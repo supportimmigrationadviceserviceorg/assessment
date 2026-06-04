@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Immigration Pathway Assessment</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f6fa; min-height: 100vh; padding: 16px; color: #1a1a2e; }
+.container { max-width: 680px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+.header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #eee; }
+.header-logo { width: 36px; height: 36px; background: #2563eb; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.header-logo svg { width: 20px; height: 20px; fill: white; }
+.header-title { font-size: 16px; font-weight: 600; color: #1a1a2e; }
+.header-sub { font-size: 12px; color: #6b7280; }
+.client-bar { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 14px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+.client-avatar { width: 32px; height: 32px; background: #2563eb; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: white; flex-shrink: 0; }
+.client-name { font-size: 14px; font-weight: 500; color: #1e40af; }
+.client-info { font-size: 12px; color: #3b82f6; }
+.progress-wrap { margin-bottom: 20px; }
+.progress-label { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 12px; color: #6b7280; }
+.progress-bar { height: 4px; background: #e5e7eb; border-radius: 2px; }
+.progress-fill { height: 4px; background: #2563eb; border-radius: 2px; transition: width 0.4s; }
+
+/* Script blocks */
+.block { border-radius: 8px; padding: 13px 15px; margin-bottom: 12px; }
+.block-read { background: #eff6ff; border-left: 3px solid #2563eb; border-radius: 0 8px 8px 0; }
+.block-listen { background: #f0fdf4; border-left: 3px solid #16a34a; border-radius: 0 8px 8px 0; }
+.block-tip { background: #fffbeb; border-left: 3px solid #f59e0b; border-radius: 0 8px 8px 0; }
+.block-hold { background: #fdf2f8; border-left: 3px solid #db2777; border-radius: 0 8px 8px 0; }
+.block-label { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+.block-read .block-label { color: #1d4ed8; }
+.block-listen .block-label { color: #15803d; }
+.block-tip .block-label { color: #b45309; }
+.block-hold .block-label { color: #be185d; }
+.block-text { font-size: 13px; line-height: 1.7; white-space: pre-line; }
+.block-read .block-text { color: #1e3a8a; }
+.block-listen .block-text { color: #14532d; }
+.block-tip .block-text { color: #78350f; }
+.block-hold .block-text { color: #831843; }
+
+/* Question */
+.q-num { font-size: 12px; color: #6b7280; margin-bottom: 4px; font-weight: 500; }
+.q-title { font-size: 16px; font-weight: 600; color: #1a1a2e; margin-bottom: 14px; }
+.opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.opts.col1 { grid-template-columns: 1fr; }
+.opt { padding: 10px 13px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; color: #374151; font-size: 13px; cursor: pointer; text-align: left; transition: all 0.15s; }
+.opt:hover { background: #f9fafb; border-color: #9ca3af; }
+.opt.sel { border: 2px solid #2563eb; background: #eff6ff; color: #1d4ed8; font-weight: 500; }
+.opt.msel { border: 2px solid #2563eb; background: #eff6ff; color: #1d4ed8; }
+.tag { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 10px; background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; margin-left: 6px; vertical-align: middle; }
+
+/* Inputs */
+.inp { width: 100%; padding: 10px 13px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px; color: #374151; margin-bottom: 14px; background: #fff; }
+.inp:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
+.textarea { width: 100%; padding: 10px 13px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px; color: #374151; min-height: 70px; resize: vertical; margin-bottom: 12px; background: #fff; }
+.lbl { font-size: 11px; color: #9ca3af; margin-bottom: 4px; }
+
+/* Country search */
+.search-wrap { position: relative; margin-bottom: 12px; }
+.search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 14px; pointer-events: none; }
+.search-inp { width: 100%; padding: 10px 13px 10px 32px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px; color: #374151; }
+.search-inp:focus { outline: none; border-color: #2563eb; }
+.country-list { border: 1px solid #d1d5db; border-radius: 8px; max-height: 200px; overflow-y: auto; background: #fff; margin-bottom: 14px; }
+.ci { padding: 9px 13px; font-size: 13px; color: #374151; cursor: pointer; border-bottom: 1px solid #f3f4f6; }
+.ci:last-child { border-bottom: none; }
+.ci:hover { background: #f9fafb; }
+.ci.csel { background: #eff6ff; color: #1d4ed8; font-weight: 500; }
+.pill { display: inline-flex; align-items: center; gap: 5px; background: #eff6ff; color: #1d4ed8; border-radius: 20px; padding: 4px 11px; font-size: 12px; margin-bottom: 8px; }
+.pill-x { cursor: pointer; font-size: 14px; line-height: 1; }
+
+/* Nav */
+.nav { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+.btn-back { background: none; border: 1px solid #d1d5db; border-radius: 8px; padding: 8px 18px; font-size: 13px; color: #6b7280; cursor: pointer; }
+.btn-back:hover { background: #f9fafb; }
+.btn-next { background: #2563eb; border: none; border-radius: 8px; padding: 9px 22px; font-size: 13px; color: #fff; cursor: pointer; font-weight: 500; }
+.btn-next:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-next:hover:not(:disabled) { background: #1d4ed8; }
+
+/* Results */
+.results-header { text-align: center; padding: 8px 0 16px; }
+.results-title { font-size: 20px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
+.results-sub { font-size: 13px; color: #6b7280; }
+.pathway-card { border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; background: #fff; }
+.p-rank { display: inline-block; font-size: 10px; font-weight: 600; letter-spacing: 0.05em; padding: 3px 10px; border-radius: 20px; margin-bottom: 7px; }
+.p1 { background: #eff6ff; color: #1d4ed8; }
+.p2 { background: #f0fdf4; color: #15803d; }
+.p3 { background: #fffbeb; color: #92400e; }
+.p-name { font-size: 14px; font-weight: 600; color: #1a1a2e; margin-bottom: 3px; }
+.p-desc { font-size: 12px; color: #6b7280; line-height: 1.5; }
+.disclaimer { font-size: 11px; color: #9ca3af; line-height: 1.6; padding: 10px 13px; border: 1px solid #e5e7eb; border-radius: 8px; margin: 12px 0; }
+.pref-btn { width: 100%; padding: 10px 13px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; color: #374151; font-size: 13px; cursor: pointer; text-align: left; margin-bottom: 8px; transition: all 0.15s; }
+.pref-btn:hover { background: #f9fafb; }
+.pref-btn.psel { border: 2px solid #16a34a; background: #f0fdf4; color: #15803d; font-weight: 500; }
+.close-opt { border: 1px solid #d1d5db; border-radius: 10px; padding: 12px 15px; margin-bottom: 8px; cursor: pointer; background: #fff; transition: all 0.15s; }
+.close-opt:hover { background: #f9fafb; }
+.close-opt.csel { border: 2px solid #2563eb; background: #eff6ff; }
+.close-opt-title { font-size: 13px; font-weight: 600; color: #1a1a2e; margin-bottom: 2px; }
+.close-opt-desc { font-size: 12px; color: #6b7280; }
+.submit-btn { width: 100%; background: #16a34a; border: none; border-radius: 8px; padding: 13px; font-size: 14px; color: #fff; cursor: pointer; font-weight: 600; margin-top: 4px; }
+.submit-btn:hover { background: #15803d; }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.divider { border: none; border-top: 1px solid #f3f4f6; margin: 14px 0; }
+
+/* Status */
+.status-box { text-align: center; padding: 32px 16px; }
+.status-icon { font-size: 48px; margin-bottom: 12px; }
+.status-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.status-sub { font-size: 13px; color: #6b7280; line-height: 1.6; }
+.spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid #e5e7eb; border-top-color: #2563eb; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="header-logo">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <div>
+      <div class="header-title">Immigration Pathway Assessment</div>
+      <div class="header-sub">Immigration Advice Service — Agent Tool</div>
+    </div>
+  </div>
+
+  <div id="client-bar" class="client-bar" style="display:none">
+    <div class="client-avatar" id="client-initials">?</div>
+    <div>
+      <div class="client-name" id="client-name-display">Loading...</div>
+      <div class="client-info" id="client-info-display"></div>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-label"><span id="progress-label">Introduction</span><span id="progress-pct">0%</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+  </div>
+
+  <div id="main"></div>
+</div>
+
+<script>
+const WEBHOOK = 'https://immiworld.org/rest/147/47yrflms2cje1cbe/';
+const COUNTRIES = ["Afghanistan","Aland Islands","Albania","Algeria","American Samoa","Andorra","Angola","Anguilla","Antarctica","Armenia","Antigua and Barbuda","Argentina","Aruba","Asia/Pacific Region","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Bolivia","Bhutan","Bermuda","Benin","Bosnia and Herzegovina","Botswana","Bouvet Island","Brazil","British Indian Ocean Territory","British Virgin Islands","Brunei","Bulgaria","Burundi","Cambodia","Cameroon","Canada","Cape Verde","Caribbean Netherlands","Cayman Islands","Central African Republic","Chad","Chile","China","Christmas Island","Cocos (Keeling) Islands","Colombia","Comoros","Congo","Cook Islands","Costa Rica","Cote d'Ivoire","Croatia","Cuba","Curaçao","Cyprus","Czech Republic","Democratic Republic of the Congo","Denmark","Djibouti","Dominica","Dominican Republic","East Timor","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Europe","Ethiopia","Falkland Islands","Faroe Islands","Fiji","Finland","France","French Guiana","French Polynesia","French Southern and Antarctic Lands","Gabon","Gambia","Georgia","Germany","Ghana","Gibraltar","Greece","Greenland","Grenada","Guadeloupe","Guam","Guatemala","Guernsey","Guinea","Guinea-Bissau","Guyana","Haiti","Heard Island and McDonald Islands","Honduras","Hong Kong","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Isle of Man","Israel","Italy","Jamaica","Japan","Jersey","Jordan","Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Macau","Macedonia (FYROM)","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Martinique","Mauritania","Mauritius","Mayotte","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Montserrat","Morocco","Mozambique","Myanmar (Burma)","Namibia","Nauru","Nepal","Netherlands","Netherlands Antilles","New Caledonia","New Zealand","Nicaragua","Niger","Nigeria","Niue","Norfolk Island","North Korea","Northern Mariana Islands","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Pitcairn Islands","Poland","Portugal","Puerto Rico","Qatar","Réunion","Romania","Russia","Rwanda","Saint Barthélemy","Saint Helena","Saint Kitts and Nevis","Saint Lucia","Saint Martin","Saint Pierre and Miquelon","Saint Vincent and the Grenadines","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Sint Maarten","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Georgia and the South Sandwich Islands","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Svalbard and Jan Mayen","Swaziland","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Togo","Tokelau","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Turks and Caicos Islands","Tuvalu","U.S. Virgin Islands","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uzbekistan","United States Minor Outlying Islands","Uruguay","Vanuatu","Vatican City","Venezuela","Vietnam","Wallis and Futuna","Western Sahara","Yemen","Zambia","Zimbabwe"];
+
+// Marital status enum IDs from the API
+const MARITAL_IDS = { 'Single':'12552', 'Married':'4071', 'Divorced':'4072', 'Widowed':'4073' };
+// Education enum IDs
+const EDU_IDS = { 'High School':'1100', 'Trade School':'1101', 'Associate Degree':'1102', "Bachelor's Degree":'1103', "Master's Degree":'1105', 'Doctorate (PhD)':'1107' };
+
+const answers = {};
+let history = [];
+let currentId = 'intro';
+const totalQ = 14;
+let leadId = null;
+let leadData = {};
+
+// Get lead_id from URL
+const params = new URLSearchParams(window.location.search);
+leadId = params.get('lead_id') || params.get('PLACEMENT_OPTIONS') || null;
+
+// Try to parse Bitrix24 placement options
+if (params.get('PLACEMENT_OPTIONS')) {
+  try {
+    const po = JSON.parse(decodeURIComponent(params.get('PLACEMENT_OPTIONS')));
+    leadId = po.ID || leadId;
+  } catch(e) {}
+}
+
+const PATHWAY_LABELS = {
+  executive: { name: 'Executive & Professional Category', desc: 'For individuals with advanced education and significant professional experience — including EB-1, EB-2, and NIW categories.' },
+  business:  { name: 'Business & Investment Category',  desc: 'For entrepreneurs, business owners, and investors — including E-2 and EB-5 visas.' },
+  employment:{ name: 'Employment Category',             desc: 'Skill-based pathways for qualified professionals sponsored by U.S. employers — including EB-2 and EB-3.' },
+  education: { name: 'Education Category',              desc: 'Immigration options through accredited U.S. academic programs that may create additional pathways to longer-term status.' },
+  family:    { name: 'Family-Based Category',           desc: 'Pathways based on close family relationships with U.S. citizens or lawful permanent residents.' }
+};
+
+const questions = [
+  { id:'intro', type:'script_page', label:'Introduction', sections:[
+    { k:'read', l:'📞 Read to client', t:`Hello, may I speak with [Client Name]?\n\nMy name is [Agent Name] and I'm calling from Immigration Advice Service.\n\nI understand that you're interested in moving to the United States and potentially working toward a Green Card in the future. Is that correct?\n\nGreat.` },
+    { k:'tip', l:'💡 Tone tip', t:`Warm and confident. Smile — it comes through in your voice.\nPause after "Is that correct?" and wait for confirmation.` },
+    { k:'listen', l:'🎧 Discovery — Let them talk', t:`Before we begin, tell me a little bit about yourself.\n\nWhat made you start looking at immigration opportunities in the United States?\n\n(LISTEN — let the client speak freely. Don't interrupt.)` },
+    { k:'read', l:'📞 After listening — Read to client', t:`I understand.\n\nYou're definitely not alone. Many of our clients are professionals, business owners, entrepreneurs, investors, and families — all looking for the best path forward.\n\nAs you probably know, immigration rules continue to change, which is why having the right strategy from the beginning is so important.\n\nWhat I'd like to do now is complete a short Immigration Pathway Assessment with you. It will only take a few minutes.\n\nOnce we're done, I'll place you on a brief hold while our system reviews your information and identifies the immigration categories that best match your profile. Then we'll review the results together.\n\nSound good?` },
+    { k:'tip', l:'💡 If client hesitates', t:`"It's completely free and takes less than 5 minutes. There's no commitment involved."` }
+  ], notes_id:'intro_notes', notes_ph:'Note anything the client shared about their motivation...', next:'q1' },
+
+  { id:'q1', type:'choice', num:1, label:'Age', q:'What is your age?', opts:['18–24','25–34','35–44','45–54','55–64','65+'], fu:'How long have you been thinking about immigration?', next:'q2' },
+  { id:'q2', type:'country', num:2, label:'Country', q:'What is your current country of residence?', fu:'How long have you been living there?', next:'q3' },
+  { id:'q3', type:'choice', num:3, label:'Marital Status', q:'What is your marital status?', opts:['Single','Married','Divorced','Widowed'],
+    bridge:{ k:'read', l:'📞 Bridge — Read to client', t:`Excellent. It's important for us to understand your family situation — in many immigration processes a spouse can be included as part of the overall immigration strategy.` }, next:'q4' },
+  { id:'q4', type:'choice', num:4, label:'Primary Goal', q:'What is your primary goal in the United States?', col1:true,
+    opts:['Career Opportunities','Starting or Expanding a Business','Investment Opportunities','Education','Family Relocation','Exploring My Options'],
+    fu:'And why is that goal important to you personally?', next:'q5' },
+  { id:'q5', type:'choice', num:5, label:'Education', q:'What is your highest level of education?',
+    opts:['High School','Trade School','Associate Degree',"Bachelor's Degree","Master's Degree","Doctorate (PhD)"],
+    bridge:{ k:'read', l:'📞 Bridge — Read to client', t:`Perfect. Different immigration pathways consider different types of education, training, and experience — so every detail helps us build a clearer picture.` },
+    fu:'What did you study or specialize in?', next:'q6' },
+  { id:'q6', type:'text', num:6, label:'Field', q:'What is your professional field of expertise?', ph:'e.g. Software Engineering, Medicine, Finance...', fu:"That's interesting — how did you get into that field?", next:'q7' },
+  { id:'q7', type:'choice', num:7, label:'Experience', q:'How many years of professional experience do you have?', col1:true,
+    opts:['Less than 2 years','2–5 years','5–10 years','More than 10 years'],
+    bridge:{ k:'read', l:'📞 Bridge — Read to client', t:`Excellent. Professional experience is often an important factor when evaluating potential immigration opportunities.` },
+    fu:'And what types of roles or positions have you held?', next:'q8' },
+  { id:'q8', type:'choice', num:8, label:'Leadership', q:'Have you ever held a management, executive, or leadership position?', opts:['Yes','No'],
+    bridge:{ k:'read', l:'📞 Bridge — Read to client', t:`That's very helpful. Professional achievements and leadership experience can sometimes strengthen certain immigration categories.` }, next:'q9' },
+  { id:'q9', type:'multi', num:9, label:'Recognition', q:'Have you received any professional recognition?',
+    opts:['Industry Awards','Publications','Research Contributions','Patents','Media Recognition','Speaking Engagements','None of the Above'], next:'q10' },
+  { id:'q10', type:'choice', num:10, label:'Current Situation', q:'Which best describes your current situation?',
+    opts:['Employee','Skilled Professional','Business Owner','Entrepreneur','Investor','Self-Employed'],
+    bridge:{ k:'read', l:'📞 Bridge — Read to client', t:`Great. There are immigration pathways that may relate to business, entrepreneurship, or investment activities — so this information is very important.` },
+    fu:'Tell me more about what that looks like day-to-day.', next:'q11' },
+  { id:'q11', type:'choice', num:11, label:'Business Interest', q:'Would you be interested in opening, purchasing, or investing in a business in the United States if it supported your immigration goals?', col1:true, opts:['Yes','Maybe','No'], next:'q12' },
+  { id:'q12', type:'choice', num:12, label:'Investment Level', q:'What investment level would you feel comfortable considering?', col1:true,
+    opts:['Under $50,000','$50,000–$100,000','$100,000–$250,000','$250,000+','Prefer Not To Say'], next:'q13' },
+  { id:'q13', type:'choice', num:13, label:'Study Interest', q:'Would you be interested in studying in the United States if it created additional immigration opportunities?', col1:true, opts:['Yes','Maybe','No'], next:'q14' },
+  { id:'q14', type:'choice', num:14, label:'Family in USA', q:'Do you currently have close family members living legally in the United States?', opts:['Yes','No'],
+    bridge:{ k:'read', l:'📞 Bridge — Read to client', t:`Thank you. Family relationships in the United States can sometimes be relevant when reviewing possible immigration options.` }, next:'hold' },
+  { id:'hold', type:'script_page', label:'Processing', sections:[
+    { k:'read', l:'📞 Transition — Read to client', t:`Mr./Mrs. [Name],\n\nThank you for sharing all of that with me.\n\nNow I'll place you on a brief hold for about one minute while the system processes your information.\n\nWhen I come back, we'll go over the results together.` },
+    { k:'hold', l:'⏸ Place client on hold now', t:`Put the client on hold.\nReview answers. Keep hold under 60 seconds.\n\nIf you need more time: "Just one more moment — almost there."` }
+  ], next:'results' },
+  { id:'results', type:'results', label:'Results' }
+];
+
+function computePathways() {
+  const scores = { executive:0, business:0, employment:0, education:0, family:0 };
+  const edu = answers['q5']||'', exp = answers['q7']||'', leadership = answers['q8']||'';
+  const recognition = answers['q9']||[], situation = answers['q10']||'';
+  const bizInterest = answers['q11']||'', investment = answers['q12']||'';
+  const studyInterest = answers['q13']||'', family = answers['q14']||'', goal = answers['q4']||'';
+  const highEdu = ["Bachelor's Degree","Master's Degree","Doctorate (PhD)"].includes(edu);
+  const highExp = ['5–10 years','More than 10 years'].includes(exp);
+  if (highEdu && highExp) {
+    scores.executive += 3;
+    if (["Master's Degree","Doctorate (PhD)"].includes(edu)) scores.executive += 2;
+    if (leadership==='Yes') scores.executive += 2;
+    if (!recognition.includes('None of the Above') && recognition.length>0) scores.executive += recognition.length;
+  }
+  if (['Business Owner','Entrepreneur','Investor'].includes(situation) && ['Yes','Maybe'].includes(bizInterest)) {
+    scores.business += 3;
+    if (!['Under $50,000','Prefer Not To Say'].includes(investment) && investment) scores.business += 2;
+    if (['Starting or Expanding a Business','Investment Opportunities'].includes(goal)) scores.business += 1;
+  }
+  if (['Skilled Professional','Employee','Self-Employed'].includes(situation)) {
+    scores.employment += 2;
+    if (highExp) scores.employment += 1;
+  }
+  if (['Yes','Maybe'].includes(studyInterest)) scores.education += ['Business Owner','Investor'].includes(situation) ? 1 : 2;
+  if (family==='Yes') scores.family += 3;
+  const ranked = Object.entries(scores).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k])=>PATHWAY_LABELS[k]);
+  if (!ranked.length) ranked.push(PATHWAY_LABELS.employment);
+  return ranked;
+}
+
+function getStep(id) { return questions.find(q=>q.id===id); }
+
+function setProgress(num, label) {
+  const pct = num ? Math.round((num/totalQ)*100) : (currentId==='results'?100:currentId==='hold'?95:0);
+  document.getElementById('progress').style.width = pct+'%';
+  document.getElementById('progress-pct').textContent = pct+'%';
+  document.getElementById('progress-label').textContent = label||'';
+}
+
+function block(s) {
+  const cls = s.k==='read'?'block-read':s.k==='listen'?'block-listen':s.k==='tip'?'block-tip':'block-hold';
+  return `<div class="block ${cls}"><div class="block-label">${s.l}</div><div class="block-text">${s.t}</div></div>`;
+}
+
+function render() {
+  const step = getStep(currentId);
+  const main = document.getElementById('main');
+  setProgress(step.num, step.label);
+
+  if (step.type==='script_page') {
+    const blocks = step.sections.map(block).join('');
+    main.innerHTML = `
+      ${blocks}
+      <div class="lbl">Agent notes (optional)</div>
+      <textarea class="textarea" id="${step.notes_id}" placeholder="${step.notes_ph||'Add notes...'}">${answers[step.notes_id]||''}</textarea>
+      <div class="nav">
+        ${history.length>0?`<button class="btn-back" onclick="goBack()">← Back</button>`:'<span></span>'}
+        <button class="btn-next" onclick="saveNotes('${step.notes_id}','${step.next}')">Continue →</button>
+      </div>`;
+
+  } else if (step.type==='text') {
+    const fu = step.fu ? block({k:'listen', l:'🎧 Follow-up you can ask', t:step.fu}) : '';
+    main.innerHTML = `
+      <div class="q-num">Question ${step.num} of ${totalQ}</div>
+      <div class="q-title">${step.q}</div>
+      ${fu}
+      <input class="inp" type="text" id="txt-${step.id}" placeholder="${step.ph||''}" value="${answers[step.id]||''}" />
+      <div class="nav">
+        <button class="btn-back" onclick="goBack()">← Back</button>
+        <button class="btn-next" onclick="saveText('${step.id}','${step.next}')">Continue →</button>
+      </div>`;
+
+  } else if (step.type==='country') {
+    const sel = answers[step.id]||'';
+    const fu = step.fu ? block({k:'listen', l:'🎧 Follow-up you can ask', t:step.fu}) : '';
+    main.innerHTML = `
+      <div class="q-num">Question ${step.num} of ${totalQ}</div>
+      <div class="q-title">${step.q}</div>
+      ${fu}
+      ${sel?`<div class="pill">${sel} <span class="pill-x" onclick="clearCountry()">×</span></div>`:''}
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="search-inp" type="text" id="csearch" placeholder="Search country..." oninput="filterC()" autocomplete="off" />
+      </div>
+      <div class="country-list" id="clist">${renderC('')}</div>
+      <div class="nav">
+        <button class="btn-back" onclick="goBack()">← Back</button>
+        <button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext('${step.next}')">Continue →</button>
+      </div>`;
+
+  } else if (step.type==='choice') {
+    const sel = answers[step.id]||null;
+    const cls = step.col1?'col1':'';
+    const opts = step.opts.map(o=>`<button class="opt ${sel===o?'sel':''}" onclick="selOpt('${step.id}','${o.replace(/'/g,"\\'")}','${step.next}',this)">${o}</button>`).join('');
+    const br = step.bridge&&sel ? block(step.bridge) : '';
+    const fu = step.fu&&sel ? block({k:'listen', l:'🎧 Follow-up you can ask', t:step.fu}) : '';
+    main.innerHTML = `
+      <div class="q-num">Question ${step.num} of ${totalQ}</div>
+      <div class="q-title">${step.q}</div>
+      <div class="opts ${cls}">${opts}</div>
+      ${br}${fu}
+      <div class="nav">
+        <button class="btn-back" onclick="goBack()">← Back</button>
+        <button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext('${step.next}')">Continue →</button>
+      </div>`;
+
+  } else if (step.type==='multi') {
+    const sel = answers[step.id]||[];
+    const opts = step.opts.map(o=>`<button class="opt ${sel.includes(o)?'msel':''}" onclick="togMulti('${step.id}','${o}')">${o}</button>`).join('');
+    main.innerHTML = `
+      <div class="q-num">Question ${step.num} of ${totalQ} <span class="tag">Select all that apply</span></div>
+      <div class="q-title">${step.q}</div>
+      <div class="opts col1">${opts}</div>
+      <div class="nav">
+        <button class="btn-back" onclick="goBack()">← Back</button>
+        <button class="btn-next" id="btn-next" ${sel.length===0?'disabled':''} onclick="goNext('${step.next}')">Continue →</button>
+      </div>`;
+
+  } else if (step.type==='results') {
+    const pathways = computePathways();
+    const rLabels = ['#1 Top Pathway','#2 Second Pathway','#3 Third Pathway'];
+    const rCls = ['p1','p2','p3'];
+    const cards = pathways.map((p,i)=>`<div class="pathway-card"><span class="p-rank ${rCls[i]}">${rLabels[i]}</span><div class="p-name">${p.name}</div><div class="p-desc">${p.desc}</div></div>`).join('');
+    const prefSel = answers['pref_pathway']||'';
+    const prefBtns = pathways.map(p=>`<button class="pref-btn ${prefSel===p.name?'psel':''}" onclick="selPref(this,'${p.name.replace(/'/g,"\\'")}')">${p.name}</button>`).join('');
+
+    main.innerHTML = `
+      ${block({k:'read', l:'📞 Results — Read to client', t:`Mr./Mrs. [Name],\n\nThank you for waiting.\n\nBased on the information you've provided, the strongest categories identified for your profile are:`})}
+      <div style="margin-bottom:14px">
+        <div class="lbl" style="margin-bottom:8px">Assessment results</div>
+        ${cards}
+      </div>
+      ${block({k:'listen', l:'🎧 Open question — Let them answer', t:`Which of these categories sounds most interesting to you, and why?\n\n(LISTEN — their answer tells you what to emphasize in the close.)`})}
+      ${block({k:'read', l:'📞 After they answer — Read to client', t:`That makes sense.\n\nThe reason this assessment is valuable is because it gives us direction and helps us focus on the opportunities that appear most relevant to your background and goals.\n\nOf course, this is only a preliminary assessment. A detailed legal review is required to determine the strongest strategy available to you.`})}
+      ${block({k:'read', l:'📞 Value building — Read to client', t:`Let me ask you something.\n\nIf there was a clear immigration strategy built specifically around your background and goals — would that be valuable to you?\n\n(LISTEN)`})}
+      ${block({k:'tip', l:'💡 Tip', t:`Don't rush past the "yes." Let them confirm it. That agreement is the bridge to the close.`})}
+      ${block({k:'read', l:'📞 Case opening — Read to client', t:`Exactly. That's where our legal team comes in.\n\nInstead of spending months trying to figure everything out on your own, our specialists review your profile and focus on the pathways that make the most sense for your situation.\n\nThe next step is opening your immigration case. Once your case is activated, you'll be assigned to one of our senior immigration specialists.\n\nBased on everything we've discussed today — does that sound like something you'd like professional guidance with?`})}
+      ${block({k:'read', l:'📞 The close — Read to client', t:`Perfect.\n\nThe Immigration Case Opening Fee is $250.\n\nTo activate your case, you have two options:`})}
+      <div class="close-opt ${answers['close_opt']==='payment'?'csel':''}" onclick="selClose('payment',this)">
+        <div class="close-opt-title">Option 1 — Secure payment request</div>
+        <div class="close-opt-desc">Send a secure payment request to client's email or phone.</div>
+      </div>
+      <div class="close-opt ${answers['close_opt']==='link'?'csel':''}" onclick="selClose('link',this)">
+        <div class="close-opt-title">Option 2 — Secure activation link</div>
+        <div class="close-opt-desc">Generate a secure activation link for the client.</div>
+      </div>
+      <hr class="divider">
+      <div class="lbl" style="margin-bottom:8px">Which pathway did the client prefer?</div>
+      ${prefBtns}
+      <div class="lbl" style="margin-top:10px">Client's biggest goal (for the legal team)</div>
+      <textarea class="textarea" id="client-goal" placeholder="What did the client say their biggest goal is?">${answers['client_goal']||''}</textarea>
+      <div class="disclaimer">This assessment identifies immigration categories that may align with the client's profile. A detailed legal review is required to determine the most appropriate immigration strategy and available pathways.</div>
+      <button class="submit-btn" id="submit-btn" onclick="submitAll()">✓  Submit & Update Lead in Bitrix24</button>`;
+  }
+  window.scrollTo(0,0);
+}
+
+function renderC(f) {
+  const fl = f.toLowerCase();
+  return COUNTRIES.filter(c=>c.toLowerCase().includes(fl)).map(c=>`<div class="ci ${answers['q2']===c?'csel':''}" onclick="selCountry('${c.replace(/'/g,"\\'")}')">${c}</div>`).join('');
+}
+function filterC() { document.getElementById('clist').innerHTML = renderC(document.getElementById('csearch').value); }
+function selCountry(n) { answers['q2']=n; render(); }
+function clearCountry() { delete answers['q2']; render(); }
+function selPref(el,n) { answers['pref_pathway']=n; document.querySelectorAll('.pref-btn').forEach(b=>b.classList.remove('psel')); el.classList.add('psel'); }
+function selClose(v,el) { answers['close_opt']=v; document.querySelectorAll('.close-opt').forEach(b=>b.classList.remove('csel')); el.classList.add('csel'); }
+function selOpt(id,val,next,el) {
+  answers[id]=val; document.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel')); el.classList.add('sel');
+  const btn=document.getElementById('btn-next'); if(btn) btn.disabled=false;
+  const step=getStep(id); if(step&&(step.bridge||step.fu)) render();
+}
+function togMulti(id,val) {
+  if(!answers[id]) answers[id]=[];
+  if(val==='None of the Above') { answers[id]=answers[id].includes(val)?[]:[val]; }
+  else { answers[id]=answers[id].filter(v=>v!=='None of the Above'); const i=answers[id].indexOf(val); if(i>-1) answers[id].splice(i,1); else answers[id].push(val); }
+  render();
+}
+function saveText(id,next) { const v=document.getElementById('txt-'+id)?.value.trim(); if(!v) return; answers[id]=v; goNext(next); }
+function saveNotes(nid,next) { const el=document.getElementById(nid); if(el) answers[nid]=el.value; goNext(next); }
+function goNext(next) { history.push(currentId); currentId=next; render(); }
+function goBack() { if(!history.length) return; currentId=history.pop(); render(); }
+
+async function submitAll() {
+  const goalEl = document.getElementById('client-goal');
+  if(goalEl) answers['client_goal'] = goalEl.value;
+  const pathways = computePathways();
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving to Bitrix24...';
+
+  const summary = [
+    '=== IMMIGRATION PATHWAY ASSESSMENT ===',
+    `Pathway #1: ${pathways[0]?.name||''}`,
+    `Pathway #2: ${pathways[1]?.name||''}`,
+    `Pathway #3: ${pathways[2]?.name||''}`,
+    `Client preferred: ${answers['pref_pathway']||'Not selected'}`,
+    `Close option: ${answers['close_opt']==='payment'?'Payment request':'Activation link'}`,
+    `Client goal: ${answers['client_goal']||''}`,
+    '',
+    '=== ASSESSMENT ANSWERS ===',
+    `Age: ${answers['q1']||''}`,
+    `Country: ${answers['q2']||''}`,
+    `Marital Status: ${answers['q3']||''}`,
+    `Primary Goal: ${answers['q4']||''}`,
+    `Education: ${answers['q5']||''}`,
+    `Field: ${answers['q6']||''}`,
+    `Experience: ${answers['q7']||''}`,
+    `Leadership: ${answers['q8']||''}`,
+    `Recognition: ${(answers['q9']||[]).join(', ')}`,
+    `Current Situation: ${answers['q10']||''}`,
+    `Business Interest: ${answers['q11']||''}`,
+    `Investment Level: ${answers['q12']||''}`,
+    `Study Interest: ${answers['q13']||''}`,
+    `Family in USA: ${answers['q14']||''}`,
+    '',
+    `Agent intro notes: ${answers['intro_notes']||''}`
+  ].join('\n');
+
+  // Build update fields
+  const fields = { COMMENTS: summary };
+
+  // Map to existing Bitrix24 fields
+  if (answers['q2']) fields['UF_CRM_1449131599'] = answers['q2']; // Birth Country
+  if (answers['q3'] && MARITAL_IDS[answers['q3']]) fields['UF_CRM_1500181612'] = MARITAL_IDS[answers['q3']]; // Marital Status
+  if (answers['q5'] && EDU_IDS[answers['q5']]) fields['UF_CRM_1484914608'] = EDU_IDS[answers['q5']]; // Education Level
+  if (answers['q6']) fields['UF_CRM_1709560603'] = answers['q6']; // About Business / Field
+  if (answers['q12']) fields['UF_CRM_1709560465'] = answers['q12']; // Investment Budget
+
+  // Stage → TypeForm (already exists in your pipeline)
+  fields['STATUS_ID'] = 'TypeForm';
+
+  if (!leadId) {
+    showResult(true, summary, pathways);
+    return;
+  }
+
+  try {
+    const url = `${WEBHOOK}crm.lead.update?ID=${leadId}&` +
+      Object.entries(fields).map(([k,v])=>`fields[${k}]=${encodeURIComponent(v)}`).join('&');
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.result) {
+      showResult(true, summary, pathways);
+    } else {
+      showResult(false, summary, pathways, JSON.stringify(data.error_description||data));
+    }
+  } catch(e) {
+    showResult(false, summary, pathways, e.message);
+  }
+}
+
+function showResult(success, summary, pathways, err) {
+  const main = document.getElementById('main');
+  if (success) {
+    main.innerHTML = `
+      <div class="status-box">
+        <div class="status-icon">✅</div>
+        <div class="status-title" style="color:#15803d">Lead Updated Successfully</div>
+        <div class="status-sub">
+          The assessment results have been saved to Bitrix24.<br><br>
+          <strong>Pathways identified:</strong><br>
+          ${pathways.map((p,i)=>`${i+1}. ${p.name}`).join('<br>')}
+          ${leadId ? `<br><br>Lead ID: ${leadId}` : ''}
+        </div>
+      </div>`;
+  } else {
+    main.innerHTML = `
+      <div class="status-box">
+        <div class="status-icon">⚠️</div>
+        <div class="status-title" style="color:#b45309">Saved Locally</div>
+        <div class="status-sub">Could not update Bitrix24 automatically${err?': '+err:''}.<br><br>Please copy the results below and paste them manually into the lead comment.<br><br>
+          <textarea class="textarea" style="font-size:11px;min-height:120px;text-align:left">${summary}</textarea>
+        </div>
+      </div>`;
+  }
+  document.getElementById('progress').style.width='100%';
+}
+
+// Load lead data if lead_id provided
+async function loadLead() {
+  if (!leadId) return;
+  try {
+    const res = await fetch(`${WEBHOOK}crm.lead.get?ID=${leadId}`);
+    const data = await res.json();
+    if (data.result) {
+      leadData = data.result;
+      const name = [leadData.NAME, leadData.LAST_NAME].filter(Boolean).join(' ') || 'Client';
+      const initials = name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+      document.getElementById('client-initials').textContent = initials;
+      document.getElementById('client-name-display').textContent = name;
+      document.getElementById('client-info-display').textContent = [leadData.PHONE?.[0]?.VALUE, leadData.EMAIL?.[0]?.VALUE].filter(Boolean).join(' · ');
+      document.getElementById('client-bar').style.display = 'flex';
+    }
+  } catch(e) { console.log('Could not load lead:', e); }
+}
+
+loadLead();
+render();
+</script>
+</body>
+</html>
