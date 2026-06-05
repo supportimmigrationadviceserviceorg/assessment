@@ -118,6 +118,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <div class="progress-wrap">
     <div class="progress-label"><span id="progress-label">Introduction</span><span id="progress-pct">0%</span></div>
     <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+    <div style="text-align:right;margin-top:2px;height:14px"><span id="score-indicator" style="font-size:10px;font-weight:600;letter-spacing:0.03em"></span></div>
   </div>
   <div id="main"></div>
 </div>
@@ -125,21 +126,21 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 const WEBHOOK = 'https://immiworld.org/rest/147/47yrflms2cje1cbe/';
 const COUNTRIES = ["Afghanistan","Aland Islands","Albania","Algeria","American Samoa","Andorra","Angola","Anguilla","Antarctica","Armenia","Antigua and Barbuda","Argentina","Aruba","Asia/Pacific Region","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Bolivia","Bhutan","Bermuda","Benin","Bosnia and Herzegovina","Botswana","Bouvet Island","Brazil","British Indian Ocean Territory","British Virgin Islands","Brunei","Bulgaria","Burundi","Cambodia","Cameroon","Canada","Cape Verde","Caribbean Netherlands","Cayman Islands","Central African Republic","Chad","Chile","China","Christmas Island","Cocos (Keeling) Islands","Colombia","Comoros","Congo","Cook Islands","Costa Rica","Cote d'Ivoire","Croatia","Cuba","Curaçao","Cyprus","Czech Republic","Democratic Republic of the Congo","Denmark","Djibouti","Dominica","Dominican Republic","East Timor","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Europe","Ethiopia","Falkland Islands","Faroe Islands","Fiji","Finland","France","French Guiana","French Polynesia","French Southern and Antarctic Lands","Gabon","Gambia","Georgia","Germany","Ghana","Gibraltar","Greece","Greenland","Grenada","Guadeloupe","Guam","Guatemala","Guernsey","Guinea","Guinea-Bissau","Guyana","Haiti","Heard Island and McDonald Islands","Honduras","Hong Kong","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Isle of Man","Israel","Italy","Jamaica","Japan","Jersey","Jordan","Kazakhstan","Kenya","Kiribati","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Macau","Macedonia (FYROM)","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Martinique","Mauritania","Mauritius","Mayotte","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Montserrat","Morocco","Mozambique","Myanmar (Burma)","Namibia","Nauru","Nepal","Netherlands","Netherlands Antilles","New Caledonia","New Zealand","Nicaragua","Niger","Nigeria","Niue","Norfolk Island","North Korea","Northern Mariana Islands","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Pitcairn Islands","Poland","Portugal","Puerto Rico","Qatar","Réunion","Romania","Russia","Rwanda","Saint Barthélemy","Saint Helena","Saint Kitts and Nevis","Saint Lucia","Saint Martin","Saint Pierre and Miquelon","Saint Vincent and the Grenadines","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Sint Maarten","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Georgia and the South Sandwich Islands","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Suriname","Svalbard and Jan Mayen","Swaziland","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Togo","Tokelau","Tonga","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Turks and Caicos Islands","Tuvalu","U.S. Virgin Islands","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uzbekistan","United States Minor Outlying Islands","Uruguay","Vanuatu","Vatican City","Venezuela","Vietnam","Wallis and Futuna","Western Sahara","Yemen","Zambia","Zimbabwe"];
 
-const PROFESSIONS = ["Accountant","Actor / Performer","Administrative Worker","Advertising Manager","Agricultural Adviser","Agronomist","Air Traffic Controller","Aircraft Mechanic","Animator","Anthropologist","Architect","Art Director","Artist","Attorney / Lawyer","Auditor","Banker","Biochemist","Biologist","Biotechnologist","Bookkeeper","Business Analyst","Business Owner","Camera Operator","Chemical Engineer","Civil Engineer","Coach / Trainer","Computer Engineer","Computer Programmer","Construction Manager","Consultant","Cook / Chef","Creative Director","Data Analyst","Dentist","Designer (Graphic / Industrial / Fashion)","Detective / Investigator","Dietician","Doctor / Physician","Economist","Educator / Teacher","Electrical Engineer","Entrepreneur","Environmental Scientist","Event Manager","Financial Analyst","Financial Officer","Fire Officer","Flight Attendant","Food Technologist","Geologist","Government Official","HR Manager","Historian","Hotel Manager","Import / Export Manager","Insurance Agent","Interior Designer","Interpreter / Translator","Investor","IT Manager","Journalist / Reporter","Judge","Landscape Architect","Lecturer / Professor","Legal Assistant","Librarian","Logistics Manager","Marine Engineer","Marketing Manager","Mechanical Engineer","Medical Laboratory Technician","Midwife","Military Officer","Musician","Nurse","Nutritionist","Operations Manager","Optician","Paramedic","Pharmacist","Photographer","Physicist","Physiotherapist","Pilot","Police Officer","Project Manager","Property Manager","Psychiatrist","Psychologist","Public Relations Manager","Publisher","Quality Inspector","Real Estate Agent","Researcher","Sales Manager","Sales Representative","Security Manager","Skilled Tradesperson","Social Worker","Software Developer","Statistician","Surgeon","Systems Analyst","Tax Adviser","Teacher (Primary / Secondary)","Telecommunications Engineer","Veterinarian","Web Developer","Other"];
+const PROFESSIONS = ["Accountant","Actor / Performer","Administrative Worker","Advertising Manager","Agricultural Adviser","Agronomist","Air Traffic Controller","Aircraft Mechanic","Animator","Anthropologist","Architect","Art Director","Artist","Attorney / Lawyer","Auditor","Banker","Biochemist","Biologist","Biotechnologist","Bookkeeper","Business Analyst","Business Owner","Camera Operator","Chemical Engineer","Civil Engineer","Coach / Trainer","Computer Engineer","Computer Programmer","Construction Manager","Consultant","Cook / Chef","Creative Director","Data Analyst","Dentist","Designer (Graphic / Industrial / Fashion)","Detective / Investigator","Dietician","Doctor / Physician","Economist","Educator / Teacher","Electrical Engineer","Entrepreneur","Environmental Scientist","Event Manager","Financial Analyst","Financial Officer","Fire Officer","Flight Attendant","Food Technologist","Geologist","Government Official","HR Manager","Historian","Hotel Manager","Import / Export Manager","Insurance Agent","Interior Designer","Interpreter / Translator","Investor","IT Manager","Journalist / Reporter","Judge","Landscape Architect","Lecturer / Professor","Legal Assistant","Librarian","Logistics Manager","Marine Engineer","Marketing Manager","Mechanical Engineer","Medical Laboratory Technician","Midwife","Military Officer","Musician","Nurse","Nutritionist","Operations Manager","Optician","Paramedic","Pharmacist","Photographer","Physicist","Physiotherapist","Pilot","Police Officer","Project Manager","Property Manager","Psychiatrist","Psychologist","Public Relations Manager","Publisher","Quality Inspector","Real Estate Agent","Researcher","Sales Manager","Sales Representative","Security Manager","Skilled Tradesperson","Social Worker","Software Developer","Statistician","Surgeon","Systems Analyst","Tax Adviser","Teacher (Primary / Secondary)","Telecommunications Engineer","Veterinarian","Web Developer","Not Currently Employed","Other"];
 
 const MARITAL_IDS = { 'Single':'12552', 'Married':'4071', 'Divorced':'4072', 'Widowed':'4073' };
 const EDU_IDS = { 'High School':'1100', 'Trade School':'1101', 'Associate Degree':'1102', "Bachelor's Degree":'1103', "Master's Degree":'1105', 'Doctorate (PhD)':'1107' };
 
 const CHEMISTRY = {
-  q1: { '18–24':'That\'s great — starting early is one of the biggest advantages you can have — the earlier you begin building your immigration strategy, the more options you will have.', '25–34':'Excellent. This is actually one of the strongest age ranges for immigration opportunities — you have experience, but also time on your side.', '35–44':'Perfect. This is one of the strongest ages we see — you have the experience, the qualifications, and the motivation to make this happen.', '45–54':'Very helpful. This is actually a great time to start — your experience and achievements are exactly what makes certain pathways much stronger.', '55–64':'Thank you. Experience and professional achievement are highly valued in several immigration categories, so your background could be very relevant.', '65+':'Thank you for sharing that. Many of our most successful clients started this process later in life — and they are so glad they did not wait any longer.' },
-  q3: { 'Single':'That\'s helpful to know. Being single actually gives us a lot of flexibility — we can focus 100% on building the strongest possible pathway around your individual profile.', 'Married':'Excellent. In many immigration processes, a spouse can be included as part of the overall immigration strategy — which can actually strengthen certain applications.', 'Divorced':'Thank you for sharing that. Your personal situation is something we will factor in carefully — and it will not hold you back from the pathways that are right for you.', 'Widowed':'Thank you for sharing that. Your personal situation is something we will factor in carefully — and it will not hold you back from the pathways that are right for you.' },
-  q4: { 'Career Opportunities':'A very common and achievable goal. There are several immigration categories specifically designed for professionals looking to advance their careers in the U.S.', 'Starting or Expanding a Business':'Excellent. The U.S. is one of the best countries in the world for entrepreneurs, and there are immigration pathways specifically designed around business creation and investment.', 'Investment Opportunities':'Great. Investment-based immigration is one of the most direct pathways available, and your interest in this area is very relevant to what we\'ll be identifying today.', 'Education':'A smart approach. Academic pathways can often create additional immigration opportunities beyond just the study period itself.', 'Family Relocation':'Family is one of the most important factors in immigration decisions, and it\'s also one of the recognized pathways in U.S. immigration law.', 'Exploring My Options':'That\'s actually the perfect place to start. Many of our clients come to us without knowing exactly what\'s available — and they\'re often surprised by what we find.' },
-  q5: { 'High School':'Thank you. Education is just one part of the picture — your experience and background can absolutely open strong doors.', 'Trade School':'Excellent. Trade and vocational training is actually highly valued in U.S. immigration — skilled professionals are in strong demand and that works in your favor.', 'Associate Degree':'Helpful. Your academic background, combined with your experience, will help us identify the most relevant pathways for your profile.', "Bachelor's Degree":'Perfect. A bachelor\'s degree opens the door to several professional immigration categories, and combined with your experience, it significantly strengthens your profile.', "Master's Degree":'Excellent. A master\'s degree is a strong asset in U.S. immigration — it can qualify you for advanced professional categories and in some cases support a self-petition.', 'Doctorate (PhD)':'Outstanding. A doctorate places you in one of the strongest positions for professional immigration categories, including options that do not require employer sponsorship.' },
-  q7: { 'Less than 2 years':'Thank you. Even at an early stage in your career, the right strategy now can set you up for a much stronger application down the road — and that is exactly what we help with.', '2–5 years':'Good. A few years of professional experience, combined with your background, can qualify you for several employment-based immigration categories.', '5–10 years':'Excellent. Five or more years of experience is a significant asset in professional immigration categories — this is a strong indicator for several pathways.', 'More than 10 years':'That\'s very impressive. Over a decade of professional experience is one of the strongest factors we see in immigration profiles — it opens doors to senior and priority categories.' },
-  q8: { 'Yes':'Very significant. Leadership and executive experience is specifically recognized in certain premium immigration categories — this could be an important factor in your assessment.', 'No':'No problem — Leadership is just one factor — and based on everything else you have shared, there are still very strong pathways worth exploring for your profile.' },
-  q10: { 'Employee':'Got it. Employment-based immigration is one of the most established pathways, and your professional background will be key in identifying the right category for you.', 'Skilled Professional':'Excellent. Skilled professionals are highly sought after in the U.S., and there are specific immigration categories designed around professional qualifications and expertise.', 'Business Owner':'That\'s very relevant. Business ownership experience is a strong factor in several immigration pathways, particularly those related to entrepreneurship and investment.', 'Entrepreneur':'Excellent. The U.S. actively welcomes entrepreneurs, and there are immigration categories specifically designed for individuals who create businesses and generate employment.', 'Investor':'Very significant. Investment-based immigration is one of the most direct and well-established pathways available, and your background is highly relevant.', 'Self-Employed':'Useful to know. Self-employment demonstrates initiative and professional independence, which can be relevant to several immigration categories.' },
-  q11: { 'Yes':'Excellent. A genuine interest in business or investment activities can significantly strengthen your immigration profile and open additional pathways.', 'Maybe':'Completely understandable. Many clients start out unsure and then find that certain business-related pathways are more accessible than they expected.', 'No':'No problem at all — the majority of our clients qualify through professional or family-based pathways, and there are very strong options we can focus on for you. — we will focus on what\'s most relevant to your profile.' },
-  q13: { 'Yes':'A smart approach. Academic pathways in the U.S. can create additional opportunities and in some cases serve as a stepping stone to longer-term immigration status.', 'Maybe':'That\'s worth keeping in mind. Even if it\'s not your primary plan, having the education option available gives us more flexibility in identifying the right pathway.', 'No':'Understood — there are plenty of strong pathways that have nothing to do with studying, and we will focus on the ones that fit your situation best.' },
+  q1: { '18–24':'That\'s great — starting early is one of the biggest advantages you can have — the earlier you begin building your immigration strategy, the more options you will have.', '25–34':'Excellent. That is great — this is actually one of the strongest age ranges for immigration opportunities — you have experience, but also time on your side.', '35–44':'Perfect. That is great — this is one of the strongest age ranges we see — you have the experience, the qualifications, and the motivation to make this happen.', '45–54':'Very helpful. That is great — this is actually a perfect time to start — your experience and achievements are exactly what makes certain pathways much stronger.', '55–64':'Thank you. Experience and professional achievement are highly valued in several immigration categories, so your background could be very relevant.', '65+':'Thank you for sharing that. That is great — many of our most successful clients started this process later in life — and they are so glad they did not wait any longer.' },
+  q3: { 'Single':'That\'s helpful to know. That is great — being single actually gives us a lot of flexibility — we can focus 100% on building the strongest possible pathway around your individual profile.', 'Married':'That is great — in many immigration processes, a spouse can be included as part of the overall immigration strategy — which can actually strengthen certain applications.', 'Divorced':'Thank you for sharing that. Your personal situation is something we will factor in carefully — and it will not hold you back from the pathways that are right for you.', 'Widowed':'Thank you for sharing that. Your personal situation is something we will factor in carefully — and it will not hold you back from the pathways that are right for you.' },
+  q4: { 'Career Opportunities':'That\'s great — this is a very common and achievable goal. There are several immigration categories specifically designed for professionals looking to advance their careers in the U.S.', 'Starting or Expanding a Business':'That\'s great — the U.S. is one of the best countries in the world for entrepreneurs, and there are immigration pathways specifically designed around business creation and investment.', 'Investment Opportunities':'That\'s great — investment-based immigration is one of the most direct pathways available, and your interest in this area is very relevant to what we\'ll be identifying today.', 'Education':'That\'s great — a smart approach. Academic pathways can often create additional immigration opportunities beyond just the study period itself.', 'Family Relocation':'That\'s great — family is one of the most important factors in immigration decisions, and it\'s also one of the recognized pathways in U.S. immigration law.', 'Exploring My Options':'That\'s actually the perfect place to start. Many of our clients come to us without knowing exactly what\'s available — and they\'re often surprised by what we find.' },
+  q5: { 'High School':'Thank you. That is great — education is just one part of the picture — your experience and background can absolutely open strong doors.', 'Trade School':'Excellent. That is great — trade and vocational training is actually highly valued in U.S. immigration — skilled professionals are in strong demand and that works in your favor.', 'Associate Degree':'Helpful. That is great — your academic background, combined with your experience, will help us identify the most relevant pathways for your profile.', "Bachelor's Degree":'Perfect. That is great — a bachelor\'s degree opens the door to several professional immigration categories, and combined with your experience, it significantly strengthens your profile.', "Master's Degree":'That is great — a master\'s degree is a strong asset in U.S. immigration — it can qualify you for advanced professional categories and in some cases support a self-petition.', 'Doctorate (PhD)':'Outstanding. A doctorate places you in one of the strongest positions for professional immigration categories, including options that do not require employer sponsorship.' },
+  q7: { 'Less than 2 years':'Thank you. That is great — even at an early stage in your career, the right strategy now can set you up for a much stronger application down the road — and that is exactly what we help with.', '2–5 years':'That is great — a few years of professional experience, combined with your background, can qualify you for several employment-based immigration categories.', '5–10 years':'Excellent. That is great — five or more years of experience is a significant asset in professional immigration categories — this is a strong indicator for several pathways.', 'More than 10 years':'That\'s very impressive. That is great — over a decade of professional experience is one of the strongest factors we see in immigration profiles — it opens doors to senior and priority categories.' },
+  q8: { 'Yes':'That is great — Leadership and executive experience is specifically recognized in certain premium immigration categories — this could be an important factor in your assessment.', 'No':'That is fine — Leadership is just one factor — and based on everything else you have shared, there are still very strong pathways worth exploring for your profile.' },
+  q10: { 'Employee':'That is great — employment-based immigration is one of the most established pathways, and your professional background will be key in identifying the right category for you.', 'Skilled Professional':'That is great — skilled professionals are highly sought after in the U.S., and there are specific immigration categories designed around professional qualifications and expertise.', 'Business Owner':'That\'s very relevant. That is great — business ownership experience is a strong factor in several immigration pathways, particularly those related to entrepreneurship and investment.', 'Entrepreneur':'That is great — the U.S. actively welcomes entrepreneurs, and there are immigration categories specifically designed for individuals who create businesses and generate employment.', 'Investor':'That is great — Investment-based immigration is one of the most direct and well-established pathways available, and your background is highly relevant.', 'Self-Employed':'That is great — Self-employment demonstrates initiative and professional independence, which can be relevant to several immigration categories.' },
+  q11: { 'Yes':'Excellent. A genuine interest in business or investment activities can significantly strengthen your immigration profile and open additional pathways.', 'Maybe':'That is fine — Many clients start out unsure and then find that certain business-related pathways are more accessible than they expected.', 'No':'No problem at all — the majority of our clients qualify through professional or family-based pathways, and there are very strong options we can focus on for you. — we will focus on what\'s most relevant to your profile.' },
+  q13: { 'Yes':'That is great — a smart approach. Academic pathways in the U.S. can create additional opportunities and in some cases serve as a stepping stone to longer-term immigration status.', 'Maybe':'That\'s worth keeping in mind. Even if it\'s not your primary plan, having the education option available gives us more flexibility in identifying the right pathway.', 'No':'Understood — there are plenty of strong pathways that have nothing to do with studying, and we will focus on the ones that fit your situation best.' },
   q14: { 'Yes':'That\'s important to know. Family relationships with U.S. citizens or permanent residents can be a recognized basis for certain immigration pathways.', 'No':'No family connection needed — the strongest pathways are based on your professional background and qualifications, and that\'s where we will focus.' }
 };
 
@@ -149,6 +150,8 @@ let currentId = 'intro';
 const totalQ = 14;
 let leadId = null;
 let clientName = '';
+let firstName = '';
+let agentName = '';
 
 const params = new URLSearchParams(window.location.search);
 leadId = params.get('lead_id') || null;
@@ -191,9 +194,33 @@ function chemistryBlock(qid, val) {
 
 function setProgress(num, label) {
   const pct=num?Math.round((num/totalQ)*100):currentId==='results'||currentId==='hold'?currentId==='hold'?95:100:0;
-  document.getElementById('progress').style.width=pct+'%';
+  const bar=document.getElementById('progress');
+  bar.style.width=pct+'%';
   document.getElementById('progress-pct').textContent=pct+'%';
   document.getElementById('progress-label').textContent=label||'';
+  // Score indicator based on answers quality
+  let pts = 0;
+  const q = answers;
+  if(['25–34','35–44'].includes(q['q1'])) pts+=2;
+  else if(['45–54','55–64'].includes(q['q1'])) pts+=1;
+  if(["Bachelor's Degree","Master's Degree","Doctorate (PhD)"].includes(q['q5'])) pts+=2;
+  else if(['Associate Degree','Trade School'].includes(q['q5'])) pts+=1;
+  if(['5–10 years','More than 10 years'].includes(q['q7'])) pts+=2;
+  else if(['2–5 years'].includes(q['q7'])) pts+=1;
+  if(q['q8']==='Yes') pts+=1;
+  if(q['q9']&&q['q9'].length>0&&!q['q9'].includes('None of the Above')) pts+=1;
+  if(['Business Owner','Entrepreneur','Investor'].includes(q['q10'])) pts+=2;
+  else if(['Skilled Professional'].includes(q['q10'])) pts+=1;
+  if(['Yes','Maybe'].includes(q['q11'])) pts+=1;
+  if(q['q14']==='Yes') pts+=1;
+  const answeredCount = Object.keys(q).filter(k=>k.startsWith('q')&&q[k]).length;
+  const si=document.getElementById('score-indicator');
+  if(si && answeredCount >= 3) {
+    if(pts>=8){bar.style.background='#16a34a';si.textContent='🟢 Strong profile';}
+    else if(pts>=5){bar.style.background='#f59e0b';si.textContent='🟡 Good profile';}
+    else if(pts>=2){bar.style.background='#3b82f6';si.textContent='🔵 Building profile';}
+    else{bar.style.background='#3b82f6';si.textContent='';}
+  } else if(si) { si.textContent=''; bar.style.background='#3b82f6'; }
 }
 
 function render() {
@@ -203,15 +230,34 @@ function render() {
   if(currentId==='intro') {
     setProgress(0,'Introduction');
     const name = clientName || '[Client Name]';
+    if(!firstName && clientName) firstName = clientName.split(' ')[0]||'';
     main.innerHTML=`
-      ${block({k:'read',l:'📞 Read to client',t:`Hello, may I speak with ${name}?\n\nMy name is [Agent Name] and I'm calling from Immigration Advice Service.\n\nI understand that you're interested in moving to the United States and potentially working toward a Green Card in the future. Is that correct?\n\nGreat.`})}
-      ${block({k:'tip',l:'💡 Tone tip',t:`😊 Warm and confident. Smile — it comes through in your voice 😊.\n📱 Pause after &quot;Is that correct?&quot; and wait for confirmation.`})}
-      ${block({k:'listen',l:'🎧 Discovery — Let them talk',t:`Before we begin, tell me a little bit about yourself.\n\nWhat made you start looking at immigration opportunities in the United States?\n\n(👂 LISTEN — let the client speak freely. Don't interrupt.)`})}
-      ${block({k:'read',l:'📞 After listening — Read to client',t:`I understand.\n\nYou're definitely not alone. Many of our clients are professionals, business owners, entrepreneurs, investors, and families — all looking for the best path forward.\n\nAs you probably know, immigration rules continue to change, which is why having the right strategy from the beginning is so important.\n\nWhat I'd like to do now is complete a short Immigration Pathway Assessment with you. It will only take a few minutes.\n\nOnce we're done, I'll place you on a brief hold while our system reviews your information. Then we'll review the results together.\n\nSound good?`})}
-      ${block({k:'tip',l:'💡 If client hesitates',t:``})}
-      <div class="lbl">Agent notes (optional)</div>
-      <textarea class="textarea" id="intro_notes" placeholder="✍️ Note anything the client shared about their motivation...">${answers['intro_notes']||''}</textarea>
-      <div class="nav"><span></span><button class="btn-next" onclick="saveNotes('intro_notes','q1')">Continue →</button></div>`;
+      ${block({k:'read',l:'📞 Read to client',t:`Hello, may I speak with ${firstName||name}?
+
+My name is ${agentName||'[Agent Name]'} and I am calling from Immigration Advice Service.
+
+I understand that you are interested in moving to the United States and potentially working toward a Green Card in the future. Is that correct?
+
+Great.
+
+The good news is that there are a number of possible pathways, and our job is to help identify which ones may be available based on your specific background and goals.
+
+To do that, I would like to ask you a few quick questions as part of our Immigration Pathway Assessment. It will only take a few minutes.
+
+Once we are done, I will place you on a brief hold while our system reviews your information. Then we will review the results together.
+
+Sound good?`})}
+      
+
+      <div style="margin-bottom:12px">
+        <div class="lbl" style="margin-bottom:8px">Sound good?</div>
+        <div style="display:flex;gap:8px">
+          <button class="opt ${answers['intro_soundgood']==='yes'?'sel':''} style="flex:1;background:${answers['intro_soundgood']==='yes'?'#eff6ff':'#fff'}" onclick="setSoundGood('yes')">✅ Yes</button>
+          <button class="opt ${answers['intro_soundgood']==='no'?'sel':''} style="flex:1" onclick="setSoundGood('no')">❌ No / Hesitates</button>
+        </div>
+      </div>
+      ${answers['intro_soundgood']==='no' ? getHesitationBlock() : ''}
+      <div class="nav"><span></span><button class="btn-next" onclick="goNext('q1')">Continue →</button></div>`;
 
   } else if(currentId==='q1') {
     setProgress(1,'Age');
@@ -222,7 +268,7 @@ function render() {
       <div class="q-title">What is your age?</div>
       <div class="opts">${opts}</div>
       ${sel?chemistryBlock('q1',sel):''}
-      ${sel?block({k:'listen',l:'🎧 Follow-up',t:'How long have you been thinking about immigration?'})+'<textarea class="textarea" style="margin-top:6px;min-height:52px;font-size:12px" placeholder="Agent notes..." onchange="answers[\'fu_q1\']=this.value">'+(answers['fu_q1']||'')+'</textarea>'  :''}
+      <textarea class="textarea" style="min-height:44px;font-size:12px;margin-top:4px" placeholder="Note..." onchange="answers['fu_q1']=this.value"></textarea>
       <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext('q2')">Continue →</button></div>`;
 
   } else if(currentId==='q2') {
@@ -231,11 +277,11 @@ function render() {
     main.innerHTML=`
       <div class="q-num">Question 2 of ${totalQ}</div>
       <div class="q-title">What is your current country of residence?</div>
-      ${block({k:'listen',l:'🎧 Follow-up',t:'How long have you been living there?'})+'<textarea class="textarea" style="margin-top:6px;min-height:52px;font-size:12px" placeholder="Agent notes..." onchange="answers[\'fu_q2\']=this.value">'+(answers['fu_q2']||'')+'</textarea>'}
-      ${sel?`<div class="pill">${sel} <span class="pill-x" onclick="clearCountry()">×</span></div>`:''}
+      <textarea class="textarea" style="min-height:44px;font-size:12px;margin-top:4px" placeholder="Note..." onchange="answers['fu_q2']=this.value"></textarea>
+      ${sel ? getCountryPill(sel) : ''}
       <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" type="text" id="csearch" placeholder="Search country..." oninput="filterC()" autocomplete="off"/></div>
       <div class="country-list" id="clist">${renderC('')}</div>
-      <div id="country-fact">${answers['country_fact']?`<div class="block block-chemistry"><div class="block-label">💬 Say to client</div><div class="block-text">${answers['country_fact']}</div></div>`:''}</div>
+      <div id="country-fact">${answers['country_fact'] ? getCountryFactBlock() : ''}</div>
       <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext('q3')">Continue →</button></div>`;
 
   } else if(currentId==='q3') {
@@ -244,9 +290,9 @@ function render() {
     const opts=['Single','Married','Divorced','Widowed'].map(o=>`<button class="opt ${sel===o?'sel':''}" onclick="selOpt('q3','${o}','q3b',this)">${o}</button>`).join('');
     main.innerHTML=`
       <div class="q-num">Question 3 of ${totalQ}</div>
-      <div class="q-title">What is your marital status?</div>
+      <div class="q-title">${firstName ? firstName+", what" : "What"} is your marital status?</div>
       <div class="opts">${opts}</div>
-      ${sel&&['Single','Married'].includes(sel)?chemistryBlock('q3',sel):''}
+      ${sel&&['Single','Married'].includes(sel)?chemistryBlock('q3',sel):''}}
       <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext('q3b')">Continue →</button></div>`;
 
   } else if(currentId==='q3b') {
@@ -255,7 +301,7 @@ function render() {
     const spouseSection = isMarried ? `
       <div class="spouse-section">
         <div class="spouse-title">👫 Spouse Information</div>
-        ${block({k:'read',l:'📞 Read to client',t:`Excellent. Since you're married, I'd like to note that in many immigration processes your spouse and children under 21 can be included as part of the overall immigration strategy — which can actually strengthen certain applications.`})}
+        ${block({k:'read',l:'📞 Read to client',t:`Excellent. Since you are married, I would like to note that in many immigration processes your spouse and children under 21 can be included as part of the overall immigration strategy — which can actually strengthen certain applications.`})}
         <div class="lbl">Spouse first name</div>
         <input class="field-inp" style="margin-bottom:8px" type="text" id="spouse_name" placeholder="Spouse name..." value="${answers['spouse_name']||''}"/>
         <div class="lbl">Spouse country of birth</div>
@@ -263,22 +309,22 @@ function render() {
           <span class="search-icon">🔍</span>
           <input class="search-inp" type="text" id="spouse_csearch" placeholder="Search country..." oninput="filterSpouseC()" autocomplete="off" style="font-size:13px"/>
         </div>
-        ${answers['spouse_country']?`<div class="pill" style="margin-bottom:6px">${answers['spouse_country']} <span class="pill-x" onclick="clearSpouseCountry()">×</span></div>`:''}
+        ${answers['spouse_country'] ? getSpouseCountryPill() : ''}
         <div class="country-list" id="spouse_clist" style="max-height:150px">${renderSpouseC('')}</div>
         <div class="lbl">Spouse education level</div>
         <select class="field-inp" style="margin-bottom:8px" id="spouse_edu">
           <option value="">Select...</option>
-          ${['High School','Trade School','Associate Degree',"Bachelor's Degree","Master's Degree","Doctorate (PhD)"].map(o=>`<option ${answers['spouse_edu']===o?'selected':''} value="${o}">${o}</option>`).join('')}
+          ${getSpouseEduOptions()}
         </select>
         <div class="lbl">Spouse years of experience</div>
         <select class="field-inp" style="margin-bottom:8px" id="spouse_exp">
           <option value="">Select...</option>
-          ${['Less than 2 years','2–5 years','5–10 years','More than 10 years'].map(o=>`<option ${answers['spouse_exp']===o?'selected':''} value="${o}">${o}</option>`).join('')}
+          ${getSpouseExpOptions()}
         </select>
         <div class="lbl">Will spouse immigrate as part of the process?</div>
         <div style="display:flex;gap:8px;margin-bottom:4px">
-          <button class="opt ${answers['spouse_immigrate']==='Yes'?'sel':''}" style="flex:1" onclick="this.parentElement.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel'));this.classList.add('sel');answers['spouse_immigrate']='Yes'">Yes</button>
-          <button class="opt ${answers['spouse_immigrate']==='No'?'sel':''}" style="flex:1" onclick="this.parentElement.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel'));this.classList.add('sel');answers['spouse_immigrate']='No'">No</button>
+          <button class="opt ${answers['spouse_immigrate']==='Yes'?'sel':''} style="flex:1" onclick="this.parentElement.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel'));this.classList.add('sel');answers['spouse_immigrate']='Yes'">Yes</button>
+          <button class="opt ${answers['spouse_immigrate']==='No'?'sel':''} style="flex:1" onclick="this.parentElement.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel'));this.classList.add('sel');answers['spouse_immigrate']='No'">No</button>
         </div>
       </div>` : '';
 
@@ -288,13 +334,10 @@ function render() {
         <div class="children-title">👶 Children</div>
         ${block({k:'read',l:'📞 Read to client',t:`Do you have any children under the age of 21?\n\nIn many immigration processes, dependent children under 21 may be included together with their parents — depending on the category and individual circumstances.`})}
         <div style="display:flex;gap:8px;margin-bottom:10px">
-          <button class="opt ${answers['has_children']==='Yes'?'sel':''}" style="flex:1" onclick="setChildren('Yes')">Yes</button>
-          <button class="opt ${answers['has_children']==='No'?'sel':''}" style="flex:1" onclick="setChildren('No')">No</button>
+          <button class="opt ${answers['has_children']==='Yes'?'sel':''} style="flex:1" onclick="setChildren('Yes')">Yes</button>
+          <button class="opt ${answers['has_children']==='No'?'sel':''} style="flex:1" onclick="setChildren('No')">No</button>
         </div>
-        ${answers['has_children']==='Yes'?`
-          <div class="lbl">How many children under 21?</div>
-          <input class="field-inp" type="number" id="children_count" min="1" max="10" placeholder="Number..." value="${answers['children_count']||''}" style="margin-bottom:4px"/>
-        `:''}
+        ${answers['has_children']==='Yes' ? getChildrenBlock() : ''}
       </div>
       <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" onclick="saveFamily('q4')">Continue →</button></div>`;
 
@@ -304,10 +347,10 @@ function render() {
     const opts=['Career Opportunities','Starting or Expanding a Business','Investment Opportunities','Education','Family Relocation','Exploring My Options'].map(o=>`<button class="opt ${sel===o?'sel':''}" onclick="selOpt('q4','${o}','q5',this)">${o}</button>`).join('');
     main.innerHTML=`
       <div class="q-num">Question 4 of ${totalQ}</div>
-      <div class="q-title">What is your primary goal in the United States?</div>
+      <div class="q-title">What is your primary goal in the United States?<br><span style="font-size:14px;font-weight:400;color:#6b7280">What is the main reason you want to move to the United States?</span></div>
       <div class="opts col1">${opts}</div>
       ${sel?chemistryBlock('q4',sel):''}
-      ${sel?block({k:'listen',l:'🎧 Follow-up',t:'And why is that goal important to you personally?'})+'<textarea class="textarea" style="margin-top:6px;min-height:52px;font-size:12px" placeholder="Agent notes..." onchange="answers[\'fu_q4\']=this.value">'+(answers['fu_q4']||'')+'</textarea>':''}
+      ${sel?block({k:'tip',l:'💡 Agent tip',t:'Take a moment to let the client share their vision and goals for life in the U.S. The more they connect with their future opportunities and aspirations, the stronger their motivation and engagement will be throughout the conversation.'})+'<textarea class="textarea" style="margin-top:6px;min-height:52px;font-size:12px" placeholder="Agent notes..." onchange="answers.fu_q4=this.value">'+(answers['fu_q4']||'')+'</textarea>':''}
       <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext('q5')">Continue →</button></div>`;
 
   } else if(currentId==='q5') {
@@ -317,10 +360,10 @@ function render() {
     const opts=eduOpts.map(o=>{const safeO=o.replace(/'/g,"\\'");return `<button class="opt ${sel===o?'sel':''}" onclick="selOpt('q5','${safeO}','q6',this)">${o}</button>`;}).join('');
     main.innerHTML=`
       <div class="q-num">Question 5 of ${totalQ}</div>
-      <div class="q-title">What is your highest level of education?</div>
+      <div class="q-title">${firstName ? firstName+", what" : "What"} is your highest level of education?</div>
       <div class="opts">${opts}</div>
       ${sel&&!['High School','Trade School'].includes(sel)?chemistryBlock('q5',sel):''}
-      ${sel&&!['High School','Trade School'].includes(sel)?block({k:'listen',l:'🎧 Follow-up',t:'What did you study or specialize in?'})+'<textarea class="textarea" style="margin-top:6px;min-height:52px;font-size:12px" placeholder="Agent notes..." onchange="answers[\'fu_q5\']=this.value">'+(answers['fu_q5']||'')+'</textarea>':''}
+      <textarea class="textarea" style="min-height:44px;font-size:12px;margin-top:4px" placeholder="Note..." onchange="answers['fu_q5']=this.value"></textarea>
       <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext('q6')">Continue →</button></div>`;
 
   } else if(currentId==='q6') {
@@ -330,11 +373,14 @@ function render() {
     main.innerHTML=`
       <div class="q-num">Question 6 of ${totalQ}</div>
       <div class="q-title">What do you do for a living? What is your job?</div>
-      ${block({k:'tip',l:'💡 Agent tip',t:'You can select the professional field from the list below — but no need to search if it slows down the conversation. Just type it manually instead.'})+block({k:'listen',l:'🎧 Follow-up',t:"That is interesting — how did you get into that field?"})+'<textarea class="textarea" style="margin-top:6px;min-height:52px;font-size:12px" placeholder="Agent notes..." onchange="answers[\'fu_q6\']=this.value">'+(answers['fu_q6']||'')+'</textarea>'}
+      ${block({k:'tip',l:'💡 Agent tip',t:'You can select the professional field from the list below — but no need to search if it slows things down. Just type it in manually.'})}
       <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" type="text" id="psearch" placeholder="Search profession..." oninput="filterP()" autocomplete="off"/></div>
       <div class="profession-list" id="plist">${renderP('')}</div>
       <div class="lbl" style="margin-top:8px">Or type manually if not in the list:</div>
       <input class="inp" type="text" id="prof_manual" placeholder="Type your profession..." value="${manualVal}"/>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid #e5e7eb">
+        <button class="opt" style="width:100%;background:#fff5f5;border:1.5px solid #fca5a5;color:#dc2626;font-weight:600;font-size:13px;padding:10px" onclick="answers['q6']='Not Currently Employed';answers['q6_profession']='Not Currently Employed';goNext('q8')">❌ Not Currently Employed</button>
+      </div>
       <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" onclick="saveProfession('q7')">Continue →</button></div>`;
 
   } else if(currentId==='q7') {
@@ -343,10 +389,10 @@ function render() {
     const opts=['Less than 2 years','2–5 years','5–10 years','More than 10 years'].map(o=>`<button class="opt col1 ${sel===o?'sel':''}" onclick="selOpt('q7','${o}','q8',this)">${o}</button>`).join('');
     main.innerHTML=`
       <div class="q-num">Question 7 of ${totalQ}</div>
-      <div class="q-title">How many years of professional experience do you have?</div>
+      <div class="q-title">How many years of experience do you have${answers["q6"] && answers["q6"] !== "Not Currently Employed" ? " as a " + answers["q6"] : ''}?</div>
       <div class="opts col1">${opts}</div>
       ${sel&&sel!=='Less than 2 years'?chemistryBlock('q7',sel):''}
-      ${sel?block({k:'listen',l:'🎧 Follow-up',t:'And what types of roles or positions have you held?'})+'<textarea class="textarea" style="margin-top:6px;min-height:52px;font-size:12px" placeholder="Agent notes..." onchange="answers[\'fu_q7\']=this.value">'+(answers['fu_q7']||'')+'</textarea>':''}
+      <textarea class="textarea" style="min-height:44px;font-size:12px;margin-top:4px" placeholder="Note..." onchange="answers['fu_q7']=this.value"></textarea>
       <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext('q8')">Continue →</button></div>`;
 
   } else if(currentId==='q8') {
@@ -355,7 +401,7 @@ function render() {
     const opts=['Yes','No'].map(o=>`<button class="opt ${sel===o?'sel':''}" onclick="selOpt('q8','${o}','q9',this)">${o}</button>`).join('');
     main.innerHTML=`
       <div class="q-num">Question 8 of ${totalQ}</div>
-      <div class="q-title">Have you ever led a team or managed people at work?</div>
+      <div class="q-title">${answers["q6"]==="Not Currently Employed" ? "In your previous work experience, did you ever lead a team or manage people?" : "Have you ever led a team or managed people at work?"}</div>
       <div class="opts">${opts}</div>
       ${sel==='Yes'?chemistryBlock('q8',sel):''}
       <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext('q9')">Continue →</button></div>`;
@@ -363,14 +409,14 @@ function render() {
   } else if(currentId==='q9') {
     setProgress(9,'Recognition');
     const sel=answers['q9']||[];
-    const opts=['Industry Awards','Publications','Research Contributions','Patents','Media Recognition','Speaking Engagements','None of the Above'].map(o=>`<button class="opt ${sel.includes(o)?'msel':''}" onclick="togMulti('q9','${o}')">${o}</button>`).join('');
-    const listenNote = sel.length>0&&!sel.includes('None of the Above') ? block({k:'listen',l:'🎧 Follow-up',t:'Can you tell me a little more about that recognition?'})+'<textarea class="textarea" style="margin-top:6px;min-height:52px;font-size:12px" placeholder="Agent notes..." onchange="answers[\'fu_q9\']=this.value">'+(answers['fu_q9']||'')+'</textarea>' : '';
+    const opts=['Industry Awards','Publications','Research Contributions','Patents','Media Recognition','Speaking Engagements'].map(o=>`<button class="opt ${sel.includes(o)?'msel':''}" onclick="togMulti('q9','${o}')">${o}</button>`).join('')+'<button class="opt" style="'+(sel.includes('None of the Above')?'background:#fee2e2;border-color:#f87171;color:#dc2626;':'background:#fff5f5;border-color:#fca5a5;color:#dc2626;')+'" onclick="togMulti('+"'q9','None of the Above')"+'">None of the Above</button>';
+    const listenNote = sel.length>0&&!sel.includes('None of the Above') ? block({k:'listen',l:'🎧 Follow-up',t:'Can you tell me a little more about that recognition?'})+'<textarea class="textarea" style="margin-top:6px;min-height:52px;font-size:12px" placeholder="Agent notes..." onchange="answers.fu_q9=this.value"></textarea>' : '';
     main.innerHTML=`
       <div class="q-num">Question 9 of ${totalQ} <span class="tag">Select all that apply</span></div>
       <div class="q-title">Have you received any professional recognition?</div>
       <div class="opts col1">${opts}</div>
       ${listenNote}
-      <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${sel.length===0?'disabled':''} onclick="goNext('q10')">Continue →</button></div>`;
+      <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${sel.length===0?'disabled':''} onclick="goNext(answers['q6']==='Not Currently Employed'?'q11':'q10')">Continue →</button></div>`;
 
   } else if(currentId==='q10') {
     setProgress(10,'Current Situation');
@@ -378,23 +424,26 @@ function render() {
     const opts=['Employee','Skilled Professional','Business Owner','Entrepreneur','Investor','Self-Employed'].map(o=>`<button class="opt ${sel===o?'sel':''}" onclick="selOpt('q10','${o}','q11',this)">${o}</button>`).join('');
     main.innerHTML=`
       <div class="q-num">Question 10 of ${totalQ}</div>
-      <div class="q-title">Which best describes your current situation?</div>
+      <div class="q-title">Which best describes your current situation${answers["q6"] && answers["q6"] !== "Not Currently Employed" ? " as a " + answers["q6"] : ''}?</div>
       <div class="opts">${opts}</div>
       ${sel?chemistryBlock('q10',sel):''}
-      ${sel?block({k:'listen',l:'🎧 Follow-up',t:'Tell me more about what that looks like day-to-day.'})+'<textarea class="textarea" style="margin-top:6px;min-height:52px;font-size:12px" placeholder="Agent notes..." onchange="answers[\'fu_q10\']=this.value">'+(answers['fu_q10']||'')+'</textarea>':''}
+      <textarea class="textarea" style="min-height:44px;font-size:12px;margin-top:4px" placeholder="Note..." onchange="answers['fu_q10']=this.value"></textarea>
       <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext('q11')">Continue →</button></div>`;
 
   } else if(currentId==='q11') {
     setProgress(11,'Business Interest');
     const sel=answers['q11']||null;
-    const opts=['Yes','Maybe','No'].map(o=>`<button class="opt ${sel===o?'sel':''}" onclick="selOpt('q11','${o}','q12',this)">${o}</button>`).join('');
+    const opts=['Yes','Maybe','No'].map(o=>{
+      const next = o==='No' ? 'q13' : 'q12';
+      return `<button class="opt ${sel===o?'sel':''}" onclick="selOpt('q11','${o}','${next}',this)">${o}</button>`;
+    }).join('');
     main.innerHTML=`
       <div class="q-num">Question 11 of ${totalQ}</div>
       <div class="q-title">Would you be interested in opening, purchasing, or investing in a business in the U.S. if it supported your immigration goals?</div>
       <div class="opts col1">${opts}</div>
       ${sel==='Yes'?chemistryBlock('q11',sel):''}
       ${sel==='Maybe'?block({k:'listen',l:'🎧 Follow-up',t:'What do you mean by maybe — is it something you have considered before?'}):''}
-      <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext('q12')">Continue →</button></div>`;
+      <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext(answers['q11']==='No' ? 'q13' : 'q12')">Continue →</button></div>`;
 
   } else if(currentId==='q12') {
     setProgress(12,'Investment Level');
@@ -416,16 +465,17 @@ function render() {
       <div class="opts col1">${opts}</div>
       ${sel==='Yes'?chemistryBlock('q13',sel):''}
       ${sel==='Maybe'?block({k:'listen',l:'🎧 Follow-up',t:'What do you mean by maybe — is studying something you have thought about before?'}):''}
+      ${(sel==='Yes'||sel==='Maybe')?`<div class="lbl" style="margin-top:8px">What would you like to study? (optional)</div><textarea class="textarea" id="study_note" placeholder="Note what the client said about their study interests..." onchange="answers.study_note=this.value">${answers.study_note||''}</textarea>`:''}
       <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext('q14')">Continue →</button></div>`;
 
   } else if(currentId==='q14') {
     setProgress(14,'Family in USA');
     const sel=answers['q14']||null;
     const opts=['Yes','No'].map(o=>`<button class="opt ${sel===o?'sel':''}" onclick="selOpt('q14','${o}','hold',this)">${o}</button>`).join('');
-    const listenNote = sel==='Yes' ? block({k:'listen',l:'🎧 Follow-up',t:'What is their current immigration status in the U.S.?'})+'<textarea class="textarea" style="margin-top:6px;min-height:52px;font-size:12px" placeholder="Agent notes..." onchange="answers[\'fu_q14\']=this.value">'+(answers['fu_q14']||'')+'</textarea>' : '';
+    const listenNote = sel==='Yes' ? block({k:'listen',l:'🎧 Follow-up',t:'What is their current immigration status in the U.S.?'})+'<textarea class="textarea" style="margin-top:6px;min-height:52px;font-size:12px" placeholder="Agent notes..." onchange="answers.fu_q14=this.value"></textarea>' : '';
     main.innerHTML=`
       <div class="q-num">Question 14 of ${totalQ}</div>
-      <div class="q-title">Do you currently have close family members living legally in the United States?</div>
+      <div class="q-title">${firstName ? firstName+", do" : "Do"} you currently have close family members living legally in the United States?</div>
       <div class="opts">${opts}</div>
       ${sel==='Yes'?chemistryBlock('q14',sel):''}
       ${listenNote}
@@ -435,7 +485,7 @@ function render() {
     setProgress(95,'Processing');
     const name = clientName || '[Name]';
     main.innerHTML=`
-      ${block({k:'read',l:'📞 Transition — Read to client',t:`Mr./Mrs. ${name},\n\nThank you for sharing all of that with me.\n\nNow I'll place you on a brief hold for about one minute while the system processes your information.\n\nWhen I come back, we'll go over the results together.`})}
+      ${block({k:'read',l:'📞 Transition — Read to client',t:`${firstName||name},\n\nThank you for sharing all of that with me.\n\nNow I will place you on a brief hold for about one minute while the system processes your information.\n\nWhen I come back, we will go over the results together.`})}
       ${block({k:'hold',l:'⏸ Place client on hold now',t:`⏸️ Put the client on hold.\n⏱️ Keep hold under 60 seconds.\n\n💬 If you need more time: "Just one more moment — almost there."`})}
       <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" onclick="goNext('results')">Continue →</button></div>`;
 
@@ -450,34 +500,36 @@ function render() {
     const name = clientName || '[Name]';
 
     main.innerHTML=`
-      ${(()=>{const n=pathways.length;const pathwayText=n===1?'one immigration pathway that matches your profile':n===2?'two immigration pathways that match your profile':'three immigration pathways that match your profile';const foundText=n===1?'We found a clear pathway for you.':n===2?'We found two strong pathways for you.':'We found three strong pathways for you.';return block({k:'read',l:'📞 Results — Read to client',t:`Mr./Mrs. ${name},\n\nThank you for waiting.\n\nI have some great news for you — congratulations! 🎉\n\nBased on the information you provided today, our system has identified ${pathwayText}.\n\n${foundText}\n\nWhat this means is that based on this initial assessment, your profile appears to qualify for legal immigration to the United States.\n\nI am really glad for you — this is an encouraging result.`});})()}
-      <div style="margin-bottom:14px">
+      ${(()=>{const n=pathways.length;const pathwayText=n===1?'one immigration pathway':n===2?'two immigration pathways':'three immigration pathways';return block({k:'read',l:'📞 Results — Read to client',t:`${firstName||name},\n\nThank you for waiting.\n\nI have some great news for you — congratulations!\n\nBased on the information you provided today, our system has identified a potential immigration pathway that matches your profile.\n\nWhat this means is that, based on this initial assessment, your profile appears to qualify for legal immigration to the United States.\n\nLet me show you the pathway that appears to be the strongest match for your background and goals:`});})()}
         <div class="lbl" style="margin-bottom:8px">Assessment results</div>
         ${cards}
-      </div>
-      <div class="disclaimer">This assessment identifies immigration categories that may align with the client's profile. A detailed legal review is required to determine the most appropriate immigration strategy and available pathways.</div>
       <div class="lbl" style="margin-bottom:8px">Agent: which pathway best matches this client? (for internal use)</div>
       ${prefBtns}
       <textarea class="textarea" id="client_pref_reason" placeholder="✍️ Note what the client said about their preferred pathway...">${answers['client_pref_reason']||''}</textarea>
-      ${block({k:'read',l:'📞 After they answer — Read to client',t:`That makes complete sense.
+      ${block({k:'read',l:'📞 After they answer — Read to client',t:`${firstName ? firstName + ", the" : "The"} good news is that we have already identified a potential immigration pathway that appears to match your profile.
 
-What we did today is just a basic initial check — and it already shows us that your profile is compatible and can allow you to immigrate legally to the United States.
+I am genuinely happy for you — this is a very encouraging result.
 
-Now, the next step is to open an official immigration file for you.`})}
-      ${block({k:'read',l:'📞 What happens next — Read to client',t:`Here is exactly what happens after you open your file:
+What we completed today is an initial assessment. The next step is to move forward with a formal case review, where our immigration team can properly evaluate your eligibility and determine the strongest strategy for your situation.`})}
+      ${block({k:'read',l:'📞 What happens next — Read to client',t:`${firstName ? firstName+", here" : "Here"} is exactly what happens after you open your file:
 
-1. You will receive a short personal questionnaire — a bit more detailed and professional than what we covered today.
+1. You will receive a short personal questionnaire — more detailed than what we covered today.
 
-2. An immigration attorney will personally review your questionnaire and your profile.
+2. An immigration attorney will personally review your questionnaire and profile.
 
-3. You will be assigned a personal immigration consultant who will handle your case directly.
+3. You will be assigned a dedicated immigration consultant who will guide you throughout the process and answer any questions you may have.
 
-For all of this — the file opening, the attorney review, and your personal consultant — the total cost is $250.
+This process allows our team to fully evaluate your case and provide professional guidance on the immigration options available to you.
 
-After payment you will receive a confirmation email with your receipt, a list of any documents needed, and all the details to get started. Our customer service team is always here for you.`})}
-      ${block({k:'tip',l:'💡 Tip',t:`Pause after the $250. Let them respond. Silence after the price is normal — do not rush.`})}
-      ${block({k:'read',l:'📞 The close — Read to client',t:`The Immigration Case Opening Fee is $250.`})}
-      ${block({k:'read',l:'📞 The close — Read to client',t:`Perfect.\n\nThe Immigration Case Opening Fee is $250.`})}
+The total cost for opening your immigration file, attorney review, and personal consultant is only $250.
+
+Our team has extensive experience with immigration cases and is committed to guiding clients through the process as smoothly and efficiently as possible.
+
+After payment, you will receive a confirmation email, your receipt, a list of any required documents, and all the information needed to get started.`})}
+      ${block({k:'tip',l:'💡 Agent tip',t:`Pause here. Let them absorb the information. Silence is normal — do not rush.
+
+To proceed with payment or close the form — click the Submit button below (the green button). Continue the payment process from there.`})}
+      ${block({k:'read',l:'📞 The close — Read to client',t:`What type of credit card do you use in ${answers['q2'] || 'your country'}?`})}
       <hr class="divider">
       <div class="lbl" style="margin-bottom:4px">Notes about the call and the client (for the legal team)</div>
       <textarea class="textarea" id="client-goal" placeholder="✍️ Add any notes about the conversation, client's personality, objections, or anything relevant for the legal team...">${answers['client_goal']||''}</textarea>
@@ -524,7 +576,54 @@ function clearCountry(){delete answers['q2'];render();}
 function renderP(f){const fl=f.toLowerCase();return PROFESSIONS.filter(p=>p.toLowerCase().includes(fl)).map(p=>`<div class="pi ${answers['q6_profession']===p?'pis':''}" onclick="selProfession('${p.replace(/'/g,"\\'")}')">${p}</div>`).join('');}
 function filterP(){document.getElementById('plist').innerHTML=renderP(document.getElementById('psearch').value);}
 function selProfession(n){answers['q6_profession']=n;const m=document.getElementById('prof_manual');if(m)m.value='';document.querySelectorAll('.pi').forEach(p=>p.classList.remove('pis'));document.querySelectorAll('.pi').forEach(p=>{if(p.textContent===n)p.classList.add('pis');});}
-function saveProfession(next){const m=document.getElementById('prof_manual')?.value.trim();if(m)answers['q6']=m;else if(answers['q6_profession'])answers['q6']=answers['q6_profession'];if(!answers['q6']){alert('Please select or type a profession.');return;}goNext(next);}
+function saveProfession(next){const m=document.getElementById('prof_manual')?.value.trim();if(m)answers['q6']=m;else if(answers['q6_profession'])answers['q6']=answers['q6_profession'];if(!answers['q6']){alert('Please select or type a profession.');return;}const skipTo=answers['q6']==='Not Currently Employed'?'q8':next;goNext(skipTo);}
+function getSpouseEduOptions() {
+  return ['High School','Trade School','Associate Degree',"Bachelor's Degree","Master's Degree","Doctorate (PhD)"].map(function(o){return '<option '+(answers['spouse_edu']===o?'selected':'')+'" value="'+o+'">'+o+'</option>';}).join('');
+}
+function getSpouseExpOptions() {
+  return ['Less than 2 years','2–5 years','5–10 years','More than 10 years'].map(function(o){return '<option '+(answers['spouse_exp']===o?'selected':'')+'" value="'+o+'">'+o+'</option>';}).join('');
+}
+
+function getCountryPill(country) {
+  return '<div class="pill">' + country + ' <span class="pill-x" onclick="clearCountry()">×</span></div>';
+}
+function getSpouseCountryPill() {
+  return '<div class="pill" style="margin-bottom:6px">' + (answers['spouse_country']||'') + ' <span class="pill-x" onclick="clearSpouseCountry()">×</span></div>';
+}
+
+function getCountryFactBlock() {
+  var html = '<div class="block block-chemistry">';
+  html += '<div class="block-label">💬 Say to client</div>';
+  html += '<div class="block-text">' + (answers['country_fact']||'') + '</div></div>';
+  return html;
+}
+
+function getChildrenBlock() {
+  var html = '<div class="lbl">How many children under 21?</div>';
+  html += '<input class="field-inp" type="number" id="children_count" min="1" max="10" placeholder="Number..." ';
+  html += 'value="' + (answers['children_count']||'') + '" style="margin-bottom:4px" ';
+  html += 'onchange="answers.children_count=this.value"/>';
+  return html;
+}
+
+function getHesitationBlock() {
+  var html = '<div class="block block-tip" style="margin-bottom:10px">';
+  html += '<div class="block-label">💡 If client hesitates</div>';
+  html += '<div class="block-text">Ask: &quot;What do you mean?&quot; — listen, then address it directly. ';
+  html += 'You can also say: &quot;There is no commitment today — I just want to check your eligibility.&quot;</div></div>';
+  html += '<div class="lbl">Note client concern (optional)</div>';
+  html += '<textarea class="textarea" id="hesitation_note" placeholder="What did the client say?" onchange="answers.hesitation_note=this.value">' + (answers['hesitation_note']||'') + '</textarea>';
+  return html;
+}
+
+function setSoundGood(v){
+  answers['intro_soundgood']=v;
+  // Save notes before re-render
+  const n=document.getElementById('intro_notes');
+  if(n) answers['intro_notes']=n.value;
+  render();
+}
+
 function setChildren(v){
   // Save spouse fields before re-render
   const sn=document.getElementById('spouse_name');
@@ -560,7 +659,7 @@ async function submitAll(){
   const reasonEl=document.getElementById('client_pref_reason');if(reasonEl)answers['client_pref_reason']=reasonEl.value;
   const pathways=computePathways();
   const btn=document.getElementById('submit-btn');btn.disabled=true;btn.textContent='Saving to Bitrix24...';
-  const summary=['=== IMMIGRATION PATHWAY ASSESSMENT ===',`Pathway #1: ${pathways[0]?.name||''}`,`Pathway #2: ${pathways[1]?.name||''}`,`Pathway #3: ${pathways[2]?.name||''}`,`Client preferred: ${answers['pref_pathway']||'Not selected'}`,`Client reason: ${answers['client_pref_reason']||''}`,`Notes: ${answers['client_goal']||''}`,``,`=== ANSWERS ===`,`Age: ${answers['q1']||''}`,`Country: ${answers['q2']||''}`,`Marital Status: ${answers['q3']||''}`,answers['q3']==='Married'?`Spouse: ${answers['spouse_name']||''} | Country: ${answers['spouse_country']||''} | Edu: ${answers['spouse_edu']||''} | Exp: ${answers['spouse_exp']||''} | Immigrating: ${answers['spouse_immigrate']||''}`:'',`Children under 21: ${answers['has_children']||''} ${answers['children_count']?'('+answers['children_count']+')':''}`,`Primary Goal: ${answers['q4']||''}`,`Education: ${answers['q5']||''}`,`Field: ${answers['q6']||''}`,`Experience: ${answers['q7']||''}`,`Leadership: ${answers['q8']||''}`,`Recognition: ${(answers['q9']||[]).join(', ')}`,`Situation: ${answers['q10']||''}`,`Business Interest: ${answers['q11']||''}`,`Investment Level: ${answers['q12']||''}`,`Study Interest: ${answers['q13']||''}`,`Family in USA: ${answers['q14']||''}`,``,`Agent intro notes: ${answers['intro_notes']||''}`].filter(l=>l!==undefined).join('\n');
+  const summary=['=== IMMIGRATION PATHWAY ASSESSMENT ===',`Pathway #1: ${pathways[0]?.name||''}`,`Pathway #2: ${pathways[1]?.name||''}`,`Pathway #3: ${pathways[2]?.name||''}`,`Client preferred: ${answers['pref_pathway']||'Not selected'}`,`Client reason: ${answers['client_pref_reason']||''}`,`Notes: ${answers['client_goal']||''}`,``,`=== ANSWERS ===`,`Age: ${answers['q1']||''}`,`Country: ${answers['q2']||''}`,`Marital Status: ${answers['q3']||''}`,answers['q3']==='Married'?`Spouse: ${answers['spouse_name']||''} | Country: ${answers['spouse_country']||''} | Edu: ${answers['spouse_edu']||''} | Exp: ${answers['spouse_exp']||''} | Immigrating: ${answers['spouse_immigrate']||''}`:'',`Children under 21: ${answers['has_children']||''} ${answers['children_count']?'('+answers['children_count']+')':''}` ,`Primary Goal: ${answers['q4']||''}`,`Education: ${answers['q5']||''}`,`Field: ${answers['q6']||''}`,`Experience: ${answers['q7']||''}`,`Leadership: ${answers['q8']||''}`,`Recognition: ${(answers['q9']||[]).join(', ')}`,`Situation: ${answers['q10']||''}`,`Business Interest: ${answers['q11']||''}`,`Investment Level: ${answers['q12']||''}`,`Study Interest: ${answers['q13']||''}`,`Family in USA: ${answers['q14']||''}`,``,`Agent intro notes: ${answers['intro_notes']||''}`].filter(l=>l!==undefined).join('\n');
   const fields={COMMENTS:summary};
   if(answers['q2'])fields['UF_CRM_1449131599']=answers['q2'];
   if(answers['q3']&&MARITAL_IDS[answers['q3']])fields['UF_CRM_1500181612']=MARITAL_IDS[answers['q3']];
@@ -574,12 +673,12 @@ async function submitAll(){
 
 function showResult(success,summary,pathways,err){
   const main=document.getElementById('main');
-  if(success){main.innerHTML=`<div class="status-box"><div class="status-icon">✅</div><div class="status-title" style="color:#15803d">Lead Updated Successfully</div><div class="status-sub">The assessment results have been saved to Bitrix24.<br><br><strong>Pathways identified:</strong><br>${pathways.map((p,i)=>`${i+1}. ${p.name}`).join('<br>')}${leadId?`<br><br>Lead ID: ${leadId}`:''}</div></div>`;}
+  if(success){main.innerHTML=`<div class="status-box"><div class="status-icon">✅</div><div class="status-title" style="color:#15803d">Lead Updated Successfully</div><div class="status-sub">The assessment results have been saved to Bitrix24.<br><br><strong>Pathways identified:</strong><br>${pathways.map((p,i)=>(i+1)+'. '+p.name).join('<br>')}${leadId ? '<br><br>Lead ID: ' + leadId : ''}</div></div>`;}
   else{main.innerHTML=`<div class="status-box"><div class="status-icon">⚠️</div><div class="status-title" style="color:#b45309">Saved Locally</div><div class="status-sub">Could not update Bitrix24${err?': '+err:''}.<br><br>Please copy the results below:<br><br><textarea class="textarea" style="font-size:11px;min-height:120px;text-align:left">${summary}</textarea></div></div>`;}
   document.getElementById('progress').style.width='100%';
 }
 
-function renderSpouseC(f){const fl=f.toLowerCase();return COUNTRIES.filter(c=>c.toLowerCase().includes(fl)).map(c=>`<div class="ci ${answers['spouse_country']===c?'csel':''}" onclick="selSpouseCountry('${c.replace(/'/g,"\'")}')">${c}</div>`).join('');}
+function renderSpouseC(f){const fl=f.toLowerCase();return COUNTRIES.filter(c=>c.toLowerCase().includes(fl)).map(c=>`<div class="ci ${answers['spouse_country']===c?'csel':''} onclick="selSpouseCountry('${c.replace(/'/g,"\'")}')">${c}</div>`).join('');}
 function filterSpouseC(){
   const sn=document.getElementById('spouse_name');
   const se=document.getElementById('spouse_edu');
@@ -605,11 +704,403 @@ function clearSpouseCountry(){delete answers['spouse_country'];render();}
 
 async function loadLead(){
   if(!leadId)return;
-  try{const res=await fetch(`${WEBHOOK}crm.lead.get?ID=${leadId}`);const data=await res.json();if(data.result){const ld=data.result;clientName=[ld.NAME,ld.LAST_NAME].filter(Boolean).join(' ')||'Client';const initials=clientName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();document.getElementById('client-initials').textContent=initials;document.getElementById('client-name-display').textContent=clientName;document.getElementById('client-info-display').textContent=[ld.PHONE?.[0]?.VALUE,ld.EMAIL?.[0]?.VALUE].filter(Boolean).join(' · ');document.getElementById('client-bar').style.display='flex';}}catch(e){console.log('Could not load lead:',e);}
+  try{const res=await fetch(`${WEBHOOK}crm.lead.get?ID=${leadId}`);const data=await res.json();if(data.result){const ld=data.result;clientName=[ld.NAME,ld.LAST_NAME].filter(Boolean).join(' ')||'Client';
+        firstName=clientName.split(' ')[0]||'';
+        // Fetch agent name
+        const agentId = ld.ASSIGNED_BY_ID;
+        if(agentId) {
+          try {
+            const agentRes = await fetch(`${WEBHOOK}user.get?ID=${agentId}`);
+            const agentData = await agentRes.json();
+            if(agentData.result && agentData.result.length > 0) {
+              const agent = agentData.result[0];
+              agentName = [agent.NAME, agent.LAST_NAME].filter(Boolean).join(' ');
+            }
+          } catch(e) { console.log('Could not load agent:', e); }
+        }const initials=clientName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();document.getElementById('client-initials').textContent=initials;document.getElementById('client-name-display').textContent=clientName;document.getElementById('client-info-display').textContent=[ld.PHONE?.[0]?.VALUE,ld.EMAIL?.[0]?.VALUE].filter(Boolean).join(' · ');document.getElementById('client-bar').style.display='flex';}}catch(e){console.log('Could not load lead:',e);}
 }
 
 loadLead();
 render();
 </script>
+
+<!-- OBJECTIONS BUTTON & MODAL -->
+<style>
+.obj-fab { position: fixed; bottom: 24px; right: 24px; background: #dc2626; color: white; border: none; border-radius: 50px; padding: 12px 20px; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 16px rgba(220,38,38,0.4); z-index: 1000; display: flex; align-items: center; gap: 7px; }
+.obj-fab:hover { background: #b91c1c; }
+.obj-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1001; }
+.obj-overlay.open { display: flex; align-items: flex-end; justify-content: center; }
+.obj-modal { background: #fff; border-radius: 16px 16px 0 0; width: 100%; max-width: 680px; max-height: 85vh; overflow-y: auto; padding: 20px; }
+.obj-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.obj-title { font-size: 16px; font-weight: 700; color: #1a1a2e; }
+.obj-close { background: none; border: none; font-size: 22px; cursor: pointer; color: #6b7280; }
+.obj-cat { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #6b7280; margin: 14px 0 8px; }
+.obj-item { border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 8px; overflow: hidden; }
+.obj-q { padding: 12px 14px; font-size: 13px; font-weight: 500; color: #1a1a2e; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: #fff; }
+.obj-q:hover { background: #f9fafb; }
+.obj-q .arr { transition: transform 0.2s; font-size: 11px; color: #9ca3af; }
+.obj-q.open .arr { transform: rotate(180deg); }
+.obj-ans { display: none; padding: 12px 14px; background: #1e3a8a; border-top: 1px solid #e5e7eb; }
+.obj-ans.show { display: block; }
+.obj-ans-label { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #93c5fd; margin-bottom: 6px; }
+.obj-ans-text { font-size: 13px; color: #ffffff; line-height: 1.7; font-weight: 500; }
+.obj-ai-btn { width:100%; margin:8px 0 6px; padding:8px; background:#7c3aed; color:#fff; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; display:none; }
+.obj-ai-btn.visible { display:block; }
+.obj-ai-btn:hover { background:#6d28d9; }
+.obj-ai-btn:disabled { background:#a78bfa; cursor:wait; }
+.obj-ai-result { font-size:13px; color:#fff; line-height:1.7; font-weight:500; background:#4c1d95; border-radius:8px; padding:0; max-height:0; overflow:hidden; transition:all 0.3s; }
+.obj-ai-result.show { padding:12px; max-height:500px; margin-bottom:8px; }
+.obj-ai-label { font-size:10px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:#c4b5fd; margin-bottom:6px; }
+.obj-listen { background: #f0fdf4; border-radius: 8px; padding: 10px 13px; margin-bottom: 10px; }
+.obj-listen-label { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #15803d; margin-bottom: 5px; }
+.obj-listen-text { font-size: 13px; color: #14532d; line-height: 1.6; }
+.obj-notes { width: 100%; padding: 8px 11px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 12px; color: #374151; min-height: 52px; resize: vertical; margin-bottom: 10px; background: #fff; }
+</style>
+
+<button class="obj-fab" onclick="openObj()">🛡️ Objections</button>
+
+<div class="obj-overlay" id="obj-overlay" onclick="closeObj(event)">
+  <div class="obj-modal" id="obj-modal">
+    <div class="obj-header">
+      <div class="obj-title">🛡️ Objection Handlers</div>
+      <div id="obj-loading" style="display:none;font-size:12px;color:#7c3aed;margin-top:4px">✨ Generating personalized responses for this client...</div>
+      <button class="obj-close" onclick="closeObj()">×</button>
+    </div>
+    <div id="obj-content">Loading...</div>
+  </div>
+</div>
+
+
+
+
+<script>
+function openObj() {
+  document.getElementById('obj-overlay').classList.add('open');
+  renderObj();
+  generateAllResponses();
+}
+
+let objResponses = {};
+let objLoading = false;
+
+async function generateAllResponses() {
+  if(objLoading || Object.keys(objResponses).length > 0) return;
+  objLoading = true;
+  
+  const pathways = computePathways();
+  const profile = {
+    name: firstName || 'the client',
+    country: answers['q2'] || 'their country',
+    goal: answers['q4'] || 'immigrate to the United States',
+    profession: answers['q6'] || 'professional',
+    experience: answers['q7'] || '',
+    education: answers['q5'] || '',
+    situation: answers['q10'] || '',
+    pathway: pathways[0]?.name || 'Employment Category',
+    pathway2: pathways[1]?.name || ''
+  };
+
+  const objList = [
+    {key:'expensive', q:'$250 is too expensive'},
+    {key:'think', q:'I need to think about it'},
+    {key:'spouse', q:'I want to talk to my spouse / family first'},
+    {key:'pay_later', q:'Can I pay later?'},
+    {key:'no_qualify', q:'What if I do not qualify after paying?'},
+    {key:'legit', q:'How do I know this is legit?'},
+    {key:'free', q:'I have seen other companies offering this for free'},
+    {key:'scammed', q:'I have been scammed before'},
+    {key:'not_lawyer', q:'Are you a real immigration lawyer?'},
+    {key:'writing', q:'Can you send me something in writing first?'},
+    {key:'email', q:'Send me an email'},
+    {key:'not_ready', q:'I am not ready yet'},
+    {key:'few_months', q:'Maybe in a few months'},
+    {key:'sort_things', q:'I need to sort some things out first'},
+    {key:'real_chance', q:'Do you think I really have a chance?'},
+    {key:'english', q:'My English is not good enough'},
+    {key:'too_old', q:'I am too old for this'},
+    {key:'criminal', q:'I have a criminal record'},
+    {key:'visa_denied', q:'I have been denied a visa before'},
+    {key:'how_long', q:'How long does the process take?'},
+    {key:'leave_country', q:'Do I need to leave my country?'},
+    {key:'chances', q:'What are my chances of success?'}
+  ];
+
+  const loadingEl = document.getElementById('obj-loading');
+  if(loadingEl) loadingEl.style.display = 'block';
+
+  const prompt = `You are an expert immigration sales coach. Generate personalized objection-handling responses for a specific client.
+
+Client profile:
+- Name: ${firstName||"the client"}
+- Country: ${profile.country}  
+- Goal in the US: ${profile.goal}
+- Profession: ${profile.profession}
+- Experience: ${profile.experience}
+- Education: ${profile.education}
+- Current situation: ${profile.situation}
+- Top immigration pathway identified: ${profile.pathway}
+${profile.pathway2 ? '- Second pathway: ' + profile.pathway2 : ''}
+
+For each objection below, write a short persuasive response (2-4 sentences) the agent reads directly to the client.
+Rules:
+- Start each response with the client name: ${firstName||"the client"}
+- Reference their specific profile details (country, profession, goal, pathway)
+- Warm, confident, conversational tone
+- No bullet points inside responses
+- Responses in English only
+
+Return ONLY a JSON object with this exact format (no markdown, no backticks):
+{"expensive":"response here","think":"response here","spouse":"response here","pay_later":"response here","no_qualify":"response here","legit":"response here","free":"response here","scammed":"response here","not_lawyer":"response here","writing":"response here","email":"response here","not_ready":"response here","few_months":"response here","sort_things":"response here","real_chance":"response here","english":"response here","too_old":"response here","criminal":"response here","visa_denied":"response here","how_long":"response here","leave_country":"response here","chances":"response here"}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '{}';
+    const clean = text.replace(/```json|```/g, '').trim();
+    objResponses = JSON.parse(clean);
+    renderObj();
+  } catch(e) {
+    console.log('AI objections error:', e);
+  } finally {
+    objLoading = false;
+    if(loadingEl) loadingEl.style.display = 'none';
+  }
+}
+function closeObj(e) {
+  if(!e || e.target===document.getElementById('obj-overlay')) {
+    document.getElementById('obj-overlay').classList.remove('open');
+  }
+}
+
+function resetObjResponses() {
+  objResponses = {};
+  objLoading = false;
+}
+function toggleObj(el) {
+  const ans = el.nextElementSibling;
+  const isOpen = ans.classList.contains('show');
+  document.querySelectorAll('.obj-ans').forEach(a=>a.classList.remove('show'));
+  document.querySelectorAll('.obj-q').forEach(q=>q.classList.remove('open'));
+  if(!isOpen) { ans.classList.add('show'); el.classList.add('open'); }
+}
+
+function getPersonalizedAnswer(key) {
+  const situation = answers['q10']||'';
+  const edu = answers['q5']||'';
+  const exp = answers['q7']||'';
+  const country = answers['q2']||'your country';
+  const goal = answers['q4']||'';
+  const pathways = computePathways();
+  const topPathway = pathways[0]?.name || 'the identified pathway';
+  const highExp = ['5–10 years','More than 10 years'].includes(exp);
+  const highEdu = ["Bachelor's Degree","Master's Degree","Doctorate (PhD)"].includes(edu);
+  const profileStrength = highEdu && highExp ? 'very strong' : highEdu || highExp ? 'solid' : 'relevant';
+  const namePrefix = firstName ? firstName + ', ' : '';
+  const spouseName = answers['spouse_name'] ? answers['spouse_name'].split(' ')[0] : '';
+  const spouseRef = spouseName ? spouseName : (answers['q3']==='Married' ? 'your spouse' : 'your partner');
+
+  const goalText = {
+    'Career Opportunities': 'advance your career in the United States',
+    'Starting or Expanding a Business': 'build or expand your business in the United States',
+    'Investment Opportunities': 'pursue investment opportunities in the United States',
+    'Education': 'study and build a future in the United States',
+    'Family Relocation': 'relocate your family to the United States',
+    'Exploring My Options': 'find the best path forward to the United States'
+  }[goal] || 'build a future in the United States';
+
+  const objections = {
+    expensive: namePrefix + "I completely understand — and I want to be honest with you. The $250 is not a big commitment compared to what is at stake here. What you are getting is a personal attorney review of your case, a dedicated immigration consultant assigned specifically to you, and a real professional evaluation of your pathway to the United States. After payment, you will receive a confirmation email, your receipt, your case number, and direct access to our client services team — people you can contact anytime. " + firstName||"the client" + ", your profile is strong. The opportunity is real. This is just the first step — and it is a small one. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?",
+
+    think: namePrefix + "Of course — take all the time you need. But I want to share something with you: the spots we have available are genuinely limited, and we do work by country allocation. I would hate for you to come back in a few days and find that the availability for " + (answers['q2']||'your country') + " has changed. You have already done the hard part today — the assessment is done, your pathway is identified. The $250 simply opens your file and gets the process moving. I am genuinely happy for you and I want to see this happen. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?",
+
+    spouse: namePrefix + "I completely understand — and I respect that. But let me be transparent: what we are doing today is simply opening a file. No major decision is being made right now. Everything will be fully visible to " + spouseRef + " — the confirmation email, the receipt, the case number, the consultant details. They will see everything. Actually — would it be possible to bring " + spouseRef + " on the call right now? Even for just a minute. I would love to answer any questions together. If not, that is fine — but Your success is our success. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?",
+
+    pay_later: namePrefix + "I wish I could offer that flexibility. The $250 activates your file — it is what assigns you a case number, starts the attorney review, and connects you to your personal consultant. Without it, your profile just sits here without moving forward. Think of it this way: this is less than what most people spend on a single hour with an immigration attorney — and it covers everything: the review, the consultant, and ongoing client support. I really want to make this work for you. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?",
+
+    no_qualify: namePrefix + "That is actually a really important question — and it shows you are thinking carefully. Here is the honest answer: the $250 covers the attorney review, which is specifically designed to tell you exactly where you stand legally. If for any reason the attorney determines that your profile needs more preparation before moving forward, they will tell you that — clearly, professionally, and with a path forward. You are not paying for a guarantee — you are paying for real clarity from a professional. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?",
+
+    legit: namePrefix + "That is a fair and smart question. We are a registered immigration services company that has helped clients from " + (answers['q2']||'around the world') + " and over 80 countries navigate this process. After you open your file, you will immediately receive a confirmation email with your receipt, your unique case number, and the contact details for your personal consultant. You will have a real person you can reach at any time. I will personally keep an eye on your file every step of the way. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?",
+
+    free: namePrefix + "You are right — there are free tools online. But here is the real difference: a free tool gives you general information. What we provide is a licensed immigration attorney personally reviewing your specific profile, your background, your country, your goals. No automated tool can do that. The $250 is not for information — it is for a professional legal evaluation of you specifically. And after that review, you will have a dedicated consultant working your case. That is a completely different level of service. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?",
+
+    scammed: namePrefix + "I hear you — and I am genuinely sorry that happened. There are bad actors in this industry and it makes everything harder. What I can tell you is this: we do not ask for large amounts upfront, we do not make promises we cannot keep, and we do not disappear after payment. After the $250, you immediately receive a confirmation email, a receipt, your case number, and the direct contact details of your consultant. You have a real paper trail from the first moment. I want to see you succeed — your success is our success. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?",
+
+    not_lawyer: namePrefix + "You are right — I am not an attorney, and I want to be fully transparent about that. My role is to conduct this initial assessment and make sure your profile reaches the right hands. Once your file is opened, a licensed immigration attorney personally reviews your case. That is who evaluates your eligibility — not me, not a system. I am here to make sure the process starts correctly for you. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?",
+
+    writing: namePrefix + "Absolutely — and you will have everything in writing. The moment your file is opened, you receive a full confirmation email: your receipt, your case number, the pathways identified, and the next steps. Everything is documented and sent directly to you. But I want to be honest — sometimes when someone says send me something first, there is a concern underneath that I have not addressed yet. I genuinely want this to work out for you. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?",
+
+    email: namePrefix + "I understand — and I want to be honest with you about something. When a client says send me an email, it usually means something did not feel right in the conversation, and I would rather address that directly than send you a message you may never open. What I can tell you is this: the email you will receive after opening your file is real and complete — your receipt, your case number, the list of required documents, and the direct contact of your personal immigration consultant. Someone you can reach anytime, even after the attorney review. But that email only exists after your file is opened. I am genuinely happy for you and I want to see you get there. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?",
+
+    not_ready: namePrefix + "I hear you — and I respect that completely. Can I ask: what would need to change for you to feel ready? Because sometimes not ready means there is a specific concern we can actually address right now. The reason I ask is that immigration availability is genuinely limited — by pathway, and even by country. Your profile is strong. The opportunity is here today. I would hate for the timing to work against you. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?",
+
+    few_months: namePrefix + "I completely respect that. But I want to share something with you honestly: we work with limited spots per country, and immigration categories can shift. What is available for " + (answers['q2']||'your country') + " today may look different in a few months. Your assessment is done. Your pathway is identified. The only thing left is to open your file — and that takes two minutes. I will personally keep an eye on your file. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?",
+
+    sort_things: namePrefix + "Of course — life is busy and complicated, I understand that. What I can tell you is that opening your file does not lock you into a timeline. It simply means an attorney reviews your case and a consultant is assigned to you. You move forward at your own pace. Think of it as securing your place while you handle everything else. The spot is reserved for you. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?",
+
+    real_chance: namePrefix + "Based on everything you shared today — your background, your goals, your profile — yes, there is a real pathway here. I would not be having this conversation with you if there was not. Now, I cannot make legal guarantees — only the attorney review can give you that certainty. But the assessment we did today is based on real immigration criteria, and your profile matched. That is not something that happens for everyone. I am genuinely happy for you — I want to see you succeed. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?",
+
+    english: namePrefix + "Your English does not need to be perfect — and honestly, that is not what immigration is based on. The process is handled through documents, forms, and your personal consultant who will guide you through every single step. Many of our most successful clients had limited English when they started. Your success is our success. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?",
+
+    too_old: namePrefix + "Age is almost never a disqualifying factor in U.S. immigration — and for the pathway we identified, your experience and everything you have built in your life are actually more valuable than youth. Many of our clients started this process in their 50s and 60s and succeeded. What matters is who you are and what you have achieved — and you have a strong profile. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?",
+
+    criminal: namePrefix + "Thank you for being honest with me — that takes courage, and it actually helps us. Not all criminal records affect immigration eligibility. It depends entirely on the type, the severity, and how long ago it occurred. This is exactly what the attorney review is designed to evaluate — your specific situation, with full context. The $250 gets your case in front of a professional who can give you a real, honest answer about where you stand." + "\n\nI am genuinely happy for you — I want to see you succeed, and your success is our success. I will personally keep an eye on your file. So — would you like to use Visa or Mastercard?",
+
+    visa_denied: namePrefix + "A previous denial does not close the door — it is actually more common than you might think. What matters is why it happened and which pathway we are pursuing now. The categories we identified today are completely different from a tourist or temporary visa. The attorney review will look at your full history and advise on the strongest approach. I will personally keep an eye on your case. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?",
+
+    how_long: namePrefix + "The timeline depends on your specific pathway and personal situation — and that is something the attorney will map out for you in detail. Generally, immigration processes take anywhere from several months to a few years. But here is the most important thing: the process starts from the day your file opens. Every day you wait is a day added to the end. The sooner we start, the sooner you get there. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?",
+
+    leave_country: namePrefix + "For most of the pathways we identified — including " + topPathway + " — you do not need to leave " + (answers['q2']||'your country') + " to start the process. The initial steps are handled through documentation and your consultant. Whether travel is eventually required depends on the specific visa category, and the attorney will explain that clearly. I am genuinely happy for you — your success is our success. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?",
+
+    chances: namePrefix + "I am not going to give you empty guarantees — that would not be honest, and you deserve honesty. What I can tell you is that the assessment we did today is based on real immigration criteria, and your profile matched a real pathway. The attorney review will give you the most accurate picture of your actual chances — with full context, full legal knowledge, and I will personally keep an eye on your file to see how it progresses. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?"
+  };
+
+    return (objResponses && objResponses[key]) ? objResponses[key] : (objections[key] || '');
+}
+
+function renderObj() {
+  const cats = [
+    { label: '💰 About the price', items: [
+      { key:'expensive', q:'$250 is too expensive' },
+      { key:'think', q:'I need to think about it' },
+      { key:'spouse', q:'I want to talk to my spouse / family first' },
+      { key:'pay_later', q:'Can I pay later?' },
+      { key:'no_qualify', q:'What if I do not qualify after paying?' },
+    ]},
+    { label: '🤔 About trust', items: [
+      { key:'legit', q:'How do I know this is legit?' },
+      { key:'free', q:'I have seen other companies offering this for free' },
+      { key:'scammed', q:'I have been scammed before' },
+      { key:'not_lawyer', q:'Are you a real immigration lawyer?' },
+      { key:'writing', q:'Can you send me something in writing first?' },
+      { key:'email', q:'Send me an email' },
+    ]},
+    { label: '⏰ About timing', items: [
+      { key:'not_ready', q:'I am not ready yet' },
+      { key:'few_months', q:'Maybe in a few months' },
+      { key:'sort_things', q:'I need to sort some things out first' },
+    ]},
+    { label: '🌍 About eligibility', items: [
+      { key:'real_chance', q:'Do you think I really have a chance?' },
+      { key:'english', q:'My English is not good enough' },
+      { key:'too_old', q:'I am too old for this' },
+      { key:'criminal', q:'I have a criminal record' },
+      { key:'visa_denied', q:'I have been denied a visa before' },
+    ]},
+    { label: '❓ About the process', items: [
+      { key:'how_long', q:'How long does the process take?' },
+      { key:'leave_country', q:'Do I need to leave my country?' },
+      { key:'chances', q:'What are my chances of success?' },
+    ]},
+  ];
+
+  var html = '';
+  cats.forEach(function(cat) {
+    html += '<div class="obj-cat">' + cat.label + '</div>';
+    cat.items.forEach(function(item) {
+      var ans = getPersonalizedAnswer(item.key);
+      html += '<div class="obj-item">';
+      html += '<div class="obj-q" onclick="toggleObj(this)">' + item.q + ' <span class="arr">▼</span></div>';
+      html += '<div class="obj-ans">';
+      html += '<div class="obj-listen"><div class="obj-listen-label">🎧 Step 1 — Ask first</div>';
+      html += '<div class="obj-listen-text">"What do you mean?"<br><br>(LISTEN — let the client explain everything. Do not interrupt.)</div></div>';
+      html += '<div class="obj-ans-label" style="color:#fcd34d;margin-bottom:5px">✍️ Note if needed</div>';
+      html += '<textarea class="obj-notes" placeholder="Note if needed..." data-key="' + item.key + '" id="note-' + item.key + '" onchange="answers[' + "'obj_note_'" + '+this.dataset.key]=this.value;showAiBtn(' + "'" + item.key + "'" + ')"></textarea>';
+      html += '<button class="obj-ai-btn" id="ai-btn-' + item.key + '" onclick="getAIResponse(' + "'" + item.key + "','" + item.q.replace(/'/g,"&#39;") + "'" + ')">✨ Get personalized response</button>';
+      html += '<div class="obj-ai-result" id="ai-result-' + item.key + '"></div>';
+      html += '<div class="obj-ans-label">📞 Step 2 — Read to client</div>';
+      html += '<div class="obj-ans-text">' + ans + '</div>';
+      html += '</div></div>';
+    });
+  });
+
+  document.getElementById('obj-content').innerHTML = html;
+}
+</script>
+
 </body>
 </html>
+<script>
+async function getAIResponse(key, objection) {
+  const noteEl = document.getElementById('note-'+key);
+  const note = noteEl ? noteEl.value : (answers['obj_note_'+key]||'');
+  const btn = document.getElementById('ai-btn-'+key);
+  const result = document.getElementById('ai-result-'+key);
+  if(!note.trim()) return;
+  btn.disabled = true;
+  btn.textContent = '✨ Generating...';
+  result.innerHTML = '';
+  result.classList.remove('show');
+
+  const pathways = computePathways();
+  const profile = {
+    name: firstName || 'the client',
+    country: answers['q2'] || '',
+    goal: answers['q4'] || '',
+    profession: answers['q6'] || '',
+    experience: answers['q7'] || '',
+    education: answers['q5'] || '',
+    situation: answers['q10'] || '',
+    pathway: pathways[0]?.name || 'the identified pathway'
+  };
+
+  const prompt = `You are an expert immigration sales coach. A sales agent is handling an objection from a prospective client.
+
+Client profile:
+- Name: ${firstName||"the client"}
+- Country: ${profile.country}
+- Goal: ${profile.goal}
+- Profession: ${profile.profession}
+- Experience: ${profile.experience}
+- Education: ${profile.education}
+- Top pathway identified: ${profile.pathway}
+
+Objection: "${objection}"
+Agent note about what the client said: "${note}"
+
+Write a short, natural, persuasive response the agent can read directly to the client.
+- Start with the client name: ${firstName||"the client"}
+- Address their specific concern from the note
+- Connect to their goal and pathway
+- Keep it under 4 sentences
+- Conversational, warm, confident tone
+- No bullet points, just natural speech`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 300,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text || 'Could not generate response.';
+    result.innerHTML = '<div class="obj-ai-label">✨ AI Response — Read to client</div>' + text;
+    result.classList.add('show');
+    btn.textContent = '✨ Regenerate';
+    btn.disabled = false;
+  } catch(e) {
+    btn.textContent = '✨ Get personalized response';
+    btn.disabled = false;
+  }
+}
+
+function showAiBtn(key) {
+  const btn = document.getElementById('ai-btn-'+key);
+  const note = document.getElementById('note-'+key);
+  if(btn && note) {
+    if(note.value.trim().length > 0) btn.classList.add('visible');
+    else btn.classList.remove('visible');
+  }
+}
+</script>
