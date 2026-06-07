@@ -668,30 +668,127 @@ function selCountry(n){
   fetchCountryFact(n);
 }
 
-async function fetchCountryFact(country) {
+function fetchCountryFact(country) {
+  const facts = {
+    "Afghanistan": "Oh nice! Afghanistan is known for its stunning mountains and some of the best pomegranates in the world.",
+    "Albania": "Beautiful country! Albania has some of the most beautiful beaches on the Adriatic coast.",
+    "Algeria": "Oh great! Algeria is the largest country in Africa — truly massive.",
+    "Argentina": "Love that place! Argentina is famous for its incredible steak and the passionate tango dance.",
+    "Armenia": "Beautiful country! Armenia is one of the oldest Christian nations in the world.",
+    "Australia": "Oh nice! Australia is home to the Great Barrier Reef, the largest coral reef system on earth.",
+    "Austria": "Love that place! Austria gave the world Mozart and some of the most beautiful classical music ever written.",
+    "Azerbaijan": "Beautiful country! Azerbaijan is known as the Land of Fire because of its ancient flame towers.",
+    "Bahrain": "Oh great! Bahrain is one of the most open and cosmopolitan countries in the Gulf region.",
+    "Bangladesh": "Oh nice! Bangladesh is home to the Sundarbans, the largest mangrove forest in the world.",
+    "Belarus": "Beautiful country! Belarus is known for its deep forests and incredible natural landscapes.",
+    "Belgium": "Love that place! Belgium is famous for its chocolate and waffles — truly world class.",
+    "Bolivia": "Oh nice! Bolivia is home to the world's largest salt flat, the Salar de Uyuni.",
+    "Bosnia and Herzegovina": "Beautiful country! Bosnia has some of the most stunning medieval architecture in Europe.",
+    "Brazil": "Beautiful country! Brazil is home to the Amazon, the largest rainforest on earth.",
+    "Bulgaria": "Oh nice! Bulgaria is one of the oldest countries in Europe with a rich history.",
+    "Cambodia": "Love that place! Cambodia is home to Angkor Wat, one of the largest religious monuments in the world.",
+    "Cameroon": "Oh great! Cameroon is called the heart of Africa because of its incredible diversity.",
+    "Canada": "Oh nice! Canada has the longest coastline of any country in the world.",
+    "Chile": "Beautiful country! Chile is home to the Atacama Desert, the driest place on earth.",
+    "China": "Love that place! China has the Great Wall, one of the most incredible structures ever built.",
+    "Colombia": "Oh nice! Colombia produces some of the finest coffee in the entire world.",
+    "Congo": "Beautiful country! The Congo is home to the second largest rainforest on the planet.",
+    "Costa Rica": "Oh great! Costa Rica is one of the greenest and most eco-friendly countries in the world.",
+    "Croatia": "Love that place! Croatia has over a thousand islands along one of Europe's most beautiful coastlines.",
+    "Cuba": "Oh nice! Cuba is famous for its incredible music, classic cars, and beautiful colonial architecture.",
+    "Czech Republic": "Beautiful country! Prague is considered one of the most beautiful cities in all of Europe.",
+    "Denmark": "Oh great! Denmark is consistently ranked as one of the happiest countries in the world.",
+    "Dominican Republic": "Love that place! The Dominican Republic has some of the most beautiful beaches in the Caribbean.",
+    "Ecuador": "Oh nice! Ecuador is one of the most biodiverse countries on earth.",
+    "Egypt": "Beautiful country! Egypt is home to the Pyramids of Giza, one of the seven wonders of the ancient world.",
+    "El Salvador": "Oh great! El Salvador is known as the Land of Volcanoes.",
+    "Ethiopia": "Love that place! Ethiopia is the birthplace of coffee — the whole world owes it a thank you.",
+    "Finland": "Beautiful country! Finland has more lakes than almost any other country in the world.",
+    "France": "Oh nice! France is the most visited country in the world and home to the Eiffel Tower.",
+    "Georgia": "Love that place! Georgia is considered one of the oldest wine-producing countries in the world.",
+    "Germany": "Oh great! Germany is home to over 1,500 different types of beer — quite impressive.",
+    "Ghana": "Beautiful country! Ghana was one of the first African countries to gain independence.",
+    "Greece": "Love that place! Greece is the birthplace of democracy and the Olympic Games.",
+    "Guatemala": "Oh nice! Guatemala is home to incredible ancient Mayan ruins.",
+    "Honduras": "Beautiful country! Honduras has some of the best diving spots in the Caribbean.",
+    "Hong Kong": "Oh great! Hong Kong has one of the most impressive skylines in the entire world.",
+    "Hungary": "Love that place! Hungary is home to the largest thermal lake in the world.",
+    "India": "Oh nice! India is the largest democracy in the world with an incredibly rich culture.",
+    "Indonesia": "Beautiful country! Indonesia is the largest archipelago in the world with over 17,000 islands.",
+    "Iran": "Love that place! Iran is home to some of the most magnificent ancient Persian architecture.",
+    "Iraq": "Oh great! Iraq is home to Mesopotamia, one of the cradles of human civilization.",
+    "Ireland": "Beautiful country! Ireland is known for its incredibly green landscapes and warm hospitality.",
+    "Israel": "Oh nice! Israel is known for its incredible history and the beautiful city of Jerusalem.",
+    "Italy": "Oh nice! Italy has the best pizza and pasta in the world, no question.",
+    "Jamaica": "Love that place! Jamaica is famous for its reggae music and beautiful beaches.",
+    "Japan": "Love that place! Japan is known for being one of the safest countries in the world.",
+    "Jordan": "Beautiful country! Jordan is home to Petra, one of the most stunning ancient cities ever built.",
+    "Kazakhstan": "Oh great! Kazakhstan is the largest landlocked country in the world.",
+    "Kenya": "Beautiful country! Kenya is home to the most spectacular wildlife safaris in the world.",
+    "Kuwait": "Oh nice! Kuwait has one of the most impressive modern skylines in the Gulf region.",
+    "Kyrgyzstan": "Beautiful country! Kyrgyzstan is known for its breathtaking mountain landscapes.",
+    "Lebanon": "Oh great! Lebanon is known for some of the best food in the entire Middle East.",
+    "Libya": "Beautiful country! Libya has some of the most well-preserved Roman ruins in the world.",
+    "Malaysia": "Love that place! Malaysia has some of the most diverse and delicious food in all of Asia.",
+    "Mexico": "Oh great! Mexico is famous for its incredible food and ancient Mayan ruins.",
+    "Moldova": "Beautiful country! Moldova is one of the top wine producers in Europe.",
+    "Mongolia": "Oh nice! Mongolia is home to the largest contiguous land empire in history.",
+    "Morocco": "Beautiful country! Morocco is known for its stunning medinas and incredible spice markets.",
+    "Mozambique": "Oh great! Mozambique has some of the most beautiful beaches in all of Africa.",
+    "Myanmar (Burma)": "Love that place! Myanmar is home to thousands of ancient Buddhist temples.",
+    "Nepal": "Oh nice! Nepal is home to Mount Everest, the highest point on earth.",
+    "Netherlands": "Beautiful country! The Netherlands is famous for its tulips and windmills.",
+    "New Zealand": "Oh great! New Zealand is known for its stunning natural landscapes.",
+    "Nicaragua": "Beautiful country! Nicaragua is known as the Land of Lakes and Volcanoes.",
+    "Nigeria": "Love that place! Nigeria has the largest economy in Africa and an incredibly vibrant culture.",
+    "Norway": "Oh nice! Norway is famous for its stunning fjords and the beautiful Northern Lights.",
+    "Oman": "Beautiful country! Oman is known for its incredible ancient forts and hospitality.",
+    "Pakistan": "Oh great! Pakistan is home to K2, the second highest mountain in the world.",
+    "Palestine": "Beautiful country! Palestine has a rich history going back thousands of years.",
+    "Panama": "Love that place! Panama is home to the famous canal connecting two oceans.",
+    "Peru": "Oh nice! Peru is home to Machu Picchu, one of the most incredible ancient sites in the world.",
+    "Philippines": "Beautiful country! The Philippines has over 7,000 islands and some of the most beautiful beaches in Asia.",
+    "Poland": "Oh great! Poland has one of the fastest growing economies in Europe.",
+    "Portugal": "Love that place! Portugal is famous for its beautiful coastal towns and incredible seafood.",
+    "Qatar": "Oh nice! Qatar has one of the highest standards of living in the world.",
+    "Romania": "Beautiful country! Romania is home to stunning castles and the beautiful Carpathian mountains.",
+    "Russia": "Oh great! Russia is the largest country in the world, spanning eleven time zones.",
+    "Saudi Arabia": "Oh nice! Saudi Arabia is home to Mecca, the holiest city in Islam.",
+    "Senegal": "Beautiful country! Senegal is known as the gateway to West Africa.",
+    "Serbia": "Love that place! Serbia has a vibrant culture and one of the best music festival scenes in Europe.",
+    "Sierra Leone": "Oh nice! Sierra Leone has some of the most beautiful beaches on the West African coast.",
+    "Singapore": "Beautiful country! Singapore is one of the cleanest and most organized cities in the entire world.",
+    "Somalia": "Oh great! Somalia has the longest coastline of any country in mainland Africa.",
+    "South Africa": "Love that place! South Africa is home to incredible wildlife and the beautiful Cape of Good Hope.",
+    "South Korea": "Oh nice! South Korea is known for its incredible technology and delicious food.",
+    "Spain": "Beautiful country! Spain is famous for its incredible food, flamenco, and beautiful architecture.",
+    "Sri Lanka": "Oh great! Sri Lanka is known as the Pearl of the Indian Ocean.",
+    "Sudan": "Love that place! Sudan has more ancient pyramids than any other country in the world.",
+    "Sweden": "Beautiful country! Sweden is consistently ranked among the best countries in the world to live.",
+    "Switzerland": "Oh nice! Switzerland is known for its incredible mountains, chocolate, and watches.",
+    "Syria": "Beautiful country! Syria has some of the oldest continuously inhabited cities in the world.",
+    "Taiwan": "Oh great! Taiwan is famous for its incredible night markets and delicious food.",
+    "Tanzania": "Love that place! Tanzania is home to Kilimanjaro, the highest peak in Africa.",
+    "Thailand": "Oh nice! Thailand is known for its incredible temples, beaches, and amazing food.",
+    "Tunisia": "Beautiful country! Tunisia is home to some of the best preserved Roman ruins in the world.",
+    "Turkey": "Oh great! Turkey sits at the crossroads of Europe and Asia — a truly unique country.",
+    "Uganda": "Love that place! Uganda is home to mountain gorillas, one of the rarest animals on earth.",
+    "Ukraine": "Beautiful country! Ukraine is known for its incredibly fertile land and warm people.",
+    "United Arab Emirates": "Oh nice! The UAE is home to the Burj Khalifa, the tallest building in the world.",
+    "United Kingdom": "Love that place! The UK is home to some of the most iconic landmarks in the world.",
+    "Uzbekistan": "Oh great! Uzbekistan is home to Samarkand, one of the oldest cities on the Silk Road.",
+    "Venezuela": "Beautiful country! Venezuela is home to Angel Falls, the highest waterfall in the world.",
+    "Vietnam": "Oh nice! Vietnam is famous for its incredible street food and beautiful landscapes.",
+    "Yemen": "Beautiful country! Yemen has one of the oldest civilizations in the Arabian Peninsula.",
+    "Zambia": "Love that place! Zambia is home to Victoria Falls, one of the largest waterfalls in the world.",
+    "Zimbabwe": "Oh great! Zimbabwe is home to Victoria Falls, one of the seven natural wonders of the world."
+  };
+
   const factEl = document.getElementById('country-fact');
   if(!factEl) return;
-  factEl.innerHTML = '<span style="color:#6b7280;font-size:12px">✨ Loading...</span>';
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 100,
-        messages: [{
-          role: 'user',
-          content: `You are a friendly sales agent chatting naturally with a client from ${country}. Write ONE short casual sentence to build rapport. Use simple everyday English — short words, no complex vocabulary. Start with a warm natural opener like "Oh nice!" or "Beautiful country!" or "Love that place!", then add ONE well-known fact — it can be about food, a landmark, geography, or something the country is famous for. Keep it light and friendly. Max 20 words. Examples: "Oh nice! Italy has the best pizza and pasta in the world, no question." or "Beautiful country! Brazil is home to the Amazon, the biggest rainforest on earth." or "Love that place! Japan is known for being one of the safest countries in the world." or "Oh great! Mexico is famous for its incredible food and ancient Mayan ruins." Just the sentence, nothing else.`
-        }]
-      })
-    });
-    const data = await res.json();
-    const text = data.content?.[0]?.text || '';
-    answers['country_fact'] = text;
-    if(factEl) factEl.innerHTML = `<div class="block block-chemistry"><div class="block-label">💬 Say to client</div><div class="block-text">${text}</div></div>`;
-  } catch(e) {
-    if(factEl) factEl.innerHTML = '';
-  }
+  const text = facts[country] || ('Oh nice! ' + country + ' — great to be speaking with someone from there.');
+  answers['country_fact'] = text;
+  factEl.innerHTML = '<div class="block block-chemistry"><div class="block-label">💬 Say to client</div><div class="block-text">' + text + '</div></div>';
 }
 function clearCountry(){delete answers['q2'];render();}
 function renderP(f){const fl=f.toLowerCase();return PROFESSIONS.filter(p=>p.toLowerCase().includes(fl)).map(p=>`<div class="pi ${answers['q6_profession']===p?'pis':''}" onclick="selProfession('${p.replace(/'/g,"\\'")}')">${p}</div>`).join('');}
