@@ -128,6 +128,119 @@ const COUNTRIES = ["Afghanistan","Aland Islands","Albania","Algeria","American S
 
 const PROFESSIONS = ["Accountant","Actor / Performer","Administrative Worker","Advertising Manager","Agricultural Adviser","Agronomist","Air Traffic Controller","Aircraft Mechanic","Animator","Anthropologist","Architect","Art Director","Artist","Attorney / Lawyer","Auditor","Banker","Biochemist","Biologist","Biotechnologist","Bookkeeper","Business Analyst","Business Owner","Camera Operator","Chemical Engineer","Civil Engineer","Coach / Trainer","Computer Engineer","Computer Programmer","Construction Manager","Consultant","Cook / Chef","Creative Director","Data Analyst","Dentist","Designer (Graphic / Industrial / Fashion)","Detective / Investigator","Dietician","Doctor / Physician","Economist","Educator / Teacher","Electrical Engineer","Entrepreneur","Environmental Scientist","Event Manager","Financial Analyst","Financial Officer","Fire Officer","Flight Attendant","Food Technologist","Geologist","Government Official","HR Manager","Historian","Hotel Manager","Import / Export Manager","Insurance Agent","Interior Designer","Interpreter / Translator","Investor","IT Manager","Journalist / Reporter","Judge","Landscape Architect","Lecturer / Professor","Legal Assistant","Librarian","Logistics Manager","Marine Engineer","Marketing Manager","Mechanical Engineer","Medical Laboratory Technician","Midwife","Military Officer","Musician","Nurse","Nutritionist","Operations Manager","Optician","Paramedic","Pharmacist","Photographer","Physicist","Physiotherapist","Pilot","Police Officer","Project Manager","Property Manager","Psychiatrist","Psychologist","Public Relations Manager","Publisher","Quality Inspector","Real Estate Agent","Researcher","Sales Manager","Sales Representative","Security Manager","Skilled Tradesperson","Social Worker","Software Developer","Statistician","Surgeon","Systems Analyst","Tax Adviser","Teacher (Primary / Secondary)","Telecommunications Engineer","Veterinarian","Web Developer","Not Currently Employed","Other"];
 
+
+const PROFESSION_SALARIES = {
+  "Accountant": "$55,000–$95,000",
+  "Actor / Performer": "$45,000–$90,000",
+  "Administrative Worker": "$38,000–$60,000",
+  "Advertising Manager": "$70,000–$130,000",
+  "Agricultural Adviser": "$50,000–$85,000",
+  "Agronomist": "$55,000–$90,000",
+  "Air Traffic Controller": "$90,000–$180,000",
+  "Aircraft Mechanic": "$60,000–$100,000",
+  "Animator": "$55,000–$95,000",
+  "Anthropologist": "$50,000–$85,000",
+  "Architect": "$75,000–$130,000",
+  "Art Director": "$75,000–$140,000",
+  "Artist": "$45,000–$85,000",
+  "Attorney / Lawyer": "$90,000–$200,000",
+  "Auditor": "$60,000–$110,000",
+  "Banker": "$70,000–$150,000",
+  "Biochemist": "$75,000–$130,000",
+  "Biologist": "$65,000–$110,000",
+  "Biotechnologist": "$80,000–$140,000",
+  "Bookkeeper": "$42,000–$65,000",
+  "Business Analyst": "$70,000–$120,000",
+  "Business Owner": "$80,000–$250,000+",
+  "Camera Operator": "$45,000–$85,000",
+  "Chemical Engineer": "$85,000–$150,000",
+  "Civil Engineer": "$75,000–$130,000",
+  "Coach / Trainer": "$45,000–$90,000",
+  "Computer Engineer": "$90,000–$160,000",
+  "Computer Programmer": "$80,000–$150,000",
+  "Construction Manager": "$80,000–$140,000",
+  "Consultant": "$75,000–$160,000",
+  "Cook / Chef": "$45,000–$80,000",
+  "Creative Director": "$85,000–$160,000",
+  "Data Analyst": "$75,000–$130,000",
+  "Dentist": "$150,000–$250,000",
+  "Designer (Graphic / Industrial / Fashion)": "$55,000–$105,000",
+  "Detective / Investigator": "$55,000–$95,000",
+  "Dietician": "$55,000–$90,000",
+  "Doctor / Physician": "$200,000–$350,000",
+  "Economist": "$80,000–$150,000",
+  "Educator / Teacher": "$45,000–$80,000",
+  "Electrical Engineer": "$85,000–$150,000",
+  "Entrepreneur": "$80,000–$300,000+",
+  "Environmental Scientist": "$60,000–$105,000",
+  "Event Manager": "$50,000–$90,000",
+  "Financial Analyst": "$75,000–$140,000",
+  "Financial Officer": "$100,000–$200,000",
+  "Fire Officer": "$55,000–$95,000",
+  "Flight Attendant": "$50,000–$85,000",
+  "Food Technologist": "$60,000–$100,000",
+  "Geologist": "$65,000–$115,000",
+  "Government Official": "$60,000–$130,000",
+  "HR Manager": "$70,000–$125,000",
+  "Historian": "$50,000–$85,000",
+  "Hotel Manager": "$55,000–$100,000",
+  "Import / Export Manager": "$65,000–$110,000",
+  "Insurance Agent": "$55,000–$100,000",
+  "Interior Designer": "$55,000–$95,000",
+  "Interpreter / Translator": "$50,000–$90,000",
+  "Investor": "$100,000–$500,000+",
+  "IT Manager": "$90,000–$160,000",
+  "Journalist / Reporter": "$45,000–$90,000",
+  "Judge": "$100,000–$200,000",
+  "Landscape Architect": "$60,000–$100,000",
+  "Lecturer / Professor": "$65,000–$130,000",
+  "Legal Assistant": "$45,000–$75,000",
+  "Librarian": "$45,000–$75,000",
+  "Logistics Manager": "$65,000–$110,000",
+  "Marine Engineer": "$80,000–$140,000",
+  "Marketing Manager": "$75,000–$140,000",
+  "Mechanical Engineer": "$80,000–$140,000",
+  "Medical Laboratory Technician": "$55,000–$90,000",
+  "Midwife": "$75,000–$120,000",
+  "Military Officer": "$65,000–$120,000",
+  "Musician": "$40,000–$90,000",
+  "Nurse": "$70,000–$120,000",
+  "Nutritionist": "$55,000–$90,000",
+  "Operations Manager": "$75,000–$135,000",
+  "Optician": "$55,000–$90,000",
+  "Paramedic": "$45,000–$80,000",
+  "Pharmacist": "$110,000–$160,000",
+  "Photographer": "$45,000–$85,000",
+  "Physicist": "$85,000–$150,000",
+  "Physiotherapist": "$70,000–$110,000",
+  "Pilot": "$90,000–$200,000",
+  "Police Officer": "$55,000–$95,000",
+  "Project Manager": "$85,000–$150,000",
+  "Property Manager": "$55,000–$100,000",
+  "Psychiatrist": "$200,000–$300,000",
+  "Psychologist": "$80,000–$130,000",
+  "Public Relations Manager": "$65,000–$120,000",
+  "Publisher": "$55,000–$100,000",
+  "Quality Inspector": "$50,000–$85,000",
+  "Real Estate Agent": "$60,000–$150,000",
+  "Researcher": "$65,000–$120,000",
+  "Sales Manager": "$75,000–$150,000",
+  "Sales Representative": "$55,000–$110,000",
+  "Security Manager": "$60,000–$110,000",
+  "Skilled Tradesperson": "$55,000–$100,000",
+  "Social Worker": "$45,000–$75,000",
+  "Software Developer": "$95,000–$175,000",
+  "Statistician": "$80,000–$140,000",
+  "Surgeon": "$250,000–$450,000",
+  "Systems Analyst": "$80,000–$140,000",
+  "Tax Adviser": "$65,000–$120,000",
+  "Teacher (Primary / Secondary)": "$45,000–$80,000",
+  "Telecommunications Engineer": "$80,000–$140,000",
+  "Veterinarian": "$100,000–$160,000",
+  "Web Developer": "$75,000–$135,000",
+  "Other": null
+};
+
 const MARITAL_IDS = { 'Single':'12552', 'Married':'4071', 'Divorced':'4072', 'Widowed':'4073' };
 const EDU_IDS = { 'High School':'1100', 'Trade School':'1101', 'Associate Degree':'1102', "Bachelor's Degree":'1103', "Master's Degree":'1105', 'Doctorate (PhD)':'1107' };
 
@@ -147,7 +260,7 @@ const CHEMISTRY = {
 const answers = {};
 let history = [];
 let currentId = 'intro';
-const totalQ = 14;
+const totalQ = 13;
 let leadId = null;
 let clientName = '';
 let firstName = '';
@@ -349,7 +462,9 @@ Sound good?`})}
       <div class="q-num">Question 4 of ${totalQ}</div>
       <div class="q-title">What is your primary goal in the United States?<br><span style="font-size:14px;font-weight:400;color:#6b7280">What is the main reason you want to move to the United States?</span></div>
       <div class="opts col1">${opts}</div>
-      ${sel?chemistryBlock('q4',sel):''}
+      <div class="opts col1">${opts}</div>
+      <button class="opt" style="width:100%;margin-bottom:8px;background:${sel==='Other'?'#eff6ff':'#fff'};border-color:${sel==='Other'?'#2563eb':'#d1d5db'};color:${sel==='Other'?'#1d4ed8':'#374151'};font-weight:${sel==='Other'?'600':'400'}" onclick="selOpt('q4','Other','q5',this)">✏️ Other — please specify</button>
+      ${sel==='Other'?'<textarea class="textarea" style="min-height:52px" placeholder="Describe the client goal..." id="q4_other" onchange="answers.q4_other=this.value">'+(answers.q4_other||'')+'</textarea>':''}
       ${sel?block({k:'tip',l:'💡 Agent tip',t:'Take a moment to let the client share their vision and goals for life in the U.S. The more they connect with their future opportunities and aspirations, the stronger their motivation and engagement will be throughout the conversation.'})+'<textarea class="textarea" style="margin-top:6px;min-height:52px;font-size:12px" placeholder="Agent notes..." onchange="answers.fu_q4=this.value">'+(answers['fu_q4']||'')+'</textarea>':''}
       <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext('q5')">Continue →</button></div>`;
 
@@ -376,6 +491,7 @@ Sound good?`})}
       ${block({k:'tip',l:'💡 Agent tip',t:'You can select the professional field from the list below — but no need to search if it slows things down. Just type it in manually.'})}
       <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" type="text" id="psearch" placeholder="Search profession..." oninput="filterP()" autocomplete="off"/></div>
       <div class="profession-list" id="plist">${renderP('')}</div>
+      <div id="salary-info" style="display:none;margin-top:8px"></div>
       <div class="lbl" style="margin-top:8px">Or type manually if not in the list:</div>
       <input class="inp" type="text" id="prof_manual" placeholder="Type your profession..." value="${manualVal}"/>
       <div style="margin-top:12px;padding-top:12px;border-top:1px solid #e5e7eb">
@@ -398,32 +514,20 @@ Sound good?`})}
   } else if(currentId==='q8') {
     setProgress(8,'Leadership');
     const sel=answers['q8']||null;
-    const opts=['Yes','No'].map(o=>`<button class="opt ${sel===o?'sel':''}" onclick="selOpt('q8','${o}','q9',this)">${o}</button>`).join('');
+    const opts=['Yes','No'].map(o=>`<button class="opt ${sel===o?'sel':''}" onclick="selOpt('q8','${o}','q10',this)">${o}</button>`).join('');
     main.innerHTML=`
       <div class="q-num">Question 8 of ${totalQ}</div>
       <div class="q-title">${answers["q6"]==="Not Currently Employed" ? "In your previous work experience, did you ever lead a team or manage people?" : "Have you ever led a team or managed people at work?"}</div>
       <div class="opts">${opts}</div>
       ${sel==='Yes'?chemistryBlock('q8',sel):''}
-      <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext('q9')">Continue →</button></div>`;
-
-  } else if(currentId==='q9') {
-    setProgress(9,'Recognition');
-    const sel=answers['q9']||[];
-    const opts=['Industry Awards','Publications','Research Contributions','Patents','Media Recognition','Speaking Engagements'].map(o=>`<button class="opt ${sel.includes(o)?'msel':''}" onclick="togMulti('q9','${o}')">${o}</button>`).join('')+'<button class="opt" style="'+(sel.includes('None of the Above')?'background:#fee2e2;border-color:#f87171;color:#dc2626;':'background:#fff5f5;border-color:#fca5a5;color:#dc2626;')+'" onclick="togMulti('+"'q9','None of the Above')"+'">None of the Above</button>';
-    const listenNote = sel.length>0&&!sel.includes('None of the Above') ? block({k:'listen',l:'🎧 Follow-up',t:'Can you tell me a little more about that recognition?'})+'<textarea class="textarea" style="margin-top:6px;min-height:52px;font-size:12px" placeholder="Agent notes..." onchange="answers.fu_q9=this.value"></textarea>' : '';
-    main.innerHTML=`
-      <div class="q-num">Question 9 of ${totalQ} <span class="tag">Select all that apply</span></div>
-      <div class="q-title">Have you received any professional recognition?</div>
-      <div class="opts col1">${opts}</div>
-      ${listenNote}
-      <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${sel.length===0?'disabled':''} onclick="goNext(answers['q6']==='Not Currently Employed'?'q11':'q10')">Continue →</button></div>`;
+      <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext('q10')">Continue →</button></div>`;
 
   } else if(currentId==='q10') {
-    setProgress(10,'Current Situation');
+    setProgress(9,'Current Situation');
     const sel=answers['q10']||null;
     const opts=['Employee','Skilled Professional','Business Owner','Entrepreneur','Investor','Self-Employed'].map(o=>`<button class="opt ${sel===o?'sel':''}" onclick="selOpt('q10','${o}','q11',this)">${o}</button>`).join('');
     main.innerHTML=`
-      <div class="q-num">Question 10 of ${totalQ}</div>
+      <div class="q-num">Question 9 of ${totalQ}</div>
       <div class="q-title">Which best describes your current situation${answers["q6"] && answers["q6"] !== "Not Currently Employed" ? " as a " + answers["q6"] : ''}?</div>
       <div class="opts">${opts}</div>
       ${sel?chemistryBlock('q10',sel):''}
@@ -431,14 +535,14 @@ Sound good?`})}
       <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext('q11')">Continue →</button></div>`;
 
   } else if(currentId==='q11') {
-    setProgress(11,'Business Interest');
+    setProgress(10,'Business Interest');
     const sel=answers['q11']||null;
     const opts=['Yes','Maybe','No'].map(o=>{
       const next = o==='No' ? 'q13' : 'q12';
       return `<button class="opt ${sel===o?'sel':''}" onclick="selOpt('q11','${o}','${next}',this)">${o}</button>`;
     }).join('');
     main.innerHTML=`
-      <div class="q-num">Question 11 of ${totalQ}</div>
+      <div class="q-num">Question 10 of ${totalQ}</div>
       <div class="q-title">Would you be interested in opening, purchasing, or investing in a business in the U.S. if it supported your immigration goals?</div>
       <div class="opts col1">${opts}</div>
       ${sel==='Yes'?chemistryBlock('q11',sel):''}
@@ -446,21 +550,21 @@ Sound good?`})}
       <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext(answers['q11']==='No' ? 'q13' : 'q12')">Continue →</button></div>`;
 
   } else if(currentId==='q12') {
-    setProgress(12,'Investment Level');
+    setProgress(11,'Investment Level');
     const sel=answers['q12']||null;
     const opts=['Under $50,000','$50,000–$100,000','$100,000–$250,000','$250,000+','Prefer Not To Say'].map(o=>`<button class="opt ${sel===o?'sel':''}" onclick="selOpt('q12','${o}','q13',this)">${o}</button>`).join('');
     main.innerHTML=`
-      <div class="q-num">Question 12 of ${totalQ}</div>
+      <div class="q-num">Question 11 of ${totalQ}</div>
       <div class="q-title">What investment level would you feel comfortable considering?</div>
       <div class="opts col1">${opts}</div>
       <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext('q13')">Continue →</button></div>`;
 
   } else if(currentId==='q13') {
-    setProgress(13,'Study Interest');
+    setProgress(12,'Study Interest');
     const sel=answers['q13']||null;
     const opts=['Yes','Maybe','No'].map(o=>`<button class="opt ${sel===o?'sel':''}" onclick="selOpt('q13','${o}','q14',this)">${o}</button>`).join('');
     main.innerHTML=`
-      <div class="q-num">Question 13 of ${totalQ}</div>
+      <div class="q-num">Question 12 of ${totalQ}</div>
       <div class="q-title">Would you be interested in studying in the U.S. if it created additional immigration opportunities?</div>
       <div class="opts col1">${opts}</div>
       ${sel==='Yes'?chemistryBlock('q13',sel):''}
@@ -469,12 +573,12 @@ Sound good?`})}
       <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext('q14')">Continue →</button></div>`;
 
   } else if(currentId==='q14') {
-    setProgress(14,'Family in USA');
+    setProgress(13,'Family in USA');
     const sel=answers['q14']||null;
     const opts=['Yes','No'].map(o=>`<button class="opt ${sel===o?'sel':''}" onclick="selOpt('q14','${o}','hold',this)">${o}</button>`).join('');
     const listenNote = sel==='Yes' ? block({k:'listen',l:'🎧 Follow-up',t:'What is their current immigration status in the U.S.?'})+'<textarea class="textarea" style="margin-top:6px;min-height:52px;font-size:12px" placeholder="Agent notes..." onchange="answers.fu_q14=this.value"></textarea>' : '';
     main.innerHTML=`
-      <div class="q-num">Question 14 of ${totalQ}</div>
+      <div class="q-num">Question 13 of ${totalQ}</div>
       <div class="q-title">${firstName ? firstName+", do" : "Do"} you currently have close family members living legally in the United States?</div>
       <div class="opts">${opts}</div>
       ${sel==='Yes'?chemistryBlock('q14',sel):''}
@@ -575,7 +679,23 @@ async function fetchCountryFact(country) {
 function clearCountry(){delete answers['q2'];render();}
 function renderP(f){const fl=f.toLowerCase();return PROFESSIONS.filter(p=>p.toLowerCase().includes(fl)).map(p=>`<div class="pi ${answers['q6_profession']===p?'pis':''}" onclick="selProfession('${p.replace(/'/g,"\\'")}')">${p}</div>`).join('');}
 function filterP(){document.getElementById('plist').innerHTML=renderP(document.getElementById('psearch').value);}
-function selProfession(n){answers['q6_profession']=n;const m=document.getElementById('prof_manual');if(m)m.value='';document.querySelectorAll('.pi').forEach(p=>p.classList.remove('pis'));document.querySelectorAll('.pi').forEach(p=>{if(p.textContent===n)p.classList.add('pis');});}
+function selProfession(n){
+  answers['q6_profession']=n;
+  const m=document.getElementById('prof_manual');
+  if(m)m.value='';
+  document.querySelectorAll('.pi').forEach(p=>p.classList.remove('pis'));
+  document.querySelectorAll('.pi').forEach(p=>{if(p.textContent===n)p.classList.add('pis');});
+  const salaryEl=document.getElementById('salary-info');
+  if(salaryEl){
+    const sal=PROFESSION_SALARIES[n];
+    if(sal){
+      salaryEl.innerHTML='<div class="block block-chemistry"><div class="block-label">💬 Say to client</div><div class="block-text">By the way — ' + n + 's in the United States typically earn between <strong>' + sal + '</strong> per year. That is the kind of opportunity your immigration pathway can open up.</div></div>';
+      salaryEl.style.display='block';
+    } else {
+      salaryEl.style.display='none';
+    }
+  }
+}
 function saveProfession(next){const m=document.getElementById('prof_manual')?.value.trim();if(m)answers['q6']=m;else if(answers['q6_profession'])answers['q6']=answers['q6_profession'];if(!answers['q6']){alert('Please select or type a profession.');return;}const skipTo=answers['q6']==='Not Currently Employed'?'q8':next;goNext(skipTo);}
 function getSpouseEduOptions() {
   return ['High School','Trade School','Associate Degree',"Bachelor's Degree","Master's Degree","Doctorate (PhD)"].map(function(o){return '<option '+(answers['spouse_edu']===o?'selected':'')+'" value="'+o+'">'+o+'</option>';}).join('');
@@ -710,7 +830,7 @@ async function loadLead(){
         const agentId = ld.ASSIGNED_BY_ID;
         if(agentId) {
           try {
-            const agentRes = await fetch(`${WEBHOOK}user.get?ID=${agentId}`);
+            const agentRes = await fetch(`${WEBHOOK}user.get?filter[ID]=${agentId}`);
             const agentData = await agentRes.json();
             if(agentData.result && agentData.result.length > 0) {
               const agent = agentData.result[0];
@@ -1028,72 +1148,112 @@ function renderObj() {
 </body>
 </html>
 <script>
-async function getAIResponse(key, objection) {
+function getAIResponse(key, objection) {
   const noteEl = document.getElementById('note-'+key);
-  const note = noteEl ? noteEl.value : (answers['obj_note_'+key]||'');
+  const note = noteEl ? noteEl.value.trim() : (answers['obj_note_'+key]||'').trim();
   const btn = document.getElementById('ai-btn-'+key);
   const result = document.getElementById('ai-result-'+key);
-  if(!note.trim()) return;
+  if(!note) return;
+
   btn.disabled = true;
   btn.textContent = '✨ Generating...';
   result.innerHTML = '';
   result.classList.remove('show');
 
+  const name = firstName || 'the client';
+  const country = answers['q2'] || 'your country';
+  const goal = answers['q4'] || 'immigrate to the United States';
+  const profession = answers['q6'] || 'professional';
   const pathways = computePathways();
-  const profile = {
-    name: firstName || 'the client',
-    country: answers['q2'] || '',
-    goal: answers['q4'] || '',
-    profession: answers['q6'] || '',
-    experience: answers['q7'] || '',
-    education: answers['q5'] || '',
-    situation: answers['q10'] || '',
-    pathway: pathways[0]?.name || 'the identified pathway'
+  const pathway = pathways[0]?.name || 'Employment Category';
+
+  // Smart template responses based on note keywords
+  const noteLower = note.toLowerCase();
+  let response = '';
+
+  const templates = {
+    installment: `${name}, thank you for being open with me — that is exactly the kind of honesty that helps me help you. I want you to know: you are in good hands here. We have helped thousands of people from ${country} and around the world navigate this process. The $250 is a single payment — not a subscription, not a commitment to more. It simply opens your file and gets a real attorney looking at your case. I will personally keep an eye on your file every step of the way. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?`,
+
+    expensive: `${name}, I appreciate you saying that — it tells me you are thinking carefully, and that is a good sign. Here is what I want you to know: we are not here to take your money. We are here because your profile — as a ${profession} from ${country} — shows genuine potential for ${pathway}. The $250 is the smallest possible first step toward something that could change your life. And after payment, you have a receipt, a case number, and a real person assigned to you. I want to see you succeed. OK? Visa or Mastercard?`,
+
+    money: `${name}, I hear you — and I respect that completely. What I want you to know first is that you are dealing with a real, registered company that has helped real people. The $250 is not a fee we take and disappear. It activates your file, assigns you a personal consultant, and gets a licensed attorney reviewing your case. Everything is documented. I will be following your progress personally. OK? Visa or Mastercard?`,
+
+    afford: `${name}, thank you for trusting me with that. I want you to feel completely safe here — no pressure, no tricks. What I can tell you is that $250 is the only amount we ask for at this stage, and in return you get a real attorney review and a consultant who will stay with you. We believe in your case. I genuinely want this to work out for you. OK? Visa or Mastercard?`,
+
+    busy: `${name}, I completely understand — and the reason I am telling you this now is because I genuinely care about your case. Opening your file today takes two minutes. Everything after that moves at your pace. Your consultant will work around your schedule. I will personally make sure your file gets the attention it deserves. OK? Visa or Mastercard?`,
+
+    later: `${name}, I respect that — and I want to be completely honest with you, not just sell you something. The reason timing matters here is real: we work with limited spots by country, and ${country} is in demand. Your assessment is done. Your pathway is identified. The only thing that could hold you back is waiting. I want to see you get there. OK? Visa or Mastercard?`,
+
+    time: `${name}, I understand — and I promise, this is literally two minutes of your time today. After that, your consultant handles everything. We have guided people from ${country} through this entire process, and our job is to make it as easy as possible for you. I will personally keep an eye on your case. OK? Visa or Mastercard?`,
+
+    scam: `${name}, I am really glad you said that — because it means you are protecting yourself, and that is smart. Let me tell you what happens the moment you pay: you receive a confirmation email with your receipt, your unique case number, and the direct contact details of your personal consultant. You have a paper trail from second one. We do not disappear. I will personally be watching your file. OK? Visa or Mastercard?`,
+
+    trust: `${name}, I appreciate that you are being honest with me — and I want to earn your trust, not just ask for it. We are a registered immigration services company. After the $250, you immediately receive documentation, a case number, and a real human being assigned to your case. Your success is genuinely our success — because our reputation depends on it. OK? Visa or Mastercard?`,
+
+    proof: `${name}, absolutely — and everything will be in writing. The moment you pay, you receive a confirmation email with your receipt, your case number, the pathways identified, and your consultant contact. There are no surprises. I will personally make sure your file is handled with care. OK? Visa or Mastercard?`,
+
+    wife: `${name}, that shows you are a responsible person — and I respect that. I want you to know: everything we are doing is fully transparent. Your wife will receive the same confirmation email, the same receipt, the same case number. Would it be possible to bring her on the call for just a moment? I would love to answer any questions together. If not — I will make sure she has everything she needs in writing. OK? Visa or Mastercard?`,
+
+    husband: `${name}, that is completely understandable — and your husband will see everything: the confirmation email, the receipt, all the details. Would it be possible to bring him on for just a minute? I want him to feel as confident as I do about your case. OK? Visa or Mastercard?`,
+
+    spouse: `${name}, I completely understand — and I want your spouse to feel just as comfortable as you do. Everything will be fully visible to them — the confirmation, the receipt, the consultant details. Would it be possible to bring them on the call right now, even briefly? OK? Visa or Mastercard?`,
+
+    family: `${name}, family is everything — and I respect that you want them involved. What I want you to know is that this decision does not lock anyone into anything dramatic. It opens a file. Everything is documented and visible. Would it be possible to bring a family member on for just a moment so I can answer any questions directly? OK? Visa or Mastercard?`,
+
+    chance: `${name}, I would not be sitting here having this conversation with you if I did not genuinely believe in your case. Your profile as a ${profession} from ${country} matched real immigration criteria. That is not something that happens for everyone. The attorney review will give you the professional confirmation you deserve. I am genuinely happy for you. OK? Visa or Mastercard?`,
+
+    qualify: `${name}, the assessment we just did is based on real U.S. immigration criteria — not guesswork. Your profile matched. That is the honest truth. What the $250 does is get a licensed attorney to confirm that professionally and build your strategy. I want to see you get that answer. OK? Visa or Mastercard?`,
+
+    sure: `${name}, your uncertainty is completely natural — and it is actually why the attorney review exists. You are not paying for a guarantee. You are paying for real clarity from a professional who has seen hundreds of cases like yours. I am on your side here. Let us get you that answer. OK? Visa or Mastercard?`,
+
+    denied: `${name}, a previous denial does not define your future — and I mean that. What matters is the pathway we are pursuing now, which is completely different from what was denied before. The attorney will look at your full history and build the strongest possible case. Many of our most successful clients started exactly where you are. I believe in your case. OK? Visa or Mastercard?`,
+
+    rejected: `${name}, a previous rejection gives us valuable information to work with — not a reason to stop. The attorney review will look at exactly what happened and advise on the best approach going forward. I have seen people in your situation succeed. I want that for you too. OK? Visa or Mastercard?`,
+
+    default: `${name}, I hear you — and whatever is on your mind, I want you to know that you are in good hands. We are a real company, with real attorneys, and real consultants who will be assigned personally to your case. Your profile as a ${profession} from ${country} shows genuine potential for ${pathway}. I am genuinely happy for you, and your success is our success. I will personally keep an eye on your file. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?`
+  };;
+
+  // Match note to best template
+  const keywordMap = {
+    installment: ['installment','install','payment plan','split','partial'],
+    expensive: ['expensive','too much','lot of money','high price','costly'],
+    money: ['money','cash','funds','afford','budget','financial'],
+    afford: ['cannot afford','cant afford','no money','broke'],
+    busy: ['busy','no time','not available','schedule','work a lot'],
+    later: ['later','next month','next week','few months','not now','wait'],
+    time: ['time','minutes','hours','how long','quick'],
+    scam: ['scam','fraud','fake','not real','suspicious','not legit'],
+    trust: ['trust','believe','sure','legitimate','real','genuine'],
+    proof: ['proof','evidence','guarantee','document','written','email first'],
+    wife: ['wife','girlfriend','partner'],
+    husband: ['husband','boyfriend'],
+    spouse: ['spouse','partner','significant other'],
+    family: ['family','parents','children','kids','relatives'],
+    chance: ['chance','odds','probability','likely','possible'],
+    qualify: ['qualify','eligible','meet requirements','fit'],
+    sure: ['not sure','unsure','doubt','maybe','think'],
+    denied: ['denied','denial','rejected visa','visa denied','refused'],
+    rejected: ['rejected','rejection','turned down','refused']
   };
 
-  const prompt = `You are an expert immigration sales coach. A sales agent is handling an objection from a prospective client.
+  for(const [templateKey, keywords] of Object.entries(keywordMap)) {
+    if(keywords.some(kw => noteLower.includes(kw))) {
+      response = templates[templateKey];
+      break;
+    }
+  }
 
-Client profile:
-- Name: ${firstName||"the client"}
-- Country: ${profile.country}
-- Goal: ${profile.goal}
-- Profession: ${profile.profession}
-- Experience: ${profile.experience}
-- Education: ${profile.education}
-- Top pathway identified: ${profile.pathway}
+  if(!response) response = templates.default;
 
-Objection: "${objection}"
-Agent note about what the client said: "${note}"
-
-Write a short, natural, persuasive response the agent can read directly to the client.
-- Start with the client name: ${firstName||"the client"}
-- Address their specific concern from the note
-- Connect to their goal and pathway
-- Keep it under 4 sentences
-- Conversational, warm, confident tone
-- No bullet points, just natural speech`;
-
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 300,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    const data = await res.json();
-    const text = data.content?.[0]?.text || 'Could not generate response.';
-    result.innerHTML = '<div class="obj-ai-label">✨ AI Response — Read to client</div>' + text;
+  // Show result
+  setTimeout(() => {
+    result.innerHTML = '<div class="obj-ai-label">✨ Personalized Response — Read to client</div>' + response;
     result.classList.add('show');
     btn.textContent = '✨ Regenerate';
     btn.disabled = false;
-  } catch(e) {
-    btn.textContent = '✨ Get personalized response';
-    btn.disabled = false;
-  }
+  }, 600);
 }
+
 
 function showAiBtn(key) {
   const btn = document.getElementById('ai-btn-'+key);
