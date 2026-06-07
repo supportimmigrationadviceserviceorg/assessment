@@ -326,14 +326,14 @@ function setProgress(num, label) {
   else if(['Skilled Professional'].includes(q['q10'])) pts+=1;
   if(['Yes','Maybe'].includes(q['q11'])) pts+=1;
   if(q['q14']==='Yes') pts+=1;
-  const answeredCount = Object.keys(q).filter(k=>k.startsWith('q')&&q[k]).length;
+  const answeredCount = Object.keys(q).filter(k=>/^q\d/.test(k)&&q[k]&&(Array.isArray(q[k])?q[k].length>0:true)).length;
   const si=document.getElementById('score-indicator');
-  if(si && answeredCount >= 3) {
-    if(pts>=8){bar.style.background='#16a34a';si.textContent='🟢 Strong profile';}
-    else if(pts>=5){bar.style.background='#f59e0b';si.textContent='🟡 Good profile';}
-    else if(pts>=2){bar.style.background='#3b82f6';si.textContent='🔵 Building profile';}
-    else{bar.style.background='#3b82f6';si.textContent='';}
-  } else if(si) { si.textContent=''; bar.style.background='#3b82f6'; }
+  if(si) {
+    if(answeredCount >= 2 && pts>=7){bar.style.background='#16a34a';si.textContent='🟢 Strong profile';}
+    else if(answeredCount >= 2 && pts>=4){bar.style.background='#f59e0b';si.textContent='🟡 Good profile';}
+    else if(answeredCount >= 2 && pts>=1){bar.style.background='#3b82f6';si.textContent='🔵 Building profile';}
+    else{si.textContent='';bar.style.background='#2563eb';}
+  }
 }
 
 function render() {
@@ -370,7 +370,7 @@ Sound good?`})}
         </div>
       </div>
       ${answers['intro_soundgood']==='no' ? getHesitationBlock() : ''}
-      <div class="nav"><span></span><button class="btn-next" onclick="goNext('q1')">Continue →</button></div>`;
+      <div class="nav"><span></span><button class="btn-next" id="btn-next-intro" ${!answers['intro_soundgood']?'disabled':''} onclick="saveNotes('intro_notes','q1')">Continue →</button></div>`;
 
   } else if(currentId==='q1') {
     setProgress(1,'Age');
@@ -464,7 +464,7 @@ Sound good?`})}
       <div class="q-num">Question 4 of ${totalQ}</div>
       <div class="q-title">What is your primary goal in the United States?<br><span style="font-size:14px;font-weight:400;color:#6b7280">What is the main reason you want to move to the United States? What is your dream?</span></div>
       <div class="opts col1">${opts}</div>
-      <div class="opts col1">${opts}</div>
+      <button class="opt" style="width:100%;margin-bottom:8px;background:${sel==='Other'?'#eff6ff':'#fff'};border:${sel==='Other'?'2px solid #2563eb':'1px solid #d1d5db'};color:${sel==='Other'?'#1d4ed8':'#374151'};font-weight:${sel==='Other'?'600':'400'}" onclick="selOpt('q4','Other','q5',this)">✏️ Other — please specify</button>
       ${sel==='Other'?'<textarea class="textarea" style="min-height:52px" placeholder="Describe the client goal..." id="q4_other" onchange="answers.q4_other=this.value">'+(answers.q4_other||'')+'</textarea>':''}
       ${sel?block({k:'tip',l:'💡 Agent tip',t:'Take a moment to let the client share their vision and goals for life in the U.S. The more they connect with their future opportunities and aspirations, the stronger their motivation and engagement will be throughout the conversation.'})+'<textarea class="textarea" style="margin-top:6px;min-height:52px;font-size:12px" placeholder="Agent notes..." onchange="answers.fu_q4=this.value">'+(answers['fu_q4']||'')+'</textarea>':''}
       <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext('q5')">Continue →</button></div>`;
@@ -763,6 +763,11 @@ function setSoundGood(v){
 
 function saveRetirement(){
   const rp=document.getElementById('ret_profession');
+  if(!rp||!rp.value.trim()) {
+    alert('Please enter your profession before retirement.');
+    if(rp) rp.focus();
+    return;
+  }
   if(rp&&rp.value.trim()) {
     answers['ret_profession']=rp.value.trim();
     answers['q6']=rp.value.trim() + ' (Retired)';
@@ -793,6 +798,10 @@ function saveFamily(next){
     answers['spouse_name']=document.getElementById('spouse_name')?.value||'';
     answers['spouse_edu']=document.getElementById('spouse_edu')?.value||'';
     answers['spouse_exp']=document.getElementById('spouse_exp')?.value||'';
+  }
+  if(!answers['has_children']){
+    alert('Please answer: Do you have any children under 21?');
+    return;
   }
   if(answers['has_children']==='Yes') answers['children_count']=document.getElementById('children_count')?.value||'';
   goNext(next);
