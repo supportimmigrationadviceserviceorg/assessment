@@ -285,10 +285,30 @@ function computePathways() {
   const studyInterest=answers['q13']||'', family=answers['q14']||'', goal=answers['q4']||'';
   const highEdu=["Bachelor's Degree","Master's Degree","Doctorate (PhD)"].includes(edu);
   const highExp=['5–10 years','More than 10 years'].includes(exp);
+  // EXECUTIVE — high education + high experience
   if(highEdu&&highExp){scores.executive+=3;if(["Master's Degree","Doctorate (PhD)"].includes(edu))scores.executive+=2;if(leadership==='Yes')scores.executive+=2;if(!recognition.includes('None of the Above')&&recognition.length>0)scores.executive+=recognition.length;}
-  if(['Business Owner','Entrepreneur','Investor'].includes(situation)&&['Yes','Maybe'].includes(bizInterest)){scores.business+=3;if(!['Under $50,000','Prefer Not To Say'].includes(investment)&&investment)scores.business+=2;if(['Starting or Expanding a Business','Investment Opportunities'].includes(goal))scores.business+=1;}
+
+  // BUSINESS — triggered by situation OR goal OR investment interest
+  const isBizSituation = ['Business Owner','Entrepreneur','Investor'].includes(situation);
+  const isBizGoal = ['Starting or Expanding a Business','Investment Opportunities'].includes(goal);
+  const isBizInterested = ['Yes','Maybe'].includes(bizInterest);
+  const hasRealInvestment = !['Under $50,000','Prefer Not To Say',''].includes(investment) && investment;
+
+  if(isBizSituation && isBizInterested) scores.business+=3;
+  if(isBizGoal) scores.business+=2;                          // goal alone triggers business
+  if(isBizInterested && !isBizSituation) scores.business+=2; // interested even if not biz owner
+  if(hasRealInvestment) scores.business+=2;                   // has real investment budget
+  if(answers['ret_invest'] && answers['ret_invest'].includes('Yes')) scores.business+=2; // retiree with savings
+
+  // EMPLOYMENT — employee/skilled/self-employed
   if(['Skilled Professional','Employee','Self-Employed'].includes(situation)){scores.employment+=2;if(highExp)scores.employment+=1;}
-  if(['Yes','Maybe'].includes(studyInterest))scores.education+=['Business Owner','Investor'].includes(situation)?1:2;
+  // Even without situation, if has experience and education still gets employment
+  if(!situation && highExp) scores.employment+=1;
+
+  // EDUCATION
+  if(['Yes','Maybe'].includes(studyInterest))scores.education+=isBizSituation?1:2;
+
+  // FAMILY
   if(family==='Yes')scores.family+=3;
   const ranked=Object.entries(scores).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k])=>PATHWAY_LABELS[k]);
   if(!ranked.length)ranked.push(PATHWAY_LABELS.employment);
