@@ -418,7 +418,7 @@ Sound good?`})}
         <div class="spouse-title">👫 Spouse Information</div>
         ${block({k:'read',l:'📞 Read to client',t:`Excellent. Since you are married, I would like to note that in many immigration processes your spouse and children under 21 can be included as part of the overall immigration strategy — which can actually strengthen certain applications.`})}
         <div class="lbl">Spouse first name</div>
-        <input class="field-inp" style="margin-bottom:8px" type="text" id="spouse_name" placeholder="Spouse name..." value="${answers['spouse_name']||''}"/>
+        <input class="field-inp" style="margin-bottom:8px" type="text" id="spouse_name" placeholder="Spouse name..." value="${answers['spouse_name']||''}" onchange="answers['spouse_name']=this.value"/>
         <div class="lbl">Spouse country of birth</div>
         <div class="search-wrap" style="margin-bottom:8px">
           <span class="search-icon">🔍</span>
@@ -427,12 +427,12 @@ Sound good?`})}
         ${answers['spouse_country'] ? getSpouseCountryPill() : ''}
         <div class="country-list" id="spouse_clist" style="max-height:150px">${renderSpouseC('')}</div>
         <div class="lbl">Spouse education level</div>
-        <select class="field-inp" style="margin-bottom:8px" id="spouse_edu">
+        <select class="field-inp" style="margin-bottom:8px" id="spouse_edu" onchange="answers['spouse_edu']=this.value">
           <option value="">Select...</option>
           ${getSpouseEduOptions()}
         </select>
         <div class="lbl">Spouse years of experience</div>
-        <select class="field-inp" style="margin-bottom:8px" id="spouse_exp">
+        <select class="field-inp" style="margin-bottom:8px" id="spouse_exp" onchange="answers['spouse_exp']=this.value">
           <option value="">Select...</option>
           ${getSpouseExpOptions()}
         </select>
@@ -877,16 +877,18 @@ function saveRetirement(){
 }
 
 function setChildren(v){
-  // Save spouse fields before re-render
+  // Save ALL spouse fields before re-render
   const sn=document.getElementById('spouse_name');
-  const sc=document.getElementById('spouse_csearch');
   const se=document.getElementById('spouse_edu');
   const sx=document.getElementById('spouse_exp');
   const cc=document.getElementById('children_count');
-  if(sn) answers['spouse_name']=sn.value;
-  if(se) answers['spouse_edu']=se.value;
-  if(sx) answers['spouse_exp']=sx.value;
-  if(cc) answers['children_count']=cc.value;
+  // Save spouse fields
+  if(sn && sn.value) answers['spouse_name']=sn.value;
+  if(se && se.value) answers['spouse_edu']=se.value;
+  if(sx && sx.value) answers['spouse_exp']=sx.value;
+  // Save children count if exists
+  if(cc && cc.value) answers['children_count']=cc.value;
+  // spouse_immigrate is already saved via onclick directly
   answers['has_children']=v;
   render();
 }
