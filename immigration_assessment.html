@@ -1019,6 +1019,104 @@ if(!leadId) render();
 
 <!-- OBJECTIONS BUTTON & MODAL -->
 <style>
+.endcall-fab {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 24px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.endcall-fab:hover { background: #4b5563; }
+.endcall-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1100;
+  align-items: center;
+  justify-content: center;
+}
+.endcall-modal.show { display: flex; }
+.endcall-box {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  width: 90%;
+  max-width: 460px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+.endcall-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.endcall-reasons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.endcall-reason {
+  padding: 9px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+}
+.endcall-reason:hover { background: #f9fafb; }
+.endcall-reason.sel { border: 2px solid #6b7280; background: #f3f4f6; font-weight: 600; }
+.endcall-notes {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 13px;
+  min-height: 70px;
+  resize: vertical;
+  margin-bottom: 14px;
+  background: #fff;
+}
+.endcall-btns { display: flex; gap: 10px; }
+.endcall-save {
+  flex: 1;
+  background: #6b7280;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.endcall-save:hover { background: #4b5563; }
+.endcall-cancel {
+  background: none;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 13px;
+  color: #6b7280;
+  cursor: pointer;
+}
+
 .obj-fab { position: fixed; bottom: 24px; right: 24px; background: #dc2626; color: white; border: none; border-radius: 50px; padding: 12px 20px; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 16px rgba(220,38,38,0.4); z-index: 1000; display: flex; align-items: center; gap: 7px; }
 .obj-fab:hover { background: #b91c1c; }
 .obj-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1001; }
@@ -1051,6 +1149,30 @@ if(!leadId) render();
 </style>
 
 <button class="obj-fab" onclick="openObj()">🛡️ Objections</button>
+<button class="endcall-fab" onclick="openEndCall()">📵 End Call</button>
+
+<div class="endcall-modal" id="endcall-modal">
+  <div class="endcall-box">
+    <div class="endcall-title">📵 End Call — Save Progress</div>
+    <div style="font-size:12px;color:#6b7280;margin-bottom:12px">Select the reason the call ended:</div>
+    <div class="endcall-reasons">
+      <button class="endcall-reason" onclick="selEndReason(this,'Client hung up')">📞 Client hung up</button>
+      <button class="endcall-reason" onclick="selEndReason(this,'Not interested')">❌ Not interested</button>
+      <button class="endcall-reason" onclick="selEndReason(this,'Call disconnected')">📶 Call disconnected</button>
+      <button class="endcall-reason" onclick="selEndReason(this,'Callback requested')">🔄 Callback requested</button>
+      <button class="endcall-reason" onclick="selEndReason(this,'Language barrier')">🌐 Language barrier</button>
+      <button class="endcall-reason" onclick="selEndReason(this,'Wrong number')">🔢 Wrong number</button>
+      <button class="endcall-reason" onclick="selEndReason(this,'Needs more time')">⏳ Needs more time</button>
+      <button class="endcall-reason" onclick="selEndReason(this,'Other')">✏️ Other</button>
+    </div>
+    <div style="font-size:12px;color:#6b7280;margin-bottom:6px">Additional notes (optional):</div>
+    <textarea class="endcall-notes" id="endcall-notes" placeholder="Add any notes about why the call ended, what the client said, or next steps..."></textarea>
+    <div class="endcall-btns">
+      <button class="endcall-save" id="endcall-save-btn" onclick="saveEndCall()">💾 Save & Close</button>
+      <button class="endcall-cancel" onclick="closeEndCall()">Cancel</button>
+    </div>
+  </div>
+</div>
 
 <div class="obj-overlay" id="obj-overlay" onclick="closeObj(event)">
   <div class="obj-modal" id="obj-modal">
@@ -1067,6 +1189,73 @@ if(!leadId) render();
 
 
 <script>
+let selectedEndReason = '';
+
+function openEndCall() {
+  selectedEndReason = '';
+  document.querySelectorAll('.endcall-reason').forEach(b => b.classList.remove('sel'));
+  document.getElementById('endcall-notes').value = '';
+  document.getElementById('endcall-modal').classList.add('show');
+}
+
+function closeEndCall() {
+  document.getElementById('endcall-modal').classList.remove('show');
+}
+
+function selEndReason(el, reason) {
+  selectedEndReason = reason;
+  document.querySelectorAll('.endcall-reason').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+async function saveEndCall() {
+  const notes = document.getElementById('endcall-notes').value.trim();
+  const reason = selectedEndReason || 'Not specified';
+  const stageMap = {
+    'intro':'Introduction','q1':'Age','q2':'Country','q3':'Marital Status',
+    'q3b':'Family Details','q4':'Primary Goal','q5':'Education','q6':'Profession',
+    'q7':'Experience','q8':'Leadership','q10':'Current Situation',
+    'q11':'Business Interest','q12':'Investment','q13':'Study Interest',
+    'q14':'Family in USA','hold':'Hold','results':'Results'
+  };
+  const stageName = stageMap[currentId] || currentId;
+  const summary = [
+    '=== CALL ENDED ===',
+    'Reason: ' + reason,
+    'Stage reached: ' + stageName,
+    notes ? 'Notes: ' + notes : '',
+    '',
+    '=== PARTIAL ANSWERS ===',
+    answers['q1'] ? 'Age: ' + answers['q1'] : '',
+    answers['exact_age'] ? 'Exact age: ' + answers['exact_age'] : '',
+    answers['q2'] ? 'Country: ' + answers['q2'] : '',
+    answers['q3'] ? 'Marital Status: ' + answers['q3'] : '',
+    answers['q4'] ? 'Goal: ' + answers['q4'] : '',
+    answers['q5'] ? 'Education: ' + answers['q5'] : '',
+    answers['q6'] ? 'Profession: ' + answers['q6'] : '',
+    answers['q7'] ? 'Experience: ' + answers['q7'] : '',
+    answers['q8'] ? 'Leadership: ' + answers['q8'] : '',
+    answers['q10'] ? 'Situation: ' + answers['q10'] : '',
+    answers['objections_raised'] && answers['objections_raised'].length ? 'Objections: ' + answers['objections_raised'].join(' | ') : ''
+  ].filter(Boolean).join('\n');
+
+  const btn = document.getElementById('endcall-save-btn');
+  btn.textContent = 'Saving...';
+  btn.disabled = true;
+
+  try {
+    if(leadId) {
+      const url = WEBHOOK + 'crm.lead.update?ID=' + leadId + '&fields[COMMENTS]=' + encodeURIComponent(summary);
+      await fetch(url);
+    }
+    btn.textContent = '✅ Saved!';
+    setTimeout(() => closeEndCall(), 1500);
+  } catch(e) {
+    btn.textContent = '⚠️ Error — try again';
+    btn.disabled = false;
+  }
+}
+
 function openObj() {
   document.getElementById('obj-overlay').classList.add('open');
   renderObj();
