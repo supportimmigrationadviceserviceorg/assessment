@@ -493,7 +493,6 @@ Sound good?`})}
       <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" ${!answers['has_children']?'disabled':''} onclick="saveChildren('q4')">Continue →</button></div>`;
 
   } else if(currentId==='q4') {
-  } else if(currentId==='q4') {
     setProgress(4,'Primary Goal');
     const sel=answers['q4']||null;
     const opts=['Career Opportunities','Starting or Expanding a Business','Investment Opportunities','Education','Family Relocation','Exploring My Options'].map(o=>`<button class="opt ${sel===o?'sel':''}" onclick="selOpt('q4','${o}','q5',this)">${o}</button>`).join('');
