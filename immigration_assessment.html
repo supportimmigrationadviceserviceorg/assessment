@@ -471,24 +471,28 @@ Sound good?`})}
         </select>
         <div class="lbl">Will spouse immigrate as part of the process?</div>
         <div style="display:flex;gap:8px;margin-bottom:4px">
-          <button class="opt ${answers['spouse_immigrate']==='Yes'?'sel':''} style="flex:1" onclick="this.parentElement.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel'));this.classList.add('sel');answers['spouse_immigrate']='Yes'">Yes</button>
-          <button class="opt ${answers['spouse_immigrate']==='No'?'sel':''} style="flex:1" onclick="this.parentElement.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel'));this.classList.add('sel');answers['spouse_immigrate']='No'">No</button>
+          <button class="opt ${answers['spouse_immigrate']==='Yes'?'sel':''}" style="flex:1" onclick="answers['spouse_immigrate']='Yes';document.querySelectorAll('.sp-imm').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')">Yes</button>
+          <button class="opt ${answers['spouse_immigrate']==='No'?'sel':''}" style="flex:1" onclick="answers['spouse_immigrate']='No';document.querySelectorAll('.sp-imm').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')">No</button>
         </div>
       </div>` : '';
-
     main.innerHTML=`
       ${spouseSection}
-      <div class="children-section">
-        <div class="children-title">👶 Children</div>
-        ${block({k:'read',l:'📞 Read to client',t:`Do you have any children under the age of 21?\n\nIn many immigration processes, dependent children under 21 may be included together with their parents — depending on the category and individual circumstances.`})}
-        <div style="display:flex;gap:8px;margin-bottom:10px">
-          <button class="opt ${answers['has_children']==='Yes'?'sel':''} style="flex:1" onclick="setChildren('Yes')">Yes</button>
-          <button class="opt ${answers['has_children']==='No'?'sel':''} style="flex:1" onclick="setChildren('No')">No</button>
-        </div>
-        ${answers['has_children']==='Yes' ? getChildrenBlock() : ''}
-      </div>
-      <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" onclick="saveFamily('q4')">Continue →</button></div>`;
+      <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" onclick="saveSpouse('q3c')">Continue →</button></div>`;
 
+  } else if(currentId==='q3c') {
+    setProgress(3,'Children');
+    main.innerHTML=`
+      <div class="q-num">Question 3b of ${totalQ}</div>
+      <div class="q-title">Do you have any children under the age of 21?</div>
+      ${block({k:'read',l:'📞 Read to client',t:`In many immigration processes, dependent children under 21 may be included together with their parents — depending on the category and individual circumstances.`})}
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <button class="opt ${answers['has_children']==='Yes'?'sel':''}" style="flex:1" onclick="selOpt('has_children','Yes','q3c',this);render()">Yes</button>
+        <button class="opt ${answers['has_children']==='No'?'sel':''}" style="flex:1" onclick="selOpt('has_children','No','q3c',this);render()">No</button>
+      </div>
+      ${answers['has_children']==='Yes' ? getChildrenBlock() : ''}
+      <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" ${!answers['has_children']?'disabled':''} onclick="saveChildren('q4')">Continue →</button></div>`;
+
+  } else if(currentId==='q4') {
   } else if(currentId==='q4') {
     setProgress(4,'Primary Goal');
     const sel=answers['q4']||null;
@@ -962,6 +966,30 @@ function setChildren(v){
   answers['has_children']=v;
   render();
 }
+function saveSpouse(next){
+  if(answers['q3']==='Married'){
+    const sn=document.getElementById('spouse_name');
+    const se=document.getElementById('spouse_edu');
+    const sx=document.getElementById('spouse_exp');
+    if(sn) answers['spouse_name']=sn.value;
+    if(se) answers['spouse_edu']=se.value;
+    if(sx) answers['spouse_exp']=sx.value;
+  }
+  goNext(next);
+}
+
+function saveChildren(next){
+  if(!answers['has_children']){
+    alert('Please answer: Do you have any children under 21?');
+    return;
+  }
+  if(answers['has_children']==='Yes'){
+    const cc=document.getElementById('children_count');
+    if(cc) answers['children_count']=cc.value;
+  }
+  goNext(next);
+}
+
 function saveFamily(next){
   if(answers['q3']==='Married'){
     answers['spouse_name']=document.getElementById('spouse_name')?.value||'';
