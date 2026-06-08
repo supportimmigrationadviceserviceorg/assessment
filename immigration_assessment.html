@@ -417,7 +417,20 @@ Sound good?`})}
       <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" type="text" id="csearch" placeholder="Search country..." oninput="filterC()" autocomplete="off"/></div>
       <div class="country-list" id="clist">${renderC('')}</div>
       <div id="country-fact">${answers['country_fact'] ? getCountryFactBlock() : ''}</div>
-      <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext('q3')">Continue →</button></div>`;
+      <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext('q2b')">Continue →</button></div>`;
+
+  } else if(currentId==='q2b') {
+    setProgress(2,'Birth Country');
+    const sel2=answers['q2b']||'';
+    const residenceDiffers = sel2 && sel2 !== answers['q2'];
+    main.innerHTML=`
+      <div class="q-num">Question 2b of ${totalQ}</div>
+      <div class="q-title">What is your country of birth?</div>
+      ${sel2 ? '<div class="pill">'+sel2+' <span class="pill-x" onclick="clearBirthCountry()">×</span></div>' : ''}
+      <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" type="text" id="bcsearch" placeholder="Search country..." oninput="filterBC()" autocomplete="off"/></div>
+      <div class="country-list" id="bclist">${renderBC('')}</div>
+      ${residenceDiffers ? getResidenceBlock(sel2, answers['q2']||'') : ''}
+      <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel2?'disabled':''} onclick="goNext('q3')">Continue →</button></div>`;
 
   } else if(currentId==='q3') {
     setProgress(3,'Marital Status');
@@ -427,7 +440,7 @@ Sound good?`})}
       <div class="q-num">Question 3 of ${totalQ}</div>
       <div class="q-title">${firstName ? firstName+", what" : "What"} is your marital status?</div>
       <div class="opts">${opts}</div>
-      ${sel&&['Single','Married'].includes(sel)?chemistryBlock('q3',sel):''}}
+      ${sel&&['Single','Married'].includes(sel)?chemistryBlock('q3',sel):''}
       <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext('q3b')">Continue →</button></div>`;
 
   } else if(currentId==='q3b') {
@@ -519,8 +532,45 @@ Sound good?`})}
         <button class="opt" style="width:100%;background:#fff5f5;border:1.5px solid #fca5a5;color:#dc2626;font-weight:600;font-size:13px;padding:10px;margin-bottom:8px" onclick="answers['q6']='Not Currently Employed';answers['q6_profession']='Not Currently Employed';goNext('q8')">❌ Not Currently Employed</button>
         <button class="opt" style="width:100%;background:#fffbeb;border:1.5px solid #fcd34d;color:#92400e;font-weight:600;font-size:13px;padding:10px" onclick="answers['q6']='Retired';answers['q6_profession']='Retired';goNext('q8_ret')">🏖️ Retired</button>
       </div>
-      <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" onclick="saveProfession('q7')">Continue →</button></div>`;
+      <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" onclick="saveProfession('q6b')">Continue →</button></div>`;
 
+  } else if(currentId==='q6b') {
+    setProgress(6,'Income');
+    const residenceCountry = answers['q2'] || '';
+    const currencyMap2 = {'Israel':'ILS','United Arab Emirates':'AED','United Kingdom':'GBP',
+      'France':'EUR','Germany':'EUR','Italy':'EUR','Spain':'EUR','Netherlands':'EUR','Austria':'EUR',
+      'Belgium':'EUR','Portugal':'EUR','Finland':'EUR','Greece':'EUR','Ireland':'EUR',
+      'Australia':'AUD','Canada':'CAD','Japan':'JPY','China':'CNY','India':'INR',
+      'Brazil':'BRL','Mexico':'MXN','Russia':'RUB','South Africa':'ZAR','Turkey':'TRY',
+      'Saudi Arabia':'SAR','Kuwait':'KWD','Qatar':'QAR','Bahrain':'BHD','Oman':'OMR',
+      'Pakistan':'PKR','Bangladesh':'BDT','Nigeria':'NGN','Egypt':'EGP','Philippines':'PHP',
+      'Indonesia':'IDR','Malaysia':'MYR','Thailand':'THB','Singapore':'SGD',
+      'Switzerland':'CHF','Sweden':'SEK','Norway':'NOK','Denmark':'DKK',
+      'Poland':'PLN','Ukraine':'UAH','South Korea':'KRW','Hong Kong':'HKD','New Zealand':'NZD',
+      'Colombia':'COP','Argentina':'ARS','Chile':'CLP','Peru':'PEN','Vietnam':'VND'
+    };
+    const localCur = currencyMap2[residenceCountry] || 'USD';
+    const incomeAmt = answers['income_amount']||'';
+    const incomeCur = answers['income_currency']||localCur;
+    const savedUSD = answers['income_usd']?'≈ $'+parseInt(answers['income_usd']).toLocaleString()+' USD per month':'';
+    main.innerHTML=`
+      <div class="q-num">Question 6b of ${totalQ}</div>
+      <div class="q-title">What is your monthly income?</div>
+      ${block({k:'tip',l:'💡 Agent tip',t:'The currency is set automatically based on the country of residence. Just enter the amount and the system converts to USD instantly.'})}
+      <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
+        <input class="inp" type="number" id="income_amount" placeholder="Amount in ${localCur}..." value="${incomeAmt}" style="flex:2;margin-bottom:0" oninput="calcIncomeUSD('${localCur}')"/>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;background:#f3f4f6;border-radius:8px;padding:10px;font-weight:600;font-size:14px;color:#374151">${localCur}</div>
+      </div>
+      <div id="income-usd" style="font-size:14px;color:#16a34a;font-weight:700;min-height:24px;margin-bottom:12px;padding:8px 12px;background:#f0fdf4;border-radius:8px">${savedUSD}</div>
+      ${block({k:'read',l:'📞 Say to client',t:'That gives us a great picture of your financial profile. In the U.S., professionals with your background typically earn significantly more — and that is exactly the kind of opportunity we want to help you access.'})}
+      <div class="lbl" style="margin-top:8px">Notes (optional)</div>
+      <textarea class="textarea" style="min-height:44px;font-size:12px" placeholder="Any notes about income..." onchange="answers['fu_income']=this.value">${answers['fu_income']||''}</textarea>
+      <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" onclick="saveIncome('q7')">Continue →</button></div>`;
+    // Auto-calculate if amount already entered
+    if(incomeAmt) setTimeout(()=>calcIncomeUSD(localCur),50);
+
+  } else if(currentId==='q7') {
+  } else if(currentId==='q7') {
   } else if(currentId==='q7') {
     setProgress(7,'Experience');
     const sel=answers['q7']||null;
@@ -557,7 +607,7 @@ Sound good?`})}
       <div class="q-title">${answers["q6"]==="Not Currently Employed" ? "In your previous work experience, did you ever lead a team or manage people?" : "Have you ever led a team or managed people at work?"}</div>
       <div class="opts">${opts}</div>
       ${sel==='Yes'?chemistryBlock('q8',sel):''}
-      <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext('q10')">Continue →</button></div>`;
+      <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext(answers['q6']==='Not Currently Employed'||answers['q6']==='Retired'?'q11':'q10')">Continue →</button></div>`;
 
   } else if(currentId==='q10') {
     setProgress(9,'Current Situation');
@@ -947,7 +997,7 @@ async function submitAll(){
   const reasonEl=document.getElementById('client_pref_reason');if(reasonEl)answers['client_pref_reason']=reasonEl.value;
   const pathways=computePathways();
   const btn=document.getElementById('submit-btn');btn.disabled=true;btn.textContent='Saving to Bitrix24...';
-  const summary=['=== IMMIGRATION PATHWAY ASSESSMENT ===',`Pathway #1: ${pathways[0]?.name||''}`,`Pathway #2: ${pathways[1]?.name||''}`,`Pathway #3: ${pathways[2]?.name||''}`,`Client preferred: ${answers['pref_pathway']||'Not selected'}`,`Client reason: ${answers['client_pref_reason']||''}`,`Notes: ${answers['client_goal']||''}`,``,`=== ANSWERS ===`,`Age: ${answers['q1']||''}`,`Country: ${answers['q2']||''}`,`Marital Status: ${answers['q3']||''}`,answers['q3']==='Married'?`Spouse: ${answers['spouse_name']||''} | Country: ${answers['spouse_country']||''} | Edu: ${answers['spouse_edu']||''} | Exp: ${answers['spouse_exp']||''} | Immigrating: ${answers['spouse_immigrate']||''}`:'',`Children under 21: ${answers['has_children']||''} ${answers['children_count']?'('+answers['children_count']+')':''}` ,`Primary Goal: ${answers['q4']||''}`,`Education: ${answers['q5']||''}`,`Field: ${answers['q6']||''}`,`Experience: ${answers['q7']||''}`,`Leadership: ${answers['q8']||''}`,`Recognition: ${(answers['q9']||[]).join(', ')}`,`Situation: ${answers['q10']||''}`,`Business Interest: ${answers['q11']||''}`,`Investment Level: ${answers['q12']||''}`,`Study Interest: ${answers['q13']||''}`,`Family in USA: ${answers['q14']||''}`,``,`Agent intro notes: ${answers['intro_notes']||''}`,answers['objections_raised']&&answers['objections_raised'].length?`Objections raised: ${answers['objections_raised'].join(' | ')}`:''].filter(l=>l!==undefined).join('\n');
+  const summary=['=== IMMIGRATION PATHWAY ASSESSMENT ===',`Pathway #1: ${pathways[0]?.name||''}`,`Pathway #2: ${pathways[1]?.name||''}`,`Pathway #3: ${pathways[2]?.name||''}`,`Client preferred: ${answers['pref_pathway']||'Not selected'}`,`Client reason: ${answers['client_pref_reason']||''}`,`Notes: ${answers['client_goal']||''}`,``,`=== ANSWERS ===`,`Age: ${answers['q1']||''}`,`Exact Age: ${answers['exact_age']||''}`,`Country of Residence: ${answers['q2']||''}`,`Country of Birth: ${answers['q2b']||''}`,answers['residence_duration']?`Time in ${answers['q2']||'residence'}: ${answers['residence_duration']}`:'',`Country: ${answers['q2']||''}`,`Marital Status: ${answers['q3']||''}`,answers['q3']==='Married'?`Spouse: ${answers['spouse_name']||''} | Country: ${answers['spouse_country']||''} | Edu: ${answers['spouse_edu']||''} | Exp: ${answers['spouse_exp']||''} | Immigrating: ${answers['spouse_immigrate']||''}`:'',`Children under 21: ${answers['has_children']||''} ${answers['children_count']?'('+answers['children_count']+')':''}` ,`Primary Goal: ${answers['q4']||''}`,`Education: ${answers['q5']||''}`,`Field: ${answers['q6']||''}`,`Monthly Income: ${answers['income_amount']||''} ${answers['income_currency']||''} (≈ $${answers['income_usd']||''} USD)`,`Experience: ${answers['q7']||''}`,`Leadership: ${answers['q8']||''}`,`Recognition: ${(answers['q9']||[]).join(', ')}`,`Situation: ${answers['q10']||''}`,`Business Interest: ${answers['q11']||''}`,`Investment Level: ${answers['q12']||''}`,`Study Interest: ${answers['q13']||''}`,`Family in USA: ${answers['q14']||''}`,``,`Agent intro notes: ${answers['intro_notes']||''}`,answers['objections_raised']&&answers['objections_raised'].length?`Objections raised: ${answers['objections_raised'].join(' | ')}`:''].filter(l=>l!==undefined).join('\n');
   const fields={COMMENTS:summary};
   if(answers['q2'])fields['UF_CRM_1449131599']=answers['q2'];
   if(answers['q3']&&MARITAL_IDS[answers['q3']])fields['UF_CRM_1500181612']=MARITAL_IDS[answers['q3']];
@@ -976,7 +1026,127 @@ function showResult(success,summary,pathways,err){
   document.getElementById('progress').style.width='100%';
 }
 
-function renderSpouseC(f){const fl=f.toLowerCase();return COUNTRIES.filter(c=>c.toLowerCase().includes(fl)).map(c=>`<div class="ci ${answers['spouse_country']===c?'csel':''} onclick="selSpouseCountry('${c.replace(/'/g,"\'")}')">${c}</div>`).join('');}
+function getResidenceBlock(birthC, resC) {
+  var opts = ['Less than 1 year','1-3 years','3-5 years','5-10 years','More than 10 years'];
+  var btns = '';
+  for(var i=0;i<opts.length;i++){
+    var o=opts[i];
+    var sel = answers['residence_duration']===o ? ' sel' : '';
+    btns += '<button class="opt'+sel+'" data-dur="'+o+'" onclick="setResDuration(this)">'+o+'</button>';
+  }
+  return '<div style="margin-top:14px;padding:12px;background:#eff6ff;border-radius:8px;border:1px solid #bfdbfe">'+
+    '<div class="block block-read"><div class="block-label">📞 Read to client</div>'+
+    '<div class="block-text">I see you were born in '+birthC+' but you are currently living in '+resC+'. How long have you been living there?</div></div>'+
+    '<div class="lbl" style="margin-top:8px">How long in '+resC+'?</div>'+
+    '<div class="opts" style="margin-bottom:0">'+btns+'</div></div>';
+}
+function setResDuration(el){
+  var v=el.getAttribute('data-dur');
+  answers['residence_duration']=v;
+  var parent=el.parentElement;
+  parent.querySelectorAll('.opt').forEach(function(b){b.classList.remove('sel');});
+  el.classList.add('sel');
+}
+
+function renderBC(f){
+  var fl=f.toLowerCase();
+  return COUNTRIES.filter(function(c){return c.toLowerCase().indexOf(fl)>=0;}).map(function(c){
+    var sel=answers['q2b']===c?'csel':'';
+    return '<div class="ci '+sel+'" onclick="selBirthCountry(this.textContent)">'+c+'</div>';
+  }).join('');
+}
+function filterBC(){
+  var el=document.getElementById('bclist');
+  var s=document.getElementById('bcsearch');
+  if(el&&s)el.innerHTML=renderBC(s.value);
+}
+function selBirthCountry(n){
+  const sn=document.getElementById('bcsearch');
+  if(sn) answers['fu_q2b_search']=sn.value;
+  answers['q2b']=n;
+  render();
+}
+function clearBirthCountry(){delete answers['q2b'];render();}
+
+const rateMap = {
+  'ILS':0.27,'AED':0.27,'GBP':1.27,'EUR':1.08,'AUD':0.65,'CAD':0.74,
+  'JPY':0.0067,'CNY':0.14,'INR':0.012,'BRL':0.20,'MXN':0.058,'RUB':0.011,
+  'ZAR':0.055,'TRY':0.031,'SAR':0.27,'KWD':3.26,'QAR':0.27,'BHD':2.65,
+  'OMR':2.60,'PKR':0.0036,'BDT':0.0091,'NGN':0.00065,'EGP':0.020,
+  'COP':0.00025,'ARS':0.0010,'CLP':0.0011,'PEN':0.27,'PHP':0.017,
+  'IDR':0.000062,'MYR':0.22,'THB':0.028,'VND':0.000039,'UAH':0.024,
+  'PLN':0.25,'RON':0.22,'HUF':0.0028,'CZK':0.044,'SEK':0.095,
+  'NOK':0.093,'DKK':0.145,'CHF':1.13,'SGD':0.74,'HKD':0.13,
+  'KRW':0.00073,'NZD':0.61,'USD':1
+};
+
+function updateIncomeUSD(rate) {
+  const amt = parseFloat(document.getElementById('income_amount')?.value)||0;
+  const curr = document.getElementById('income_currency')?.value||'USD';
+  const r = rateMap[curr]||rate||1;
+  const usd = (amt*r).toFixed(0);
+  const el = document.getElementById('income-usd');
+  if(el && amt>0) {
+    el.textContent = '≈ $' + parseInt(usd).toLocaleString() + ' USD per month';
+    answers['income_amount'] = amt;
+    answers['income_currency'] = curr;
+    answers['income_usd'] = usd;
+  } else if(el) {
+    el.textContent = '';
+  }
+}
+
+function calcIncomeUSD(forceCur){
+  const rates={'ILS':0.27,'AED':0.27,'GBP':1.27,'EUR':1.08,'AUD':0.65,'CAD':0.74,
+    'JPY':0.0067,'CNY':0.14,'INR':0.012,'BRL':0.20,'MXN':0.058,'RUB':0.011,
+    'ZAR':0.055,'TRY':0.031,'SAR':0.27,'KWD':3.26,'QAR':0.27,'BHD':2.65,
+    'OMR':2.60,'PKR':0.0036,'BDT':0.0091,'NGN':0.00065,'EGP':0.020,
+    'PHP':0.017,'IDR':0.000062,'MYR':0.22,'THB':0.028,'SGD':0.74,
+    'CHF':1.13,'SEK':0.095,'NOK':0.093,'DKK':0.145,'PLN':0.25,
+    'UAH':0.024,'KRW':0.00073,'HKD':0.13,'NZD':0.61,'USD':1,
+    'COP':0.00025,'ARS':0.0010,'CLP':0.0011,'PEN':0.27,'VND':0.000039};
+  const amt=parseFloat(document.getElementById('income_amount')?.value)||0;
+  const cur=forceCur||'USD';
+  const usd=Math.round(amt*(rates[cur]||1));
+  const el=document.getElementById('income-usd');
+  if(el){
+    if(amt>0){
+      el.innerHTML='≈ <strong>$'+usd.toLocaleString()+' USD</strong> per month';
+      answers['income_amount']=amt;
+      answers['income_currency']=cur;
+      answers['income_usd']=usd;
+    } else {
+      el.textContent='';
+    }
+  }
+}
+
+function saveIncome(next){
+  const amt = document.getElementById('income_amount')?.value;
+  if(amt) {
+    answers['income_amount'] = amt;
+    answers['income_currency'] = document.getElementById('income_currency')?.value||'USD';
+    updateIncomeUSD(1);
+  }
+  goNext(next);
+}
+
+function renderSpouseC(f){
+  var fl=f.toLowerCase();
+  var filtered=COUNTRIES.filter(function(c){return c.toLowerCase().indexOf(fl)>=0;});
+  var html='';
+  for(var i=0;i<filtered.length;i++){
+    var c=filtered[i];
+    var sel=answers['spouse_country']===c?' csel':'';
+    html+='<div class="ci'+sel+'" data-country="'+i+'" onclick="pickSpouseCountry('+i+','+JSON.stringify(fl)+')">'+c+'</div>';
+  }
+  return html;
+}
+function pickSpouseCountry(idx,filter){
+  var fl=filter.toLowerCase();
+  var filtered=COUNTRIES.filter(function(c){return c.toLowerCase().indexOf(fl)>=0;});
+  if(filtered[idx]) selSpouseCountry(filtered[idx]);
+}
 function filterSpouseC(){
   const sn=document.getElementById('spouse_name');
   const se=document.getElementById('spouse_edu');
