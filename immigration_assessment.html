@@ -999,6 +999,7 @@ async function submitAll(){
   const btn=document.getElementById('submit-btn');btn.disabled=true;btn.textContent='Saving to Bitrix24...';
   const summary=['=== IMMIGRATION PATHWAY ASSESSMENT ===',`Pathway #1: ${pathways[0]?.name||''}`,`Pathway #2: ${pathways[1]?.name||''}`,`Pathway #3: ${pathways[2]?.name||''}`,`Client preferred: ${answers['pref_pathway']||'Not selected'}`,`Client reason: ${answers['client_pref_reason']||''}`,`Notes: ${answers['client_goal']||''}`,``,`=== ANSWERS ===`,`Age: ${answers['q1']||''}`,`Exact Age: ${answers['exact_age']||''}`,`Country of Residence: ${answers['q2']||''}`,`Country of Birth: ${answers['q2b']||''}`,answers['residence_duration']?`Time in ${answers['q2']||'residence'}: ${answers['residence_duration']}`:'',`Country: ${answers['q2']||''}`,`Marital Status: ${answers['q3']||''}`,answers['q3']==='Married'?`Spouse: ${answers['spouse_name']||''} | Country: ${answers['spouse_country']||''} | Edu: ${answers['spouse_edu']||''} | Exp: ${answers['spouse_exp']||''} | Immigrating: ${answers['spouse_immigrate']||''}`:'',`Children under 21: ${answers['has_children']||''} ${answers['children_count']?'('+answers['children_count']+')':''}` ,`Primary Goal: ${answers['q4']||''}`,`Education: ${answers['q5']||''}`,`Field: ${answers['q6']||''}`,`Monthly Income: ${answers['income_amount']||''} ${answers['income_currency']||''} (≈ $${answers['income_usd']||''} USD)`,`Experience: ${answers['q7']||''}`,`Leadership: ${answers['q8']||''}`,`Recognition: ${(answers['q9']||[]).join(', ')}`,`Situation: ${answers['q10']||''}`,`Business Interest: ${answers['q11']||''}`,`Investment Level: ${answers['q12']||''}`,`Study Interest: ${answers['q13']||''}`,`Family in USA: ${answers['q14']||''}`,``,`Agent intro notes: ${answers['intro_notes']||''}`,answers['objections_raised']&&answers['objections_raised'].length?`Objections raised: ${answers['objections_raised'].join(' | ')}`:''].filter(l=>l!==undefined).join('\n');
   const fields={COMMENTS:summary};
+  fields['UF_CRM_1780906448']='Full';
   if(answers['q2'])fields['UF_CRM_1449131599']=answers['q2'];
   if(answers['q3']&&MARITAL_IDS[answers['q3']])fields['UF_CRM_1500181612']=MARITAL_IDS[answers['q3']];
   if(answers['q5']&&EDU_IDS[answers['q5']])fields['UF_CRM_1484914608']=EDU_IDS[answers['q5']];
@@ -1188,6 +1189,10 @@ async function loadLead(){
         }const initials=clientName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();document.getElementById('client-initials').textContent=initials;document.getElementById('client-name-display').textContent=clientName;document.getElementById('client-info-display').textContent=[ld.PHONE?.[0]?.VALUE,ld.EMAIL?.[0]?.VALUE].filter(Boolean).join(' · ');document.getElementById('client-bar').style.display='flex';
     // Re-render intro if we're still on that page to show the loaded name
     if(currentId==='intro') render();
+    // Mark assessment as Not completed when page opens
+    if(leadId){
+      fetch(WEBHOOK+'crm.lead.update?ID='+leadId+'&fields[UF_CRM_1780906448]=Not+completed').catch(()=>{});
+    }
   }}catch(e){console.log('Could not load lead:',e);}
 }
 
@@ -1427,6 +1432,8 @@ async function saveEndCall() {
       // Add to Activity Feed
     const commentUrl = WEBHOOK + 'crm.timeline.comment.add';
     await fetch(commentUrl, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({fields:{ENTITY_TYPE:'lead',ENTITY_ID:leadId,COMMENT:summary}})});
+    // Mark assessment as Partial
+    await fetch(WEBHOOK+'crm.lead.update?ID='+leadId+'&fields[UF_CRM_1780906448]=Partial');
     }
     btn.textContent = '✅ Saved!';
     setTimeout(() => closeEndCall(), 1500);
