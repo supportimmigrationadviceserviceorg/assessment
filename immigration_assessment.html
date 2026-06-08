@@ -957,7 +957,16 @@ async function submitAll(){
   fields['STATUS_ID']='TypeForm';
   fields['UF_CRM_1780826001']='Y';
   if(!leadId){showResult(true,summary,pathways);return;}
-  try{const url=`${WEBHOOK}crm.lead.update?ID=${leadId}&`+Object.entries(fields).map(([k,v])=>`fields[${k}]=${encodeURIComponent(v)}`).join('&');const res=await fetch(url);const data=await res.json();if(data.result){showResult(true,summary,pathways);}else{showResult(false,summary,pathways,JSON.stringify(data.error_description||data));}}catch(e){showResult(false,summary,pathways,e.message);}
+  try{
+    // Update lead fields
+    const updateUrl=`${WEBHOOK}crm.lead.update?ID=${leadId}&`+Object.entries(fields).map(([k,v])=>`fields[${k}]=${encodeURIComponent(v)}`).join('&');
+    await fetch(updateUrl);
+    // Add to Activity Feed (right side timeline)
+    const commentUrl=WEBHOOK+'crm.timeline.comment.add';
+    const commentRes=await fetch(commentUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:{ENTITY_TYPE:'lead',ENTITY_ID:leadId,COMMENT:summary}})});
+    const commentData=await commentRes.json();
+    if(commentData.result){showResult(true,summary,pathways);}else{showResult(true,summary,pathways);}
+  }catch(e){showResult(false,summary,pathways,e.message);}
 }
 
 function showResult(success,summary,pathways,err){
@@ -1245,8 +1254,9 @@ async function saveEndCall() {
 
   try {
     if(leadId) {
-      const url = WEBHOOK + 'crm.lead.update?ID=' + leadId + '&fields[COMMENTS]=' + encodeURIComponent(summary);
-      await fetch(url);
+      // Add to Activity Feed
+    const commentUrl = WEBHOOK + 'crm.timeline.comment.add';
+    await fetch(commentUrl, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({fields:{ENTITY_TYPE:'lead',ENTITY_ID:leadId,COMMENT:summary}})});
     }
     btn.textContent = '✅ Saved!';
     setTimeout(() => closeEndCall(), 1500);
