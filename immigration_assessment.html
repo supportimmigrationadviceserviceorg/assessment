@@ -486,8 +486,8 @@ Sound good?`})}
       <div class="q-title">Do you have any children under the age of 21?</div>
       ${block({k:'read',l:'📞 Read to client',t:`In many immigration processes, dependent children under 21 may be included together with their parents — depending on the category and individual circumstances.`})}
       <div style="display:flex;gap:8px;margin-bottom:10px">
-        <button class="opt ${answers['has_children']==='Yes'?'sel':''}" style="flex:1" onclick="selOpt('has_children','Yes','q3c',this);render()">Yes</button>
-        <button class="opt ${answers['has_children']==='No'?'sel':''}" style="flex:1" onclick="selOpt('has_children','No','q3c',this);render()">No</button>
+        <button class="opt ${answers['has_children']==='Yes'?'sel':''}" style="flex:1" onclick="answers['has_children']='Yes';render()">Yes</button>
+        <button class="opt ${answers['has_children']==='No'?'sel':''}" style="flex:1" onclick="answers['has_children']='No';render()">No</button>
       </div>
       ${answers['has_children']==='Yes' ? getChildrenBlock() : ''}
       <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" ${!answers['has_children']?'disabled':''} onclick="saveChildren('q4')">Continue →</button></div>`;
@@ -573,8 +573,6 @@ Sound good?`})}
     // Auto-calculate if amount already entered
     if(incomeAmt) setTimeout(()=>calcIncomeUSD(localCur),50);
 
-  } else if(currentId==='q7') {
-  } else if(currentId==='q7') {
   } else if(currentId==='q7') {
     setProgress(7,'Experience');
     const sel=answers['q7']||null;
