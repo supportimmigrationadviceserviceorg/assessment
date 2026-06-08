@@ -1139,12 +1139,13 @@ function renderSpouseC(f){
   for(var i=0;i<filtered.length;i++){
     var c=filtered[i];
     var sel=answers['spouse_country']===c?' csel':'';
-    html+='<div class="ci'+sel+'" data-country="'+i+'" onclick="pickSpouseCountry('+i+','+JSON.stringify(fl)+')">'+c+'</div>';
+    html+='<div class="ci'+sel+'" data-idx="'+i+'" data-filter="'+fl.replace(/"/g,'&quot;')+'" onclick="pickSpouseCountry(this)">'+c+'</div>';
   }
   return html;
 }
-function pickSpouseCountry(idx,filter){
-  var fl=filter.toLowerCase();
+function pickSpouseCountry(el){
+  var idx=parseInt(el.getAttribute('data-idx'));
+  var fl=el.getAttribute('data-filter')||'';
   var filtered=COUNTRIES.filter(function(c){return c.toLowerCase().indexOf(fl)>=0;});
   if(filtered[idx]) selSpouseCountry(filtered[idx]);
 }
