@@ -435,13 +435,18 @@ Sound good?`})}
   } else if(currentId==='q3') {
     setProgress(3,'Marital Status');
     const sel=answers['q3']||null;
-    const opts=['Single','Married','Divorced','Widowed'].map(o=>`<button class="opt ${sel===o?'sel':''}" onclick="selOpt('q3','${o}','q3b',this)">${o}</button>`).join('');
+    const q3opts=['Single','Married','Divorced','Widowed'];
+    const opts=q3opts.map(function(o){
+      const isSel=sel===o?'sel':'';
+      const nxt=o==='Married'?'q3b':'q3c';
+      return '<button class="opt '+isSel+'" onclick="selOpt(\'q3\',\''+o+'\',\''+nxt+'\',this)">'+o+'</button>';
+    }).join('');
     main.innerHTML=`
       <div class="q-num">Question 3 of ${totalQ}</div>
       <div class="q-title">${firstName ? firstName+", what" : "What"} is your marital status?</div>
       <div class="opts">${opts}</div>
       ${sel&&['Single','Married'].includes(sel)?chemistryBlock('q3',sel):''}
-      <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext('q3b')">Continue →</button></div>`;
+      <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" id="btn-next" ${!sel?'disabled':''} onclick="goNext(answers['q3']==='Married'?'q3b':'q3c')">Continue →</button></div>`;
 
   } else if(currentId==='q3b') {
     setProgress(3,'Family Details');
@@ -566,9 +571,11 @@ Sound good?`})}
       </div>
       <div id="income-usd" style="font-size:14px;color:#16a34a;font-weight:700;min-height:24px;margin-bottom:12px;padding:8px 12px;background:#f0fdf4;border-radius:8px">${savedUSD}</div>
       ${block({k:'read',l:'📞 Say to client',t:'That gives us a great picture of your financial profile. In the U.S., professionals with your background typically earn significantly more — and that is exactly the kind of opportunity we want to help you access.'})}
+      <div class="lbl" style="margin-top:10px">Exact monthly income in USD <span style="color:#dc2626">*</span> (required)</div>
+      <input class="inp" type="number" id="income_exact_usd" placeholder="Enter exact amount in USD..." value="${answers['income_exact_usd']||''}" oninput="answers['income_exact_usd']=this.value;document.getElementById('btn-income-next').disabled=!this.value;" style="border:${!answers['income_exact_usd']?'1.5px solid #fca5a5':'1px solid #d1d5db'}"/>
       <div class="lbl" style="margin-top:8px">Notes (optional)</div>
       <textarea class="textarea" style="min-height:44px;font-size:12px" placeholder="Any notes about income..." onchange="answers['fu_income']=this.value">${answers['fu_income']||''}</textarea>
-      <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" onclick="saveIncome('q7')">Continue →</button></div>`;
+      <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button id="btn-income-next" class="btn-next" ${!answers['income_exact_usd']?'disabled':''} onclick="saveIncome('q7')">Continue →</button></div>`;
     // Auto-calculate if amount already entered
     if(incomeAmt) setTimeout(()=>calcIncomeUSD(localCur),50);
 
@@ -1025,6 +1032,16 @@ async function submitAll(){
   const summary=['=== IMMIGRATION PATHWAY ASSESSMENT ===',`Pathway #1: ${pathways[0]?.name||''}`,`Pathway #2: ${pathways[1]?.name||''}`,`Pathway #3: ${pathways[2]?.name||''}`,`Client preferred: ${answers['pref_pathway']||'Not selected'}`,`Client reason: ${answers['client_pref_reason']||''}`,`Notes: ${answers['client_goal']||''}`,``,`=== ANSWERS ===`,`Age: ${answers['q1']||''}`,`Exact Age: ${answers['exact_age']||''}`,`Country of Residence: ${answers['q2']||''}`,`Country of Birth: ${answers['q2b']||''}`,answers['residence_duration']?`Time in ${answers['q2']||'residence'}: ${answers['residence_duration']}`:'',`Country: ${answers['q2']||''}`,`Marital Status: ${answers['q3']||''}`,answers['q3']==='Married'?`Spouse: ${answers['spouse_name']||''} | Country: ${answers['spouse_country']||''} | Edu: ${answers['spouse_edu']||''} | Exp: ${answers['spouse_exp']||''} | Immigrating: ${answers['spouse_immigrate']||''}`:'',`Children under 21: ${answers['has_children']||''} ${answers['children_count']?'('+answers['children_count']+')':''}` ,`Primary Goal: ${answers['q4']||''}`,`Education: ${answers['q5']||''}`,`Field: ${answers['q6']||''}`,`Monthly Income: ${answers['income_amount']||''} ${answers['income_currency']||''} (≈ $${answers['income_usd']||''} USD)`,`Experience: ${answers['q7']||''}`,`Leadership: ${answers['q8']||''}`,`Recognition: ${(answers['q9']||[]).join(', ')}`,`Situation: ${answers['q10']||''}`,`Business Interest: ${answers['q11']||''}`,`Investment Level: ${answers['q12']||''}`,`Study Interest: ${answers['q13']||''}`,`Family in USA: ${answers['q14']||''}`,``,`Agent intro notes: ${answers['intro_notes']||''}`,answers['objections_raised']&&answers['objections_raised'].length?`Objections raised: ${answers['objections_raised'].join(' | ')}`:''].filter(l=>l!==undefined).join('\n');
   const fields={COMMENTS:summary};
   fields['UF_CRM_1780906448']='13330';
+  // Income range field
+  const incomeUSD = parseInt(answers['income_usd']||0);
+  if(incomeUSD > 0) {
+    if(incomeUSD < 1000) fields['UF_CRM_1484911973']='0-999';
+    else if(incomeUSD < 2500) fields['UF_CRM_1484911973']='1000-2499';
+    else if(incomeUSD < 4000) fields['UF_CRM_1484911973']='2500-3999';
+    else if(incomeUSD < 6000) fields['UF_CRM_1484911973']='4000-5999';
+    else if(incomeUSD < 10000) fields['UF_CRM_1484911973']='6000-9999';
+    else fields['UF_CRM_1484911973']='+10000';
+  }
   if(answers['q2'])fields['UF_CRM_1449131599']=answers['q2'];
   if(answers['q3']&&MARITAL_IDS[answers['q3']])fields['UF_CRM_1500181612']=MARITAL_IDS[answers['q3']];
   if(answers['q5']&&EDU_IDS[answers['q5']])fields['UF_CRM_1484914608']=EDU_IDS[answers['q5']];
@@ -1141,6 +1158,15 @@ function calcIncomeUSD(forceCur){
       answers['income_amount']=amt;
       answers['income_currency']=cur;
       answers['income_usd']=usd;
+      // Auto-fill exact USD field
+      const exactField=document.getElementById('income_exact_usd');
+      if(exactField && !exactField.value) { 
+        exactField.value=usd; 
+        answers['income_exact_usd']=String(usd); 
+        exactField.style.border='1px solid #d1d5db';
+        const btn=document.getElementById('btn-income-next');
+        if(btn) btn.disabled=false;
+      }
     } else {
       el.textContent='';
     }
@@ -1510,6 +1536,7 @@ async function generateAllResponses() {
     {key:'not_ready', q:'I am not ready yet'},
     {key:'few_months', q:'Maybe in a few months'},
     {key:'sort_things', q:'I need to sort some things out first'},
+    {key:'no_card', q:'I don\'t have my card with me'},
     {key:'real_chance', q:'Do you think I really have a chance?'},
     {key:'english', q:'My English is not good enough'},
     {key:'too_old', q:'I am too old for this'},
@@ -1649,6 +1676,7 @@ function getPersonalizedAnswer(key) {
 
     sort_things: namePrefix + "Of course — life is busy and complicated, I understand that. What I can tell you is that opening your file does not lock you into a timeline. It simply means an attorney reviews your case and a consultant is assigned to you. You move forward at your own pace. Think of it as securing your place while you handle everything else. The spot is reserved for you. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?",
 
+    no_card: namePrefix + 'No problem at all. Most banks today allow you to access your card details directly through their banking app or card provider app. Just open the app and you should find your card information there. Your bank may send you a one-time password or a quick verification to confirm your identity — that is completely normal and it is there to protect you. All our payments are processed securely and verified by the bank to ensure that only the cardholder can approve the transaction. I am going to send you a secure payment link right now. When you open it, you will see the exact amount, and your bank may send you a text message or app notification to approve it. I will stay on the line and guide you through every step.',
     real_chance: namePrefix + "Based on everything you shared today — your background, your goals, your profile — yes, there is a real pathway here. I would not be having this conversation with you if there was not. Now, I cannot make legal guarantees — only the attorney review can give you that certainty. But the assessment we did today is based on real immigration criteria, and your profile matched. That is not something that happens for everyone. I am genuinely happy for you — I want to see you succeed. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?",
 
     english: namePrefix + "Your English does not need to be perfect — and honestly, that is not what immigration is based on. The process is handled through documents, forms, and your personal consultant who will guide you through every single step. Many of our most successful clients had limited English when they started. Your success is our success. OK? And to activate your case with our immigration attorney — what do you prefer to use, Visa or Mastercard?",
@@ -1690,6 +1718,7 @@ function renderObj() {
       { key:'not_ready', q:'I am not ready yet' },
       { key:'few_months', q:'Maybe in a few months' },
       { key:'sort_things', q:'I need to sort some things out first' },
+      { key:'no_card', q:'I don\'t have my card with me' },
     ]},
     { label: '🌍 About eligibility', items: [
       { key:'real_chance', q:'Do you think I really have a chance?' },
