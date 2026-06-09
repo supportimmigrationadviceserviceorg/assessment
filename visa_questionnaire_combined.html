@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>U.S. Immigration Assessment — Full Questionnaire</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f4f8; min-height: 100vh; padding: 20px 16px 60px; color: #1a1a2e; }
+.container { max-width: 660px; margin: 0 auto; }
+.header { text-align: center; padding: 28px 0 22px; }
+.header-flag { font-size: 30px; margin-bottom: 8px; }
+.header-title { font-size: 21px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
+.header-sub { font-size: 12px; color: #6b7280; }
+.progress-wrap { margin-bottom: 24px; }
+.progress-meta { display: flex; justify-content: space-between; font-size: 12px; color: #6b7280; margin-bottom: 6px; }
+.progress-bar { height: 5px; background: #e2e8f0; border-radius: 3px; }
+.progress-fill { height: 5px; background: linear-gradient(90deg, #2563eb, #3b82f6); border-radius: 3px; transition: width 0.4s; }
+.card { background: #fff; border-radius: 14px; padding: 24px 22px; box-shadow: 0 1px 6px rgba(0,0,0,0.07); margin-bottom: 12px; }
+.section-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #2563eb; margin-bottom: 16px; display: flex; align-items: center; gap: 6px; }
+.section-eyebrow::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
+.phase-badge { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 10px; border-radius: 20px; margin-bottom: 14px; }
+.phase-1 { background: #eff6ff; color: #1d4ed8; }
+.phase-2 { background: #f0fdf4; color: #15803d; }
+.q-num { font-size: 11px; font-weight: 600; color: #9ca3af; margin-bottom: 4px; }
+.q-title { font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 6px; line-height: 1.4; }
+.q-hint { font-size: 12px; color: #6b7280; margin-bottom: 14px; line-height: 1.5; font-style: italic; }
+.q-example { font-size: 11px; color: #9ca3af; background: #f9fafb; border-left: 3px solid #e5e7eb; padding: 8px 12px; border-radius: 0 6px 6px 0; margin-bottom: 12px; line-height: 1.5; }
+.inp { width: 100%; padding: 10px 13px; border: 1.5px solid #d1d5db; border-radius: 9px; font-size: 13px; color: #111827; background: #fff; transition: border-color 0.15s; margin-bottom: 10px; font-family: inherit; }
+.inp:focus { outline: none; border-color: #2563eb; }
+textarea.inp { min-height: 100px; resize: vertical; line-height: 1.6; }
+.inp-label { font-size: 11px; font-weight: 600; color: #374151; margin-bottom: 4px; display: block; }
+.opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.opts.col1 { grid-template-columns: 1fr; }
+.opt { padding: 10px 13px; border: 1.5px solid #e5e7eb; border-radius: 9px; background: #fff; color: #374151; font-size: 13px; cursor: pointer; text-align: left; transition: all 0.15s; line-height: 1.4; width: 100%; }
+.opt:hover { border-color: #93c5fd; background: #eff6ff; }
+.opt.sel { border-color: #2563eb; background: #eff6ff; color: #1d4ed8; font-weight: 600; }
+.check-opts { display: flex; flex-direction: column; gap: 7px; margin-bottom: 12px; }
+.check-opt { display: flex; align-items: flex-start; gap: 10px; padding: 10px 13px; border: 1.5px solid #e5e7eb; border-radius: 9px; background: #fff; cursor: pointer; transition: all 0.15s; }
+.check-opt:hover { border-color: #93c5fd; background: #f8faff; }
+.check-opt.sel { border-color: #2563eb; background: #eff6ff; }
+.check-box { width: 18px; height: 18px; border: 2px solid #d1d5db; border-radius: 4px; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; font-size: 11px; transition: all 0.15s; }
+.check-opt.sel .check-box { background: #2563eb; border-color: #2563eb; color: #fff; }
+.check-text { font-size: 13px; color: #374151; line-height: 1.4; }
+.check-opt.sel .check-text { color: #1d4ed8; font-weight: 500; }
+.nav { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; gap: 10px; }
+.btn-back { background: none; border: 1.5px solid #d1d5db; border-radius: 9px; padding: 10px 18px; font-size: 13px; color: #6b7280; cursor: pointer; }
+.btn-back:hover { border-color: #9ca3af; }
+.btn-next { background: #2563eb; border: none; border-radius: 9px; padding: 10px 24px; font-size: 13px; color: #fff; cursor: pointer; font-weight: 600; flex: 1; }
+.btn-next:hover { background: #1d4ed8; }
+.btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
+.search-wrap { position: relative; margin-bottom: 10px; }
+.search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: #9ca3af; pointer-events: none; }
+.search-inp { width: 100%; padding: 10px 13px 10px 32px; border: 1.5px solid #d1d5db; border-radius: 9px; font-size: 13px; color: #374151; }
+.search-inp:focus { outline: none; border-color: #2563eb; }
+.country-list { border: 1.5px solid #e5e7eb; border-radius: 9px; max-height: 200px; overflow-y: auto; background: #fff; margin-bottom: 12px; }
+.ci { padding: 9px 13px; font-size: 13px; color: #374151; cursor: pointer; border-bottom: 1px solid #f3f4f6; }
+.ci:last-child { border-bottom: none; }
+.ci:hover { background: #f9fafb; }
+.ci.csel { background: #eff6ff; color: #1d4ed8; font-weight: 500; }
+.pill { display: inline-flex; align-items: center; gap: 5px; background: #eff6ff; color: #1d4ed8; border-radius: 20px; padding: 4px 11px; font-size: 12px; margin-bottom: 8px; }
+.pill-x { cursor: pointer; font-size: 14px; line-height: 1; }
+.profession-list { border: 1.5px solid #e5e7eb; border-radius: 9px; max-height: 180px; overflow-y: auto; background: #fff; margin-bottom: 8px; }
+.pi { padding: 8px 13px; font-size: 13px; color: #374151; cursor: pointer; border-bottom: 1px solid #f3f4f6; }
+.pi:hover { background: #f9fafb; }
+.pi.pis { background: #eff6ff; color: #1d4ed8; font-weight: 500; }
+.optional-badge { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 10px; background: #f3f4f6; color: #9ca3af; border: 1px solid #e5e7eb; margin-left: 6px; vertical-align: middle; }
+.welcome-bar { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+.welcome-avatar { width: 32px; height: 32px; background: #2563eb; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.welcome-name { font-size: 13px; font-weight: 600; color: #1d4ed8; }
+.welcome-sub { font-size: 11px; color: #3b82f6; }
+.autofill-note { font-size: 11px; color: #16a34a; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 7px; padding: 6px 10px; margin-bottom: 10px; }
+.saving-overlay { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.88); z-index: 999; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
+.saving-overlay.show { display: flex; }
+.saving-spinner { width: 34px; height: 34px; border: 3px solid #e5e7eb; border-top-color: #2563eb; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.saving-text { font-size: 13px; color: #6b7280; font-weight: 500; }
+.thankyou { text-align: center; padding: 16px 0; }
+.thankyou-icon { font-size: 48px; margin-bottom: 14px; }
+.thankyou-title { font-size: 21px; font-weight: 700; color: #111827; margin-bottom: 8px; }
+.thankyou-sub { font-size: 13px; color: #6b7280; line-height: 1.7; margin-bottom: 20px; }
+.thankyou-box { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 16px 18px; font-size: 13px; color: #0369a1; line-height: 1.6; text-align: left; }
+.email-step { text-align: center; padding: 8px 0; }
+.email-icon { font-size: 40px; margin-bottom: 14px; }
+.email-title { font-size: 19px; font-weight: 700; margin-bottom: 6px; }
+.email-sub { font-size: 13px; color: #6b7280; margin-bottom: 20px; line-height: 1.6; }
+.email-status { font-size: 12px; margin-top: 8px; min-height: 18px; line-height: 1.5; }
+.email-status.ok { color: #16a34a; }
+.email-status.err { color: #dc2626; }
+.email-status.loading { color: #6b7280; }
+@media (max-width: 480px) { .card { padding: 18px 14px; } .opts { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="saving-overlay" id="saving-overlay">
+  <div class="saving-spinner"></div>
+  <div class="saving-text" id="saving-text">Saving your answers...</div>
+</div>
+<div class="container">
+  <div class="header">
+    <div class="header-flag">🇺🇸</div>
+    <div class="header-title">U.S. Immigration Assessment</div>
+    <div class="header-sub">Full Questionnaire &nbsp;·&nbsp; Estimated time: 45–60 minutes</div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-meta"><span id="progress-label">Getting started</span><span id="progress-pct">0%</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+  <div id="main"></div>
+</div>
+<script>
+const WEBHOOK = 'https://immiworld.org/rest/147/47yrflms2cje1cbe/';
+
+const COUNTRIES = ["Afghanistan","Albania","Algeria","Andorra","Angola","Argentina","Armenia","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Bolivia","Bosnia and Herzegovina","Botswana","Brazil","British Virgin Islands","Brunei","Bulgaria","Cambodia","Cameroon","Canada","Chile","China","Colombia","Costa Rica","Croatia","Cuba","Cyprus","Czech Republic","Denmark","Dominican Republic","Ecuador","Egypt","El Salvador","Eritrea","Estonia","Ethiopia","Fiji","Finland","France","Georgia","Germany","Ghana","Greece","Guatemala","Haiti","Honduras","Hong Kong","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Libya","Lithuania","Luxembourg","Macau","Madagascar","Malaysia","Maldives","Mali","Malta","Mexico","Moldova","Mongolia","Montenegro","Morocco","Mozambique","Myanmar (Burma)","Namibia","Nepal","Netherlands","New Zealand","Nicaragua","Nigeria","North Korea","Norway","Oman","Pakistan","Palestine","Panama","Paraguay","Peru","Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","Saudi Arabia","Senegal","Serbia","Singapore","Slovakia","Slovenia","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","Sudan","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Trinidad and Tobago","Tunisia","Turkey","Turkmenistan","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"];
+
+const PROFESSIONS = ["Accountant","Actor / Performer","Administrative Worker","Advertising Manager","Architect","Art Director","Artist","Attorney / Lawyer","Auditor","Banker","Biochemist","Biologist","Biotechnologist","Business Analyst","Business Owner","Chemical Engineer","Civil Engineer","Coach / Trainer","Computer Engineer","Computer Programmer","Construction Manager","Consultant","Cook / Chef","Creative Director","Data Analyst","Dentist","Designer (Graphic / Industrial / Fashion)","Doctor / Physician","Economist","Educator / Teacher","Electrical Engineer","Entrepreneur","Environmental Scientist","Event Manager","Financial Analyst","Financial Officer","Geologist","Government Official","HR Manager","Hotel Manager","Insurance Agent","Interior Designer","Investor","IT Manager","Journalist / Reporter","Judge","Lecturer / Professor","Logistics Manager","Marine Engineer","Marketing Manager","Mechanical Engineer","Midwife","Military Officer","Musician","Nurse","Nutritionist","Operations Manager","Pharmacist","Photographer","Physicist","Physiotherapist","Pilot","Police Officer","Project Manager","Psychiatrist","Psychologist","Public Relations Manager","Real Estate Agent","Researcher","Sales Manager","Social Worker","Software Developer","Statistician","Surgeon","Systems Analyst","Tax Adviser","Teacher (Primary / Secondary)","Telecommunications Engineer","Veterinarian","Web Developer","Not Currently Employed","Other"];
+
+const EDU_OPTS_S2 = ['Primary school only','High School, no degree','High School degree','Vocational School','Some university Courses','University Degree','Some Graduate Level Courses',"Master's Degree",'Some Doctorate Level Courses','Doctorate Degree'];
+const EDU_IDS = {'Primary school only':'250','High School, no degree':'251','High School degree':'252','Vocational School':'253','Some university Courses':'254','University Degree':'12567','Some Graduate Level Courses':'256',"Master's Degree":'12568','Some Doctorate Level Courses':'267','Doctorate Degree':'268'};
+const VISA_STATUS = { RECEIVED: '3139' };
+const CRM = {
+  EDUCATION: 'UF_CRM_1465285867', EDUCATION2: 'UF_CRM_1656684580', EDUCATION3: 'UF_CRM_64CF881B8596B',
+  MARITAL: 'UF_CRM_64CBB649310F0', MARITAL2: 'UF_CRM_1500181716',
+  PROFESSION: 'UF_CRM_1484918121', INCOME: 'UF_CRM_1484917802',
+  TOP_REASON: 'UF_CRM_1648031237', VISA_ASSESSMENT: 'UF_CRM_1494160345',
+  NUM_CHILDREN: 'UF_CRM_5663EF24DD8A5', SPOUSE_FNAME: 'UF_CRM_5663EF2587EEC',
+  SPOUSE_LNAME: 'UF_CRM_146529634', SPOUSE_EDU: 'UF_CRM_1465286312',
+  BIRTH_COUNTRY: 'UF_CRM_566016C18B2CC',
+};
+
+// ── State ──
+const urlParams = new URLSearchParams(window.location.search);
+let leadId = urlParams.get('lead_id') || null;
+let contactId = urlParams.get('contact_id') || null;
+let contactEmail = '', contactName = '', firstName = '';
+let answers = {};
+let stepHistory = [];
+let currentStep = leadId ? 'loading' : 'email';
+let leadPreloaded = false;
+
+// ── Steps ──
+// Phase 1 = S1 questions (from immigration_assessment), Phase 2 = deep questions
+const TOTAL_STEPS = 28;
+const STEP_LABELS = {
+  email:'Getting started', loading:'Loading your file',
+  // Phase 1
+  s1_age:'Your Age', s1_country:'Country', s1_birth:'Country of Birth',
+  s1_marital:'Marital Status', s1_spouse:'Spouse Details', s1_children:'Children',
+  s1_goal:'Primary Goal', s1_edu:'Education Level', s1_profession:'Profession',
+  s1_income:'Monthly Income', s1_experience:'Experience', s1_leadership:'Leadership',
+  s1_situation:'Current Situation', s1_business:'Business Interest', s1_investment:'Investment',
+  s1_study:'Study Interest', s1_family_usa:'Family in U.S.',
+  // Phase 2
+  s2_edu_level:'Detailed Education', s2_edu_detail:'Education Details',
+  s2_awards_q:'Academic Awards', s2_awards:'Awards Detail',
+  s2_career:'Career History', s2_unique_q:'Unique Expertise', s2_unique_detail:'Expertise Detail',
+  s2_recognition:'Achievements', s2_recognition_detail:'Recognition Detail',
+  s2_judging:'Judging Roles', s2_projects:'Impact Projects', s2_impact:'Broader Impact',
+  s2_business_q:'Business Plans', s2_assets:'Asset Documentation',
+  s2_why_us:'Why the U.S.', s2_vision:'5-Year Vision', s2_intention:'Long-term Intention',
+  s2_city:'City Preference', s2_us_family:'U.S. Family', s2_extra:'Additional Info',
+  s2_final:'Final Thoughts', thankyou:'Complete'
+};
+
+function setProgress(id) {
+  const ordered = ['email','loading','s1_age','s1_country','s1_birth','s1_marital','s1_spouse','s1_children','s1_goal','s1_edu','s1_profession','s1_income','s1_experience','s1_leadership','s1_situation','s1_business','s1_investment','s1_study','s1_family_usa','s2_edu_level','s2_edu_detail','s2_awards_q','s2_awards','s2_career','s2_unique_q','s2_unique_detail','s2_recognition','s2_recognition_detail','s2_judging','s2_projects','s2_impact','s2_business_q','s2_assets','s2_why_us','s2_vision','s2_intention','s2_city','s2_us_family','s2_extra','s2_final','thankyou'];
+  const i = ordered.indexOf(id);
+  const total = ordered.length - 3;
+  const pct = id === 'thankyou' ? 100 : id === 'email' || id === 'loading' ? 0 : Math.round(((i - 2) / total) * 100);
+  document.getElementById('progress-fill').style.width = Math.max(0,pct) + '%';
+  document.getElementById('progress-pct').textContent = Math.max(0,pct) + '%';
+  document.getElementById('progress-label').textContent = STEP_LABELS[id] || '';
+}
+
+function render() {
+  setProgress(currentStep);
+  const main = document.getElementById('main');
+  const map = {
+    email: renderEmail, loading: renderLoading,
+    s1_age: renderS1Age, s1_country: renderS1Country, s1_birth: renderS1Birth,
+    s1_marital: renderS1Marital, s1_spouse: renderS1Spouse, s1_children: renderS1Children,
+    s1_goal: renderS1Goal, s1_edu: renderS1Edu, s1_profession: renderS1Profession,
+    s1_income: renderS1Income, s1_experience: renderS1Experience,
+    s1_leadership: renderS1Leadership, s1_situation: renderS1Situation,
+    s1_business: renderS1Business, s1_investment: renderS1Investment,
+    s1_study: renderS1Study, s1_family_usa: renderS1FamilyUSA,
+    s2_edu_level: renderS2EduLevel, s2_edu_detail: renderS2EduDetail,
+    s2_awards_q: renderS2AwardsQ, s2_awards: renderS2Awards,
+    s2_career: renderS2Career, s2_unique_q: renderS2UniqueQ, s2_unique_detail: renderS2UniqueDetail,
+    s2_recognition: renderS2Recognition, s2_recognition_detail: renderS2RecognitionDetail,
+    s2_judging: renderS2Judging, s2_projects: renderS2Projects, s2_impact: renderS2Impact,
+    s2_business_q: renderS2BusinessQ, s2_assets: renderS2Assets,
+    s2_why_us: renderS2WhyUS, s2_vision: renderS2Vision,
+    s2_intention: renderS2Intention, s2_city: renderS2City,
+    s2_us_family: renderS2USFamily, s2_extra: renderS2Extra,
+    s2_final: renderS2Final, thankyou: renderThankYou
+  };
+  if(map[currentStep]) map[currentStep](main);
+}
+
+function goNext(next) { stepHistory.push(currentStep); currentStep = next; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function goBack() { if(!stepHistory.length) return; currentStep = stepHistory.pop(); render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function selSingle(key, val) { answers[key] = val; render(); }
+function saveAndGo(key, inputId, next) { const el = document.getElementById(inputId); if(el) answers[key] = el.value.trim(); goNext(next); }
+
+function welcomeBar() {
+  if(!contactName) return '';
+  const initials = contactName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+  return `<div class="welcome-bar"><div class="welcome-avatar">${initials}</div><div><div class="welcome-name">${contactName}</div><div class="welcome-sub">${contactEmail}</div></div></div>`;
+}
+
+function card(eyebrow, content, phase) {
+  const badge = phase === 1 ? '<span class="phase-badge phase-1">📋 Part 1 — Your Profile</span>' : phase === 2 ? '<span class="phase-badge phase-2">📝 Part 2 — Detailed Assessment</span>' : '';
+  return `<div class="card">${welcomeBar()}${badge}<div class="section-eyebrow">${eyebrow}</div>${content}</div>`;
+}
+function nav(backFn, nextFn, nextLabel, disabled) {
+  const b = backFn ? `<button class="btn-back" onclick="${backFn}">← Back</button>` : `<span></span>`;
+  return `<div class="nav">${b}<button class="btn-next" ${disabled?'disabled':''} onclick="${nextFn}">${nextLabel||'Continue →'}</button></div>`;
+}
+function autofillNote(text) {
+  return `<div class="autofill-note">✅ Pre-filled from your profile: ${text}</div>`;
+}
+
+// ── LOADING ──
+function renderLoading(main) {
+  main.innerHTML = `<div class="card" style="text-align:center;padding:40px 20px"><div class="saving-spinner" style="margin:0 auto 16px"></div><div style="font-size:14px;color:#6b7280">Loading your file...</div></div>`;
+  loadAll();
+}
+
+async function loadAll() {
+  try {
+    // Step 1: if contact_id in URL → load contact directly
+    if(contactId) {
+      await loadContactFields(contactId);
+      currentStep = contactEmail ? 'email' : 'email';
+      render(); return;
+    }
+    // Step 2: if lead_id → get lead → find contact by email
+    if(leadId) {
+      const res = await fetch(`${WEBHOOK}crm.lead.get?ID=${leadId}`);
+      const data = await res.json();
+      if(data.result) {
+        const ld = data.result;
+        contactName = [ld.NAME, ld.LAST_NAME].filter(Boolean).join(' ') || '';
+        firstName = contactName.split(' ')[0] || '';
+        contactEmail = ld.EMAIL?.[0]?.VALUE || '';
+        if(contactEmail) answers['email'] = contactEmail;
+        // Pre-fill from lead fields
+        prefillFromLead(ld);
+        // Try to find linked contact
+        if(contactEmail) {
+          try {
+            const cr = await fetch(`${WEBHOOK}crm.contact.list?filter[EMAIL]=${encodeURIComponent(contactEmail)}&select[]=ID`);
+            const cd = await cr.json();
+            if(cd.result && cd.result.length > 0) {
+              contactId = cd.result[0].ID;
+              await loadContactFields(contactId);
+            }
+          } catch(e){}
+        }
+      }
+    }
+  } catch(e){}
+  currentStep = 'email';
+  render();
+}
+
+// Load all fields from Contact and pre-fill answers
+async function loadContactFields(cid) {
+  try {
+    const res = await fetch(`${WEBHOOK}crm.contact.get?ID=${cid}`);
+    const data = await res.json();
+    if(!data.result) return;
+    const c = data.result;
+
+    // Basic info
+    if(!contactName) contactName = [c.NAME, c.LAST_NAME].filter(Boolean).join(' ') || '';
+    if(!firstName) firstName = contactName.split(' ')[0] || '';
+    if(!contactEmail) contactEmail = c.EMAIL?.[0]?.VALUE || '';
+    if(contactEmail) answers['email'] = contactEmail;
+
+    // ── Map Contact fields → answers ──
+
+    // Country of birth / residence
+    if(c.UF_CRM_566016C18B2CC) answers['s1_birth'] = c.UF_CRM_566016C18B2CC;
+    if(c.UF_CRM_1449131599) answers['s1_country'] = c.UF_CRM_1449131599; // from lead field if exists
+
+    // Marital status (string field)
+    if(c.UF_CRM_64CBB649310F0) {
+      const ms = c.UF_CRM_64CBB649310F0;
+      const validStatuses = ['Single','Married','Divorced','Widowed'];
+      const matched = validStatuses.find(s => ms.toLowerCase().includes(s.toLowerCase()));
+      if(matched) answers['s1_marital'] = matched;
+    }
+    if(c.UF_CRM_1500181716 && !answers['s1_marital']) answers['s1_marital'] = c.UF_CRM_1500181716;
+
+    // Education
+    if(c.UF_CRM_1465285867) {
+      // It's a list ID — reverse map
+      const eduRev = {'250':'Primary school only','251':'High School, no degree','252':'High School degree','253':'Vocational School','254':'Some university Courses','12567':'University Degree','256':'Some Graduate Level Courses','12568':"Master's Degree",'267':'Some Doctorate Level Courses','268':'Doctorate Degree'};
+      const mapped = eduRev[String(c.UF_CRM_1465285867)];
+      if(mapped) { answers['s2_edu_level'] = mapped; }
+    }
+    if(c.UF_CRM_1656684580) answers['s2_edu_level'] = answers['s2_edu_level'] || c.UF_CRM_1656684580;
+    if(c.UF_CRM_64CF881B8596B) answers['s2_edu_level'] = answers['s2_edu_level'] || c.UF_CRM_64CF881B8596B;
+
+    // Profession
+    if(c.UF_CRM_1484918121) answers['s1_profession'] = c.UF_CRM_1484918121;
+
+    // Income
+    if(c.UF_CRM_1484917802) answers['income_prefilled'] = c.UF_CRM_1484917802;
+
+    // Spouse
+    if(c.UF_CRM_5663EF2587EEC) answers['spouse_fname'] = c.UF_CRM_5663EF2587EEC;
+    if(c.UF_CRM_146529634) answers['spouse_lname'] = c.UF_CRM_146529634;
+    if(c.UF_CRM_1596458290) answers['spouse_birth_country'] = c.UF_CRM_1596458290;
+    if(c.UF_CRM_1465286312) {
+      const eduRev = {'250':'Primary school only','251':'High School, no degree','252':'High School degree','253':'Vocational School','254':'Some university Courses','12567':'University Degree','256':'Some Graduate Level Courses','12568':"Master's Degree",'267':'Some Doctorate Level Courses','268':'Doctorate Degree'};
+      const mapped = eduRev[String(c.UF_CRM_1465286312)];
+      if(mapped) answers['spouse_edu'] = mapped;
+    }
+
+    // Number of children
+    if(c.UF_CRM_5663EF24DD8A5) {
+      answers['children_count'] = c.UF_CRM_5663EF24DD8A5;
+      if(parseInt(c.UF_CRM_5663EF24DD8A5) > 0) answers['has_children'] = 'Yes';
+    }
+
+    // Top reason / why US
+    if(c.UF_CRM_1648031237) answers['s2_why_us'] = c.UF_CRM_1648031237;
+
+    // Date of birth → derive age bracket
+    if(c.UF_CRM_64CBB646272AB && !answers['s1_age']) {
+      try {
+        const dob = new Date(c.UF_CRM_64CBB646272AB);
+        const age = Math.floor((Date.now() - dob) / (365.25*24*3600*1000));
+        answers['exact_age'] = String(age);
+        if(age < 25) answers['s1_age'] = '18–24';
+        else if(age < 35) answers['s1_age'] = '25–34';
+        else if(age < 45) answers['s1_age'] = '35–44';
+        else if(age < 55) answers['s1_age'] = '45–54';
+        else if(age < 65) answers['s1_age'] = '55–64';
+        else answers['s1_age'] = '65+';
+      } catch(e){}
+    }
+
+    // Address country → residence
+    if(c.UF_CRM_1464603245 && !answers['s1_country']) answers['s1_country'] = c.UF_CRM_1464603245;
+
+    leadPreloaded = true;
+  } catch(e){ console.log('Contact load error:', e); }
+}
+
+function prefillFromLead(ld) {
+  if(ld.UF_CRM_1449131599) answers['s1_country'] = ld.UF_CRM_1449131599;
+  if(ld.UF_CRM_1709560603) answers['s1_profession'] = ld.UF_CRM_1709560603;
+  if(ld.UF_CRM_1484914608) {
+    const eduMapLead = {'13320':'High School','13321':'Trade School','13322':'Associate Degree','13323':"Bachelor's Degree",'13324':"Master's Degree",'13325':'Doctorate (PhD)'};
+    if(eduMapLead[String(ld.UF_CRM_1484914608)]) answers['s1_edu'] = eduMapLead[String(ld.UF_CRM_1484914608)];
+  }
+  if(ld.UF_CRM_1500181612) {
+    const msMap = {'13326':'Single','13327':'Married','13328':'Divorced','13329':'Widowed'};
+    if(msMap[String(ld.UF_CRM_1500181612)]) answers['s1_marital'] = msMap[String(ld.UF_CRM_1500181612)];
+  }
+}
+
+// ── EMAIL ──
+function renderEmail(main) {
+  const prefilledEmail = answers['email'] || contactEmail || '';
+  main.innerHTML = `<div class="card"><div class="email-step">
+    <div class="email-icon">✉️</div>
+    <div class="email-title">Welcome to your Immigration Assessment</div>
+    <div class="email-sub">Please confirm your email address to get started.<br>We'll link your answers to your file.</div>
+    ${prefilledEmail ? autofillNote(prefilledEmail) : ''}
+    <label class="inp-label" style="text-align:left;display:block">Your email address</label>
+    <input class="inp" id="email-inp" type="email" placeholder="you@example.com" value="${prefilledEmail}" oninput="clearEmailStatus()" onkeydown="if(event.key==='Enter')lookupEmail()">
+    <div class="email-status" id="email-status"></div>
+    <div class="nav" style="margin-top:16px"><span></span><button class="btn-next" onclick="lookupEmail()" id="email-btn">Start →</button></div>
+  </div></div>`;
+}
+function clearEmailStatus() { const el=document.getElementById('email-status'); if(el){el.textContent='';el.className='email-status';} }
+function setEmailStatus(msg,type) { const el=document.getElementById('email-status'); if(el){el.textContent=msg;el.className='email-status '+(type||'');} }
+async function lookupEmail() {
+  const inp = document.getElementById('email-inp');
+  const email = inp ? inp.value.trim() : '';
+  if(!email||!email.includes('@')) { setEmailStatus('Please enter a valid email address.','err'); return; }
+  contactEmail = email;
+  const btn = document.getElementById('email-btn');
+  btn.disabled = true; btn.textContent = 'Looking up...';
+  setEmailStatus('Searching for your file...','loading');
+  try {
+    const res = await fetch(`${WEBHOOK}crm.contact.list?filter[EMAIL]=${encodeURIComponent(email)}&select[]=ID&select[]=NAME&select[]=LAST_NAME`);
+    const data = await res.json();
+    if(data.result && data.result.length > 0) {
+      const c = data.result[0];
+      contactId = c.ID;
+      contactName = [c.NAME,c.LAST_NAME].filter(Boolean).join(' ')||'';
+      firstName = contactName.split(' ')[0]||'';
+      setEmailStatus('✅ File found — welcome, '+(c.NAME||'')+'! Loading your profile...','ok');
+      // Load all contact fields
+      await loadContactFields(contactId);
+      markVisaStatus();
+      setTimeout(()=>goNext('s1_age'),900);
+    } else {
+      setEmailStatus('We couldn\'t find a file for this email. Please double-check or contact us at info@immigrationadviceservice.org.','err');
+      btn.disabled=false; btn.textContent='Start →';
+    }
+  } catch(e) {
+    setEmailStatus('⚠️ Connection error. Please try again.','err');
+    btn.disabled=false; btn.textContent='Start →';
+  }
+}
+
+// ── PHASE 1 QUESTIONS (from immigration_assessment) ──
+
+function renderS1Age(main) {
+  const sel = answers['s1_age']||'';
+  const opts = ['18–24','25–34','35–44','45–54','55–64','65+'];
+  main.innerHTML = card('👤 About You',
+    `<div class="q-num">Question 1</div>
+     <div class="q-title">What is your age?</div>
+     <div class="opts">${opts.map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('s1_age','${o}');render()">${o}</button>`).join('')}</div>
+     ${sel?`<label class="inp-label">Exact age</label><input class="inp" type="number" id="exact_age" min="16" max="100" placeholder="Enter exact age..." value="${answers['exact_age']||''}"/>`:''}` +
+    nav(null,"saveS1Age('s1_country')",'Continue →',!sel), 1);
+}
+function saveS1Age(next) { const el=document.getElementById('exact_age'); if(el) answers['exact_age']=el.value; goNext(next); }
+
+function renderS1Country(main) {
+  const sel = answers['s1_country']||'';
+  main.innerHTML = card('👤 About You',
+    `<div class="q-num">Question 2</div>
+     <div class="q-title">What is your current country of residence?</div>
+     ${sel?`<div class="pill">${sel} <span class="pill-x" onclick="delete answers['s1_country'];render()">×</span></div>`:''}
+     <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" type="text" id="csearch" placeholder="Search country..." oninput="filterC()" autocomplete="off"/></div>
+     <div class="country-list" id="clist">${renderCList('')}</div>` +
+    nav("goBack()","goNext('s1_birth')",'Continue →',!sel), 1);
+}
+function renderCList(f) { const fl=f.toLowerCase(); return COUNTRIES.filter(c=>c.toLowerCase().includes(fl)).map(c=>`<div class="ci${answers['s1_country']===c?' csel':''}" onclick="pickCountry('s1_country','${c.replace(/'/g,"\\'")}','s1_birth')">${c}</div>`).join(''); }
+function filterC() { const el=document.getElementById('clist'),s=document.getElementById('csearch'); if(el&&s)el.innerHTML=renderCList(s.value); }
+function pickCountry(key,val,next) { answers[key]=val; goNext(next); }
+
+function renderS1Birth(main) {
+  const sel = answers['s1_birth']||'';
+  main.innerHTML = card('👤 About You',
+    `<div class="q-num">Question 3</div>
+     <div class="q-title">What is your country of birth?</div>
+     ${sel?`<div class="pill">${sel} <span class="pill-x" onclick="delete answers['s1_birth'];render()">×</span></div>`:''}
+     <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" type="text" id="bsearch" placeholder="Search country..." oninput="filterB()" autocomplete="off"/></div>
+     <div class="country-list" id="blist">${renderBList('')}</div>` +
+    nav("goBack()","goNext('s1_marital')",'Continue →',!sel), 1);
+}
+function renderBList(f) { const fl=f.toLowerCase(); return COUNTRIES.filter(c=>c.toLowerCase().includes(fl)).map(c=>`<div class="ci${answers['s1_birth']===c?' csel':''}" onclick="pickCountry('s1_birth','${c.replace(/'/g,"\\'")}','s1_marital')">${c}</div>`).join(''); }
+function filterB() { const el=document.getElementById('blist'),s=document.getElementById('bsearch'); if(el&&s)el.innerHTML=renderBList(s.value); }
+
+function renderS1Marital(main) {
+  const sel = answers['s1_marital']||'';
+  const opts = ['Single','Married','Divorced','Widowed'];
+  main.innerHTML = card('👤 About You',
+    `<div class="q-num">Question 4</div>
+     <div class="q-title">What is your marital status?</div>
+     <div class="opts">${opts.map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('s1_marital','${o}');render()">${o}</button>`).join('')}</div>` +
+    nav("goBack()","goFromMarital()",'Continue →',!sel), 1);
+}
+function goFromMarital() { if(!answers['s1_marital']) return; goNext(answers['s1_marital']==='Married'?'s1_spouse':'s1_children'); }
+
+function renderS1Spouse(main) {
+  main.innerHTML = card('👤 About You',
+    `<div class="q-num">Question 4b</div>
+     <div class="q-title">Spouse information</div>
+     <label class="inp-label">Spouse first name</label>
+     <input class="inp" id="sp_fname" placeholder="First name..." value="${answers['spouse_fname']||''}"/>
+     <label class="inp-label">Spouse last name</label>
+     <input class="inp" id="sp_lname" placeholder="Last name..." value="${answers['spouse_lname']||''}"/>
+     <label class="inp-label">Spouse education level</label>
+     <select class="inp" id="sp_edu" style="margin-bottom:10px">
+       <option value="">Select...</option>
+       ${EDU_OPTS_S2.map(o=>`<option value="${o}" ${answers['spouse_edu']===o?'selected':''}>${o}</option>`).join('')}
+     </select>
+     <label class="inp-label">Will spouse immigrate as part of the process?</label>
+     <div class="opts">
+       <button class="opt${answers['spouse_immigrate']==='Yes'?' sel':''}" onclick="selSingle('spouse_immigrate','Yes');render()">Yes</button>
+       <button class="opt${answers['spouse_immigrate']==='No'?' sel':''}" onclick="selSingle('spouse_immigrate','No');render()">No</button>
+     </div>` +
+    nav("goBack()","saveSpouseInfo('s1_children')"), 1);
+}
+function saveSpouseInfo(next) {
+  const fn=document.getElementById('sp_fname'), ln=document.getElementById('sp_lname'), edu=document.getElementById('sp_edu');
+  if(fn) answers['spouse_fname']=fn.value.trim();
+  if(ln) answers['spouse_lname']=ln.value.trim();
+  if(edu) answers['spouse_edu']=edu.value;
+  goNext(next);
+}
+
+function renderS1Children(main) {
+  const sel = answers['has_children']||'';
+  main.innerHTML = card('👤 About You',
+    `<div class="q-num">Question 5</div>
+     <div class="q-title">Do you have any children under the age of 21?</div>
+     <div class="opts">
+       <button class="opt${sel==='Yes'?' sel':''}" onclick="selSingle('has_children','Yes');render()">Yes</button>
+       <button class="opt${sel==='No'?' sel':''}" onclick="selSingle('has_children','No');render()">No</button>
+     </div>
+     ${sel==='Yes'?`<label class="inp-label">How many children?</label><input class="inp" type="number" id="children_count" min="1" max="20" placeholder="Number of children..." value="${answers['children_count']||''}"/>`:''}` +
+    nav("goBack()","saveChildren('s1_goal')",'Continue →',!sel), 1);
+}
+function saveChildren(next) { const el=document.getElementById('children_count'); if(el) answers['children_count']=el.value; goNext(next); }
+
+function renderS1Goal(main) {
+  const sel = answers['s1_goal']||'';
+  const opts = ['Career Opportunities','Starting or Expanding a Business','Investment Opportunities','Education','Family Relocation','Exploring My Options'];
+  main.innerHTML = card('🎯 Your Goals',
+    `<div class="q-num">Question 6</div>
+     <div class="q-title">What is your primary goal in the United States?</div>
+     <div class="opts col1">${opts.map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('s1_goal','${o}');render()">${o}</button>`).join('')}</div>` +
+    nav("goBack()","goNext('s1_edu')",'Continue →',!sel), 1);
+}
+
+function renderS1Edu(main) {
+  const sel = answers['s1_edu']||'';
+  const opts = ['High School','Trade School','Associate Degree',"Bachelor's Degree","Master's Degree","Doctorate (PhD)"];
+  main.innerHTML = card('🎓 Education',
+    `<div class="q-num">Question 7</div>
+     <div class="q-title">What is your highest level of education?</div>
+     <div class="opts">${opts.map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('s1_edu','${o.replace(/'/g,"\\'")}');render()">${o}</button>`).join('')}</div>` +
+    nav("goBack()","goNext('s1_profession')",'Continue →',!sel), 1);
+}
+
+function renderS1Profession(main) {
+  const manualVal = answers['s1_profession']||answers['s1_profession_val']||'';
+  main.innerHTML = card('💼 Career',
+    `<div class="q-num">Question 8</div>
+     <div class="q-title">What do you do for a living?</div>
+     ${manualVal?autofillNote(manualVal):''}
+     <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" type="text" id="psearch" placeholder="Search profession..." oninput="filterP()" autocomplete="off"/></div>
+     <div class="profession-list" id="plist">${renderPList('')}</div>
+     <label class="inp-label" style="margin-top:8px">Or type manually:</label>
+     <input class="inp" type="text" id="prof_manual" placeholder="Type your profession..." value="${manualVal}"/>
+     <div style="margin-top:8px;display:flex;gap:8px">
+       <button class="opt" style="background:#fff5f5;border-color:#fca5a5;color:#dc2626;font-weight:600" onclick="answers['s1_profession']='Not Currently Employed';goNext('s1_experience')">❌ Not Employed</button>
+       <button class="opt" style="background:#fffbeb;border-color:#fcd34d;color:#92400e;font-weight:600" onclick="answers['s1_profession']='Retired';goNext('s1_experience')">🏖️ Retired</button>
+     </div>` +
+    nav("goBack()","saveProfS1('s1_income')"), 1);
+}
+function renderPList(f) { const fl=f.toLowerCase(); return PROFESSIONS.filter(p=>p.toLowerCase().includes(fl)).map(p=>`<div class="pi${answers['s1_profession']===p?' pis':''}" onclick="answers['s1_profession']='${p.replace(/'/g,"\\'")}';render()">${p}</div>`).join(''); }
+function filterP() { const el=document.getElementById('plist'),s=document.getElementById('psearch'); if(el&&s)el.innerHTML=renderPList(s.value); }
+function saveProfS1(next) { const el=document.getElementById('prof_manual'); if(el&&el.value.trim()) answers['s1_profession']=el.value.trim(); if(!answers['s1_profession']){alert('Please select or enter your profession.');return;} goNext(next); }
+
+function renderS1Income(main) {
+  const currencyMap = {'Israel':'ILS','United Arab Emirates':'AED','United Kingdom':'GBP','France':'EUR','Germany':'EUR','Italy':'EUR','Spain':'EUR','Australia':'AUD','Canada':'CAD','Japan':'JPY','China':'CNY','India':'INR','Brazil':'BRL','Mexico':'MXN','Russia':'RUB','South Africa':'ZAR','Turkey':'TRY','Saudi Arabia':'SAR','Kuwait':'KWD','Qatar':'QAR','Switzerland':'CHF','Sweden':'SEK','Norway':'NOK','Denmark':'DKK','Singapore':'SGD','South Korea':'KRW','Hong Kong':'HKD','New Zealand':'NZD'};
+  const localCur = currencyMap[answers['s1_country']] || 'USD';
+  const rateMap = {'ILS':0.27,'AED':0.27,'GBP':1.27,'EUR':1.08,'AUD':0.65,'CAD':0.74,'JPY':0.0067,'CNY':0.14,'INR':0.012,'BRL':0.20,'MXN':0.058,'RUB':0.011,'ZAR':0.055,'TRY':0.031,'SAR':0.27,'KWD':3.26,'QAR':0.27,'CHF':1.13,'SEK':0.095,'NOK':0.093,'DKK':0.145,'SGD':0.74,'KRW':0.00073,'HKD':0.13,'NZD':0.61,'USD':1};
+  const savedAmt = answers['income_amount']||'';
+  const savedUSD = answers['income_usd']?'≈ $'+parseInt(answers['income_usd']).toLocaleString()+' USD/month':'';
+  main.innerHTML = card('💼 Career',
+    `<div class="q-num">Question 9</div>
+     <div class="q-title">What is your approximate monthly income?</div>
+     <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
+       <input class="inp" type="number" id="income_amt" placeholder="Amount..." value="${savedAmt}" style="flex:2;margin-bottom:0" oninput="calcIncome('${localCur}',${JSON.stringify(rateMap)})"/>
+       <div style="flex:1;display:flex;align-items:center;justify-content:center;background:#f3f4f6;border-radius:9px;padding:10px;font-weight:600;font-size:13px">${localCur}</div>
+     </div>
+     <div id="income-usd" style="font-size:13px;color:#16a34a;font-weight:600;min-height:22px;margin-bottom:10px;padding:7px 11px;background:#f0fdf4;border-radius:8px">${savedUSD}</div>` +
+    nav("goBack()","saveIncome('s1_experience')"), 1);
+  if(savedAmt) setTimeout(()=>calcIncome(localCur,rateMap),50);
+}
+function calcIncome(cur, rates) { const amt=parseFloat(document.getElementById('income_amt')?.value)||0; const usd=Math.round(amt*(rates[cur]||1)); const el=document.getElementById('income-usd'); if(el){if(amt>0){el.innerHTML='≈ <strong>$'+usd.toLocaleString()+' USD</strong>/month';answers['income_amount']=amt;answers['income_currency']=cur;answers['income_usd']=usd;}else{el.textContent='';}} }
+function saveIncome(next) { const el=document.getElementById('income_amt'); if(el&&el.value) answers['income_amount']=el.value; goNext(next); }
+
+function renderS1Experience(main) {
+  const sel = answers['s1_experience']||'';
+  const opts = ['Less than 2 years','2–5 years','5–10 years','More than 10 years'];
+  const prof = answers['s1_profession']||'';
+  main.innerHTML = card('💼 Career',
+    `<div class="q-num">Question 10</div>
+     <div class="q-title">How many years of experience do you have${prof&&prof!=='Not Currently Employed'?' as a '+prof:''}?</div>
+     <div class="opts col1">${opts.map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('s1_experience','${o}');render()">${o}</button>`).join('')}</div>` +
+    nav("goBack()","goNext('s1_leadership')",'Continue →',!sel), 1);
+}
+
+function renderS1Leadership(main) {
+  const sel = answers['s1_leadership']||'';
+  main.innerHTML = card('💼 Career',
+    `<div class="q-num">Question 11</div>
+     <div class="q-title">Have you ever led a team or managed people at work?</div>
+     <div class="opts">
+       <button class="opt${sel==='Yes'?' sel':''}" onclick="selSingle('s1_leadership','Yes');render()">Yes</button>
+       <button class="opt${sel==='No'?' sel':''}" onclick="selSingle('s1_leadership','No');render()">No</button>
+     </div>` +
+    nav("goBack()","goNext('s1_situation')",'Continue →',!sel), 1);
+}
+
+function renderS1Situation(main) {
+  const sel = answers['s1_situation']||'';
+  const opts = ['Employee','Skilled Professional','Business Owner','Entrepreneur','Investor','Self-Employed'];
+  main.innerHTML = card('💼 Career',
+    `<div class="q-num">Question 12</div>
+     <div class="q-title">Which best describes your current situation?</div>
+     <div class="opts">${opts.map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('s1_situation','${o}');render()">${o}</button>`).join('')}</div>` +
+    nav("goBack()","goNext('s1_business')",'Continue →',!sel), 1);
+}
+
+function renderS1Business(main) {
+  const sel = answers['s1_business']||'';
+  const opts = ['Yes','Maybe','No'];
+  main.innerHTML = card('💰 Business & Investment',
+    `<div class="q-num">Question 13</div>
+     <div class="q-title">Would you be interested in opening, purchasing, or investing in a business in the U.S. if it supported your immigration goals?</div>
+     <div class="opts col1">${opts.map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('s1_business','${o}');render()">${o}</button>`).join('')}</div>` +
+    nav("goBack()","goFromBusiness()",'Continue →',!sel), 1);
+}
+function goFromBusiness() { if(!answers['s1_business']) return; goNext(answers['s1_business']==='No'?'s1_study':'s1_investment'); }
+
+function renderS1Investment(main) {
+  const sel = answers['s1_investment']||'';
+  const opts = ['Under $50,000','$50,000–$100,000','$100,000–$250,000','$250,000+','Prefer Not To Say'];
+  main.innerHTML = card('💰 Business & Investment',
+    `<div class="q-num">Question 14</div>
+     <div class="q-title">What investment level would you feel comfortable considering?</div>
+     <div class="opts col1">${opts.map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('s1_investment','${o}');render()">${o}</button>`).join('')}</div>` +
+    nav("goBack()","goNext('s1_study')",'Continue →',!sel), 1);
+}
+
+function renderS1Study(main) {
+  const sel = answers['s1_study']||'';
+  const opts = ['Yes','Maybe','No'];
+  main.innerHTML = card('🎓 Education',
+    `<div class="q-num">Question 15</div>
+     <div class="q-title">Would you be interested in studying in the U.S. if it created additional immigration opportunities?</div>
+     <div class="opts col1">${opts.map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('s1_study','${o}');render()">${o}</button>`).join('')}</div>` +
+    nav("goBack()","goNext('s1_family_usa')",'Continue →',!sel), 1);
+}
+
+function renderS1FamilyUSA(main) {
+  const sel = answers['s1_family_usa']||'';
+  main.innerHTML = card('🏠 U.S. Ties',
+    `<div class="q-num">Question 16</div>
+     <div class="q-title">${firstName?firstName+', do':'Do'} you have close family members living legally in the United States?</div>
+     <div class="opts">
+       <button class="opt${sel==='Yes'?' sel':''}" onclick="selSingle('s1_family_usa','Yes');render()">Yes</button>
+       <button class="opt${sel==='No'?' sel':''}" onclick="selSingle('s1_family_usa','No');render()">No</button>
+     </div>
+     ${sel==='Yes'?`<label class="inp-label">Who and what is their status?</label><textarea class="inp" id="family_usa_detail" placeholder="e.g. Sister — U.S. citizen, living in Chicago since 2015..." style="min-height:70px">${answers['family_usa_detail']||''}</textarea>`:''}` +
+    nav("goBack()","saveFamilyUSA('s2_edu_level')",'Continue →',!sel), 1);
+}
+function saveFamilyUSA(next) { const el=document.getElementById('family_usa_detail'); if(el) answers['family_usa_detail']=el.value.trim(); goNext(next); }
+
+// ── PHASE 2 TRANSITION ──
+// (continues directly into Stage 2 deep questions)
+
+// ── PHASE 2 QUESTIONS ──
+
+function renderS2EduLevel(main) {
+  const sel = answers['s2_edu_level']||'';
+  main.innerHTML = card('🎓 Detailed Education', `
+    <div class="phase-badge phase-2" style="margin-bottom:12px">📝 Part 2 — Detailed Assessment</div>
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:#15803d;line-height:1.5">
+      <strong>You've completed Part 1!</strong><br>Now we'll ask you more detailed questions to help build the strongest possible case for your visa petition.
+    </div>
+    <div class="q-num">Question 17</div>
+    <div class="q-title">What is your highest level of education? (detailed)</div>
+    <div class="opts col1">${EDU_OPTS_S2.map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('s2_edu_level','${o.replace(/'/g,"\\'")}');render()">${o}</button>`).join('')}</div>` +
+    nav("goBack()","goNext('s2_edu_detail')",'Continue →',!sel), 2);
+}
+
+function renderS2EduDetail(main) {
+  main.innerHTML = card('🎓 Detailed Education',
+    `<div class="q-num">Question 17 (continued)</div>
+     <div class="q-title">Describe your academic background in detail.</div>
+     <div class="q-hint">Every degree, institution, field of study, graduation year, GPA or honors. If you wrote a thesis or dissertation, describe the topic.</div>
+     <div class="q-example"><strong>Example:</strong> "B.Sc. Computer Science, Tel Aviv University, 2008, GPA 94/100. M.Sc. Machine Learning, Technion, 2011. Thesis: real-time object detection — later published in NeurIPS."</div>
+     <textarea class="inp" id="s2_edu_detail_inp" style="min-height:110px" placeholder="List all degrees, institutions, years, and any honors...">${answers['s2_edu_detail']||''}</textarea>` +
+    nav("goBack()","saveAndGo('s2_edu_detail','s2_edu_detail_inp','s2_awards_q')"), 2);
+}
+
+function renderS2AwardsQ(main) {
+  const sel = answers['s2_awards_q']||'';
+  main.innerHTML = card('🎓 Detailed Education',
+    `<div class="q-num">Question 18</div>
+     <div class="q-title">Have you received any academic awards, scholarships, or fellowships?</div>
+     <div class="opts">
+       <button class="opt${sel==='Yes'?' sel':''}" onclick="selSingle('s2_awards_q','Yes');render()">Yes</button>
+       <button class="opt${sel==='No'?' sel':''}" onclick="selSingle('s2_awards_q','No');render()">No</button>
+     </div>` +
+    nav("goBack()","goFromAwardsQ()",'Continue →',!sel), 2);
+}
+function goFromAwardsQ() { if(!answers['s2_awards_q']) return; goNext(answers['s2_awards_q']==='Yes'?'s2_awards':'s2_career'); }
+
+function renderS2Awards(main) {
+  main.innerHTML = card('🎓 Detailed Education',
+    `<div class="q-num">Question 18 (continued)</div>
+     <div class="q-title">List your academic awards, scholarships, or fellowships.</div>
+     <div class="q-hint">Include the name, who granted it, the year, and how competitive it is.</div>
+     <div class="q-example"><strong>Example:</strong> "Rothschild Foundation scholarship, 2010 — awarded to 15 candidates annually out of ~800 applicants."</div>
+     <textarea class="inp" id="s2_awards_inp" placeholder="Describe each award in detail...">${answers['s2_awards']||''}</textarea>` +
+    nav("goBack()","saveAndGo('s2_awards','s2_awards_inp','s2_career')"), 2);
+}
+
+function renderS2Career(main) {
+  main.innerHTML = card('💼 Career History',
+    `<div class="q-num">Question 19</div>
+     <div class="q-title">Walk us through your full employment history (last 10–15 years).</div>
+     <div class="q-hint">For each position: company name, title, dates, people managed, and key responsibilities. Be specific.</div>
+     <div class="q-example"><strong>Example:</strong> "Senior ML Engineer, Google Israel, Jan 2020–present. Managed team of 5. Led development of the core recommendation engine used by 3M+ users globally."</div>
+     <textarea class="inp" id="s2_career_inp" style="min-height:140px" placeholder="List each role...">${answers['s2_career']||''}</textarea>` +
+    nav("goBack()","saveAndGo('s2_career','s2_career_inp','s2_unique_q')"), 2);
+}
+
+function renderS2UniqueQ(main) {
+  const sel = answers['s2_unique_q']||'';
+  const opts = ['Yes','Possibly','No','Not sure'];
+  main.innerHTML = card('⭐ Unique Expertise',
+    `<div class="q-num">Question 20</div>
+     <div class="q-title">Is there something you are exceptionally good at — a skill or expertise that very few people in the world have?</div>
+     <div class="opts col1">${opts.map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('s2_unique_q','${o}');render()">${o}</button>`).join('')}</div>` +
+    nav("goBack()","goFromUniqueQ()",'Continue →',!sel), 2);
+}
+function goFromUniqueQ() { if(!answers['s2_unique_q']) return; goNext(answers['s2_unique_q']==='Yes'||answers['s2_unique_q']==='Possibly'?'s2_unique_detail':'s2_recognition'); }
+
+function renderS2UniqueDetail(main) {
+  main.innerHTML = card('⭐ Unique Expertise',
+    `<div class="q-num">Question 20 (continued)</div>
+     <div class="q-title">Describe your exceptional expertise. <span class="optional-badge">optional</span></div>
+     <div class="q-hint">What do people come to you for? What took you years to master that most people in your field have not?</div>
+     <textarea class="inp" id="s2_unique_inp" placeholder="Describe what makes your knowledge or skill rare...">${answers['s2_unique_detail']||''}</textarea>` +
+    nav("goBack()","saveAndGo('s2_unique_detail','s2_unique_inp','s2_recognition')"), 2);
+}
+
+const RECOGNITION_OPTIONS = ['Industry awards or prizes','Published academic papers or books','Patents (filed or granted)','Media coverage (press, TV, radio, podcasts)','Speaking at conferences or professional panels','Peer review or judging panels',"Forbes, industry rankings, or 'top X' lists",'None of the above'];
+
+function renderS2Recognition(main) {
+  const sel = answers['s2_recognition']||[];
+  main.innerHTML = card('🏆 Achievements',
+    `<div class="q-num">Question 21</div>
+     <div class="q-title">Which of the following have you received or participated in?</div>
+     <div class="q-hint">Select all that apply.</div>
+     <div class="check-opts">${RECOGNITION_OPTIONS.map(o=>{const s=sel.includes(o);return `<div class="check-opt${s?' sel':''}" onclick="togRecognition('${o.replace(/'/g,"\\'")}')"><div class="check-box">${s?'✓':''}</div><div class="check-text">${o}</div></div>`;}).join('')}</div>` +
+    nav("goBack()","goNext('s2_recognition_detail')",'Continue →',!sel.length), 2);
+}
+function togRecognition(val) { if(!answers['s2_recognition']) answers['s2_recognition']=[]; if(val==='None of the above'){answers['s2_recognition']=answers['s2_recognition'].includes(val)?[]:[val];}else{answers['s2_recognition']=answers['s2_recognition'].filter(v=>v!=='None of the above');const i=answers['s2_recognition'].indexOf(val);if(i>-1)answers['s2_recognition'].splice(i,1);else answers['s2_recognition'].push(val);}render(); }
+
+function renderS2RecognitionDetail(main) {
+  main.innerHTML = card('🏆 Achievements',
+    `<div class="q-num">Question 22</div>
+     <div class="q-title">Describe your most significant professional recognition in detail.</div>
+     <div class="q-hint">For each: the name, who granted it, the year, and what makes it prestigious. How many people receive it?</div>
+     <div class="q-example"><strong>Example:</strong> "Granted US Patent #10,123,456 (2021). Published 3 papers in NeurIPS with 340 combined citations. Named Forbes 30 Under 30 Israel 2020 (from ~2,000 nominees)."</div>
+     <textarea class="inp" id="s2_recog_inp" placeholder="Describe awards, publications, patents, or other recognition...">${answers['s2_recognition_detail']||''}</textarea>` +
+    nav("goBack()","saveAndGo('s2_recognition_detail','s2_recog_inp','s2_judging')"), 2);
+}
+
+function renderS2Judging(main) {
+  main.innerHTML = card('🏆 Achievements',
+    `<div class="q-num">Question 23 <span class="optional-badge">optional</span></div>
+     <div class="q-title">Have you been invited to judge, review, or evaluate others' work in your field?</div>
+     <div class="q-hint">E.g. reviewing academic papers, judging startup competitions, serving as an expert witness, advising on grants.</div>
+     <div class="q-example"><strong>Example:</strong> "Reviewer for NeurIPS since 2019. Judged the Intel Innovation Awards (2022)."</div>
+     <textarea class="inp" id="s2_judging_inp" placeholder="Leave blank if none...">${answers['s2_judging']||''}</textarea>` +
+    nav("goBack()","saveAndGo('s2_judging','s2_judging_inp','s2_projects')"), 2);
+}
+
+function renderS2Projects(main) {
+  main.innerHTML = card('🚀 Impact',
+    `<div class="q-num">Question 24</div>
+     <div class="q-title">Describe your 3 most impactful professional projects.</div>
+     <div class="q-hint">For each: the challenge, YOUR specific role, what you delivered, and the measurable outcome. Numbers matter.</div>
+     <div class="q-example"><strong>Example:</strong> "Project 1: Led fraud detection redesign at Fintech Co. My role: technical lead. Outcome: reduced false positives 42%, saving ~$1.8M annually."</div>
+     <textarea class="inp" id="s2_projects_inp" style="min-height:140px" placeholder="Project 1: ...\n\nProject 2: ...\n\nProject 3: ...">${answers['s2_projects']||''}</textarea>` +
+    nav("goBack()","saveAndGo('s2_projects','s2_projects_inp','s2_impact')"), 2);
+}
+
+function renderS2Impact(main) {
+  main.innerHTML = card('🚀 Impact',
+    `<div class="q-num">Question 25 <span class="optional-badge">optional</span></div>
+     <div class="q-title">Has your work had an impact beyond your own organization?</div>
+     <div class="q-hint">Open-source contributions, policy influence, community programs, setting industry standards, or any broader effect.</div>
+     <textarea class="inp" id="s2_impact_inp" placeholder="Leave blank if none...">${answers['s2_impact']||''}</textarea>` +
+    nav("goBack()","saveAndGo('s2_impact','s2_impact_inp','s2_business_q')"), 2);
+}
+
+function renderS2BusinessQ(main) {
+  const sel = answers['s2_business_interest']||'';
+  const showText = sel==='Yes'||sel==='Maybe';
+  main.innerHTML = card('💰 Business & Investment',
+    `<div class="q-num">Question 26</div>
+     <div class="q-title">Are you interested in starting, buying, or investing in a U.S. business?</div>
+     <div class="opts col1">${['Yes','Maybe','No'].map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('s2_business_interest','${o}');render()">${o}</button>`).join('')}</div>
+     ${showText?`<label class="inp-label">Tell us a little about the idea <span class="optional-badge">optional</span></label>
+     <div class="q-hint">No need for details — just describe in general terms.</div>
+     <div class="q-example"><strong>Example:</strong> "Thinking about a small restaurant or investing in a friend's tech startup."</div>
+     <textarea class="inp" id="s2_biz_inp" placeholder="Describe your business interest...">${answers['s2_business_idea']||''}</textarea>`:''}` +
+    nav("goBack()","saveS2Business('s2_assets')",'Continue →',!sel), 2);
+}
+function saveS2Business(next) { const el=document.getElementById('s2_biz_inp'); if(el) answers['s2_business_idea']=el.value.trim(); goNext(next); }
+
+function renderS2Assets(main) {
+  const sel = answers['s2_assets']||'';
+  const opts = ['Yes — clear documentation available','Partially — some documents','Working on it','No'];
+  main.innerHTML = card('💰 Business & Investment',
+    `<div class="q-num">Question 27</div>
+     <div class="q-title">Do you have documented proof of business ownership, investment activity, or substantial personal assets?</div>
+     <div class="opts col1">${opts.map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('s2_assets','${o.replace(/'/g,"\\'")}');render()">${o}</button>`).join('')}</div>` +
+    nav("goBack()","goNext('s2_why_us')",'Continue →',!sel), 2);
+}
+
+function renderS2WhyUS(main) {
+  main.innerHTML = card('🌟 Your American Dream',
+    `<div class="q-num">Question 28</div>
+     <div class="q-title">Why the United States? What is drawing you there specifically?</div>
+     <div class="q-hint">Be honest and personal. What opportunities, people, or circumstances make the U.S. the place for this next chapter?</div>
+     <div class="q-example"><strong>Example:</strong> "I have spent 8 years researching a cardiac therapy that can only be tested at scale through the U.S. clinical trial network."</div>
+     <textarea class="inp" id="s2_whyus_inp" style="min-height:110px" placeholder="Be specific and personal...">${answers['s2_why_us']||''}</textarea>` +
+    nav("goBack()","saveAndGo('s2_why_us','s2_whyus_inp','s2_vision')"), 2);
+}
+
+function renderS2Vision(main) {
+  main.innerHTML = card('🌟 Your American Dream',
+    `<div class="q-num">Question 29</div>
+     <div class="q-title">Picture your life in the United States 5 years from now. What does it look like?</div>
+     <div class="q-hint">Where do you live? What are you working on? What have you built? Who is with you?</div>
+     <div class="q-example"><strong>Example:</strong> "I see myself running a small research lab in Boston, collaborating with doctors I've admired for years. My kids are in school nearby."</div>
+     <textarea class="inp" id="s2_vision_inp" style="min-height:110px" placeholder="Paint the picture...">${answers['s2_vision']||''}</textarea>` +
+    nav("goBack()","saveAndGo('s2_vision','s2_vision_inp','s2_intention')"), 2);
+}
+
+function renderS2Intention(main) {
+  const sel = answers['s2_intention']||'';
+  const opts = ['I want both the Green Card and eventually citizenship',"I want a Green Card but I'm not sure about citizenship","I'm not sure yet",'I plan to return home eventually'];
+  main.innerHTML = card('🌟 Your American Dream',
+    `<div class="q-num">Question 30</div>
+     <div class="q-title">After 3 years in the U.S. you may become eligible for a Green Card. What is your long-term intention?</div>
+     <div class="opts col1">${opts.map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('s2_intention','${o.replace(/'/g,"\\'")}');render()">${o}</button>`).join('')}</div>` +
+    nav("goBack()","goNext('s2_city')",'Continue →',!sel), 2);
+}
+
+function renderS2City(main) {
+  main.innerHTML = card('🌟 Your American Dream',
+    `<div class="q-num">Question 31 <span class="optional-badge">optional</span></div>
+     <div class="q-title">Is there a specific city or community you envision yourself in?</div>
+     <div class="q-hint">Why that place? Professional ecosystem, community, lifestyle, or personal connection?</div>
+     <div class="q-example"><strong>Example:</strong> "New York — the startup ecosystem is unmatched, and my brother's family is already there."</div>
+     <textarea class="inp" id="s2_city_inp" placeholder="Leave blank if no preference...">${answers['s2_city']||''}</textarea>` +
+    nav("goBack()","saveAndGo('s2_city','s2_city_inp','s2_us_family')"), 2);
+}
+
+function renderS2USFamily(main) {
+  main.innerHTML = card('🏠 U.S. Ties',
+    `<div class="q-num">Question 32 <span class="optional-badge">optional</span></div>
+     <div class="q-title">Do you have close family members living legally in the U.S.? Describe your connection.</div>
+     <div class="q-hint">Relationship, their immigration status, how long they've been in the U.S., and whether they're willing to sponsor you.</div>
+     <div class="q-example"><strong>Example:</strong> "My sister is a U.S. citizen living in Chicago since 2015. She has expressed willingness to file a family petition."</div>
+     <textarea class="inp" id="s2_usfam_inp" placeholder="Leave blank if none...">${answers['s2_us_family']||''}</textarea>` +
+    nav("goBack()","saveAndGo('s2_us_family','s2_usfam_inp','s2_extra')"), 2);
+}
+
+function renderS2Extra(main) {
+  main.innerHTML = card('🏠 U.S. Ties',
+    `<div class="q-num">Question 33 <span class="optional-badge">optional</span></div>
+     <div class="q-title">Is there anything else you want us to know?</div>
+     <div class="q-hint">Unique life experiences, personal challenges, a compelling story, or any detail that might help us build the strongest possible case for you.</div>
+     <textarea class="inp" id="s2_extra_inp" style="min-height:110px" placeholder="Leave blank if nothing to add...">${answers['s2_extra']||''}</textarea>` +
+    nav("goBack()","saveAndGo('s2_extra','s2_extra_inp','s2_final')"), 2);
+}
+
+function renderS2Final(main) {
+  main.innerHTML = card('💬 Final Thoughts',
+    `<div class="q-num">Question 34 <span class="optional-badge">optional</span></div>
+     <div class="q-title">Now that you've completed the questionnaire — tell us about yourself and anything you'd like to add.</div>
+     <div class="q-hint">Who are you professionally? What drives you? Is there anything you'd like to emphasize or share that didn't come up in the previous questions? This is your space.</div>
+     <textarea class="inp" id="s2_final_inp" style="min-height:130px" placeholder="Tell us about yourself, your story, or anything you'd like to highlight...">${answers['s2_final']||''}</textarea>
+     <div class="nav">
+       <button class="btn-back" onclick="goBack()">← Back</button>
+       <button class="btn-next" onclick="saveAndSubmit()">Submit my answers →</button>
+     </div>`, 2);
+}
+
+// ── THANK YOU ──
+function renderThankYou(main) {
+  main.innerHTML = `<div class="card"><div class="thankyou">
+    <div class="thankyou-icon">✅</div>
+    <div class="thankyou-title">Your answers have been submitted</div>
+    <div class="thankyou-sub">Thank you for taking the time to complete this questionnaire.<br>Your information is now in the hands of our team.</div>
+    <div class="thankyou-box">
+      <strong>What happens next?</strong><br><br>
+      A licensed immigration attorney will review your full profile and eligibility assessment. Once the review is complete, you will receive a detailed response by email.<br><br>
+      Please keep an eye on your inbox, including your spam or junk folder.
+    </div>
+  </div></div>`;
+}
+
+// ── CRM ──
+async function markVisaStatus() {
+  if(!contactId) return;
+  try { await fetch(`${WEBHOOK}crm.contact.update?ID=${contactId}&fields[${CRM.VISA_ASSESSMENT}]=${VISA_STATUS.RECEIVED}`); } catch(e){}
+}
+
+function saveAndSubmit() {
+  const el = document.getElementById('s2_final_inp');
+  if(el) answers['s2_final'] = el.value.trim();
+  submitAll();
+}
+
+async function submitAll() {
+  document.getElementById('saving-overlay').classList.add('show');
+  document.getElementById('saving-text').textContent = 'Saving your answers...';
+  const summary = buildSummary();
+  const fields = buildFields();
+  try {
+    if(contactId) {
+      const params = Object.entries(fields).map(([k,v])=>`fields[${k}]=${encodeURIComponent(v)}`).join('&');
+      await fetch(`${WEBHOOK}crm.contact.update?ID=${contactId}&${params}`);
+      await fetch(WEBHOOK+'crm.timeline.comment.add', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:{ENTITY_TYPE:'contact',ENTITY_ID:contactId,COMMENT:summary}})});
+      await fetch(`${WEBHOOK}crm.contact.update?ID=${contactId}&fields[${CRM.VISA_ASSESSMENT}]=${VISA_STATUS.RECEIVED}`);
+    }
+  } catch(e){}
+  document.getElementById('saving-overlay').classList.remove('show');
+  goNext('thankyou');
+}
+
+function buildFields() {
+  const f = {};
+  if(answers['s2_edu_level']&&EDU_IDS[answers['s2_edu_level']]) { f[CRM.EDUCATION]=EDU_IDS[answers['s2_edu_level']]; f[CRM.EDUCATION2]=answers['s2_edu_level']; f[CRM.EDUCATION3]=answers['s2_edu_level']; }
+  if(answers['s1_marital']) { f[CRM.MARITAL]=answers['s1_marital']; f[CRM.MARITAL2]=answers['s1_marital']; }
+  if(answers['s1_profession']) f[CRM.PROFESSION]=answers['s1_profession'];
+  if(answers['income_usd']) f[CRM.INCOME]='$'+parseInt(answers['income_usd']).toLocaleString()+' USD/month';
+  if(answers['s1_country']) f[CRM.BIRTH_COUNTRY]=answers['s1_country'];
+  if(answers['s2_why_us']) f[CRM.TOP_REASON]=answers['s2_why_us'].substring(0,255);
+  if(answers['spouse_fname']) f[CRM.SPOUSE_FNAME]=answers['spouse_fname'];
+  if(answers['spouse_lname']) f[CRM.SPOUSE_LNAME]=answers['spouse_lname'];
+  if(answers['spouse_edu']&&EDU_IDS[answers['spouse_edu']]) f[CRM.SPOUSE_EDU]=EDU_IDS[answers['spouse_edu']];
+  if(answers['children_count']) f[CRM.NUM_CHILDREN]=answers['children_count'];
+  f[CRM.VISA_ASSESSMENT] = VISA_STATUS.RECEIVED;
+  f['COMMENTS'] = buildSummary().substring(0,3000);
+  return f;
+}
+
+function buildSummary() {
+  return [
+    '=== U.S. IMMIGRATION ASSESSMENT — FULL QUESTIONNAIRE ===',
+    `Client: ${contactName||contactEmail||'unknown'} | Email: ${contactEmail} | Contact ID: ${contactId||'not linked'}`,
+    '',
+    '━━━ PART 1 — PROFILE ━━━',
+    `Age: ${answers['s1_age']||''} ${answers['exact_age']?'(exact: '+answers['exact_age']+')':''}`,
+    `Country of residence: ${answers['s1_country']||''}`,
+    `Country of birth: ${answers['s1_birth']||''}`,
+    `Marital status: ${answers['s1_marital']||''}`,
+    answers['s1_marital']==='Married'?`Spouse: ${answers['spouse_fname']||''} ${answers['spouse_lname']||''} | Edu: ${answers['spouse_edu']||''} | Immigrating: ${answers['spouse_immigrate']||''}`:'',
+    `Children under 21: ${answers['has_children']||''} ${answers['children_count']?'('+answers['children_count']+')':''}`,
+    `Primary goal: ${answers['s1_goal']||''}`,
+    `Education (Stage 1): ${answers['s1_edu']||''}`,
+    `Profession: ${answers['s1_profession']||''}`,
+    `Monthly income: ${answers['income_amount']||''} ${answers['income_currency']||''} (≈ $${answers['income_usd']||''} USD)`,
+    `Experience: ${answers['s1_experience']||''}`,
+    `Leadership: ${answers['s1_leadership']||''}`,
+    `Current situation: ${answers['s1_situation']||''}`,
+    `Business interest (Stage 1): ${answers['s1_business']||''}`,
+    answers['s1_business']!=='No'?`Investment level: ${answers['s1_investment']||''}`:'',
+    `Study interest: ${answers['s1_study']||''}`,
+    `Family in U.S.: ${answers['s1_family_usa']||''} ${answers['family_usa_detail']?'— '+answers['family_usa_detail']:''}`,
+    '',
+    '━━━ PART 2 — DETAILED ASSESSMENT ━━━',
+    `Education (detailed level): ${answers['s2_edu_level']||''}`,
+    `Academic background: ${answers['s2_edu_detail']||'(not provided)'}`,
+    `Academic awards: ${answers['s2_awards_q']==='Yes'?answers['s2_awards']||'(not described)':'None'}`,
+    `Employment history: ${answers['s2_career']||'(not provided)'}`,
+    `Unique expertise: ${answers['s2_unique_q']||''} ${answers['s2_unique_detail']?'— '+answers['s2_unique_detail']:''}`,
+    `Recognition types: ${(answers['s2_recognition']||[]).join(', ')||'none selected'}`,
+    `Recognition detail: ${answers['s2_recognition_detail']||'(not provided)'}`,
+    `Judging/review roles: ${answers['s2_judging']||'none'}`,
+    `Impact projects: ${answers['s2_projects']||'(not provided)'}`,
+    `Broader impact: ${answers['s2_impact']||'none'}`,
+    `Business plans: ${answers['s2_business_interest']||''} ${answers['s2_business_idea']?'— '+answers['s2_business_idea']:''}`,
+    `Asset documentation: ${answers['s2_assets']||''}`,
+    `Why the U.S.: ${answers['s2_why_us']||'(not provided)'}`,
+    `5-year vision: ${answers['s2_vision']||'(not provided)'}`,
+    `Long-term intention: ${answers['s2_intention']||''}`,
+    `Preferred city: ${answers['s2_city']||'none'}`,
+    `U.S. family: ${answers['s2_us_family']||'none'}`,
+    `Additional info: ${answers['s2_extra']||'none'}`,
+    `Final thoughts: ${answers['s2_final']||'none'}`,
+  ].filter(l=>l!==undefined&&l!=='').join('\n');
+}
+
+// ── INIT ──
+render();
+</script>
+</body>
+</html>
