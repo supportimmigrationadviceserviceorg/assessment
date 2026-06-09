@@ -416,7 +416,19 @@ function parseComments(text) {
     const spouseCountry = spouseLine.match(/Country:\s*([^|]+)/i);
     if(spouseCountry) answers['spouse_birth_country'] = spouseCountry[1].trim();
     const spouseEdu = spouseLine.match(/Edu:\s*([^|]+)/i);
-    if(spouseEdu) answers['spouse_edu'] = spouseEdu[1].trim();
+    if(spouseEdu) {
+      const rawEdu = spouseEdu[1].trim();
+      // Map from Stage 1 education values to Stage 2 values
+      const eduMap = {
+        "High School": "High School degree",
+        "Trade School": "Vocational School",
+        "Associate Degree": "Some university Courses",
+        "Bachelor's Degree": "University Degree",
+        "Master's Degree": "Master's Degree",
+        "Doctorate (PhD)": "Doctorate Degree"
+      };
+      answers['spouse_edu'] = eduMap[rawEdu] || rawEdu;
+    }
     const spouseImm = spouseLine.match(/Immigrating:\s*([^|]+)/i);
     if(spouseImm) answers['spouse_immigrate'] = spouseImm[1].trim();
   }
@@ -877,6 +889,7 @@ function renderS1FamilyUSA(main) {
   if(sel && !answers['s1_family_usa_confirmed']) {
     main.innerHTML = confirmCard(16, 'Do you', (sel==='Yes'?'have':'not have')+' close family members living legally in the U.S.', 's2_edu_level', 's1_family_usa', 1); return;
   }
+  const famCountry = answers['family_usa_country']||'';
   main.innerHTML = card('🏠 U.S. Ties',
     `<div class="q-num">Question 16</div>
      <div class="q-title">${firstName?firstName+', do':'Do'} you have close family members living legally in the United States?</div>
@@ -884,9 +897,18 @@ function renderS1FamilyUSA(main) {
        <button class="opt${sel==='Yes'?' sel':''}" onclick="selSingle('s1_family_usa','Yes');answers['s1_family_usa_confirmed']=true;render()">Yes</button>
        <button class="opt${sel==='No'?' sel':''}" onclick="selSingle('s1_family_usa','No');answers['s1_family_usa_confirmed']=true;render()">No</button>
      </div>
-     ${sel==='Yes'?`<label class="inp-label">Who and what is their status?</label><textarea class="inp" id="family_usa_detail" placeholder="e.g. Sister — U.S. citizen, living in Chicago since 2015..." style="min-height:70px">${answers['family_usa_detail']||''}</textarea>`:''}` +
+     ${sel==='Yes'?`
+       <label class="inp-label" style="margin-bottom:5px">Their country of origin</label>
+       ${famCountry?`<div class="pill">${famCountry} <span class="pill-x" onclick="delete answers['family_usa_country'];render()">×</span></div>`:''}
+       <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" type="text" id="fam_csearch" placeholder="Search country..." oninput="filterFamC()" autocomplete="off"/></div>
+       <div class="country-list" id="fam_clist" style="max-height:150px">${renderFamCList('')}</div>
+       <label class="inp-label" style="margin-top:8px;margin-bottom:5px">Additional details <span class="optional-badge">optional</span></label>
+       <textarea class="inp" id="family_usa_detail" placeholder="e.g. Sister — U.S. citizen, living in Chicago since 2015, willing to sponsor..." style="min-height:70px">${answers['family_usa_detail']||''}</textarea>
+     `:''}` +
     nav("goBack()","saveFamilyUSA('s2_edu_level')",'Continue →',!sel), 1);
 }
+function renderFamCList(f) { const fl=f.toLowerCase(); return COUNTRIES.filter(c=>c.toLowerCase().includes(fl)).map(c=>`<div class="ci${answers['family_usa_country']===c?' csel':''}" onclick="answers['family_usa_country']='${c.replace(/'/g,"\\'")}';render()">${c}</div>`).join(''); }
+function filterFamC() { const el=document.getElementById('fam_clist'),s=document.getElementById('fam_csearch'); if(el&&s)el.innerHTML=renderFamCList(s.value); }
 function saveFamilyUSA(next) { const el=document.getElementById('family_usa_detail'); if(el) answers['family_usa_detail']=el.value.trim(); answers['s1_family_usa_confirmed']=true; goNext(next); }
 
 // ── PHASE 2 TRANSITION ──
@@ -895,7 +917,35 @@ function saveFamilyUSA(next) { const el=document.getElementById('family_usa_deta
 // ── PHASE 2 QUESTIONS ──
 
 function renderS2EduLevel(main) {
+  // Auto-map from s1_edu if s2_edu_level not set
+  if(!answers['s2_edu_level'] && answers['s1_edu']) {
+    const map = {
+      'High School': 'High School degree',
+      'Trade School': 'Vocational School',
+      'Associate Degree': 'Some university Courses',
+      "Bachelor's Degree": 'University Degree',
+      "Master's Degree": "Master's Degree",
+      'Doctorate (PhD)': 'Doctorate Degree'
+    };
+    if(map[answers['s1_edu']]) answers['s2_edu_level'] = map[answers['s1_edu']];
+  }
+
   const sel = answers['s2_edu_level']||'';
+
+  // If already known — skip straight to detail (show transition message first)
+  if(sel && !answers['s2_edu_level_shown']) {
+    answers['s2_edu_level_shown'] = true;
+    // Show Part 2 transition then go to detail
+    main.innerHTML = `<div class="card">
+      <span class="phase-badge phase-2">📝 Part 2 — Detailed Assessment</span>
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;margin:12px 0 16px;font-size:13px;color:#15803d;line-height:1.6">
+        <strong>You've completed Part 1!</strong><br>Now we'll ask you more detailed questions to help build the strongest possible case for your visa petition.
+      </div>
+      <div class="nav"><span></span><button class="btn-next" onclick="goNext('s2_edu_detail')">Continue →</button></div>
+    </div>`;
+    return;
+  }
+
   main.innerHTML = card('🎓 Detailed Education', `
     <div class="phase-badge phase-2" style="margin-bottom:12px">📝 Part 2 — Detailed Assessment</div>
     <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:#15803d;line-height:1.5">
@@ -903,7 +953,7 @@ function renderS2EduLevel(main) {
     </div>
     <div class="q-num">Question 17</div>
     <div class="q-title">What is your highest level of education? (detailed)</div>
-    <div class="opts col1">${EDU_OPTS_S2.map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('s2_edu_level','${o.replace(/'/g,"\\'")}');render()">${o}</button>`).join('')}</div>` +
+    <div class="opts col1">${EDU_OPTS_S2.map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('s2_edu_level','${o.replace(/'/g,"\\'")}');answers['s2_edu_level_shown']=true;render()">${o}</button>`).join('')}</div>` +
     nav("goBack()","goNext('s2_edu_detail')",'Continue →',!sel), 2);
 }
 
@@ -1024,15 +1074,36 @@ function saveS2Judging(next) { const el=document.getElementById('s2_judging_inp'
 
 function renderS2Projects(main) {
   const count = answers['s2_projects_count']||'';
+  const num = count==='4+'?4:parseInt(count)||0;
+
+  const projectInputs = num > 0 ? Array.from({length:num},(_,i)=>`
+    <div style="margin-bottom:14px">
+      <div class="inp-label" style="margin-bottom:5px;color:#2563eb;font-weight:700">Project ${i+1}</div>
+      <textarea class="inp" id="s2_project_${i+1}" style="min-height:90px" placeholder="What was the challenge? What was YOUR role? What did you deliver? What was the measurable outcome?">${answers['s2_project_'+(i+1)]||''}</textarea>
+    </div>`).join('') : '';
+
   main.innerHTML = card('🚀 Impact',
     `<div class="q-num">Question 24</div>
      <div class="q-title">Describe your most impactful professional projects.</div>
-     <div class="inp-label" style="margin-bottom:6px">How many major projects would you like to describe?</div>
+     <div class="inp-label" style="margin-bottom:6px">How many projects would you like to describe?</div>
      <div class="opts" style="margin-bottom:16px">${['1','2','3','4+'].map(o=>`<button class="opt${count===o?' sel':''}" onclick="selSingle('s2_projects_count','${o}');render()">${o}</button>`).join('')}</div>
-     ${count ? `<div class="q-hint">For each: the challenge, YOUR specific role, what you delivered, and the measurable outcome. Numbers matter.</div>
-     <div class="q-example"><strong>Example:</strong> "Project 1: Led fraud detection redesign at Fintech Co. My role: technical lead. Outcome: reduced false positives 42%, saving ~$1.8M annually."</div>
-     <textarea class="inp" id="s2_projects_inp" style="min-height:${count==='1'?'110':count==='2'?'150':'180'}px" placeholder="${count==='1'?'Describe your most impactful project...':'Project 1: ...\n\nProject 2: ...'+(count==='3'||count==='4+'?'\n\nProject 3: ...':'')+(count==='4+'?'\n\nProject 4: ...':'')}">${answers['s2_projects']||''}</textarea>` : ''}` +
-    nav("goBack()","saveAndGo('s2_projects','s2_projects_inp','s2_impact')",'Continue →',!count), 2);
+     ${num>0?`<div class="q-hint" style="margin-bottom:12px">For each: the challenge, YOUR specific role, what you delivered, and the measurable outcome. Numbers matter.</div>`:''}
+     ${projectInputs}` +
+    nav("goBack()","saveS2Projects('s2_impact')",'Continue →',!count), 2);
+}
+function saveS2Projects(next) {
+  const count = answers['s2_projects_count']||'';
+  const num = count==='4+'?4:parseInt(count)||0;
+  const parts = [];
+  for(let i=1;i<=num;i++){
+    const el=document.getElementById('s2_project_'+i);
+    if(el&&el.value.trim()){
+      answers['s2_project_'+i]=el.value.trim();
+      parts.push('Project '+i+':\n'+el.value.trim());
+    }
+  }
+  answers['s2_projects']=parts.join('\n\n');
+  goNext(next);
 }
 
 function renderS2Impact(main) {
@@ -1140,6 +1211,7 @@ function saveS2City(next) { const el=document.getElementById('s2_city_inp'); if(
 function renderS2USFamily(main) {
   const sel = answers['s2_us_family_q']||'';
   const showDetail = sel==='Yes';
+  const famCountry2 = answers['s2_us_family_country']||answers['family_usa_country']||'';
   main.innerHTML = card('🏠 U.S. Ties',
     `<div class="q-num">Question 32</div>
      <div class="q-title">Do you have close family members living legally in the United States?</div>
@@ -1147,11 +1219,19 @@ function renderS2USFamily(main) {
        <button class="opt${sel==='Yes'?' sel':''}" onclick="selSingle('s2_us_family_q','Yes');render()">Yes</button>
        <button class="opt${sel==='No'?' sel':''}" onclick="selSingle('s2_us_family_q','No');render()">No</button>
      </div>
-     ${showDetail ? `<div class="q-hint">Relationship, their immigration status, how long they've been in the U.S., and whether they're willing to sponsor you.</div>
-     <div class="q-example"><strong>Example:</strong> "My sister is a U.S. citizen living in Chicago since 2015. She has expressed willingness to file a family petition."</div>
-     <textarea class="inp" id="s2_usfam_inp" placeholder="Describe your connection...">${answers['s2_us_family']||''}</textarea>` : ''}` +
+     ${showDetail ? `
+       <label class="inp-label" style="margin-bottom:5px">Their country of origin</label>
+       ${famCountry2?`<div class="pill">${famCountry2} <span class="pill-x" onclick="delete answers['s2_us_family_country'];render()">×</span></div>`:''}
+       <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" type="text" id="fam2_csearch" placeholder="Search country..." oninput="filterFam2C()" autocomplete="off"/></div>
+       <div class="country-list" id="fam2_clist" style="max-height:150px">${renderFam2CList('')}</div>
+       <label class="inp-label" style="margin-top:8px;margin-bottom:5px">Additional details <span class="optional-badge">optional</span></label>
+       <div class="q-example"><strong>Example:</strong> "My sister is a U.S. citizen living in Chicago since 2015. She has expressed willingness to file a family petition."</div>
+       <textarea class="inp" id="s2_usfam_inp" placeholder="Relationship, immigration status, how long in U.S., willing to sponsor?...">${answers['s2_us_family']||''}</textarea>
+     ` : ''}` +
     nav("goBack()","saveS2USFamily('s2_extra')",'Continue →',!sel), 2);
 }
+function renderFam2CList(f) { const fl=f.toLowerCase(); return COUNTRIES.filter(c=>c.toLowerCase().includes(fl)).map(c=>`<div class="ci${answers['s2_us_family_country']===c?' csel':''}" onclick="answers['s2_us_family_country']='${c.replace(/'/g,"\\'")}';render()">${c}</div>`).join(''); }
+function filterFam2C() { const el=document.getElementById('fam2_clist'),s=document.getElementById('fam2_csearch'); if(el&&s)el.innerHTML=renderFam2CList(s.value); }
 function saveS2USFamily(next) { const el=document.getElementById('s2_usfam_inp'); if(el) answers['s2_us_family']=el.value.trim(); goNext(next); }
 
 function renderS2Extra(main) {
@@ -1207,21 +1287,44 @@ function renderThankYou(main) {
   else strength = 'solid';
 
   const highlightText = highlights.length > 0
-    ? `Your profile stands out for your ${highlights.slice(0,-1).join(', ')}${highlights.length>1?' and ':''  }${highlights[highlights.length-1]}.`
+    ? `Your profile stands out for your ${highlights.slice(0,-1).join(', ')}${highlights.length>1?' and ':''}${highlights[highlights.length-1]}.`
     : `Your background as a ${prof} from ${country} shows genuine potential.`;
+
+  // Build case number from lead_id: IASFF + leadId
+  const caseNumber = leadId ? 'IASFF' + leadId : (contactId ? 'IAS' + contactId : 'IAS' + Date.now().toString().slice(-6));
+  const name = firstName ? firstName : '';
 
   main.innerHTML = `<div class="card"><div class="thankyou">
     <div class="thankyou-icon">🎉</div>
-    <div class="thankyou-title">Your questionnaire looks ${strength}!</div>
-    <div style="background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:1px solid #bfdbfe;border-radius:12px;padding:16px 18px;margin-bottom:20px;text-align:left">
+    <div class="thankyou-title">Your questionnaire looks ${strength}${name?', '+name:''}!</div>
+
+    <div style="background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:1px solid #bfdbfe;border-radius:12px;padding:16px 18px;margin-bottom:16px;text-align:left">
       <div style="font-size:13px;color:#1e40af;font-weight:600;margin-bottom:6px">✨ Our initial assessment of your profile:</div>
       <div style="font-size:13px;color:#374151;line-height:1.7">${highlightText} Based on what you've shared, you appear to have a <strong>${strength} case</strong> for U.S. immigration. Our attorney will now review the full details.</div>
     </div>
-    <div class="thankyou-sub">Thank you for taking the time to complete this questionnaire,${answers['exact_age']?' '+firstName:''}. Your information is now in the hands of our team.</div>
+
+    <div style="background:#fff;border:2px solid #2563eb;border-radius:12px;padding:16px 18px;margin-bottom:16px;text-align:left">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#2563eb;margin-bottom:10px">📋 Your Case Details</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e5e7eb">
+        <div style="font-size:12px;color:#6b7280">Case Number</div>
+        <div style="font-size:15px;font-weight:700;color:#1a1a2e;letter-spacing:0.05em">${caseNumber}</div>
+      </div>
+      <div style="padding:10px 0;border-bottom:1px solid #e5e7eb">
+        <div style="font-size:12px;color:#6b7280;margin-bottom:4px">Your Personal Immigration Advisor</div>
+        <div style="font-size:13px;font-weight:600;color:#1a1a2e">Immigration Advice Service</div>
+        <div style="font-size:12px;color:#6b7280;margin-top:2px">A dedicated advisor has been assigned to your file and will be responsible for your case from this point forward.</div>
+      </div>
+      <div style="padding-top:10px">
+        <div style="font-size:12px;color:#6b7280;margin-bottom:4px">📞 Expect a call</div>
+        <div style="font-size:13px;color:#374151;line-height:1.5">Your immigration advisor will contact you by phone to explain the next steps in the process and answer any questions you may have.</div>
+      </div>
+    </div>
+
     <div class="thankyou-box">
       <strong>What happens next?</strong><br><br>
       A licensed immigration attorney will personally review your full profile. Once complete, you will receive a detailed response by email with your assessment results and recommended next steps.<br><br>
-      📬 Please keep an eye on your inbox, including your spam or junk folder.
+      📬 Please keep an eye on your inbox, including your spam or junk folder.<br><br>
+      📞 Your personal advisor will also be in touch by phone to guide you through the process.
     </div>
   </div></div>`;
 }
