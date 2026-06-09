@@ -115,6 +115,8 @@ const COUNTRIES = ["Afghanistan","Albania","Algeria","Andorra","Angola","Argenti
 
 const PROFESSIONS = ["Accountant","Actor / Performer","Administrative Worker","Advertising Manager","Architect","Art Director","Artist","Attorney / Lawyer","Auditor","Banker","Biochemist","Biologist","Biotechnologist","Business Analyst","Business Owner","Chemical Engineer","Civil Engineer","Coach / Trainer","Computer Engineer","Computer Programmer","Construction Manager","Consultant","Cook / Chef","Creative Director","Data Analyst","Dentist","Designer (Graphic / Industrial / Fashion)","Doctor / Physician","Economist","Educator / Teacher","Electrical Engineer","Entrepreneur","Environmental Scientist","Event Manager","Financial Analyst","Financial Officer","Geologist","Government Official","HR Manager","Hotel Manager","Insurance Agent","Interior Designer","Investor","IT Manager","Journalist / Reporter","Judge","Lecturer / Professor","Logistics Manager","Marine Engineer","Marketing Manager","Mechanical Engineer","Midwife","Military Officer","Musician","Nurse","Nutritionist","Operations Manager","Pharmacist","Photographer","Physicist","Physiotherapist","Pilot","Police Officer","Project Manager","Psychiatrist","Psychologist","Public Relations Manager","Real Estate Agent","Researcher","Sales Manager","Social Worker","Software Developer","Statistician","Surgeon","Systems Analyst","Tax Adviser","Teacher (Primary / Secondary)","Telecommunications Engineer","Veterinarian","Web Developer","Not Currently Employed","Other"];
 
+const US_STATES = ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"];
+
 const EDU_OPTS_S2 = ['Primary school only','High School, no degree','High School degree','Vocational School','Some university Courses','University Degree','Some Graduate Level Courses',"Master's Degree",'Some Doctorate Level Courses','Doctorate Degree'];
 const EDU_IDS = {'Primary school only':'250','High School, no degree':'251','High School degree':'252','Vocational School':'253','Some university Courses':'254','University Degree':'12567','Some Graduate Level Courses':'256',"Master's Degree":'12568','Some Doctorate Level Courses':'267','Doctorate Degree':'268'};
 const VISA_STATUS = { RECEIVED: '3139' };
@@ -163,7 +165,7 @@ const STEP_LABELS = {
 };
 
 function setProgress(id) {
-  const ordered = ['email','loading','s1_age','s1_country','s1_birth','s1_marital','s1_spouse','s1_children','s1_goal','s1_edu','s1_profession','s1_income','s1_experience','s1_leadership','s1_situation','s1_business','s1_investment','s1_study','s1_family_usa','s2_edu_level','s2_edu_detail','s2_awards_q','s2_awards','s2_career','s2_unique_q','s2_unique_detail','s2_recognition','s2_recognition_detail','s2_judging','s2_projects','s2_impact','s2_business_q','s2_assets','s2_why_us','s2_vision','s2_intention','s2_city','s2_us_family','s2_extra','s2_final','thankyou'];
+  const ordered = ['email','loading','s1_age','s1_country','s1_birth','s1_marital','s1_spouse','s1_children','s1_goal','s1_edu','s1_profession','s1_income','s1_experience','s1_leadership','s1_situation','s1_business','s1_investment','s1_study','s1_family_usa','s2_edu_level','s2_nationality','s2_second_nationality','s2_parents_origin','s2_spouse_parents','s2_work_details','s2_special_profile','s2_investment_interest','s2_edu_detail','s2_awards_q','s2_awards','s2_career','s2_unique_q','s2_unique_detail','s2_recognition','s2_recognition_detail','s2_judging','s2_projects','s2_impact','s2_business_q','s2_assets','s2_why_us','s2_vision','s2_intention','s2_city','s2_us_family','s2_extra','s2_final','thankyou'];
   const i = ordered.indexOf(id);
   const total = ordered.length - 3;
   const pct = id === 'thankyou' ? 100 : id === 'email' || id === 'loading' ? 0 : Math.round(((i - 2) / total) * 100);
@@ -185,6 +187,10 @@ function render() {
     s1_business: renderS1Business, s1_investment: renderS1Investment,
     s1_study: renderS1Study, s1_family_usa: renderS1FamilyUSA,
     s2_edu_level: renderS2EduLevel, s2_edu_detail: renderS2EduDetail,
+    s2_nationality: renderS2Nationality, s2_second_nationality: renderS2SecondNationality,
+    s2_parents_origin: renderS2ParentsOrigin, s2_spouse_parents: renderS2SpouseParents,
+    s2_work_details: renderS2WorkDetails, s2_special_profile: renderS2SpecialProfile,
+    s2_investment_interest: renderS2InvestmentInterest,
     s2_awards_q: renderS2AwardsQ, s2_awards: renderS2Awards,
     s2_career: renderS2Career, s2_unique_q: renderS2UniqueQ, s2_unique_detail: renderS2UniqueDetail,
     s2_recognition: renderS2Recognition, s2_recognition_detail: renderS2RecognitionDetail,
@@ -898,21 +904,37 @@ function renderS1FamilyUSA(main) {
        <button class="opt${sel==='No'?' sel':''}" onclick="selSingle('s1_family_usa','No');answers['s1_family_usa_confirmed']=true;render()">No</button>
      </div>
      ${sel==='Yes'?`
-       <label class="inp-label" style="margin-bottom:5px">Their country of origin</label>
+       <label class="inp-label" style="margin-bottom:5px">Which U.S. state(s) do they live in? <span style="color:#9ca3af;font-size:11px">(select all that apply)</span></label>
        ${famCountry?`<div class="pill">${famCountry} <span class="pill-x" onclick="delete answers['family_usa_country'];render()">×</span></div>`:''}
        <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" type="text" id="fam_csearch" placeholder="Search country..." oninput="filterFamC()" autocomplete="off"/></div>
        <div class="country-list" id="fam_clist" style="max-height:150px">${renderFamCList('')}</div>
-       <label class="inp-label" style="margin-top:8px;margin-bottom:5px">Additional details <span class="optional-badge">optional</span></label>
+       <label class="inp-label" style="margin-top:8px;margin-bottom:5px">Additional details </label>
        <textarea class="inp" id="family_usa_detail" placeholder="e.g. Sister — U.S. citizen, living in Chicago since 2015, willing to sponsor..." style="min-height:70px">${answers['family_usa_detail']||''}</textarea>
      `:''}` +
     nav("goBack()","saveFamilyUSA('s2_edu_level')",'Continue →',!sel), 1);
 }
-function renderFamCList(f) { const fl=f.toLowerCase(); return COUNTRIES.filter(c=>c.toLowerCase().includes(fl)).map(c=>`<div class="ci${answers['family_usa_country']===c?' csel':''}" onclick="answers['family_usa_country']='${c.replace(/'/g,"\\'")}';render()">${c}</div>`).join(''); }
+function renderFamCList(f) {
+  const fl=f.toLowerCase();
+  const selected = answers['family_usa_states']||[];
+  return US_STATES.filter(s=>s.toLowerCase().includes(fl)).map(s=>{
+    const isSel = selected.includes(s);
+    return '<div class="ci'+(isSel?' csel':'')+'" onclick="togFamState(\''+s+'\')">'+s+(isSel?' ✓':'')+'</div>';
+  }).join('');
+}
 function filterFamC() { const el=document.getElementById('fam_clist'),s=document.getElementById('fam_csearch'); if(el&&s)el.innerHTML=renderFamCList(s.value); }
-function saveFamilyUSA(next) { const el=document.getElementById('family_usa_detail'); if(el) answers['family_usa_detail']=el.value.trim(); answers['s1_family_usa_confirmed']=true; goNext(next); }
-
-// ── PHASE 2 TRANSITION ──
-// (continues directly into Stage 2 deep questions)
+function togFamState(val) {
+  if(!answers['family_usa_states']) answers['family_usa_states']=[];
+  const i=answers['family_usa_states'].indexOf(val);
+  if(i>-1) answers['family_usa_states'].splice(i,1);
+  else answers['family_usa_states'].push(val);
+  answers['family_usa_country']=answers['family_usa_states'].join(', ');
+  const el=document.getElementById('fam_clist');
+  const s=document.getElementById('fam_csearch');
+  if(el&&s)el.innerHTML=renderFamCList(s.value);
+  // Update pill display
+  const pill=document.getElementById('fam_pill');
+  if(pill) pill.innerHTML=answers['family_usa_states'].length?'<div class="pill" style="flex-wrap:wrap;gap:4px">'+answers['family_usa_states'].map(st=>'<span style="background:#2563eb;color:#fff;border-radius:12px;padding:2px 10px;font-size:12px;display:inline-flex;align-items:center;gap:4px">'+st+' <span onclick="togFamState(\''+st+'\');event.stopPropagation()" style="cursor:pointer;font-size:14px">×</span></span>').join('')+'</div>':'';
+}
 
 // ── PHASE 2 QUESTIONS ──
 
@@ -920,32 +942,24 @@ function renderS2EduLevel(main) {
   // Auto-map from s1_edu if s2_edu_level not set
   if(!answers['s2_edu_level'] && answers['s1_edu']) {
     const map = {
-      'High School': 'High School degree',
-      'Trade School': 'Vocational School',
-      'Associate Degree': 'Some university Courses',
-      "Bachelor's Degree": 'University Degree',
-      "Master's Degree": "Master's Degree",
-      'Doctorate (PhD)': 'Doctorate Degree'
+      'High School': 'High School degree', 'Trade School': 'Vocational School',
+      'Associate Degree': 'Some university Courses', "Bachelor's Degree": 'University Degree',
+      "Master's Degree": "Master's Degree", 'Doctorate (PhD)': 'Doctorate Degree'
     };
     if(map[answers['s1_edu']]) answers['s2_edu_level'] = map[answers['s1_edu']];
   }
-
   const sel = answers['s2_edu_level']||'';
-
-  // If already known — skip straight to detail (show transition message first)
   if(sel && !answers['s2_edu_level_shown']) {
     answers['s2_edu_level_shown'] = true;
-    // Show Part 2 transition then go to detail
     main.innerHTML = `<div class="card">
       <span class="phase-badge phase-2">📝 Part 2 — Detailed Assessment</span>
       <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;margin:12px 0 16px;font-size:13px;color:#15803d;line-height:1.6">
         <strong>You've completed Part 1!</strong><br>Now we'll ask you more detailed questions to help build the strongest possible case for your visa petition.
       </div>
-      <div class="nav"><span></span><button class="btn-next" onclick="goNext('s2_edu_detail')">Continue →</button></div>
+      <div class="nav"><span></span><button class="btn-next" onclick="goNext('s2_nationality')">Continue →</button></div>
     </div>`;
     return;
   }
-
   main.innerHTML = card('🎓 Detailed Education', `
     <div class="phase-badge phase-2" style="margin-bottom:12px">📝 Part 2 — Detailed Assessment</div>
     <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:#15803d;line-height:1.5">
@@ -954,7 +968,182 @@ function renderS2EduLevel(main) {
     <div class="q-num">Question 17</div>
     <div class="q-title">What is your highest level of education? (detailed)</div>
     <div class="opts col1">${EDU_OPTS_S2.map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('s2_edu_level','${o.replace(/'/g,"\\'")}');answers['s2_edu_level_shown']=true;render()">${o}</button>`).join('')}</div>` +
-    nav("goBack()","goNext('s2_edu_detail')",'Continue →',!sel), 2);
+    nav("goBack()","goNext('s2_nationality')",'Continue →',!sel), 2);
+}
+
+// ── ADDITIONAL QUESTIONS ──
+
+function renderS2Nationality(main) {
+  const sel = answers['s2_nationality']||'';
+  main.innerHTML = card('🌍 Personal Details',
+    `<div class="q-num">Additional Question</div>
+     <div class="q-title">What is your nationality?</div>
+     ${sel?`<div class="pill">${sel} <span class="pill-x" onclick="delete answers['s2_nationality'];render()">×</span></div>`:''}
+     <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" type="text" id="nat_search" placeholder="Search country..." oninput="filterNat()" autocomplete="off"/></div>
+     <div class="country-list" id="nat_list">${renderNatList('')}</div>` +
+    nav("goBack()","goNext('s2_second_nationality')",'Continue →',!sel), 2);
+}
+function renderNatList(f) { const fl=f.toLowerCase(); return COUNTRIES.filter(c=>c.toLowerCase().includes(fl)).map(c=>`<div class="ci${answers['s2_nationality']===c?' csel':''}" onclick="answers['s2_nationality']='${c.replace(/'/g,"\\'")}';render()">${c}</div>`).join(''); }
+function filterNat() { const el=document.getElementById('nat_list'),s=document.getElementById('nat_search'); if(el&&s)el.innerHTML=renderNatList(s.value); }
+
+function renderS2SecondNationality(main) {
+  const sel = answers['s2_second_nationality_q']||'';
+  main.innerHTML = card('🌍 Personal Details',
+    `<div class="q-num">Additional Question</div>
+     <div class="q-title">Do you have a second nationality or passport from another country?</div>
+     <div class="opts">
+       <button class="opt${sel==='Yes'?' sel':''}" onclick="selSingle('s2_second_nationality_q','Yes');render()">Yes</button>
+       <button class="opt${sel==='No'?' sel':''}" onclick="selSingle('s2_second_nationality_q','No');render()">No</button>
+     </div>
+     ${sel==='Yes'?`
+       <label class="inp-label">Which country?</label>
+       ${answers['s2_second_nationality']?`<div class="pill">${answers['s2_second_nationality']} <span class="pill-x" onclick="delete answers['s2_second_nationality'];render()">×</span></div>`:''}
+       <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" type="text" id="nat2_search" placeholder="Search country..." oninput="filterNat2()" autocomplete="off"/></div>
+       <div class="country-list" id="nat2_list">${renderNat2List('')}</div>
+     `:''}` +
+    nav("goBack()","goNext('s2_parents_origin')",'Continue →',!sel), 2);
+}
+function renderNat2List(f) { const fl=f.toLowerCase(); return COUNTRIES.filter(c=>c.toLowerCase().includes(fl)).map(c=>`<div class="ci${answers['s2_second_nationality']===c?' csel':''}" onclick="answers['s2_second_nationality']='${c.replace(/'/g,"\\'")}';render()">${c}</div>`).join(''); }
+function filterNat2() { const el=document.getElementById('nat2_list'),s=document.getElementById('nat2_search'); if(el&&s)el.innerHTML=renderNat2List(s.value); }
+
+function renderS2ParentsOrigin(main) {
+  const fatherC = answers['s2_father_country']||'';
+  const motherC = answers['s2_mother_country']||'';
+  main.innerHTML = card('🌍 Personal Details',
+    `<div class="q-num">Additional Question</div>
+     <div class="q-title">What are your parents' countries of birth?</div>
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px">
+       <div>
+         <label class="inp-label" style="margin-bottom:5px">Father's country of birth</label>
+         ${fatherC?`<div class="pill" style="margin-bottom:6px">${fatherC} <span class="pill-x" onclick="delete answers['s2_father_country'];render()">×</span></div>`:''}
+         <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" type="text" id="father_search" placeholder="Search..." oninput="filterFather()" autocomplete="off" style="font-size:12px"/></div>
+         <div class="country-list" id="father_list" style="max-height:140px">${renderParentList('father','')}</div>
+       </div>
+       <div>
+         <label class="inp-label" style="margin-bottom:5px">Mother's country of birth</label>
+         ${motherC?`<div class="pill" style="margin-bottom:6px">${motherC} <span class="pill-x" onclick="delete answers['s2_mother_country'];render()">×</span></div>`:''}
+         <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" type="text" id="mother_search" placeholder="Search..." oninput="filterMother()" autocomplete="off" style="font-size:12px"/></div>
+         <div class="country-list" id="mother_list" style="max-height:140px">${renderParentList('mother','')}</div>
+       </div>
+     </div>` +
+    nav("goBack()","goNext('s2_spouse_parents')",'Continue →',!(fatherC&&motherC)), 2);
+}
+function renderParentList(parent,f) { const key='s2_'+parent+'_country'; const fl=f.toLowerCase(); return COUNTRIES.filter(c=>c.toLowerCase().includes(fl)).map(c=>`<div class="ci${answers[key]===c?' csel':''}" onclick="answers['${key}']='${c.replace(/'/g,"\\'")}';render()">${c}</div>`).join(''); }
+function filterFather() { const el=document.getElementById('father_list'),s=document.getElementById('father_search'); if(el&&s)el.innerHTML=renderParentList('father',s.value); }
+function filterMother() { const el=document.getElementById('mother_list'),s=document.getElementById('mother_search'); if(el&&s)el.innerHTML=renderParentList('mother',s.value); }
+
+function renderS2SpouseParents(main) {
+  if(answers['s1_marital']!=='Married') { goNext('s2_work_details'); return; }
+  const fatherC = answers['s2_spouse_father_country']||'';
+  const motherC = answers['s2_spouse_mother_country']||'';
+  main.innerHTML = card('👫 Spouse Details',
+    `<div class="q-num">Additional Question</div>
+     <div class="q-title">What are your spouse's parents' countries of birth?</div>
+     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+       <div>
+         <label class="inp-label" style="margin-bottom:5px">Spouse's father</label>
+         ${fatherC?`<div class="pill">${fatherC} <span class="pill-x" onclick="delete answers['s2_spouse_father_country'];render()">×</span></div>`:''}
+         <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" type="text" id="spf_search" placeholder="Search..." oninput="filterSpF()" autocomplete="off" style="font-size:12px"/></div>
+         <div class="country-list" id="spf_list" style="max-height:140px">${renderSPList('spouse_father','')}</div>
+       </div>
+       <div>
+         <label class="inp-label" style="margin-bottom:5px">Spouse's mother</label>
+         ${motherC?`<div class="pill">${motherC} <span class="pill-x" onclick="delete answers['s2_spouse_mother_country'];render()">×</span></div>`:''}
+         <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" type="text" id="spm_search" placeholder="Search..." oninput="filterSpM()" autocomplete="off" style="font-size:12px"/></div>
+         <div class="country-list" id="spm_list" style="max-height:140px">${renderSPList('spouse_mother','')}</div>
+       </div>
+     </div>` +
+    nav("goBack()","goNext('s2_work_details')"), 2);
+}
+function renderSPList(parent,f) { const key='s2_'+parent+'_country'; const fl=f.toLowerCase(); return COUNTRIES.filter(c=>c.toLowerCase().includes(fl)).map(c=>`<div class="ci${answers[key]===c?' csel':''}" onclick="answers['${key}']='${c.replace(/'/g,"\\'")}';render()">${c}</div>`).join(''); }
+function filterSpF() { const el=document.getElementById('spf_list'),s=document.getElementById('spf_search'); if(el&&s)el.innerHTML=renderSPList('spouse_father',s.value); }
+function filterSpM() { const el=document.getElementById('spm_list'),s=document.getElementById('spm_search'); if(el&&s)el.innerHTML=renderSPList('spouse_mother',s.value); }
+
+function renderS2WorkDetails(main) {
+  const hasBranch = answers['s2_company_us_branch']||'';
+  const isOwner = answers['s2_business_owner']||'';
+  main.innerHTML = card('💼 Work Details',
+    `<div class="q-num">Additional Question</div>
+     <div class="q-title">A few more questions about your work</div>
+     <label class="inp-label" style="margin-bottom:6px">Do you work for a company that has a branch in the U.S.?</label>
+     <div class="opts" style="margin-bottom:14px">
+       <button class="opt${hasBranch==='Yes'?' sel':''}" onclick="selSingle('s2_company_us_branch','Yes');render()">Yes</button>
+       <button class="opt${hasBranch==='No'?' sel':''}" onclick="selSingle('s2_company_us_branch','No');render()">No</button>
+       <button class="opt${hasBranch==='Not sure'?' sel':''}" onclick="selSingle('s2_company_us_branch','Not sure');render()">Not sure</button>
+     </div>
+     <label class="inp-label" style="margin-bottom:6px">Are you a business owner?</label>
+     <div class="opts" style="margin-bottom:14px">
+       <button class="opt${isOwner==='Yes'?' sel':''}" onclick="selSingle('s2_business_owner','Yes');render()">Yes</button>
+       <button class="opt${isOwner==='No'?' sel':''}" onclick="selSingle('s2_business_owner','No');render()">No</button>
+     </div>
+     ${isOwner==='Yes'?`
+       <label class="inp-label" style="margin-bottom:6px">Are you interested in expanding your business to the U.S.?</label>
+       <div class="opts" style="margin-bottom:14px">
+         <button class="opt${answers['s2_expand_to_us']==='Yes'?' sel':''}" onclick="selSingle('s2_expand_to_us','Yes');render()">Yes</button>
+         <button class="opt${answers['s2_expand_to_us']==='No'?' sel':''}" onclick="selSingle('s2_expand_to_us','No');render()">No</button>
+         <button class="opt${answers['s2_expand_to_us']==='Maybe'?' sel':''}" onclick="selSingle('s2_expand_to_us','Maybe');render()">Maybe</button>
+       </div>
+       <label class="inp-label" style="margin-bottom:6px">What year was your business established?</label>
+       <input class="inp" type="number" id="biz_year" placeholder="e.g. 2015" min="1900" max="2025" value="${answers['s2_biz_year']||''}" oninput="answers['s2_biz_year']=this.value"/>
+       <label class="inp-label" style="margin-bottom:6px">Does your business primarily conduct international trade with the U.S.?</label>
+       <div class="opts" style="margin-bottom:0">
+         <button class="opt${answers['s2_intl_trade']==='Yes'?' sel':''}" onclick="selSingle('s2_intl_trade','Yes');render()">Yes</button>
+         <button class="opt${answers['s2_intl_trade']==='No'?' sel':''}" onclick="selSingle('s2_intl_trade','No');render()">No</button>
+       </div>
+     `:''}` +
+    nav("goBack()","goNext('s2_special_profile')",'Continue →',!(hasBranch&&isOwner)), 2);
+}
+
+function renderS2SpecialProfile(main) {
+  const opts = [
+    {k:'s2_is_artist', label:'Are you a professional artist, musician, or social media influencer well-known in your field?'},
+    {k:'s2_is_athlete', label:'Are you a professional athlete?'},
+    {k:'s2_published', label:'Have you ever had your work published or been cited as an expert in your field?'},
+    {k:'s2_has_awards', label:'Have you received endorsements, awards, or recognition in your field?'},
+    {k:'s2_religious_leader', label:'Do you hold a leadership position in a religious organization?'},
+    {k:'s2_is_expert', label:'Do you consider yourself an expert in your field?'},
+    {k:'s2_agriculture', label:'Are you interested in working in agriculture?'},
+  ];
+  main.innerHTML = card('⭐ Special Profile',
+    `<div class="q-num">Additional Question</div>
+     <div class="q-title">A few yes/no questions about your profile</div>
+     <div style="display:flex;flex-direction:column;gap:14px;margin-top:8px">` +
+    opts.map(o=>`
+      <div>
+        <div class="inp-label" style="margin-bottom:5px">${o.label}</div>
+        <div class="opts">
+          <button class="opt${answers[o.k]==='Yes'?' sel':''}" onclick="selSingle('${o.k}','Yes');render()">Yes</button>
+          <button class="opt${answers[o.k]==='No'?' sel':''}" onclick="selSingle('${o.k}','No');render()">No</button>
+        </div>
+      </div>`).join('') +
+    `</div>` +
+    nav("goBack()","goNext('s2_investment_interest')",'Continue →', !opts.every(o=>answers[o.k])), 2);
+}
+
+function renderS2InvestmentInterest(main) {
+  const realEstate = answers['s2_real_estate_interest']||'';
+  const realEstateFunds = answers['s2_real_estate_funds']||'';
+  main.innerHTML = card('💰 Investment Interest',
+    `<div class="q-num">Additional Question</div>
+     <div class="q-title">Investment interests in the U.S.</div>
+     <label class="inp-label" style="margin-bottom:6px">Are you interested in investing in real estate in the U.S.?</label>
+     <div class="opts" style="margin-bottom:14px">
+       <button class="opt${realEstate==='Yes'?' sel':''}" onclick="selSingle('s2_real_estate_interest','Yes');render()">Yes</button>
+       <button class="opt${realEstate==='No'?' sel':''}" onclick="selSingle('s2_real_estate_interest','No');render()">No</button>
+       <button class="opt${realEstate==='Maybe'?' sel':''}" onclick="selSingle('s2_real_estate_interest','Maybe');render()">Maybe</button>
+     </div>
+     ${realEstate==='Yes'?`
+       <label class="inp-label" style="margin-bottom:6px">Do you have $100,000 or more available to invest in real estate?</label>
+       <div class="opts" style="margin-bottom:14px">
+         <button class="opt${realEstateFunds==='Yes'?' sel':''}" onclick="selSingle('s2_real_estate_funds','Yes');render()">Yes</button>
+         <button class="opt${realEstateFunds==='No'?' sel':''}" onclick="selSingle('s2_real_estate_funds','No');render()">No</button>
+       </div>
+     `:''}
+     <label class="inp-label" style="margin-bottom:6px">When do you plan to move to the U.S.?</label>
+     <div class="opts col1">
+       ${['Within 6 months','6–12 months','1–2 years','2–3 years','3+ years','Not sure yet'].map(o=>`<button class="opt${answers['s2_move_timeline']===o?' sel':''}" onclick="selSingle('s2_move_timeline','${o}');render()">${o}</button>`).join('')}
+     </div>` +
+    nav("goBack()","goNext('s2_edu_detail')",'Continue →',!(realEstate&&answers['s2_move_timeline'])), 2);
 }
 
 function renderS2EduDetail(main) {
@@ -963,9 +1152,11 @@ function renderS2EduDetail(main) {
      <div class="q-title">Describe your academic background in detail.</div>
      <div class="q-hint">Every degree, institution, field of study, graduation year, GPA or honors. If you wrote a thesis or dissertation, describe the topic.</div>
      <div class="q-example"><strong>Example:</strong> "B.Sc. Computer Science, Tel Aviv University, 2008, GPA 94/100. M.Sc. Machine Learning, Technion, 2011. Thesis: real-time object detection — later published in NeurIPS."</div>
-     <textarea class="inp" id="s2_edu_detail_inp" style="min-height:110px" placeholder="List all degrees, institutions, years, and any honors...">${answers['s2_edu_detail']||''}</textarea>` +
-    nav("goBack()","saveAndGo('s2_edu_detail','s2_edu_detail_inp','s2_awards_q')"), 2);
+     <textarea class="inp" id="s2_edu_detail_inp" style="min-height:110px" placeholder="List all degrees, institutions, years, and any honors...">${answers['s2_edu_detail']||''}</textarea>
+     <button class="opt" style="width:100%;margin-top:4px;color:#6b7280;font-size:12px" onclick="answers['s2_edu_detail']='Not applicable';goNext('s2_awards_q')">⬜ Not applicable / Prefer not to say</button>` +
+    nav("goBack()","saveS2EduDetail('s2_awards_q')"), 2);
 }
+function saveS2EduDetail(next) { const el=document.getElementById('s2_edu_detail_inp'); if(el&&el.value.trim()) answers['s2_edu_detail']=el.value.trim(); if(!answers['s2_edu_detail']){alert('Please describe your academic background or select Not applicable.');return;} goNext(next); }
 
 function renderS2AwardsQ(main) {
   const sel = answers['s2_awards_q']||'';
@@ -996,9 +1187,11 @@ function renderS2Career(main) {
      <div class="q-title">Walk us through your full employment history (last 10–15 years).</div>
      <div class="q-hint">For each position: company name, title, dates, people managed, and key responsibilities. Be specific.</div>
      <div class="q-example"><strong>Example:</strong> "Senior ML Engineer, Google Israel, Jan 2020–present. Managed team of 5. Led development of the core recommendation engine used by 3M+ users globally."</div>
-     <textarea class="inp" id="s2_career_inp" style="min-height:140px" placeholder="List each role...">${answers['s2_career']||''}</textarea>` +
-    nav("goBack()","saveAndGo('s2_career','s2_career_inp','s2_unique_q')"), 2);
+     <textarea class="inp" id="s2_career_inp" style="min-height:140px" placeholder="List each role...">${answers['s2_career']||''}</textarea>
+     <button class="opt" style="width:100%;margin-top:4px;color:#6b7280;font-size:12px" onclick="answers['s2_career']='Not applicable';goNext('s2_unique_q')">⬜ Not applicable / No relevant work history</button>` +
+    nav("goBack()","saveS2Career('s2_unique_q')"), 2);
 }
+function saveS2Career(next) { const el=document.getElementById('s2_career_inp'); if(el&&el.value.trim()) answers['s2_career']=el.value.trim(); if(!answers['s2_career']){alert('Please describe your employment history or select Not applicable.');return;} goNext(next); }
 
 function renderS2UniqueQ(main) {
   const sel = answers['s2_unique_q']||'';
@@ -1014,7 +1207,7 @@ function goFromUniqueQ() { if(!answers['s2_unique_q']) return; goNext(answers['s
 function renderS2UniqueDetail(main) {
   main.innerHTML = card('⭐ Unique Expertise',
     `<div class="q-num">Question 20 (continued)</div>
-     <div class="q-title">Describe your exceptional expertise. <span class="optional-badge">optional</span></div>
+     <div class="q-title">Describe your exceptional expertise. </div>
      <div class="q-hint">What do people come to you for? What took you years to master that most people in your field have not?</div>
      <textarea class="inp" id="s2_unique_inp" placeholder="Describe what makes your knowledge or skill rare...">${answers['s2_unique_detail']||''}</textarea>` +
     nav("goBack()","saveAndGo('s2_unique_detail','s2_unique_inp','s2_recognition')"), 2);
@@ -1051,9 +1244,11 @@ function renderS2RecognitionDetail(main) {
      </div>
      <div class="q-hint">Now describe your most significant recognition in detail — awards, publications, media coverage, rankings.</div>
      <div class="q-example"><strong>Example:</strong> "Granted US Patent #10,123,456 (2021). Published 3 papers in NeurIPS with 340 combined citations. Named Forbes 30 Under 30 Israel 2020 (from ~2,000 nominees)."</div>
-     <textarea class="inp" id="s2_recog_inp" placeholder="Describe awards, publications, patents, or other recognition...">${answers['s2_recognition_detail']||''}</textarea>` +
-    nav("goBack()","saveAndGo('s2_recognition_detail','s2_recog_inp','s2_judging')"), 2);
+     <textarea class="inp" id="s2_recog_inp" placeholder="Describe awards, publications, patents, or other recognition...">${answers['s2_recognition_detail']||''}</textarea>
+     <button class="opt" style="width:100%;margin-top:4px;color:#6b7280;font-size:12px" onclick="answers['s2_recognition_detail']='None';goNext('s2_judging')">⬜ None / Not applicable</button>` +
+    nav("goBack()","saveS2RecogDetail('s2_judging')"), 2);
 }
+function saveS2RecogDetail(next) { const el=document.getElementById('s2_recog_inp'); if(el&&el.value.trim()) answers['s2_recognition_detail']=el.value.trim(); if(!answers['s2_recognition_detail']){alert('Please describe your recognition or select None.');return;} goNext(next); }
 
 function renderS2Judging(main) {
   const sel = answers['s2_judging_q']||'';
@@ -1062,15 +1257,16 @@ function renderS2Judging(main) {
     `<div class="q-num">Question 23</div>
      <div class="q-title">Have you been invited to judge, review, or evaluate others' work in your field?</div>
      <div class="q-hint">E.g. reviewing academic papers, judging startup competitions, serving as an expert witness, advising on grants.</div>
-     <div class="opts">
+     <div class="opts col1">
        <button class="opt${sel==='Yes'?' sel':''}" onclick="selSingle('s2_judging_q','Yes');render()">Yes</button>
        <button class="opt${sel==='No'?' sel':''}" onclick="selSingle('s2_judging_q','No');render()">No</button>
+       <button class="opt${sel==='Not sure'?' sel':''}" onclick="selSingle('s2_judging_q','Not sure');render()">Not sure / Not applicable</button>
      </div>
      ${showDetail ? `<div class="q-example"><strong>Example:</strong> "Reviewer for NeurIPS since 2019. Judged the Intel Innovation Awards (2022)."</div>
      <textarea class="inp" id="s2_judging_inp" placeholder="Describe your judging and review roles...">${answers['s2_judging']||''}</textarea>` : ''}` +
     nav("goBack()","saveS2Judging('s2_projects')",'Continue →',!sel), 2);
 }
-function saveS2Judging(next) { const el=document.getElementById('s2_judging_inp'); if(el) answers['s2_judging']=el.value.trim(); goNext(next); }
+function saveS2Judging(next) { const el=document.getElementById('s2_judging_inp'); if(el) answers['s2_judging']=el.value.trim(); if(!answers['s2_judging']&&answers['s2_judging_q']==='Yes'){alert('Please describe your judging roles.');return;} goNext(next); }
 
 function renderS2Projects(main) {
   const count = answers['s2_projects_count']||'';
@@ -1102,6 +1298,7 @@ function saveS2Projects(next) {
       parts.push('Project '+i+':\n'+el.value.trim());
     }
   }
+  if(parts.length===0){alert('Please describe at least one project.');return;}
   answers['s2_projects']=parts.join('\n\n');
   goNext(next);
 }
@@ -1113,9 +1310,10 @@ function renderS2Impact(main) {
     `<div class="q-num">Question 25</div>
      <div class="q-title">Has your work had an impact beyond your own organization?</div>
      <div class="q-hint">Think open-source contributions, policy influence, community programs, or setting industry standards.</div>
-     <div class="opts">
+     <div class="opts col1">
        <button class="opt${sel==='Yes'?' sel':''}" onclick="selSingle('s2_impact_q','Yes');render()">Yes</button>
        <button class="opt${sel==='No'?' sel':''}" onclick="selSingle('s2_impact_q','No');render()">No</button>
+       <button class="opt${sel==='Not sure'?' sel':''}" onclick="selSingle('s2_impact_q','Not sure');render()">Not sure</button>
      </div>
      ${showDetail ? `<textarea class="inp" id="s2_impact_inp" placeholder="Describe the broader impact of your work...">${answers['s2_impact']||''}</textarea>` : ''}` +
     nav("goBack()","saveS2Impact('s2_business_q')",'Continue →',!sel), 2);
@@ -1129,7 +1327,7 @@ function renderS2BusinessQ(main) {
     `<div class="q-num">Question 26</div>
      <div class="q-title">Are you interested in starting, buying, or investing in a U.S. business?</div>
      <div class="opts col1">${['Yes','Maybe','No'].map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('s2_business_interest','${o}');render()">${o}</button>`).join('')}</div>
-     ${showText?`<label class="inp-label">Tell us a little about the idea <span class="optional-badge">optional</span></label>
+     ${showText?`<label class="inp-label">Tell us a little about the idea </label>
      <div class="q-hint">No need for details — just describe in general terms.</div>
      <div class="q-example"><strong>Example:</strong> "Thinking about a small restaurant or investing in a friend's tech startup."</div>
      <textarea class="inp" id="s2_biz_inp" placeholder="Describe your business interest...">${answers['s2_business_idea']||''}</textarea>`:''}` +
@@ -1147,29 +1345,53 @@ function renderS2Assets(main) {
     nav("goBack()","goNext('s2_why_us')",'Continue →',!sel), 2);
 }
 
+const WHY_US_OPTIONS = [
+  'Career & professional opportunities',
+  'Research or academic environment',
+  'Business or investment opportunities',
+  'Family connection or reunification',
+  'Education',
+  'Quality of life & freedom',
+  'Financial opportunities',
+  'Other'
+];
+const WHY_US_EMOJIS = ['🚀','🔬','💼','👨‍👩‍👧','🎓','🌟','💰','🌍'];
+
 function renderS2WhyUS(main) {
   const reasons = answers['s2_why_us_reasons']||[];
+  let items = '';
+  for(let i=0;i<WHY_US_OPTIONS.length;i++){
+    const o = WHY_US_OPTIONS[i];
+    const s = reasons.includes(o);
+    items += '<div class="check-opt'+(s?' sel':'')+'" data-idx="'+i+'" onclick="togWhyUS(this)"><div class="check-box">'+(s?'✓':'')+'</div><div class="check-text">'+WHY_US_EMOJIS[i]+' '+o+'</div></div>';
+  }
+  const textarea = reasons.length ? '<div class="q-hint">Now tell us more — be honest and personal.</div><div class="q-example"><strong>Example:</strong> "I have spent 8 years researching a cardiac therapy that can only be tested at scale through the U.S. clinical trial network."</div><textarea class="inp" id="s2_whyus_inp" style="min-height:110px" placeholder="Be specific and personal...">'+(answers['s2_why_us']||'')+'</textarea>' : '';
   main.innerHTML = card('🌟 Your American Dream',
-    `<div class="q-num">Question 28</div>
-     <div class="q-title">Why the United States? What is drawing you there?</div>
-     <div class="inp-label" style="margin-bottom:6px">What are the main reasons? <span style="color:#9ca3af;font-weight:400">(select all that apply)</span></div>
-     <div class="check-opts" style="margin-bottom:16px">${[
-       '🚀 Career & professional opportunities',
-       '🔬 Research or academic environment',
-       '💼 Business or investment opportunities',
-       '👨‍👩‍👧 Family connection or reunification',
-       '🎓 Education',
-       '🌟 Quality of life & freedom',
-       '💰 Financial opportunities',
-       '🌍 Other'
-     ].map(o=>{const s=reasons.includes(o);return `<div class="check-opt${s?' sel':''}" onclick="togWhyUS('${o.replace(/'/g,"\'")}')"><div class="check-box">${s?'✓':''}</div><div class="check-text">${o}</div></div>`;}).join('')}</div>
-     ${reasons.length ? `<div class="q-hint">Now tell us more — be honest and personal.</div>
-     <div class="q-example"><strong>Example:</strong> "I have spent 8 years researching a cardiac therapy that can only be tested at scale through the U.S. clinical trial network."</div>
-     <textarea class="inp" id="s2_whyus_inp" style="min-height:110px" placeholder="Be specific and personal...">${answers['s2_why_us']||''}</textarea>` : ''}` +
+    '<div class="q-num">Question 28</div>'+
+    '<div class="q-title">Why the United States? What is drawing you there?</div>'+
+    '<div class="inp-label" style="margin-bottom:6px">Main reasons <span style="color:#9ca3af;font-weight:400">(select all that apply)</span></div>'+
+    '<div class="check-opts" style="margin-bottom:16px">'+items+'</div>'+
+    textarea +
     nav("goBack()","saveS2WhyUS('s2_vision')",'Continue →',!reasons.length), 2);
 }
-function togWhyUS(val) { if(!answers['s2_why_us_reasons']) answers['s2_why_us_reasons']=[]; const i=answers['s2_why_us_reasons'].indexOf(val); if(i>-1) answers['s2_why_us_reasons'].splice(i,1); else answers['s2_why_us_reasons'].push(val); render(); }
-function saveS2WhyUS(next) { const el=document.getElementById('s2_whyus_inp'); if(el) answers['s2_why_us']=el.value.trim(); goNext(next); }
+function togWhyUS(el) {
+  const idx = parseInt(el.getAttribute('data-idx'));
+  const val = WHY_US_OPTIONS[idx];
+  if(!answers['s2_why_us_reasons']) answers['s2_why_us_reasons']=[];
+  const i = answers['s2_why_us_reasons'].indexOf(val);
+  if(i>-1) answers['s2_why_us_reasons'].splice(i,1);
+  else answers['s2_why_us_reasons'].push(val);
+  render();
+}
+function saveS2WhyUS(next) {
+  const el = document.getElementById('s2_whyus_inp');
+  if(el) answers['s2_why_us'] = el.value.trim();
+  if(!answers['s2_why_us'] && answers['s2_why_us_reasons'] && answers['s2_why_us_reasons'].length) {
+    alert('Please tell us more about why you chose the U.S.');
+    return;
+  }
+  goNext(next);
+}
 
 function renderS2Vision(main) {
   main.innerHTML = card('🌟 Your American Dream',
@@ -1177,9 +1399,11 @@ function renderS2Vision(main) {
      <div class="q-title">Picture your life in the United States 5 years from now. What does it look like?</div>
      <div class="q-hint">Where do you live? What are you working on? What have you built? Who is with you?</div>
      <div class="q-example"><strong>Example:</strong> "I see myself running a small research lab in Boston, collaborating with doctors I've admired for years. My kids are in school nearby."</div>
-     <textarea class="inp" id="s2_vision_inp" style="min-height:110px" placeholder="Paint the picture...">${answers['s2_vision']||''}</textarea>` +
-    nav("goBack()","saveAndGo('s2_vision','s2_vision_inp','s2_intention')"), 2);
+     <textarea class="inp" id="s2_vision_inp" style="min-height:110px" placeholder="Paint the picture...">${answers['s2_vision']||''}</textarea>
+     <button class="opt" style="width:100%;margin-top:4px;color:#6b7280;font-size:12px" onclick="answers['s2_vision']='Not sure yet';goNext('s2_intention')">⬜ I'm not sure yet</button>` +
+    nav("goBack()","saveS2Vision('s2_intention')"), 2);
 }
+function saveS2Vision(next) { const el=document.getElementById('s2_vision_inp'); if(el&&el.value.trim()) answers['s2_vision']=el.value.trim(); if(!answers['s2_vision']){alert('Please describe your 5-year vision or select Not sure yet.');return;} goNext(next); }
 
 function renderS2Intention(main) {
   const sel = answers['s2_intention']||'';
@@ -1220,41 +1444,59 @@ function renderS2USFamily(main) {
        <button class="opt${sel==='No'?' sel':''}" onclick="selSingle('s2_us_family_q','No');render()">No</button>
      </div>
      ${showDetail ? `
-       <label class="inp-label" style="margin-bottom:5px">Their country of origin</label>
+       <label class="inp-label" style="margin-bottom:5px">Which U.S. state(s) do they live in? <span style="color:#9ca3af;font-size:11px">(select all that apply)</span></label>
        ${famCountry2?`<div class="pill">${famCountry2} <span class="pill-x" onclick="delete answers['s2_us_family_country'];render()">×</span></div>`:''}
        <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" type="text" id="fam2_csearch" placeholder="Search country..." oninput="filterFam2C()" autocomplete="off"/></div>
        <div class="country-list" id="fam2_clist" style="max-height:150px">${renderFam2CList('')}</div>
-       <label class="inp-label" style="margin-top:8px;margin-bottom:5px">Additional details <span class="optional-badge">optional</span></label>
+       <label class="inp-label" style="margin-top:8px;margin-bottom:5px">Additional details </label>
        <div class="q-example"><strong>Example:</strong> "My sister is a U.S. citizen living in Chicago since 2015. She has expressed willingness to file a family petition."</div>
        <textarea class="inp" id="s2_usfam_inp" placeholder="Relationship, immigration status, how long in U.S., willing to sponsor?...">${answers['s2_us_family']||''}</textarea>
      ` : ''}` +
     nav("goBack()","saveS2USFamily('s2_extra')",'Continue →',!sel), 2);
 }
-function renderFam2CList(f) { const fl=f.toLowerCase(); return COUNTRIES.filter(c=>c.toLowerCase().includes(fl)).map(c=>`<div class="ci${answers['s2_us_family_country']===c?' csel':''}" onclick="answers['s2_us_family_country']='${c.replace(/'/g,"\\'")}';render()">${c}</div>`).join(''); }
+function renderFam2CList(f) {
+  const fl=f.toLowerCase();
+  const selected = answers['s2_us_family_states']||[];
+  return US_STATES.filter(s=>s.toLowerCase().includes(fl)).map(s=>{
+    const isSel = selected.includes(s);
+    return '<div class="ci'+(isSel?' csel':'')+'" onclick="togFam2State(\''+s+'\')">'+s+(isSel?' ✓':'')+'</div>';
+  }).join('');
+}
 function filterFam2C() { const el=document.getElementById('fam2_clist'),s=document.getElementById('fam2_csearch'); if(el&&s)el.innerHTML=renderFam2CList(s.value); }
-function saveS2USFamily(next) { const el=document.getElementById('s2_usfam_inp'); if(el) answers['s2_us_family']=el.value.trim(); goNext(next); }
+function togFam2State(val) {
+  if(!answers['s2_us_family_states']) answers['s2_us_family_states']=[];
+  const i=answers['s2_us_family_states'].indexOf(val);
+  if(i>-1) answers['s2_us_family_states'].splice(i,1);
+  else answers['s2_us_family_states'].push(val);
+  answers['s2_us_family_country']=answers['s2_us_family_states'].join(', ');
+  const el=document.getElementById('fam2_clist');
+  const s=document.getElementById('fam2_csearch');
+  if(el&&s)el.innerHTML=renderFam2CList(s.value);
+}
+function saveS2Extra(next) { const el=document.getElementById('s2_extra_inp'); if(el) answers['s2_extra']=el.value.trim(); goNext(next); }
 
 function renderS2Extra(main) {
   const sel = answers['s2_extra_q']||'';
   const showDetail = sel==='Yes';
   main.innerHTML = card('🏠 U.S. Ties',
     `<div class="q-num">Question 33</div>
-     <div class="q-title">Is there anything else you'd like us to know — unique experiences, challenges you've overcome, or a compelling story?</div>
-     <div class="opts">
-       <button class="opt${sel==='Yes'?' sel':''}" onclick="selSingle('s2_extra_q','Yes');render()">Yes, I'd like to add something</button>
+     <div class="q-title">Is there anything else you would like us to know — unique experiences, challenges you have overcome, or a compelling story?</div>
+     <div class="opts col1">
+       <button class="opt${sel==='Yes'?' sel':''}" onclick="selSingle('s2_extra_q','Yes');render()">Yes, I would like to add something</button>
        <button class="opt${sel==='No'?' sel':''}" onclick="selSingle('s2_extra_q','No');render()">No, nothing to add</button>
      </div>
      ${showDetail ? `<textarea class="inp" id="s2_extra_inp" style="min-height:110px" placeholder="Share anything that might strengthen your case...">${answers['s2_extra']||''}</textarea>` : ''}` +
-    nav("goBack()","saveS2Extra('s2_final')",'Continue →',!sel), 2);
+    nav("goBack()","saveS2ExtraAndGo('s2_final')",'Continue →',!sel), 2);
 }
-function saveS2Extra(next) { const el=document.getElementById('s2_extra_inp'); if(el) answers['s2_extra']=el.value.trim(); goNext(next); }
+function saveS2ExtraAndGo(next) { const el=document.getElementById('s2_extra_inp'); if(el) answers['s2_extra']=el.value.trim(); goNext(next); }
 
 function renderS2Final(main) {
   main.innerHTML = card('💬 Final Thoughts',
-    `<div class="q-num">Question 34 <span class="optional-badge">optional</span></div>
+    `<div class="q-num">Question 34 </div>
      <div class="q-title">Now that you've completed the questionnaire — tell us about yourself and anything you'd like to add.</div>
      <div class="q-hint">Who are you professionally? What drives you? Is there anything you'd like to emphasize or share that didn't come up in the previous questions? This is your space.</div>
      <textarea class="inp" id="s2_final_inp" style="min-height:130px" placeholder="Tell us about yourself, your story, or anything you'd like to highlight...">${answers['s2_final']||''}</textarea>
+     <button class="opt" style="width:100%;margin-top:4px;color:#6b7280;font-size:12px" onclick="answers['s2_final']='Nothing to add';saveAndSubmit()">⬜ Nothing to add — submit as is</button>
      <div class="nav">
        <button class="btn-back" onclick="goBack()">← Back</button>
        <button class="btn-next" onclick="saveAndSubmit()">Submit my answers →</button>
