@@ -413,8 +413,27 @@ async function lookupEmail() {
 
 // ── PHASE 1 QUESTIONS (from immigration_assessment) ──
 
+// ── CONFIRM HELPER ──
+function confirmCard(qNum, question, value, yesNext, key, phase) {
+  return card('👤 About You',
+    `<div class="q-num">Question ${qNum}</div>
+     <div class="q-title">${question} <strong>${value}</strong>?</div>
+     <div class="opts" style="margin-top:14px">
+       <button class="opt" onclick="answers['${key}_confirmed']=true;goNext('${yesNext}')" style="border-color:#16a34a;background:#f0fdf4;color:#15803d;font-weight:700;font-size:15px">✅ Yes</button>
+       <button class="opt" onclick="answers['${key}_confirmed']=true;answers['${key}']='';render()" style="border-color:#dc2626;background:#fff5f5;color:#dc2626;font-weight:600">No, change it</button>
+     </div>` +
+    nav("goBack()", "goNext('"+yesNext+"')", 'Continue →', false), phase);
+}
+
 function renderS1Age(main) {
   const sel = answers['s1_age']||'';
+  const confirmed = answers['s1_age_confirmed'];
+
+  if(sel && !confirmed) {
+    main.innerHTML = confirmCard(1, 'Are you', sel + (answers['exact_age']?' ('+answers['exact_age']+' years old)':''), 's1_country', 's1_age', 1);
+    return;
+  }
+
   const opts = ['18–24','25–34','35–44','45–54','55–64','65+'];
   main.innerHTML = card('👤 About You',
     `<div class="q-num">Question 1</div>
@@ -423,10 +442,26 @@ function renderS1Age(main) {
      ${sel?`<label class="inp-label">Exact age</label><input class="inp" type="number" id="exact_age" min="16" max="100" placeholder="Enter exact age..." value="${answers['exact_age']||''}"/>`:''}` +
     nav(null,"saveS1Age('s1_country')",'Continue →',!sel), 1);
 }
-function saveS1Age(next) { const el=document.getElementById('exact_age'); if(el) answers['exact_age']=el.value; goNext(next); }
+function saveS1Age(next) { answers['s1_age_confirmed']=true; const el=document.getElementById('exact_age'); if(el) answers['exact_age']=el.value; goNext(next); }
 
 function renderS1Country(main) {
   const sel = answers['s1_country']||'';
+  const confirmed = answers['s1_country_confirmed'];
+
+  // If we have a pre-filled country and not yet confirmed → show confirm screen
+  if(sel && !confirmed) {
+    main.innerHTML = card('👤 About You',
+      `<div class="q-num">Question 2</div>
+       <div class="q-title">Is your current country of residence <strong>${sel}</strong>?</div>
+       <div class="opts" style="margin-top:14px">
+         <button class="opt" onclick="answers['s1_country_confirmed']=true;goNext('s1_birth')" style="border-color:#16a34a;background:#f0fdf4;color:#15803d;font-weight:700;font-size:15px">✅ Yes</button>
+         <button class="opt" onclick="answers['s1_country_confirmed']=true;answers['s1_country']='';render()" style="border-color:#dc2626;background:#fff5f5;color:#dc2626;font-weight:600">No, change it</button>
+       </div>` +
+      nav("goBack()", "goNext('s1_birth')", 'Continue →', false), 1);
+    return;
+  }
+
+  // No pre-fill or user said No → show full country list
   main.innerHTML = card('👤 About You',
     `<div class="q-num">Question 2</div>
      <div class="q-title">What is your current country of residence?</div>
@@ -435,12 +470,26 @@ function renderS1Country(main) {
      <div class="country-list" id="clist">${renderCList('')}</div>` +
     nav("goBack()","goNext('s1_birth')",'Continue →',!sel), 1);
 }
-function renderCList(f) { const fl=f.toLowerCase(); return COUNTRIES.filter(c=>c.toLowerCase().includes(fl)).map(c=>`<div class="ci${answers['s1_country']===c?' csel':''}" onclick="pickCountry('s1_country','${c.replace(/'/g,"\\'")}','s1_birth')">${c}</div>`).join(''); }
+function renderCList(f) { const fl=f.toLowerCase(); return COUNTRIES.filter(c=>c.toLowerCase().includes(fl)).map(c=>`<div class="ci${answers['s1_country']===c?' csel':''}" onclick="answers['s1_country_confirmed']=true;pickCountry('s1_country','${c.replace(/'/g,"\\'")}','s1_birth')">${c}</div>`).join(''); }
 function filterC() { const el=document.getElementById('clist'),s=document.getElementById('csearch'); if(el&&s)el.innerHTML=renderCList(s.value); }
 function pickCountry(key,val,next) { answers[key]=val; goNext(next); }
 
 function renderS1Birth(main) {
   const sel = answers['s1_birth']||'';
+  const confirmed = answers['s1_birth_confirmed'];
+
+  if(sel && !confirmed) {
+    main.innerHTML = card('👤 About You',
+      `<div class="q-num">Question 3</div>
+       <div class="q-title">Is your country of birth <strong>${sel}</strong>?</div>
+       <div class="opts" style="margin-top:14px">
+         <button class="opt" onclick="answers['s1_birth_confirmed']=true;goNext('s1_marital')" style="border-color:#16a34a;background:#f0fdf4;color:#15803d;font-weight:700;font-size:15px">✅ Yes</button>
+         <button class="opt" onclick="answers['s1_birth_confirmed']=true;answers['s1_birth']='';render()" style="border-color:#dc2626;background:#fff5f5;color:#dc2626;font-weight:600">No, change it</button>
+       </div>` +
+      nav("goBack()", "goNext('s1_marital')", 'Continue →', false), 1);
+    return;
+  }
+
   main.innerHTML = card('👤 About You',
     `<div class="q-num">Question 3</div>
      <div class="q-title">What is your country of birth?</div>
@@ -449,19 +498,26 @@ function renderS1Birth(main) {
      <div class="country-list" id="blist">${renderBList('')}</div>` +
     nav("goBack()","goNext('s1_marital')",'Continue →',!sel), 1);
 }
-function renderBList(f) { const fl=f.toLowerCase(); return COUNTRIES.filter(c=>c.toLowerCase().includes(fl)).map(c=>`<div class="ci${answers['s1_birth']===c?' csel':''}" onclick="pickCountry('s1_birth','${c.replace(/'/g,"\\'")}','s1_marital')">${c}</div>`).join(''); }
+function renderBList(f) { const fl=f.toLowerCase(); return COUNTRIES.filter(c=>c.toLowerCase().includes(fl)).map(c=>`<div class="ci${answers['s1_birth']===c?' csel':''}" onclick="answers['s1_birth_confirmed']=true;pickCountry('s1_birth','${c.replace(/'/g,"\\'")}','s1_marital')">${c}</div>`).join(''); }
 function filterB() { const el=document.getElementById('blist'),s=document.getElementById('bsearch'); if(el&&s)el.innerHTML=renderBList(s.value); }
 
 function renderS1Marital(main) {
   const sel = answers['s1_marital']||'';
+  const confirmed = answers['s1_marital_confirmed'];
+
+  if(sel && !confirmed) {
+    main.innerHTML = confirmCard(4, 'Is your marital status', sel, answers['s1_marital']==='Married'?'s1_spouse':'s1_children', 's1_marital', 1);
+    return;
+  }
+
   const opts = ['Single','Married','Divorced','Widowed'];
   main.innerHTML = card('👤 About You',
     `<div class="q-num">Question 4</div>
      <div class="q-title">What is your marital status?</div>
-     <div class="opts">${opts.map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('s1_marital','${o}');render()">${o}</button>`).join('')}</div>` +
+     <div class="opts">${opts.map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('s1_marital','${o}');answers['s1_marital_confirmed']=true;render()">${o}</button>`).join('')}</div>` +
     nav("goBack()","goFromMarital()",'Continue →',!sel), 1);
 }
-function goFromMarital() { if(!answers['s1_marital']) return; goNext(answers['s1_marital']==='Married'?'s1_spouse':'s1_children'); }
+function goFromMarital() { if(!answers['s1_marital']) return; answers['s1_marital_confirmed']=true; goNext(answers['s1_marital']==='Married'?'s1_spouse':'s1_children'); }
 
 function renderS1Spouse(main) {
   main.innerHTML = card('👤 About You',
@@ -493,17 +549,24 @@ function saveSpouseInfo(next) {
 
 function renderS1Children(main) {
   const sel = answers['has_children']||'';
+  const confirmed = answers['has_children_confirmed'];
+
+  if(sel && answers['children_count'] && !confirmed) {
+    main.innerHTML = confirmCard(5, 'Do you have', answers['children_count']+' children under 21', 's1_goal', 'has_children', 1);
+    return;
+  }
+
   main.innerHTML = card('👤 About You',
     `<div class="q-num">Question 5</div>
      <div class="q-title">Do you have any children under the age of 21?</div>
      <div class="opts">
-       <button class="opt${sel==='Yes'?' sel':''}" onclick="selSingle('has_children','Yes');render()">Yes</button>
-       <button class="opt${sel==='No'?' sel':''}" onclick="selSingle('has_children','No');render()">No</button>
+       <button class="opt${sel==='Yes'?' sel':''}" onclick="selSingle('has_children','Yes');answers['has_children_confirmed']=true;render()">Yes</button>
+       <button class="opt${sel==='No'?' sel':''}" onclick="selSingle('has_children','No');answers['has_children_confirmed']=true;render()">No</button>
      </div>
      ${sel==='Yes'?`<label class="inp-label">How many children?</label><input class="inp" type="number" id="children_count" min="1" max="20" placeholder="Number of children..." value="${answers['children_count']||''}"/>`:''}` +
     nav("goBack()","saveChildren('s1_goal')",'Continue →',!sel), 1);
 }
-function saveChildren(next) { const el=document.getElementById('children_count'); if(el) answers['children_count']=el.value; goNext(next); }
+function saveChildren(next) { const el=document.getElementById('children_count'); if(el) answers['children_count']=el.value; answers['has_children_confirmed']=true; goNext(next); }
 
 function renderS1Goal(main) {
   const sel = answers['s1_goal']||'';
@@ -517,33 +580,46 @@ function renderS1Goal(main) {
 
 function renderS1Edu(main) {
   const sel = answers['s1_edu']||'';
+  const confirmed = answers['s1_edu_confirmed'];
+
+  if(sel && !confirmed) {
+    main.innerHTML = confirmCard(7, 'Is your highest level of education', sel, 's1_profession', 's1_edu', 1);
+    return;
+  }
+
   const opts = ['High School','Trade School','Associate Degree',"Bachelor's Degree","Master's Degree","Doctorate (PhD)"];
   main.innerHTML = card('🎓 Education',
     `<div class="q-num">Question 7</div>
      <div class="q-title">What is your highest level of education?</div>
-     <div class="opts">${opts.map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('s1_edu','${o.replace(/'/g,"\\'")}');render()">${o}</button>`).join('')}</div>` +
+     <div class="opts">${opts.map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('s1_edu','${o.replace(/'/g,"\\'")}');answers['s1_edu_confirmed']=true;render()">${o}</button>`).join('')}</div>` +
     nav("goBack()","goNext('s1_profession')",'Continue →',!sel), 1);
 }
 
 function renderS1Profession(main) {
-  const manualVal = answers['s1_profession']||answers['s1_profession_val']||'';
+  const manualVal = answers['s1_profession']||'';
+  const confirmed = answers['s1_profession_confirmed'];
+
+  if(manualVal && !confirmed) {
+    main.innerHTML = confirmCard(8, 'Is your profession', manualVal, 's1_income', 's1_profession', 1);
+    return;
+  }
+
   main.innerHTML = card('💼 Career',
     `<div class="q-num">Question 8</div>
      <div class="q-title">What do you do for a living?</div>
-     ${manualVal?autofillNote(manualVal):''}
      <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" type="text" id="psearch" placeholder="Search profession..." oninput="filterP()" autocomplete="off"/></div>
      <div class="profession-list" id="plist">${renderPList('')}</div>
      <label class="inp-label" style="margin-top:8px">Or type manually:</label>
      <input class="inp" type="text" id="prof_manual" placeholder="Type your profession..." value="${manualVal}"/>
      <div style="margin-top:8px;display:flex;gap:8px">
-       <button class="opt" style="background:#fff5f5;border-color:#fca5a5;color:#dc2626;font-weight:600" onclick="answers['s1_profession']='Not Currently Employed';goNext('s1_experience')">❌ Not Employed</button>
-       <button class="opt" style="background:#fffbeb;border-color:#fcd34d;color:#92400e;font-weight:600" onclick="answers['s1_profession']='Retired';goNext('s1_experience')">🏖️ Retired</button>
+       <button class="opt" style="background:#fff5f5;border-color:#fca5a5;color:#dc2626;font-weight:600" onclick="answers['s1_profession']='Not Currently Employed';answers['s1_profession_confirmed']=true;goNext('s1_experience')">❌ Not Employed</button>
+       <button class="opt" style="background:#fffbeb;border-color:#fcd34d;color:#92400e;font-weight:600" onclick="answers['s1_profession']='Retired';answers['s1_profession_confirmed']=true;goNext('s1_experience')">🏖️ Retired</button>
      </div>` +
     nav("goBack()","saveProfS1('s1_income')"), 1);
 }
-function renderPList(f) { const fl=f.toLowerCase(); return PROFESSIONS.filter(p=>p.toLowerCase().includes(fl)).map(p=>`<div class="pi${answers['s1_profession']===p?' pis':''}" onclick="answers['s1_profession']='${p.replace(/'/g,"\\'")}';render()">${p}</div>`).join(''); }
+function renderPList(f) { const fl=f.toLowerCase(); return PROFESSIONS.filter(p=>p.toLowerCase().includes(fl)).map(p=>`<div class="pi${answers['s1_profession']===p?' pis':''}" onclick="answers['s1_profession']='${p.replace(/'/g,"\\'")}';answers['s1_profession_confirmed']=true;render()">${p}</div>`).join(''); }
 function filterP() { const el=document.getElementById('plist'),s=document.getElementById('psearch'); if(el&&s)el.innerHTML=renderPList(s.value); }
-function saveProfS1(next) { const el=document.getElementById('prof_manual'); if(el&&el.value.trim()) answers['s1_profession']=el.value.trim(); if(!answers['s1_profession']){alert('Please select or enter your profession.');return;} goNext(next); }
+function saveProfS1(next) { const el=document.getElementById('prof_manual'); if(el&&el.value.trim()) answers['s1_profession']=el.value.trim(); if(!answers['s1_profession']){alert('Please select or enter your profession.');return;} answers['s1_profession_confirmed']=true; goNext(next); }
 
 function renderS1Income(main) {
   const currencyMap = {'Israel':'ILS','United Arab Emirates':'AED','United Kingdom':'GBP','France':'EUR','Germany':'EUR','Italy':'EUR','Spain':'EUR','Australia':'AUD','Canada':'CAD','Japan':'JPY','China':'CNY','India':'INR','Brazil':'BRL','Mexico':'MXN','Russia':'RUB','South Africa':'ZAR','Turkey':'TRY','Saudi Arabia':'SAR','Kuwait':'KWD','Qatar':'QAR','Switzerland':'CHF','Sweden':'SEK','Norway':'NOK','Denmark':'DKK','Singapore':'SGD','South Korea':'KRW','Hong Kong':'HKD','New Zealand':'NZD'};
