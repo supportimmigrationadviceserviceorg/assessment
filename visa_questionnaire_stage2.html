@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>U.S. Visa Eligibility — Detailed Questionnaire</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f0f4f8;
+  min-height: 100vh;
+  padding: 20px 16px 60px;
+  color: #1a1a2e;
+}
+.container { max-width: 660px; margin: 0 auto; }
+.header { text-align: center; padding: 32px 0 28px; }
+.header-flag { font-size: 32px; margin-bottom: 10px; }
+.header-title { font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 6px; }
+.header-sub { font-size: 13px; color: #6b7280; }
+.progress-wrap { margin-bottom: 28px; }
+.progress-meta { display: flex; justify-content: space-between; font-size: 12px; color: #6b7280; margin-bottom: 7px; }
+.progress-bar { height: 5px; background: #e2e8f0; border-radius: 3px; }
+.progress-fill { height: 5px; background: linear-gradient(90deg, #2563eb, #3b82f6); border-radius: 3px; transition: width 0.5s ease; }
+.card { background: #fff; border-radius: 14px; padding: 28px 26px; box-shadow: 0 1px 6px rgba(0,0,0,0.07); margin-bottom: 14px; }
+.section-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #2563eb; margin-bottom: 18px; display: flex; align-items: center; gap: 6px; }
+.section-eyebrow::after { content: ''; flex: 1; height: 1px; background: #e5e7eb; }
+.q-num { font-size: 11px; font-weight: 600; color: #9ca3af; margin-bottom: 5px; }
+.q-title { font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 6px; line-height: 1.4; }
+.q-hint { font-size: 12px; color: #6b7280; margin-bottom: 16px; line-height: 1.5; font-style: italic; }
+.q-example { font-size: 11px; color: #9ca3af; background: #f9fafb; border-left: 3px solid #e5e7eb; padding: 8px 12px; border-radius: 0 6px 6px 0; margin-bottom: 14px; line-height: 1.5; }
+.inp { width: 100%; padding: 11px 14px; border: 1.5px solid #d1d5db; border-radius: 9px; font-size: 14px; color: #111827; background: #fff; transition: border-color 0.15s; margin-bottom: 12px; font-family: inherit; }
+.inp:focus { outline: none; border-color: #2563eb; }
+textarea.inp { min-height: 110px; resize: vertical; line-height: 1.6; }
+.inp-label { font-size: 11px; font-weight: 600; color: #374151; margin-bottom: 5px; display: block; }
+.opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.opts.col1 { grid-template-columns: 1fr; }
+.opt { padding: 11px 14px; border: 1.5px solid #e5e7eb; border-radius: 9px; background: #fff; color: #374151; font-size: 13px; cursor: pointer; text-align: left; transition: all 0.15s; line-height: 1.4; }
+.opt:hover { border-color: #93c5fd; background: #eff6ff; }
+.opt.sel { border-color: #2563eb; background: #eff6ff; color: #1d4ed8; font-weight: 600; }
+.check-opts { display: flex; flex-direction: column; gap: 7px; margin-bottom: 14px; }
+.check-opt { display: flex; align-items: flex-start; gap: 10px; padding: 11px 14px; border: 1.5px solid #e5e7eb; border-radius: 9px; background: #fff; cursor: pointer; transition: all 0.15s; }
+.check-opt:hover { border-color: #93c5fd; background: #f8faff; }
+.check-opt.sel { border-color: #2563eb; background: #eff6ff; }
+.check-box { width: 18px; height: 18px; border: 2px solid #d1d5db; border-radius: 4px; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; font-size: 11px; }
+.check-opt.sel .check-box { background: #2563eb; border-color: #2563eb; color: #fff; }
+.check-text { font-size: 13px; color: #374151; line-height: 1.4; }
+.check-opt.sel .check-text { color: #1d4ed8; font-weight: 500; }
+.nav { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; gap: 10px; }
+.btn-back { background: none; border: 1.5px solid #d1d5db; border-radius: 9px; padding: 10px 20px; font-size: 13px; color: #6b7280; cursor: pointer; transition: all 0.15s; }
+.btn-back:hover { border-color: #9ca3af; color: #374151; }
+.btn-next { background: #2563eb; border: none; border-radius: 9px; padding: 11px 28px; font-size: 14px; color: #fff; cursor: pointer; font-weight: 600; transition: background 0.15s; flex: 1; }
+.btn-next:hover { background: #1d4ed8; }
+.btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
+.email-step { text-align: center; padding: 10px 0; }
+.email-icon { font-size: 44px; margin-bottom: 16px; }
+.email-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.email-sub { font-size: 14px; color: #6b7280; margin-bottom: 24px; line-height: 1.6; }
+.email-status { font-size: 13px; margin-top: 10px; min-height: 20px; line-height: 1.5; }
+.email-status.ok { color: #16a34a; }
+.email-status.err { color: #dc2626; }
+.email-status.loading { color: #6b7280; }
+.welcome-bar { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+.welcome-avatar { width: 34px; height: 34px; background: #2563eb; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.welcome-name { font-size: 14px; font-weight: 600; color: #1d4ed8; }
+.welcome-sub { font-size: 11px; color: #3b82f6; }
+.thankyou { text-align: center; padding: 20px 0; }
+.thankyou-icon { font-size: 52px; margin-bottom: 16px; }
+.thankyou-title { font-size: 22px; font-weight: 700; color: #111827; margin-bottom: 10px; }
+.thankyou-sub { font-size: 14px; color: #6b7280; line-height: 1.7; margin-bottom: 24px; }
+.thankyou-box { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 18px 20px; font-size: 13px; color: #0369a1; line-height: 1.6; text-align: left; }
+.optional-badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 10px; background: #f3f4f6; color: #9ca3af; border: 1px solid #e5e7eb; margin-left: 7px; vertical-align: middle; font-weight: 500; }
+.saving-overlay { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.88); z-index: 999; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
+.saving-overlay.show { display: flex; }
+.saving-spinner { width: 36px; height: 36px; border: 3px solid #e5e7eb; border-top-color: #2563eb; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.saving-text { font-size: 14px; color: #6b7280; font-weight: 500; }
+@media (max-width: 480px) { .card { padding: 20px 16px; } .opts { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="saving-overlay" id="saving-overlay">
+  <div class="saving-spinner"></div>
+  <div class="saving-text" id="saving-text">Saving your answers...</div>
+</div>
+
+<div class="container">
+  <div class="header">
+    <div class="header-flag">🇺🇸</div>
+    <div class="header-title">U.S. Visa Eligibility Questionnaire</div>
+    <div class="header-sub">Stage 2 of 2 &nbsp;·&nbsp; Estimated time: 30–45 minutes</div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-meta">
+      <span id="progress-label">Getting started</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+  <div id="main"></div>
+</div>
+
+<script>
+const WEBHOOK = 'https://immiworld.org/rest/147/47yrflms2cje1cbe/';
+
+// ── CRM Field IDs (Contact) ──
+const CRM = {
+  EDUCATION:        'UF_CRM_1465285867',   // List
+  SPOUSE_EDUCATION: 'UF_CRM_1465286312',   // List
+  MARITAL_STATUS:   'UF_CRM_64CBB649310F0',// String
+  MARITAL_STATUS2:  'UF_CRM_1500181716',   // also marital (update both)
+  PROFESSION:       'UF_CRM_1484918121',   // String
+  INCOME:           'UF_CRM_1484917802',   // String
+  TOP_REASON:       'UF_CRM_1648031237',   // String (why US)
+  VISA_ASSESSMENT:  'UF_CRM_1494160345',   // List
+  NUM_CHILDREN:     'UF_CRM_5663EF24DD8A5',// String
+  SPOUSE_FNAME:     'UF_CRM_5663EF2587EEC',// String
+  SPOUSE_LNAME:     'UF_CRM_146529634',    // String
+  SPOUSE_BIRTH_COUNTRY: 'UF_CRM_1596458290', // String
+};
+
+// Education List IDs
+const EDU_IDS = {
+  'Primary school only': '250',
+  'High School, no degree': '251',
+  'High School degree': '252',
+  'Vocational School': '253',
+  'Some university Courses': '254',
+  'University Degree': '12567',
+  'Some Graduate Level Courses': '256',
+  "Master's Degree": '12568',
+  'Some Doctorate Level Courses': '267',
+  'Doctorate Degree': '268'
+};
+
+// Visa Assessment List IDs
+const VISA_STATUS = {
+  NEW: '3137',
+  SENT: '3138',
+  RECEIVED: '3139',
+  ASSESSED: '3140'
+};
+
+// ── State ──
+const urlParams = new URLSearchParams(window.location.search);
+let leadId     = urlParams.get('lead_id') || null;
+let contactId  = urlParams.get('contact_id') || null;
+let contactEmail = '';
+let contactName  = '';
+let firstName    = '';
+
+let currentStep  = 'email';
+let stepHistory  = [];
+let answers      = {};
+
+// If lead_id in URL, skip email step and load lead directly
+if(leadId) {
+  currentStep = 'loading';
+}
+
+// ── Steps ──
+const STEPS = ['email','q1','q2','q3','q4','q5','q6','q7','q8','q9','q10','q11','q12','q13','q14','q15','q16','q17','q18','q19','thankyou'];
+const STEP_LABELS = {
+  email:'Getting started', q1:'About You', q2:'Education', q3:'Education Awards',
+  q4:'Career History', q5:'Unique Skills', q6:'Unique Skills Detail',
+  q7:'Achievements', q8:'Recognition Detail', q9:'Judging & Review',
+  q10:'Impact Projects', q11:'Broader Impact',
+  q12:'Business Plans', q13:'Assets & Proof',
+  q14:'Why the U.S.', q15:'5-Year Vision', q16:'Long-term Intention', q17:'City & Community',
+  q18:'U.S. Family', q19:'Anything Else', thankyou:'Complete'
+};
+
+function stepIndex(id) { const i = STEPS.indexOf(id); return i < 0 ? 0 : i; }
+
+function setProgress(id) {
+  const i = stepIndex(id);
+  const total = STEPS.length - 2;
+  const pct = id === 'thankyou' ? 100 : id === 'email' || id === 'loading' ? 0 : Math.round(((i - 1) / total) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-label').textContent = STEP_LABELS[id] || '';
+}
+
+// ── Render ──
+function render() {
+  setProgress(currentStep);
+  const main = document.getElementById('main');
+  const map = {
+    email: renderEmail, loading: renderLoading,
+    q1:renderQ1, q2:renderQ2, q3:renderQ3, q4:renderQ4, q5:renderQ5, q6:renderQ6,
+    q7:renderQ7, q8:renderQ8, q9:renderQ9, q10:renderQ10, q11:renderQ11,
+    q12:renderQ12, q13:renderQ13, q14:renderQ14, q15:renderQ15,
+    q16:renderQ16, q17:renderQ17, q18:renderQ18, q19:renderQ19,
+    thankyou: renderThankYou
+  };
+  if(map[currentStep]) map[currentStep](main);
+}
+
+// ── Welcome bar (shown once contact is loaded) ──
+function welcomeBar() {
+  if(!contactName) return '';
+  const initials = contactName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+  return `<div class="welcome-bar">
+    <div class="welcome-avatar">${initials}</div>
+    <div>
+      <div class="welcome-name">${contactName}</div>
+      <div class="welcome-sub">${contactEmail}</div>
+    </div>
+  </div>`;
+}
+
+// ── LOADING (lead_id in URL) ──
+function renderLoading(main) {
+  main.innerHTML = `<div class="card" style="text-align:center;padding:40px 20px">
+    <div class="saving-spinner" style="margin:0 auto 16px"></div>
+    <div style="font-size:14px;color:#6b7280">Loading your file...</div>
+  </div>`;
+  loadFromLead();
+}
+
+async function loadFromLead() {
+  try {
+    const res = await fetch(`${WEBHOOK}crm.lead.get?ID=${leadId}`);
+    const data = await res.json();
+    if(data.result) {
+      const ld = data.result;
+      contactName  = [ld.NAME, ld.LAST_NAME].filter(Boolean).join(' ') || 'Client';
+      firstName    = contactName.split(' ')[0] || '';
+      contactEmail = ld.EMAIL?.[0]?.VALUE || '';
+      // Try to find linked contact
+      if(contactEmail) {
+        try {
+          const cr = await fetch(`${WEBHOOK}crm.contact.list?filter[EMAIL]=${encodeURIComponent(contactEmail)}&select[]=ID`);
+          const cd = await cr.json();
+          if(cd.result && cd.result.length > 0) contactId = cd.result[0].ID;
+        } catch(e) {}
+      }
+    }
+  } catch(e) {}
+  currentStep = 'q1';
+  render();
+}
+
+// ── EMAIL STEP ──
+function renderEmail(main) {
+  main.innerHTML = `<div class="card">
+    <div class="email-step">
+      <div class="email-icon">✉️</div>
+      <div class="email-title">Welcome to Stage 2</div>
+      <div class="email-sub">Please enter the email address you used when you registered with us.<br>We'll use it to link your answers to your file.</div>
+      <label class="inp-label" for="email-inp" style="text-align:left;display:block">Your email address</label>
+      <input class="inp" id="email-inp" type="email" placeholder="you@example.com" value="${contactEmail}"
+        oninput="clearEmailStatus()"
+        onkeydown="if(event.key==='Enter')lookupEmail()">
+      <div class="email-status" id="email-status"></div>
+      <div class="nav" style="margin-top:20px">
+        <span></span>
+        <button class="btn-next" onclick="lookupEmail()" id="email-btn">Continue →</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function clearEmailStatus() {
+  const el = document.getElementById('email-status');
+  if(el) { el.textContent=''; el.className='email-status'; }
+}
+
+async function lookupEmail() {
+  const inp = document.getElementById('email-inp');
+  const email = inp ? inp.value.trim() : '';
+  if(!email || !email.includes('@')) { setEmailStatus('Please enter a valid email address.','err'); return; }
+  contactEmail = email;
+  const btn = document.getElementById('email-btn');
+  btn.disabled = true; btn.textContent = 'Looking up...';
+  setEmailStatus('Searching for your file...','loading');
+  try {
+    const res = await fetch(`${WEBHOOK}crm.contact.list?filter[EMAIL]=${encodeURIComponent(email)}&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=EMAIL`);
+    const data = await res.json();
+    if(data.result && data.result.length > 0) {
+      const c = data.result[0];
+      contactId   = c.ID;
+      contactName = [c.NAME, c.LAST_NAME].filter(Boolean).join(' ') || 'Client';
+      firstName   = contactName.split(' ')[0] || '';
+      setEmailStatus('✅ File found — welcome, ' + (c.NAME||'') + '!', 'ok');
+      // Mark questionnaire as received
+      markVisaStatus(VISA_STATUS.RECEIVED);
+      setTimeout(() => goNext('q1'), 900);
+    } else {
+      setEmailStatus('We couldn\'t find a file for this email. Please double-check or contact us at info@immigrationadviceservice.org.','err');
+      btn.disabled = false; btn.textContent = 'Continue →';
+    }
+  } catch(e) {
+    setEmailStatus('⚠️ Connection error. Please try again.','err');
+    btn.disabled = false; btn.textContent = 'Continue →';
+  }
+}
+
+function setEmailStatus(msg, type) {
+  const el = document.getElementById('email-status');
+  if(el) { el.textContent = msg; el.className = 'email-status ' + (type||''); }
+}
+
+// ── HELPERS ──
+function card(eyebrow, content) {
+  return `<div class="card">${welcomeBar()}<div class="section-eyebrow">${eyebrow}</div>${content}</div>`;
+}
+function qHead(num, title, hint, example) {
+  return `<div class="q-num">Question ${num} of 19</div>
+    <div class="q-title">${title}</div>
+    ${hint ? `<div class="q-hint">${hint}</div>` : ''}
+    ${example ? `<div class="q-example"><strong>Example:</strong> ${example}</div>` : ''}`;
+}
+function navBar(backFn, nextFn, nextLabel, disabled) {
+  const back = backFn ? `<button class="btn-back" onclick="${backFn}">← Back</button>` : `<span></span>`;
+  return `<div class="nav">${back}<button class="btn-next" ${disabled?'disabled':''} onclick="${nextFn}">${nextLabel||'Continue →'}</button></div>`;
+}
+function goNext(next) { stepHistory.push(currentStep); currentStep = next; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function goBack() { if(!stepHistory.length) return; currentStep = stepHistory.pop(); render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function saveAndGo(key, inputId, next) { const el=document.getElementById(inputId); if(el) answers[key]=el.value.trim(); goNext(next); }
+function selSingle(key, val) { answers[key]=val; render(); }
+
+// ── QUESTIONS ──
+
+function renderQ1(main) {
+  main.innerHTML = card('👤 Who You Are',
+    qHead(1,'Tell us about yourself — who are you professionally?',
+      'Your field, your specialty, what drives you, and where you are in your career today. Write as if you\'re introducing yourself to someone who will fight for you.',
+      '"I\'m a senior cardiologist with 14 years of experience in interventional procedures, currently heading the cardiac unit at a major hospital in Tel Aviv..."') +
+    `<label class="inp-label">Your professional introduction</label>
+     <textarea class="inp" id="q1-inp" placeholder="Describe your field, specialty, and where you are in your career today...">${answers['q1']||''}</textarea>` +
+    navBar(null,"saveAndGo('q1','q1-inp','q2')")
+  );
+}
+
+const EDU_OPTS = ['Primary school only','High School, no degree','High School degree','Vocational School','Some university Courses','University Degree','Some Graduate Level Courses',"Master's Degree",'Some Doctorate Level Courses','Doctorate Degree'];
+
+function renderQ2(main) {
+  const sel = answers['q2_level'] || '';
+  main.innerHTML = card('🎓 Education',
+    qHead(2,'Describe your academic background in detail.',
+      'Every degree, institution, field of study, graduation year, GPA or honors. If you wrote a thesis or dissertation, describe the topic.',
+      '"B.Sc. Computer Science, Tel Aviv University, 2008, GPA 94/100, magna cum laude. M.Sc. Machine Learning, Technion, 2011. Thesis: real-time object detection..."') +
+    `<label class="inp-label">Highest education level</label>
+     <div class="opts col1" style="margin-bottom:16px">${EDU_OPTS.map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('q2_level','${o.replace(/'/g,"\\'")}');render()">${o}</button>`).join('')}</div>
+     <label class="inp-label">Full academic history (details)</label>
+     <textarea class="inp" id="q2-inp" placeholder="List all degrees, institutions, years, and any honors...">${answers['q2']||''}</textarea>` +
+    navBar("goBack()","saveQ2('q3')",'Continue →',!sel)
+  );
+}
+function saveQ2(next) {
+  const el = document.getElementById('q2-inp');
+  if(el) answers['q2'] = el.value.trim();
+  goNext(next);
+}
+
+function renderQ3(main) {
+  main.innerHTML = card('🎓 Education',
+    qHead(3,'List any academic awards, scholarships, or fellowships you have received. <span class="optional-badge">optional</span>',
+      'Include the name, who granted it, the year, and how competitive it is.',
+      '"Rothschild Foundation scholarship, 2010 — awarded to 15 candidates annually across Israel out of ~800 applicants."') +
+    `<label class="inp-label">Awards and scholarships</label>
+     <textarea class="inp" id="q3-inp" placeholder="Leave blank if none...">${answers['q3']||''}</textarea>` +
+    navBar("goBack()","saveAndGo('q3','q3-inp','q4')")
+  );
+}
+
+function renderQ4(main) {
+  main.innerHTML = card('💼 Career & Experience',
+    qHead(4,'Walk us through your full employment history (last 10–15 years).',
+      'For each position: company name, title, dates, people managed, and key responsibilities. Be specific.',
+      '"Senior ML Engineer, Google Israel, Jan 2020–present. Managed a team of 5. Led development of the core recommendation engine used by 3M+ users globally..."') +
+    `<label class="inp-label">Employment history</label>
+     <textarea class="inp" id="q4-inp" style="min-height:140px" placeholder="List each role with company, title, dates, and responsibilities...">${answers['q4']||''}</textarea>` +
+    navBar("goBack()","saveAndGo('q4','q4-inp','q5')")
+  );
+}
+
+function renderQ5(main) {
+  const sel = answers['q5'] || '';
+  const opts = ['Yes','Possibly','No','Not sure'];
+  main.innerHTML = card('💼 Career & Experience',
+    qHead(5,'Is there something you are exceptionally good at — a skill, knowledge, or expertise — that very few people in the world have?','Select one.') +
+    `<div class="opts col1">${opts.map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('q5','${o}');render()">${o}</button>`).join('')}</div>` +
+    navBar("goBack()","goFromQ5()",'Continue →',!sel)
+  );
+}
+function goFromQ5() {
+  if(!answers['q5']) return;
+  if(answers['q5']==='Yes'||answers['q5']==='Possibly') goNext('q6');
+  else { answers['q6']=''; goNext('q7'); }
+}
+
+function renderQ6(main) {
+  main.innerHTML = card('💼 Career & Experience',
+    qHead(6,'Describe your exceptional expertise. <span class="optional-badge">optional</span>',
+      'What do people come to you specifically for? What took you years to master that most people in your field have not?') +
+    `<label class="inp-label">Your unique expertise</label>
+     <textarea class="inp" id="q6-inp" placeholder="Describe what makes your knowledge or skill rare...">${answers['q6']||''}</textarea>` +
+    navBar("goBack()","saveAndGo('q6','q6-inp','q7')")
+  );
+}
+
+const RECOGNITION_OPTIONS = [
+  'Industry awards or prizes','Published academic papers or books','Patents (filed or granted)',
+  'Media coverage (press, TV, radio, podcasts)','Speaking at conferences or professional panels',
+  'Peer review or judging panels',"Forbes, industry rankings, or 'top X' lists",'None of the above'
+];
+
+function renderQ7(main) {
+  const sel = answers['q7'] || [];
+  main.innerHTML = card('🏆 Achievements & Recognition',
+    qHead(7,'Which of the following have you received or participated in?','Select all that apply.') +
+    `<div class="check-opts">` +
+    RECOGNITION_OPTIONS.map(o => {
+      const s = sel.includes(o);
+      return `<div class="check-opt${s?' sel':''}" onclick="togQ7('${o.replace(/'/g,"\\'")}')">
+        <div class="check-box">${s?'✓':''}</div>
+        <div class="check-text">${o}</div>
+      </div>`;
+    }).join('') + `</div>` +
+    navBar("goBack()","goNext('q8')",'Continue →',!sel.length)
+  );
+}
+function togQ7(val) {
+  if(!answers['q7']) answers['q7']=[];
+  if(val==='None of the above') { answers['q7']=answers['q7'].includes(val)?[]:[val]; }
+  else { answers['q7']=answers['q7'].filter(v=>v!=='None of the above'); const i=answers['q7'].indexOf(val); if(i>-1) answers['q7'].splice(i,1); else answers['q7'].push(val); }
+  render();
+}
+
+function renderQ8(main) {
+  main.innerHTML = card('🏆 Achievements & Recognition',
+    qHead(8,'Describe your most significant professional recognition in detail.',
+      'For each: the name, who granted it, the year, and what makes it prestigious. How many people receive it?',
+      '"Granted US Patent #10,123,456 (2021). Published 3 papers in NeurIPS and ICML with 340 combined citations. Named Forbes 30 Under 30 Israel 2020 (selected from ~2,000 nominees)."') +
+    `<label class="inp-label">Your most significant recognition</label>
+     <textarea class="inp" id="q8-inp" placeholder="Describe awards, publications, patents, or other recognition in detail...">${answers['q8']||''}</textarea>` +
+    navBar("goBack()","saveAndGo('q8','q8-inp','q9')")
+  );
+}
+
+function renderQ9(main) {
+  main.innerHTML = card('🏆 Achievements & Recognition',
+    qHead(9,'Have you been invited to judge, review, or evaluate others\' work in your field? <span class="optional-badge">optional</span>',
+      'E.g. reviewing academic papers, sitting on award committees, judging startup competitions, serving as an expert witness.',
+      '"Reviewer for NeurIPS and ICML since 2019. Judged the Intel Innovation Awards (2022)."') +
+    `<label class="inp-label">Judging and review roles</label>
+     <textarea class="inp" id="q9-inp" placeholder="Leave blank if none...">${answers['q9']||''}</textarea>` +
+    navBar("goBack()","saveAndGo('q9','q9-inp','q10')")
+  );
+}
+
+function renderQ10(main) {
+  main.innerHTML = card('🚀 Projects & Impact',
+    qHead(10,'Describe your 3 most impactful professional projects.',
+      'For each: what was the challenge, what was YOUR specific role, what did you deliver, and what was the measurable outcome? Numbers matter.',
+      '"Project 1: Led redesign of fraud detection at Fintech Co. My role: technical lead, team of 4. Outcome: reduced false positives by 42%, saving ~$1.8M annually..."') +
+    `<label class="inp-label">Your 3 most impactful projects</label>
+     <textarea class="inp" id="q10-inp" style="min-height:150px" placeholder="Project 1: ...\n\nProject 2: ...\n\nProject 3: ...">${answers['q10']||''}</textarea>` +
+    navBar("goBack()","saveAndGo('q10','q10-inp','q11')")
+  );
+}
+
+function renderQ11(main) {
+  main.innerHTML = card('🚀 Projects & Impact',
+    qHead(11,'Has your work had an impact beyond your own organization? <span class="optional-badge">optional</span>',
+      'Think about open-source contributions, policy influence, community programs, setting industry standards, or any broader effect your work has had.') +
+    `<label class="inp-label">Broader impact</label>
+     <textarea class="inp" id="q11-inp" placeholder="Leave blank if none...">${answers['q11']||''}</textarea>` +
+    navBar("goBack()","saveAndGo('q11','q11-inp','q12')")
+  );
+}
+
+function renderQ12(main) {
+  main.innerHTML = card('💰 Business & Investment',
+    qHead(12,'If you are interested in starting, buying, or investing in a U.S. business — tell us about the idea. <span class="optional-badge">optional</span>',
+      'No need for details or numbers at this stage. Just describe in general terms what you have in mind.',
+      '"I\'m thinking about opening a small restaurant, or maybe investing in a friend\'s tech startup. I\'m not sure yet but I\'m open to it."') +
+    `<label class="inp-label">Business idea or interest</label>
+     <textarea class="inp" id="q12-inp" placeholder="Leave blank if not applicable...">${answers['q12']||''}</textarea>` +
+    navBar("goBack()","saveAndGo('q12','q12-inp','q13')")
+  );
+}
+
+function renderQ13(main) {
+  const sel = answers['q13'] || '';
+  const opts = ['Yes — clear documentation available','Partially — some documents','Working on it','No'];
+  main.innerHTML = card('💰 Business & Investment',
+    qHead(13,'Do you have documented proof of business ownership, investment activity, or substantial personal assets?','Select one.') +
+    `<div class="opts col1">${opts.map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('q13','${o.replace(/'/g,"\\'")}');render()">${o}</button>`).join('')}</div>` +
+    navBar("goBack()","goNext('q14')",'Continue →',!sel)
+  );
+}
+
+function renderQ14(main) {
+  main.innerHTML = card('🌟 Your American Dream',
+    qHead(14,'Why the United States? What is drawing you there specifically?',
+      'Be honest and personal. What opportunities, people, or circumstances make the U.S. the place for this next chapter? This is one of the most important questions in your petition.',
+      '"I have spent 8 years researching a cardiac therapy that can only be tested at scale through the U.S. clinical trial network..."') +
+    `<label class="inp-label">Your reason for choosing the United States</label>
+     <textarea class="inp" id="q14-inp" style="min-height:120px" placeholder="Be specific and personal...">${answers['q14']||''}</textarea>` +
+    navBar("goBack()","saveAndGo('q14','q14-inp','q15')")
+  );
+}
+
+function renderQ15(main) {
+  main.innerHTML = card('🌟 Your American Dream',
+    qHead(15,'Picture your life in the United States 5 years from now. What does it look like?',
+      'Be specific and personal. Where do you live? What are you working on? What have you built? Who is with you?',
+      '"I see myself running a small research lab in Boston, collaborating with doctors I\'ve admired for years. My kids are in school nearby..."') +
+    `<label class="inp-label">Your 5-year vision</label>
+     <textarea class="inp" id="q15-inp" style="min-height:120px" placeholder="Paint the picture...">${answers['q15']||''}</textarea>` +
+    navBar("goBack()","saveAndGo('q15','q15-inp','q16')")
+  );
+}
+
+function renderQ16(main) {
+  const sel = answers['q16'] || '';
+  const opts = ['I want both the Green Card and eventually citizenship',"I want a Green Card but I'm not sure about citizenship","I'm not sure yet",'I plan to return home eventually'];
+  main.innerHTML = card('🌟 Your American Dream',
+    qHead(16,'After 3 years in the U.S. you may become eligible for a Green Card. After 5 years, you can apply for citizenship. What is your long-term intention?','Select one.') +
+    `<div class="opts col1">${opts.map(o=>`<button class="opt${sel===o?' sel':''}" onclick="selSingle('q16','${o.replace(/'/g,"\\'")}');render()">${o}</button>`).join('')}</div>` +
+    navBar("goBack()","goNext('q17')",'Continue →',!sel)
+  );
+}
+
+function renderQ17(main) {
+  main.innerHTML = card('🌟 Your American Dream',
+    qHead(17,'Is there a specific city, community, or environment you envision yourself in? <span class="optional-badge">optional</span>',
+      'Why that place? Is there a professional ecosystem, a community, a lifestyle, or a personal connection drawing you there?',
+      '"New York — because the startup ecosystem and access to capital is unmatched, and my brother\'s family is already there."') +
+    `<label class="inp-label">Preferred city or environment</label>
+     <textarea class="inp" id="q17-inp" placeholder="Leave blank if no preference...">${answers['q17']||''}</textarea>` +
+    navBar("goBack()","saveAndGo('q17','q17-inp','q18')")
+  );
+}
+
+function renderQ18(main) {
+  main.innerHTML = card('🏠 U.S. Ties & Final Details',
+    qHead(18,'If you have close family members living legally in the U.S., describe your connection. <span class="optional-badge">optional</span>',
+      'Relationship, their immigration status, how long they\'ve been in the U.S., and whether they\'re willing to sponsor you.',
+      '"My sister is a U.S. citizen living in Chicago since 2015. She has expressed willingness to file a family petition on my behalf."') +
+    `<label class="inp-label">U.S. family connections</label>
+     <textarea class="inp" id="q18-inp" placeholder="Leave blank if none...">${answers['q18']||''}</textarea>` +
+    navBar("goBack()","saveAndGo('q18','q18-inp','q19')")
+  );
+}
+
+function renderQ19(main) {
+  main.innerHTML = card('🏠 U.S. Ties & Final Details',
+    qHead(19,'Is there anything else you want us to know? <span class="optional-badge">optional</span>',
+      'Unique life experiences, personal challenges you\'ve overcome, a compelling story, or any detail that might help us build the strongest possible case for you.') +
+    `<label class="inp-label">Additional information</label>
+     <textarea class="inp" id="q19-inp" style="min-height:120px" placeholder="Leave blank if nothing to add...">${answers['q19']||''}</textarea>
+     <div class="nav">
+       <button class="btn-back" onclick="goBack()">← Back</button>
+       <button class="btn-next" onclick="submitAll()">Submit my answers →</button>
+     </div>`
+  );
+}
+
+// ── THANK YOU ──
+function renderThankYou(main) {
+  main.innerHTML = `<div class="card">
+    <div class="thankyou">
+      <div class="thankyou-icon">✅</div>
+      <div class="thankyou-title">Your answers have been submitted</div>
+      <div class="thankyou-sub">Thank you for taking the time to complete this questionnaire.<br>Your information is now in the hands of our team.</div>
+      <div class="thankyou-box">
+        <strong>What happens next?</strong><br><br>
+        A licensed immigration attorney will review your full profile and eligibility assessment. Once the review is complete, you will receive a detailed response by email.<br><br>
+        Please keep an eye on your inbox, including your spam or junk folder.
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── CRM HELPERS ──
+async function markVisaStatus(statusId) {
+  if(!contactId) return;
+  try {
+    await fetch(`${WEBHOOK}crm.contact.update?ID=${contactId}&fields[${CRM.VISA_ASSESSMENT}]=${statusId}`);
+  } catch(e) {}
+}
+
+// ── SUBMIT ──
+async function submitAll() {
+  const el19 = document.getElementById('q19-inp');
+  if(el19) answers['q19'] = el19.value.trim();
+
+  const overlay = document.getElementById('saving-overlay');
+  overlay.classList.add('show');
+  document.getElementById('saving-text').textContent = 'Saving your answers...';
+
+  const summary = buildSummary();
+  const fields  = buildFields();
+
+  try {
+    if(contactId) {
+      // 1. Update Contact fields
+      const params = Object.entries(fields).map(([k,v])=>`fields[${k}]=${encodeURIComponent(v)}`).join('&');
+      await fetch(`${WEBHOOK}crm.contact.update?ID=${contactId}&${params}`);
+
+      // 2. Add to Activity Feed (timeline)
+      await fetch(WEBHOOK + 'crm.timeline.comment.add', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({fields:{ENTITY_TYPE:'contact', ENTITY_ID:contactId, COMMENT:summary}})
+      });
+
+      // 3. Mark Visa Assessment as "Questionnaire received"
+      await fetch(`${WEBHOOK}crm.contact.update?ID=${contactId}&fields[${CRM.VISA_ASSESSMENT}]=${VISA_STATUS.RECEIVED}`);
+    }
+
+    overlay.classList.remove('show');
+    goNext('thankyou');
+  } catch(e) {
+    // Still show thank you — data may have partially saved
+    overlay.classList.remove('show');
+    goNext('thankyou');
+  }
+}
+
+function buildFields() {
+  const f = {};
+
+  // Education — update all 3 education fields
+  if(answers['q2_level'] && EDU_IDS[answers['q2_level']]) {
+    f[CRM.EDUCATION]       = EDU_IDS[answers['q2_level']];
+    // UF_CRM_1656684580 is also "education level" — update with text value
+    f['UF_CRM_1656684580'] = answers['q2_level'];
+    f['UF_CRM_64CF881B8596B'] = answers['q2_level']; // FB Education level
+  }
+
+  // Marital status (from Q18 context — not asked directly but update if known from lead)
+  // Profession — not directly asked in this form but if detected
+  // Why US → Top reason field
+  if(answers['q14']) f[CRM.TOP_REASON] = answers['q14'].substring(0,255);
+
+  // Full questionnaire text → COMMENTS
+  f['COMMENTS'] = buildSummary().substring(0, 3000);
+
+  // Visa Assessment → Questionnaire received
+  f[CRM.VISA_ASSESSMENT] = VISA_STATUS.RECEIVED;
+
+  return f;
+}
+
+function buildSummary() {
+  return [
+    '=== U.S. VISA ELIGIBILITY — STAGE 2 QUESTIONNAIRE ===',
+    `Client: ${contactName || contactEmail || 'unknown'}`,
+    `Email: ${contactEmail || 'unknown'}`,
+    `Contact ID: ${contactId || (leadId ? 'from lead #'+leadId : 'not linked')}`,
+    '',
+    '--- Q1. Professional Introduction ---',
+    answers['q1'] || '(not answered)',
+    '',
+    '--- Q2. Academic Background ---',
+    'Highest level: ' + (answers['q2_level'] || 'not selected'),
+    answers['q2'] || '(no details provided)',
+    '',
+    '--- Q3. Academic Awards & Scholarships ---',
+    answers['q3'] || '(none provided)',
+    '',
+    '--- Q4. Employment History ---',
+    answers['q4'] || '(not answered)',
+    '',
+    '--- Q5. Has Rare/Unique Expertise ---',
+    answers['q5'] || '(not answered)',
+    answers['q6'] ? 'Description: ' + answers['q6'] : '',
+    '',
+    '--- Q7. Recognition Types ---',
+    (answers['q7'] || []).join(', ') || '(none selected)',
+    '',
+    '--- Q8. Most Significant Recognition ---',
+    answers['q8'] || '(not answered)',
+    '',
+    '--- Q9. Judging & Review Roles ---',
+    answers['q9'] || '(none provided)',
+    '',
+    '--- Q10. 3 Most Impactful Projects ---',
+    answers['q10'] || '(not answered)',
+    '',
+    '--- Q11. Broader Impact ---',
+    answers['q11'] || '(none provided)',
+    '',
+    '--- Q12. U.S. Business Plans ---',
+    answers['q12'] || '(none provided)',
+    '',
+    '--- Q13. Asset Documentation ---',
+    answers['q13'] || '(not answered)',
+    '',
+    '--- Q14. Why the United States ---',
+    answers['q14'] || '(not answered)',
+    '',
+    '--- Q15. 5-Year Vision ---',
+    answers['q15'] || '(not answered)',
+    '',
+    '--- Q16. Long-term Intention ---',
+    answers['q16'] || '(not answered)',
+    '',
+    '--- Q17. Preferred City/Community ---',
+    answers['q17'] || '(none provided)',
+    '',
+    '--- Q18. U.S. Family Connections ---',
+    answers['q18'] || '(none provided)',
+    '',
+    '--- Q19. Additional Information ---',
+    answers['q19'] || '(none provided)',
+  ].filter(l => l !== undefined).join('\n');
+}
+
+// ── INIT ──
+if(leadId) {
+  render(); // will show loading → then loadFromLead
+} else {
+  render();
+}
+</script>
+</body>
+</html>
