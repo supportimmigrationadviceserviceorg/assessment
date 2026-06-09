@@ -974,7 +974,24 @@ function renderS2EduLevel(main) {
 // ── ADDITIONAL QUESTIONS ──
 
 function renderS2Nationality(main) {
+  // Auto-fill from country of birth if not set
+  if(!answers['s2_nationality'] && answers['s1_birth']) {
+    answers['s2_nationality'] = answers['s1_birth'];
+  }
   const sel = answers['s2_nationality']||'';
+
+  // If pre-filled — show confirm
+  if(sel && !answers['s2_nationality_confirmed']) {
+    main.innerHTML = card('🌍 Personal Details',
+      `<div class="q-num">Additional Question</div>
+       <div class="q-title">Is your nationality <strong>${sel}</strong>?</div>
+       <div class="opts" style="margin-top:14px">
+         <button class="opt" onclick="answers['s2_nationality_confirmed']=true;goNext('s2_second_nationality')" style="border-color:#16a34a;background:#f0fdf4;color:#15803d;font-weight:700;font-size:15px">✅ Yes</button>
+         <button class="opt" onclick="answers['s2_nationality_confirmed']=true;answers['s2_nationality']='';render()" style="border-color:#dc2626;background:#fff5f5;color:#dc2626;font-weight:600">No, change it</button>
+       </div>` +
+      nav("goBack()", "goNext('s2_second_nationality')", 'Continue →', false), 2);
+    return;
+  }
   main.innerHTML = card('🌍 Personal Details',
     `<div class="q-num">Additional Question</div>
      <div class="q-title">What is your nationality?</div>
