@@ -572,7 +572,7 @@ async function lookupEmail(email) {
       const name = [answers.firstName, answers.lastName].filter(Boolean).join(' ');
       result.innerHTML = `
         <div class="lookup-result lookup-found">
-          <div class="lookup-found-title">✅ We found your profile${name ? ' — '+name : ''}!</div>
+          <div class="lookup-found-title">✅ ${name ? name+' — your' : 'Your'} details have been loaded automatically.</div>
           <div style="color:var(--gray-600)">Your details have been filled in automatically. Please review and continue.</div>
         </div>`;
       result.style.display = 'block';
@@ -967,8 +967,7 @@ async function loadLeadById() {
       document.getElementById('btnContact').disabled = !answers.firstName;
       const r = document.getElementById('lookupResult');
       const name = [answers.firstName, answers.lastName].filter(Boolean).join(' ');
-      r.innerHTML = `<div class="lookup-result lookup-found"><div class="lookup-found-title">✅ Welcome back${name?' — '+name:''}!</div><div style="color:var(--gray-600)">Your details have been loaded from your profile.</div></div>`;
-      r.style.display = 'block';
+      r.style.display = 'none';
       updateClientBar();
     }, 300);
   }
