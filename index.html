@@ -308,7 +308,24 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
         <div id="reinforce-q2" class="reinforce-wrap"><div class="reinforce-bubble"><span class="reinforce-icon">🌍</span><span id="reinforce-q2-text"></span></div></div>
         <div class="nav">
           <button class="btn-back" onclick="goBack()">← Back</button>
-          <button class="btn-next" id="btnQ2" onclick="goNext('q3')" disabled>Continue →</button>
+          <button class="btn-next" id="btnQ2" onclick="goNext('q2b')" disabled>Continue →</button>
+        </div>
+      </div>
+
+
+      <!-- Q2b – COUNTRY OF BIRTH -->
+      <div class="screen" id="screen-q2b">
+        <div class="q-eyebrow">Question 2 of 10</div>
+        <div class="q-title">What is your country of birth?</div>
+        <div id="birthCountryPill"></div>
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" type="text" id="birthCountrySearch" placeholder="Search your country..." oninput="filterBirthCountries()" autocomplete="off"/>
+        </div>
+        <div class="country-list" id="birthCountryList"></div>
+        <div class="nav">
+          <button class="btn-back" onclick="goBack()">← Back</button>
+          <button class="btn-next" id="btnQ2b" onclick="goNext('q3')" disabled>Continue →</button>
         </div>
       </div>
 
@@ -348,7 +365,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
               <div class="field-label">Spouse Country of Birth</div>
               <div class="search-wrap" style="margin-bottom:4px">
                 <span class="search-icon">&#128269;</span>
-                <input class="search-input" type="text" id="spouseCountrySearch" placeholder="Search country..." oninput="filterSpouseCountry()" autocomplete="off"/>
+                <input class="search-input" type="text" id="spouseCountrySearch" placeholder="Search country..." oninput="renderSpouseCountries(this.value)" autocomplete="off"/>
               </div>
               <div id="spouseCountryPill"></div>
               <div class="country-list" id="spouseCountryList" style="max-height:150px"></div>
@@ -810,9 +827,9 @@ function editContact() {
 // ─────────────────────────────────────────────────────────
 // SCREEN NAVIGATION
 // ─────────────────────────────────────────────────────────
-const Q_SCREENS = ['q1','q2','q3','q3b','q3c','q4','q5','q6','q7','q8','q9','q10'];
+const Q_SCREENS = ['q1','q2','q2b','q3','q3b','q3c','q4','q5','q6','q7','q8','q9','q10'];
 const SCREEN_LABELS = {
-  contact:'Your Details', q1:'Age', q2:'Country', q3:'Marital Status',
+  contact:'Your Details', q1:'Age', q2:'Country of Residence', q2b:'Country of Birth', q3:'Marital Status',
   q3b:'Spouse Details', q3c:'Children', q4:'Your Goal', q5:'Education', q6:'Profession', q7:'Experience',
   q8:'Business Interest', q9:'Family in U.S.', q10:'Final Question'
 };
@@ -851,6 +868,8 @@ function showScreen(id) {
 
   if(Q_SCREENS.includes(id)) restoreOpts(id);
   if(id === 'q2') renderCountries('');
+  if(id === 'q2b') renderBirthCountries('');
+  if(id === 'q3b') renderSpouseCountries('');
   if(id === 'q6') { renderProf(''); restoreProfDisplay(); }
   window.scrollTo(0, 0);
 }
@@ -887,13 +906,45 @@ function restoreOpts(id) {
 
 
 // ─────────────────────────────────────────────────────────
+// BIRTH COUNTRY (q2b)
+// ─────────────────────────────────────────────────────────
+function renderBirthCountries(filter) {
+  const fl = filter.toLowerCase();
+  const list = COUNTRIES.filter(c => c.toLowerCase().includes(fl));
+  const el = document.getElementById('birthCountryList');
+  if(!el) return;
+  if(!list.length) { el.innerHTML = '<div style="padding:12px;font-size:13px;color:var(--gray-400)">No results</div>'; return; }
+  el.innerHTML = '';
+  list.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'country-item' + (answers.q2b===c?' selected':'');
+    div.textContent = c;
+    div.addEventListener('click', () => selBirthCountry(c));
+    el.appendChild(div);
+  });
+}
+function filterBirthCountries() { renderBirthCountries(document.getElementById('birthCountrySearch').value); }
+function selBirthCountry(c) {
+  answers.q2b = c;
+  document.getElementById('birthCountryPill').innerHTML = '<div class="selected-pill">'+c+' <span class="pill-x" onclick="clearBirthCountry()">×</span></div>';
+  document.getElementById('btnQ2b').disabled = false;
+  renderBirthCountries(document.getElementById('birthCountrySearch').value);
+}
+function clearBirthCountry() {
+  delete answers.q2b;
+  document.getElementById('birthCountryPill').innerHTML = '';
+  document.getElementById('btnQ2b').disabled = true;
+  renderBirthCountries('');
+}
+
+// ─────────────────────────────────────────────────────────
 // SPOUSE COUNTRY
 // ─────────────────────────────────────────────────────────
-function filterSpouseCountry() {
-  const val = document.getElementById('spouseCountrySearch').value;
-  const fl = val.toLowerCase();
+function renderSpouseCountries(filter) {
+  const fl = (filter||'').toLowerCase();
   const list = COUNTRIES.filter(c => c.toLowerCase().includes(fl));
   const el = document.getElementById('spouseCountryList');
+  if(!el) return;
   el.innerHTML = '';
   list.forEach(c => {
     const div = document.createElement('div');
@@ -907,11 +958,6 @@ function filterSpouseCountry() {
     });
     el.appendChild(div);
   });
-}
-function clearSpouseCountry() {
-  delete answers.spouseCountry;
-  document.getElementById('spouseCountryPill').innerHTML = '';
-  filterSpouseCountry();
 }
 
 // ─────────────────────────────────────────────────────────
@@ -1063,6 +1109,7 @@ async function submitAndShowResults() {
     '',
     '=== ANSWERS ===',
     `Age: ${answers.q1||''}`,
+    `Country of Birth: ${answers.q2b||''}`,
     answers.q3==='Married' ? `Spouse: ${[answers.spouseFirst,answers.spouseLast].filter(Boolean).join(' ')} | Country: ${answers.spouseCountry||''} | Edu: ${answers.spouseEdu||''} | Immigrating: ${answers.spouseImmigrate||''}` : '',
     `Children under 21: ${answers.q3c||''} ${answers.childrenCount?'('+answers.childrenCount+')':''}`,
     `Country: ${answers.q2||''}`,
