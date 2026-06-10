@@ -163,6 +163,10 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
 .salary-amount{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:#fff;margin-bottom:6px;}
 .salary-note{font-size:13px;color:rgba(255,255,255,0.8);line-height:1.55;}
 
+/* SHAKE VALIDATION */
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.shake{animation:shake 0.35s ease;border-color:var(--red)!important;}
+
 /* PROCESSING / DONE */
 .status-wrap{text-align:center;padding:32px 16px;}
 .status-icon{font-size:48px;margin-bottom:16px;}
@@ -539,7 +543,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
         <button class="opt" style="width:100%;margin-bottom:0;background:var(--gold-light);border-color:rgba(201,168,76,0.4);color:#78621a" data-val="Retired" onclick="selProfDirect('Retired');goNext('q6b')"><div class="opt-radio" style="border-color:rgba(201,168,76,0.6)"></div>🏖️ Retired</button>
         <div class="nav" style="margin-top:16px">
           <button class="btn-back" onclick="goBack()">← Back</button>
-          <button class="btn-next" id="btnQ6" onclick="goNext('q7')" disabled>Continue →</button>
+          <button class="btn-next" id="btnQ6" onclick="validateAndGoQ7()" disabled>Continue →</button>
         </div>
       </div>
 
@@ -694,23 +698,55 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
 
       <!-- RESULTS -->
       <div class="screen" id="screen-results">
+        <!-- HERO -->
         <div class="result-hero">
           <div class="result-badge">✅ Assessment Complete</div>
-          <div class="result-title" id="resultTitle">Great news — your profile qualifies!</div>
-          <div class="result-sub">Based on your answers, we identified immigration pathways that match your profile.</div>
+          <div class="result-title" id="resultTitle">Well done — you've taken the right step!</div>
+          <div class="result-sub" id="resultSub">Based on your answers, we identified potential immigration pathways for your profile.</div>
         </div>
+
+        <!-- PATHWAY CARDS -->
         <div id="pathwayCards"></div>
+
         <div class="separator"></div>
-        <div class="cta-section">
-          <div class="cta-price">$250</div>
-          <div class="cta-price-note">One-time file opening fee — no hidden costs</div>
-          <ul class="cta-points">
-            <li><span class="cta-check">✓</span> Personal review by a licensed immigration attorney</li>
-            <li><span class="cta-check">✓</span> Dedicated immigration consultant assigned to your case</li>
-            <li><span class="cta-check">✓</span> Detailed eligibility report + recommended next steps</li>
-            <li><span class="cta-check">✓</span> Confirmation email with your case number immediately</li>
+
+        <!-- IMPORTANT NOTICE -->
+        <div style="background:#fffbeb;border:1.5px solid rgba(245,158,11,0.35);border-radius:var(--radius);padding:16px;margin-bottom:20px">
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <span style="font-size:20px;flex-shrink:0">⚠️</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#92400e;margin-bottom:5px">Important — This is an initial assessment only</div>
+              <div style="font-size:13px;color:#78350f;line-height:1.7">
+                Online assessments cannot capture the full picture. There may be additional visa categories and immigration pathways available to you that require a professional legal review to identify. To determine your best options accurately, your case must be reviewed by a licensed immigration attorney.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NEXT STEP — STAGE 2 -->
+        <div style="background:linear-gradient(135deg,#1a3a6b 0%,#2255a4 100%);border-radius:12px;padding:22px;margin-bottom:20px;color:#fff">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:rgba(255,255,255,0.65);margin-bottom:8px;font-weight:500">Next Step — Activate Your Case</div>
+          <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:600;margin-bottom:10px;line-height:1.3">Step 2: Attorney Review &amp; Detailed Questionnaire</div>
+          <div style="font-size:13px;color:rgba(255,255,255,0.85);line-height:1.7;margin-bottom:16px">
+            The next step is to activate your immigration file. You will receive a more detailed questionnaire designed by our immigration attorneys — and your full profile will be reviewed by a licensed attorney who will identify <strong style="color:#fff">every pathway available to you</strong>, including ones that cannot be detected through an online assessment alone.
+          </div>
+          <ul style="list-style:none;margin-bottom:18px">
+            <li style="display:flex;align-items:flex-start;gap:9px;font-size:13px;color:rgba(255,255,255,0.85);padding:5px 0"><span style="color:#86efac;font-size:15px;flex-shrink:0">✓</span> Detailed Stage 2 questionnaire sent to you personally</li>
+            <li style="display:flex;align-items:flex-start;gap:9px;font-size:13px;color:rgba(255,255,255,0.85);padding:5px 0"><span style="color:#86efac;font-size:15px;flex-shrink:0">✓</span> Full case review by a licensed immigration attorney</li>
+            <li style="display:flex;align-items:flex-start;gap:9px;font-size:13px;color:rgba(255,255,255,0.85);padding:5px 0"><span style="color:#86efac;font-size:15px;flex-shrink:0">✓</span> Dedicated immigration consultant assigned to your case</li>
+            <li style="display:flex;align-items:flex-start;gap:9px;font-size:13px;color:rgba(255,255,255,0.85);padding:5px 0"><span style="color:#86efac;font-size:15px;flex-shrink:0">✓</span> Complete eligibility report with all available options</li>
           </ul>
-          <a id="ctaPayBtn" href="#" class="btn-cta">Open My Immigration File →</a>
+          <!-- SPECIAL OFFER -->
+          <div style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius);padding:14px;margin-bottom:16px;text-align:center">
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:rgba(255,255,255,0.65);margin-bottom:4px">Special Online Offer</div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:4px">
+              <span style="font-size:16px;color:rgba(255,255,255,0.45);text-decoration:line-through">$250</span>
+              <span style="font-family:'Playfair Display',serif;font-size:32px;font-weight:600;color:#fff">$200</span>
+            </div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.7)">One-time file activation fee — no hidden costs</div>
+          </div>
+          <a id="ctaPayBtn" href="#" style="display:block;width:100%;background:#16a34a;border:none;border-radius:var(--radius);padding:15px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:600;color:#fff;cursor:pointer;text-align:center;text-decoration:none;transition:background 0.15s;box-sizing:border-box">Activate My Immigration File — $200 →</a>
+          <p style="text-align:center;font-size:12px;color:rgba(255,255,255,0.55);margin-top:10px">🔒 Secure payment &nbsp;·&nbsp; Instant confirmation</p>
         </div>
 
         <!-- FAQ trigger -->
@@ -785,7 +821,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
           <div class="status-title">Check Your Inbox</div>
           <p class="status-sub">We've sent your personalized assessment results to <strong id="doneEmail"></strong>.<br><br>Ready to take the next step?</p>
           <div style="margin-top:24px">
-            <a id="donePayBtn" href="#" class="btn-cta">Open My Immigration File — $250</a>
+            <a id="donePayBtn" href="#" class="btn-cta">Activate My Immigration File — $200 →</a>
           </div>
           <p class="result-disclaimer" style="margin-top:16px">Didn't receive the email? Check your spam folder or contact us at <a href="mailto:support@immigrationadviceservice.org" style="color:var(--blue-accent)">support@immigrationadviceservice.org</a></p>
         </div>
@@ -810,7 +846,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
 <script>
 // ─────────────────────────────────────────────────────────
 const WEBHOOK = 'https://immiworld.org/rest/147/47yrflms2cje1cbe/';
-const PAYMENT_BASE = 'https://immigrationadviceservice.org/visa_assessment-payment-29/';
+const PAYMENT_BASE = 'https://immigrationadviceservice.org/fb-payment-200/';
 
 const answers = {};
 let history = [];
@@ -966,9 +1002,18 @@ async function lookupEmail(email) {
 // CONTACT
 // ─────────────────────────────────────────────────────────
 function saveContact() {
-  answers.firstName = document.getElementById('contactFirst').value.trim() || answers.firstName;
+  const email = document.getElementById('emailInput').value.trim();
+  const first = document.getElementById('contactFirst').value.trim();
+  if(!email || !email.includes('@')) {
+    shakeEl('emailInput'); return;
+  }
+  if(!first) {
+    shakeEl('contactFirst'); return;
+  }
+  answers.firstName = first;
   answers.lastName  = document.getElementById('contactLast').value.trim()  || answers.lastName;
   answers.phone     = document.getElementById('contactPhone').value.trim() || answers.phone;
+  answers.email = email;
   updateClientBar();
   goNext('q1');
 }
@@ -1443,7 +1488,10 @@ async function submitAndShowResults() {
   // Show results after processing animation
   setTimeout(() => {
     const fn = answers.firstName ? answers.firstName + ', great' : 'Great';
-    document.getElementById('resultTitle').textContent = fn + ' news — your profile qualifies!';
+    const fn2 = answers.firstName || '';
+    document.getElementById('resultTitle').textContent = fn2 ? fn2 + ", you've taken the right step!" : "Well done — you've taken the right step!";
+    const sub = document.getElementById('resultSub');
+    if(sub) sub.textContent = 'Based on your answers, we identified ' + pathways.length + ' potential immigration pathway' + (pathways.length>1?'s':'') + ' for your profile.';
 
     const rankClass = ['rank-1','rank-2','rank-3'];
     document.getElementById('pathwayCards').innerHTML = pathways.map((p,i) => `
@@ -1566,6 +1614,21 @@ function showReinforcement(qid, val) {
 // ─────────────────────────────────────────────────────────
 // FAQ TOGGLE
 // ─────────────────────────────────────────────────────────
+function validateAndGoQ7() {
+  if(!answers.q6) { shakeEl('profInput'); return; }
+  goNext('q7');
+}
+
+function shakeEl(id) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.classList.remove('shake');
+  void el.offsetWidth;
+  el.classList.add('shake');
+  el.focus();
+  setTimeout(() => el.classList.remove('shake'), 400);
+}
+
 function openFaq() {
   document.getElementById('faqOverlay').classList.add('open');
 }
