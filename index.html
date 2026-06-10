@@ -494,7 +494,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
         </div>
         <div class="nav">
           <button class="btn-back" onclick="goBack()">&#8592; Back</button>
-          <button class="btn-next" onclick="goNext('q3c')">Continue &#8594;</button>
+          <button class="btn-next" onclick="validateSpouse()">Continue &#8594;</button>
         </div>
       </div>
 
@@ -504,12 +504,12 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
         <div class="q-title">Do you have any children under the age of 21?</div>
         <div class="q-sub">Dependent children may be included as part of your immigration process.</div>
         <div class="opts col2" id="opts-q3c">
-          <button class="opt" data-val="Yes" onclick="selOpt('q3c',this);document.getElementById('childrenCount').style.display='block'"><div class="opt-radio"></div>Yes</button>
-          <button class="opt" data-val="No" onclick="selOpt('q3c',this);document.getElementById('childrenCount').style.display='none'"><div class="opt-radio"></div>No</button>
+          <button class="opt" data-val="Yes" onclick="selOpt('q3c',this);document.getElementById('childrenCount').style.display='block';document.getElementById('btnQ3c').disabled=true"><div class="opt-radio"></div>Yes</button>
+          <button class="opt" data-val="No" onclick="selOpt('q3c',this);document.getElementById('childrenCount').style.display='none';document.getElementById('btnQ3c').disabled=false"><div class="opt-radio"></div>No</button>
         </div>
         <div id="childrenCount" style="display:none;margin-bottom:16px">
-          <div class="field-label">How many children under 21?</div>
-          <input class="field-input" type="number" min="1" max="10" placeholder="Number of children..." oninput="answers.childrenCount=this.value"/>
+          <div class="field-label">How many children under 21? <span style="color:var(--red)">*</span></div>
+          <input class="field-input" type="number" id="childrenCountInput" min="1" max="10" placeholder="e.g. 2" oninput="answers.childrenCount=this.value;document.getElementById('btnQ3c').disabled=!this.value"/>
         </div>
         <div class="nav">
           <button class="btn-back" onclick="goBack()">&#8592; Back</button>
@@ -522,13 +522,13 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
         <div class="q-eyebrow">Question 4 of 10</div>
         <div class="q-title">What is your primary goal in the United States?</div>
         <div class="opts col1" id="opts-q4">
-          <button class="opt" data-val="Career Opportunities" onclick="selOpt('q4',this)"><div class="opt-radio"></div>Career Opportunities</button>
-          <button class="opt" data-val="Starting or Expanding a Business" onclick="selOpt('q4',this)"><div class="opt-radio"></div>Starting or Expanding a Business</button>
-          <button class="opt" data-val="Investment Opportunities" onclick="selOpt('q4',this)"><div class="opt-radio"></div>Investment Opportunities</button>
-          <button class="opt" data-val="Education" onclick="selOpt('q4',this)"><div class="opt-radio"></div>Education</button>
-          <button class="opt" data-val="Family Relocation" onclick="selOpt('q4',this)"><div class="opt-radio"></div>Family Relocation</button>
-          <button class="opt" data-val="Exploring My Options" onclick="selOpt('q4',this)"><div class="opt-radio"></div>Exploring My Options</button>
-          <button class="opt" data-val="Not Sure Yet" onclick="selOpt('q4',this)"><div class="opt-radio"></div>Not Sure Yet</button>
+          <button class="opt" data-val="Career Opportunities" onclick="selOpt('q4',this)"><div class="opt-radio"></div>💼 Career Opportunities</button>
+          <button class="opt" data-val="Starting or Expanding a Business" onclick="selOpt('q4',this)"><div class="opt-radio"></div>🏢 Starting or Expanding a Business</button>
+          <button class="opt" data-val="Investment Opportunities" onclick="selOpt('q4',this)"><div class="opt-radio"></div>📈 Investment Opportunities</button>
+          <button class="opt" data-val="Education" onclick="selOpt('q4',this)"><div class="opt-radio"></div>🎓 Education</button>
+          <button class="opt" data-val="Family Relocation" onclick="selOpt('q4',this)"><div class="opt-radio"></div>👨‍👩‍👧 Family Relocation</button>
+          <button class="opt" data-val="Exploring My Options" onclick="selOpt('q4',this)"><div class="opt-radio"></div>🔍 Exploring My Options</button>
+          <button class="opt" data-val="Not Sure Yet" onclick="selOpt('q4',this)"><div class="opt-radio"></div>💭 Not Sure Yet</button>
         </div>
         <div id="reinforce-q4" class="reinforce-wrap"><div class="reinforce-bubble"><span class="reinforce-icon">🎯</span><span id="reinforce-q4-text"></span></div></div>
         <div id="q4-elaborate" style="display:none;margin-top:12px">
@@ -537,7 +537,34 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
         </div>
         <div class="nav">
           <button class="btn-back" onclick="goBack()">← Back</button>
-          <button class="btn-next" id="btnQ4" onclick="goNext('q5')" disabled>Continue →</button>
+          <button class="btn-next" id="btnQ4" onclick="goNext('q4b')" disabled>Continue →</button>
+        </div>
+      </div>
+
+      <!-- Q4b – DREAM / LOCATION -->
+      <div class="screen" id="screen-q4b">
+        <div class="q-eyebrow">Question 4 of 10</div>
+        <div class="q-title">✨ What is your dream?</div>
+        <div class="q-sub" style="font-size:14px;color:var(--gray-600);line-height:1.7;margin-bottom:20px">Close your eyes for a moment. Imagine your life in the United States — where are you? What does your daily life look like? <strong style="color:var(--blue)">Tell us your dream.</strong></div>
+        <textarea id="q4DreamText" class="field-input" style="min-height:100px;resize:vertical;font-size:14px;padding:14px 15px;line-height:1.7;margin-bottom:16px" placeholder="e.g. I dream of living in Miami with my family, building my own business, watching my children grow up speaking English in a safe and beautiful country..." oninput="answers.q4_dream=this.value;document.getElementById('btnQ4b').disabled=!this.value.trim()"></textarea>
+
+        <div class="field-label" style="margin-top:0">Where in the U.S. would you like to live? <span style="color:var(--gray-400)">(optional)</span></div>
+        <div class="opts col2" id="opts-q4loc" style="margin-bottom:12px">
+          <button class="opt" data-val="New York" onclick="selQ4Loc(this)"><div class="opt-radio"></div>🗽 New York</button>
+          <button class="opt" data-val="Florida" onclick="selQ4Loc(this)"><div class="opt-radio"></div>🌴 Florida</button>
+          <button class="opt" data-val="California" onclick="selQ4Loc(this)"><div class="opt-radio"></div>🌞 California</button>
+          <button class="opt" data-val="Texas" onclick="selQ4Loc(this)"><div class="opt-radio"></div>⭐ Texas</button>
+          <button class="opt" data-val="New Jersey" onclick="selQ4Loc(this)"><div class="opt-radio"></div>🏙️ New Jersey</button>
+          <button class="opt" data-val="Illinois (Chicago)" onclick="selQ4Loc(this)"><div class="opt-radio"></div>🌆 Illinois (Chicago)</button>
+          <button class="opt" data-val="Georgia (Atlanta)" onclick="selQ4Loc(this)"><div class="opt-radio"></div>🍑 Georgia (Atlanta)</button>
+          <button class="opt" data-val="Massachusetts" onclick="selQ4Loc(this)"><div class="opt-radio"></div>🎓 Massachusetts</button>
+          <button class="opt" data-val="Washington State" onclick="selQ4Loc(this)"><div class="opt-radio"></div>🌲 Washington State</button>
+          <button class="opt" data-val="Not sure yet" onclick="selQ4Loc(this)"><div class="opt-radio"></div>💭 Not sure yet</button>
+        </div>
+
+        <div class="nav">
+          <button class="btn-back" onclick="goBack()">← Back</button>
+          <button class="btn-next" id="btnQ4b" onclick="goNext('q5')" disabled>Continue →</button>
         </div>
       </div>
 
@@ -809,8 +836,9 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
           <ul style="list-style:none;margin-bottom:18px">
             <li style="display:flex;align-items:flex-start;gap:9px;font-size:13px;color:rgba(255,255,255,0.85);padding:5px 0"><span style="color:#86efac;font-size:15px;flex-shrink:0">✓</span> Detailed Stage 2 questionnaire sent to you personally</li>
             <li style="display:flex;align-items:flex-start;gap:9px;font-size:13px;color:rgba(255,255,255,0.85);padding:5px 0"><span style="color:#86efac;font-size:15px;flex-shrink:0">✓</span> Full case review by a licensed immigration attorney</li>
-            <li style="display:flex;align-items:flex-start;gap:9px;font-size:13px;color:rgba(255,255,255,0.85);padding:5px 0"><span style="color:#86efac;font-size:15px;flex-shrink:0">✓</span> Dedicated immigration consultant assigned to your case</li>
-            <li style="display:flex;align-items:flex-start;gap:9px;font-size:13px;color:rgba(255,255,255,0.85);padding:5px 0"><span style="color:#86efac;font-size:15px;flex-shrink:0">✓</span> Complete eligibility report with all available options</li>
+            <li style="display:flex;align-items:flex-start;gap:9px;font-size:13px;color:rgba(255,255,255,0.85);padding:5px 0"><span style="color:#86efac;font-size:15px;flex-shrink:0">✓</span> <strong style="color:#fff">Personal immigration consultant assigned to your case</strong> — your dedicated guide from start to finish</li>
+            <li style="display:flex;align-items:flex-start;gap:9px;font-size:13px;color:rgba(255,255,255,0.85);padding:5px 0"><span style="color:#86efac;font-size:15px;flex-shrink:0">✓</span> Complete eligibility report with all available pathways</li>
+            <li style="display:flex;align-items:flex-start;gap:9px;font-size:13px;color:rgba(255,255,255,0.85);padding:5px 0"><span style="color:#86efac;font-size:15px;flex-shrink:0">✓</span> <strong style="color:#fff">Full support until the day you arrive in the United States</strong> — we stay with you every step of the way</li>
           </ul>
           <!-- SPECIAL OFFER -->
           <div style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius);padding:14px;margin-bottom:16px;text-align:center">
@@ -1123,10 +1151,10 @@ function editContact() {
 // ─────────────────────────────────────────────────────────
 // SCREEN NAVIGATION
 // ─────────────────────────────────────────────────────────
-const Q_SCREENS = ['q1','q2','q2b','q3','q3b','q3c','q4','q5','q6','q6b','q7','q8','qSit','qInvest','qStudy','q9','q10'];
+const Q_SCREENS = ['q1','q2','q2b','q3','q3b','q3c','q4','q4b','q5','q6','q6b','q7','q8','qSit','qInvest','qStudy','q9','q10'];
 const SCREEN_LABELS = {
   contact:'Your Details', q1:'Age', q2:'Country of Residence', q2b:'Country of Birth', q3:'Marital Status',
-  q3b:'Spouse Details', q3c:'Children', q4:'Your Goal', q5:'Education', q6:'Profession', q6b:'Retirement Details', q7:'Experience',
+  q3b:'Spouse Details', q3c:'Children', q4:'Your Goal', q4b:'Your Dream', q5:'Education', q6:'Profession', q6b:'Retirement Details', q7:'Experience',
   q8:'Business Interest', qSit:'Current Situation', qInvest:'Investment Level', qStudy:'Study Interest', q9:'Family in U.S.', q10:'Final Question'
 };
 
@@ -1214,6 +1242,13 @@ function showScreen(id) {
   // Show encouragement messages at key points
   showEncouragement(id);
 
+  if(id === 'q4b') {
+    const dt = document.getElementById('q4DreamText');
+    if(dt && answers.q4_dream) { dt.value = answers.q4_dream; document.getElementById('btnQ4b').disabled = false; }
+    if(answers.q4_location) {
+      document.querySelectorAll('#opts-q4loc .opt').forEach(b => b.classList.toggle('selected', b.dataset.val === answers.q4_location));
+    }
+  }
   // Personalize new screen titles
   if(id === 'qStudy') {
     const fn = answers.firstName ? answers.firstName + ', ' : '';
@@ -1549,6 +1584,8 @@ async function submitAndShowResults() {
     `Country: ${answers.q2||''}`,
     `Marital Status: ${answers.q3||''}`,
     `Primary Goal: ${answers.q4||''}${answers.q4_detail?' — '+answers.q4_detail:''}`,
+    answers.q4_dream ? `Dream: ${answers.q4_dream}` : '',
+    answers.q4_location ? `Preferred U.S. location: ${answers.q4_location}` : '',
     `Education: ${answers.q5||''}`,
     `Profession: ${answers.q6||''}`,
     answers.retProfession ? `Pre-retirement profession: ${answers.retProfession}` : '',
@@ -1767,6 +1804,31 @@ function onProfManual(val) {
     delete answers.q6;
     document.getElementById('btnQ6').disabled = true;
   }
+}
+
+function validateSpouse() {
+  const first = document.getElementById('spouseFirst');
+  const country = answers.spouseCountry;
+  const edu = document.getElementById('spouseEdu');
+  const imm = answers.spouseImmigrate;
+  if(!first || !first.value.trim()) { shakeEl('spouseFirst'); return; }
+  if(!country) {
+    const sc = document.getElementById('spouseCountrySearch');
+    if(sc) shakeEl('spouseCountrySearch');
+    return;
+  }
+  if(!edu || !edu.value) { shakeEl('spouseEdu'); return; }
+  if(!imm) {
+    shakeEl('spouseImmYes');
+    return;
+  }
+  goNext('q3c');
+}
+
+function selQ4Loc(el) {
+  answers.q4_location = el.dataset.val;
+  document.querySelectorAll('#opts-q4loc .opt').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
 }
 
 function validateAndGoQ7() {
