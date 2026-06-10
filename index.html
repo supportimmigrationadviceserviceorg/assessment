@@ -136,6 +136,23 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
 .result-disclaimer{font-size:11px;color:var(--gray-400);line-height:1.7;text-align:center;margin-top:20px;padding:0 4px;}
 .separator{border:none;border-top:1px solid var(--gray-100);margin:20px 0;}
 
+/* BEGIN BUTTON PULSE */
+@keyframes pulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,0.45);}
+  50%{box-shadow:0 0 0 10px rgba(37,99,235,0);}
+}
+.btn-begin{
+  background:var(--blue);border:none;border-radius:var(--radius);
+  padding:15px 36px;
+  font-family:'DM Sans',sans-serif;
+  font-size:17px;color:#fff;cursor:pointer;font-weight:500;
+  display:inline-flex;align-items:center;gap:10px;
+  animation:pulse 1.8s ease infinite;
+  transition:background 0.15s,transform 0.15s;
+}
+.btn-begin:hover{background:var(--blue-mid);transform:translateY(-2px);animation:none;box-shadow:0 6px 20px rgba(26,58,107,0.35);}
+.btn-begin-arrow{font-size:20px;}
+
 /* ENCOURAGEMENT TOAST */
 .encourage-toast{
   display:flex;align-items:center;gap:10px;
@@ -290,7 +307,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
         </ul>
         <div class="intro-note">🔒 Your information is confidential and only used to identify immigration pathways available to you.</div>
         <div class="nav" style="justify-content:flex-end">
-          <button class="btn-next" onclick="goNext('contact')">Begin Assessment →</button>
+          <button class="btn-begin" onclick="goNext('contact')">Begin Assessment <span class="btn-begin-arrow">→</span></button>
         </div>
       </div>
 
@@ -694,10 +711,37 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
         <div class="q-eyebrow">Question 9 of 10</div>
         <div class="q-title" id="q9Title">Do you have close family members living legally in the United States?</div>
         <div class="opts col2" id="opts-q9">
-          <button class="opt" data-val="Yes" onclick="selOpt('q9',this)"><div class="opt-radio"></div>Yes</button>
-          <button class="opt" data-val="No" onclick="selOpt('q9',this)"><div class="opt-radio"></div>No</button>
+          <button class="opt" data-val="Yes" onclick="selOpt('q9',this);showFamilyFollowUp(true)"><div class="opt-radio"></div>Yes</button>
+          <button class="opt" data-val="No" onclick="selOpt('q9',this);showFamilyFollowUp(false)"><div class="opt-radio"></div>No</button>
         </div>
         <div id="reinforce-q9" class="reinforce-wrap"><div class="reinforce-bubble"><span class="reinforce-icon">👨‍👩‍👧</span><span id="reinforce-q9-text"></span></div></div>
+
+        <!-- Follow-up 1: Who? (shown only if Yes) -->
+        <div id="familyFollowUp1" style="display:none;margin-top:4px">
+          <div style="background:var(--blue-light);border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius);padding:14px">
+            <div class="field-label" style="margin-top:0">Who are your family members in the U.S.? <span style="color:var(--gray-400)">(select all that apply)</span></div>
+            <div class="opts col2" id="opts-familyWho" style="margin-bottom:8px">
+              <button class="opt" data-val="Spouse/Partner" onclick="toggleFamilyWho(this)"><div class="opt-radio" style="border-radius:3px"></div>Spouse / Partner</button>
+              <button class="opt" data-val="Parent(s)" onclick="toggleFamilyWho(this)"><div class="opt-radio" style="border-radius:3px"></div>Parent(s)</button>
+              <button class="opt" data-val="Sibling(s)" onclick="toggleFamilyWho(this)"><div class="opt-radio" style="border-radius:3px"></div>Sibling(s)</button>
+              <button class="opt" data-val="Child/Children" onclick="toggleFamilyWho(this)"><div class="opt-radio" style="border-radius:3px"></div>Child / Children</button>
+              <button class="opt" data-val="Other relatives" onclick="toggleFamilyWho(this)"><div class="opt-radio" style="border-radius:3px"></div>Other relatives</button>
+            </div>
+
+            <!-- Follow-up 2: Status? (shown after selecting who) -->
+            <div id="familyFollowUp2" style="display:none;margin-top:4px">
+              <div class="field-label" style="margin-top:0">What is their immigration status?</div>
+              <div class="opts col1" id="opts-familyStatus" style="margin-bottom:0">
+                <button class="opt" data-val="U.S. Citizen" onclick="selFamilyStatus(this)"><div class="opt-radio"></div>U.S. Citizen</button>
+                <button class="opt" data-val="Green Card holder (Permanent Resident)" onclick="selFamilyStatus(this)"><div class="opt-radio"></div>Green Card holder (Permanent Resident)</button>
+                <button class="opt" data-val="Work visa holder" onclick="selFamilyStatus(this)"><div class="opt-radio"></div>Work visa holder</button>
+                <button class="opt" data-val="Student visa holder" onclick="selFamilyStatus(this)"><div class="opt-radio"></div>Student visa holder</button>
+                <button class="opt" data-val="Not sure" onclick="selFamilyStatus(this)"><div class="opt-radio"></div>Not sure</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="nav">
           <button class="btn-back" onclick="goBack()">← Back</button>
           <button class="btn-next" id="btnQ9" onclick="goNext('q10')" disabled>Continue →</button>
@@ -1161,7 +1205,10 @@ function showScreen(id) {
     const t = document.getElementById('q7Title');
     if(t) {
       const prof = answers.q6 && answers.q6 !== 'Not Currently Employed' && !answers.q6.includes('Retired') ? answers.q6 : null;
-      t.textContent = prof ? 'How many years of experience do you have as a ' + prof + '?' : 'How many years of professional experience do you have?';
+      // Only use profession name if it came from the list (short, single profession name)
+      // If typed manually it could be long text — use generic question in that case
+      const fromList = prof && PROFESSIONS.includes(prof);
+      t.textContent = fromList ? 'How many years of experience do you have as a ' + prof + '?' : 'How many years of professional experience do you have?';
     }
   }
   // Show encouragement messages at key points
@@ -1512,6 +1559,8 @@ async function submitAndShowResults() {
     answers.qInvest ? `Investment Level: ${answers.qInvest}` : '',
     answers.qStudy ? `Study Interest: ${answers.qStudy}` : '',
     `Family in USA: ${answers.q9||''}`,
+    answers.familyWho && answers.familyWho.length ? `Family members: ${answers.familyWho.join(', ')}` : '',
+    answers.familyStatus ? `Their status: ${answers.familyStatus}` : '',
     `Leadership: ${answers.q10||''}`,
     '',
     `Payment URL: ${paymentUrl}`
@@ -1656,7 +1705,7 @@ const REINFORCE = {
     'Doctorate (PhD)': "Outstanding. A doctorate places you in one of the strongest positions for professional immigration — including options that may not require employer sponsorship."
   },
   q7: {
-    'Less than 2 years': "Even at an early stage in your career, the right strategy now can set you up for a much stronger application down the road.",
+    'Less than 2 years': '',
     '2–5 years': "A few years of professional experience, combined with your background, can qualify you for several employment-based immigration categories.",
     '5–10 years': "Five or more years of experience is a significant asset in professional immigration — this is a strong indicator for several pathways.",
     'More than 10 years': "Over a decade of professional experience is one of the strongest factors we see in immigration profiles — it opens doors to senior and priority categories."
@@ -1733,6 +1782,47 @@ function shakeEl(id) {
   el.classList.add('shake');
   el.focus();
   setTimeout(() => el.classList.remove('shake'), 400);
+}
+
+function showFamilyFollowUp(show) {
+  const fu1 = document.getElementById('familyFollowUp1');
+  if(fu1) fu1.style.display = show ? 'block' : 'none';
+  if(!show) {
+    // Reset follow-ups
+    delete answers.familyWho;
+    delete answers.familyStatus;
+    document.getElementById('familyFollowUp2').style.display = 'none';
+    document.querySelectorAll('#opts-familyWho .opt').forEach(b => b.classList.remove('selected'));
+    document.querySelectorAll('#opts-familyStatus .opt').forEach(b => b.classList.remove('selected'));
+  }
+  // Enable continue button — No requires no follow-up
+  if(!show) document.getElementById('btnQ9').disabled = false;
+  else document.getElementById('btnQ9').disabled = true; // need to fill follow-up
+}
+
+function toggleFamilyWho(el) {
+  el.classList.toggle('selected');
+  // Collect selected
+  const selected = [...document.querySelectorAll('#opts-familyWho .opt.selected')].map(b => b.dataset.val);
+  answers.familyWho = selected;
+  // Show status follow-up if at least one selected
+  const fu2 = document.getElementById('familyFollowUp2');
+  if(fu2) fu2.style.display = selected.length > 0 ? 'block' : 'none';
+  // Enable continue if who + status both filled
+  checkFamilyComplete();
+}
+
+function selFamilyStatus(el) {
+  answers.familyStatus = el.dataset.val;
+  document.querySelectorAll('#opts-familyStatus .opt').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  checkFamilyComplete();
+}
+
+function checkFamilyComplete() {
+  const hasWho = answers.familyWho && answers.familyWho.length > 0;
+  const hasStatus = !!answers.familyStatus;
+  document.getElementById('btnQ9').disabled = !(hasWho && hasStatus);
 }
 
 function openFaq() {
