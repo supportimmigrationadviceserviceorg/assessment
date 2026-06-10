@@ -718,9 +718,16 @@ function restoreOpts(id) {
 function renderCountries(filter) {
   const fl = filter.toLowerCase();
   const list = COUNTRIES.filter(c => c.toLowerCase().includes(fl));
-  document.getElementById('countryList').innerHTML = list.map(c =>
-    `<div class="country-item ${answers.q2===c?'selected':''}" onclick="selCountry('${c.replace(/'/g,"\\'")}'">${c}</div>`
-  ).join('') || '<div style="padding:12px;font-size:13px;color:var(--gray-400)">No results</div>';
+  const el = document.getElementById('countryList');
+  if(!list.length) { el.innerHTML = '<div style="padding:12px;font-size:13px;color:var(--gray-400)">No results</div>'; return; }
+  el.innerHTML = '';
+  list.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'country-item' + (answers.q2===c?' selected':'');
+    div.textContent = c;
+    div.addEventListener('click', () => selCountry(c));
+    el.appendChild(div);
+  });
 }
 
 function filterCountries() { renderCountries(document.getElementById('countrySearch').value); }
@@ -745,9 +752,16 @@ function clearCountry() {
 function renderProf(filter) {
   const fl = filter.toLowerCase();
   const list = PROFESSIONS.filter(p => p.toLowerCase().includes(fl)).slice(0, 30);
-  document.getElementById('profList').innerHTML = list.map(p =>
-    `<div class="country-item ${answers.q6===p?'selected':''}" onclick="selProf('${p.replace(/'/g,"\\'")}'">${p}</div>`
-  ).join('') || '<div style="padding:12px;font-size:13px;color:var(--gray-400)">No results</div>';
+  const el = document.getElementById('profList');
+  if(!list.length) { el.innerHTML = '<div style="padding:12px;font-size:13px;color:var(--gray-400)">No results</div>'; return; }
+  el.innerHTML = '';
+  list.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'country-item' + (answers.q6===p?' selected':'');
+    div.textContent = p;
+    div.addEventListener('click', () => selProf(p));
+    el.appendChild(div);
+  });
 }
 
 function filterProf(v) {
