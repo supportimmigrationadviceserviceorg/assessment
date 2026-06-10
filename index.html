@@ -136,6 +136,33 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
 .result-disclaimer{font-size:11px;color:var(--gray-400);line-height:1.7;text-align:center;margin-top:20px;padding:0 4px;}
 .separator{border:none;border-top:1px solid var(--gray-100);margin:20px 0;}
 
+/* ENCOURAGEMENT TOAST */
+.encourage-toast{
+  display:flex;align-items:center;gap:10px;
+  background:linear-gradient(135deg,#f0fdf4,#e8f8f0);
+  border:1.5px solid rgba(21,128,61,0.25);
+  border-radius:var(--radius);
+  padding:12px 15px;
+  margin-bottom:16px;
+  animation:fadeSlideIn 0.4s ease;
+  font-size:14px;color:var(--green);font-weight:500;line-height:1.5;
+}
+.encourage-icon{font-size:20px;flex-shrink:0;}
+
+/* SALARY BUBBLE */
+.salary-bubble{
+  background:linear-gradient(135deg,#1a3a6b 0%,#2255a4 100%);
+  border-radius:var(--radius);
+  padding:14px 16px;
+  margin-top:12px;
+  color:#fff;
+  animation:fadeSlideIn 0.4s ease;
+}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.salary-title{font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:rgba(255,255,255,0.65);margin-bottom:6px;font-weight:500;}
+.salary-amount{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:#fff;margin-bottom:6px;}
+.salary-note{font-size:13px;color:rgba(255,255,255,0.8);line-height:1.55;}
+
 /* PROCESSING / DONE */
 .status-wrap{text-align:center;padding:32px 16px;}
 .status-icon{font-size:48px;margin-bottom:16px;}
@@ -161,9 +188,47 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
 /* PROGRESS REMAINING */
 .progress-remaining{font-size:11px;color:var(--gray-400);text-align:right;margin-top:5px;margin-bottom:0;font-style:italic;}
 
-/* FAQ ACCORDION */
-.faq-section{margin-top:24px;}
-.faq-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--blue);margin-bottom:16px;font-weight:600;}
+/* FAQ — FLOATING BUTTON + OVERLAY PANEL */
+.faq-fab{
+  position:fixed;bottom:24px;right:24px;
+  background:var(--blue);color:#fff;
+  border:none;border-radius:50px;
+  padding:12px 20px;
+  font-family:'DM Sans',sans-serif;
+  font-size:14px;font-weight:500;
+  cursor:pointer;
+  box-shadow:0 4px 16px rgba(26,58,107,0.35);
+  z-index:900;
+  display:flex;align-items:center;gap:8px;
+  transition:background 0.15s,transform 0.15s;
+}
+.faq-fab:hover{background:var(--blue-mid);transform:translateY(-2px);}
+.faq-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,0.45);z-index:1000;
+  align-items:flex-end;justify-content:center;
+}
+.faq-overlay.open{display:flex;}
+.faq-panel{
+  background:#fff;border-radius:20px 20px 0 0;
+  width:100%;max-width:680px;
+  max-height:85vh;overflow-y:auto;
+  padding:24px;
+  animation:slideUp 0.3s ease;
+}
+@keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+.faq-panel-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:20px;
+}
+.faq-panel-title{font-family:'Playfair Display',serif;font-size:20px;color:var(--blue);font-weight:600;}
+.faq-close{background:none;border:none;font-size:24px;cursor:pointer;color:var(--gray-400);line-height:1;}
+.faq-contact{
+  background:var(--blue-light);border:1px solid rgba(26,58,107,0.12);
+  border-radius:var(--radius);padding:14px 16px;
+  margin-bottom:20px;font-size:13px;color:var(--blue);line-height:1.7;
+}
+.faq-contact a{color:var(--blue-mid);font-weight:500;}
 .faq-item{border:1px solid var(--gray-200);border-radius:var(--radius);margin-bottom:8px;overflow:hidden;}
 .faq-q{padding:14px 16px;font-size:14px;font-weight:500;color:var(--gray-800);cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:#fff;transition:background 0.15s;user-select:none;}
 .faq-q:hover{background:var(--gray-50);}
@@ -332,7 +397,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
       <!-- Q3 – MARITAL STATUS -->
       <div class="screen" id="screen-q3">
         <div class="q-eyebrow">Question 3 of 10</div>
-        <div class="q-title">What is your marital status?</div>
+        <div class="q-title" id="q3Title">What is your marital status?</div>
         <div class="opts col2" id="opts-q3">
           <button class="opt" data-val="Single" onclick="selOpt('q3',this)"><div class="opt-radio"></div>Single</button>
           <button class="opt" data-val="Married" onclick="selOpt('q3',this)"><div class="opt-radio"></div>Married</button>
@@ -427,8 +492,13 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
           <button class="opt" data-val="Education" onclick="selOpt('q4',this)"><div class="opt-radio"></div>Education</button>
           <button class="opt" data-val="Family Relocation" onclick="selOpt('q4',this)"><div class="opt-radio"></div>Family Relocation</button>
           <button class="opt" data-val="Exploring My Options" onclick="selOpt('q4',this)"><div class="opt-radio"></div>Exploring My Options</button>
+          <button class="opt" data-val="Not Sure Yet" onclick="selOpt('q4',this)"><div class="opt-radio"></div>Not Sure Yet</button>
         </div>
         <div id="reinforce-q4" class="reinforce-wrap"><div class="reinforce-bubble"><span class="reinforce-icon">🎯</span><span id="reinforce-q4-text"></span></div></div>
+        <div id="q4-elaborate" style="display:none;margin-top:12px">
+          <div class="field-label">Tell us a bit more (optional)</div>
+          <textarea id="q4ElaborateText" class="field-input" style="min-height:72px;resize:vertical;font-size:14px;padding:12px 15px" placeholder="Share anything about your goals or dreams for life in the U.S. — the more we know, the better we can help." oninput="answers.q4_detail=this.value"></textarea>
+        </div>
         <div class="nav">
           <button class="btn-back" onclick="goBack()">← Back</button>
           <button class="btn-next" id="btnQ4" onclick="goNext('q5')" disabled>Continue →</button>
@@ -438,7 +508,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
       <!-- Q5 – EDUCATION -->
       <div class="screen" id="screen-q5">
         <div class="q-eyebrow">Question 5 of 10</div>
-        <div class="q-title">What is your highest level of education?</div>
+        <div class="q-title" id="q5Title">What is your highest level of education?</div>
         <div class="opts col2" id="opts-q5">
           <button class="opt" data-val="High School" onclick="selOpt('q5',this)"><div class="opt-radio"></div>High School</button>
           <button class="opt" data-val="Trade School" onclick="selOpt('q5',this)"><div class="opt-radio"></div>Trade School</button>
@@ -465,17 +535,41 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
           <div class="selected-pill" id="profPill"><span id="profPillText"></span> <span class="pill-x" onclick="clearProf()">×</span></div>
         </div>
         <div class="separator"></div>
-        <button class="opt" style="width:100%;margin-bottom:0" data-val="Not Currently Employed" onclick="selProfDirect('Not Currently Employed')"><div class="opt-radio" id="optRadioUnemployed"></div>Not currently employed</button>
+        <button class="opt" style="width:100%;margin-bottom:8px" data-val="Not Currently Employed" onclick="selProfDirect('Not Currently Employed')"><div class="opt-radio" id="optRadioUnemployed"></div>Not currently employed</button>
+        <button class="opt" style="width:100%;margin-bottom:0;background:var(--gold-light);border-color:rgba(201,168,76,0.4);color:#78621a" data-val="Retired" onclick="selProfDirect('Retired');goNext('q6b')"><div class="opt-radio" style="border-color:rgba(201,168,76,0.6)"></div>🏖️ Retired</button>
         <div class="nav" style="margin-top:16px">
           <button class="btn-back" onclick="goBack()">← Back</button>
           <button class="btn-next" id="btnQ6" onclick="goNext('q7')" disabled>Continue →</button>
         </div>
       </div>
 
+      <!-- Q6b – RETIRED -->
+      <div class="screen" id="screen-q6b">
+        <div class="q-eyebrow">Question 6 of 10</div>
+        <div class="q-title">Tell us about your background</div>
+        <div class="q-sub">Retirement is a great time to explore new opportunities — your experience matters.</div>
+        <div style="background:var(--gold-light);border:1px solid rgba(201,168,76,0.3);border-radius:var(--radius);padding:16px;margin-bottom:16px">
+          <div class="field-label">What was your profession before retirement?</div>
+          <input class="field-input" type="text" id="retProfInput" placeholder="e.g. Engineer, Business Owner, Doctor..." style="margin-bottom:16px" oninput="answers.retProfession=this.value"/>
+          <div class="field-label" style="margin-top:0">Do you have savings or assets you would consider investing?</div>
+          <div class="opts col1" id="opts-q6b" style="margin-bottom:0">
+            <button class="opt" data-val="Yes — significant savings" onclick="selOpt('q6b',this)"><div class="opt-radio"></div>Yes — I have significant savings</button>
+            <button class="opt" data-val="Yes — modest savings" onclick="selOpt('q6b',this)"><div class="opt-radio"></div>Yes — modest savings</button>
+            <button class="opt" data-val="Prefer not to say" onclick="selOpt('q6b',this)"><div class="opt-radio"></div>Prefer not to say</button>
+            <button class="opt" data-val="No" onclick="selOpt('q6b',this)"><div class="opt-radio"></div>No</button>
+          </div>
+          <div id="reinforce-q6b" class="reinforce-wrap" style="margin-top:12px"><div class="reinforce-bubble"><span class="reinforce-icon">💰</span><span id="reinforce-q6b-text"></span></div></div>
+        </div>
+        <div class="nav">
+          <button class="btn-back" onclick="goBack()">← Back</button>
+          <button class="btn-next" id="btnQ6b" onclick="saveRetired()" disabled>Continue →</button>
+        </div>
+      </div>
+
       <!-- Q7 – EXPERIENCE -->
       <div class="screen" id="screen-q7">
         <div class="q-eyebrow">Question 7 of 10</div>
-        <div class="q-title">How many years of professional experience do you have?</div>
+        <div class="q-title" id="q7Title">How many years of professional experience do you have?</div>
         <div class="opts col1" id="opts-q7">
           <button class="opt" data-val="Less than 2 years" onclick="selOpt('q7',this)"><div class="opt-radio"></div>Less than 2 years</button>
           <button class="opt" data-val="2–5 years" onclick="selOpt('q7',this)"><div class="opt-radio"></div>2–5 years</button>
@@ -492,7 +586,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
       <!-- Q8 – BUSINESS INTEREST -->
       <div class="screen" id="screen-q8">
         <div class="q-eyebrow">Question 8 of 10</div>
-        <div class="q-title">Would you be interested in opening or investing in a business in the U.S.?</div>
+        <div class="q-title" id="q8Title">Would you be interested in opening or investing in a business in the U.S.?</div>
         <div class="opts col1" id="opts-q8">
           <button class="opt" data-val="Yes" onclick="selOpt('q8',this)"><div class="opt-radio"></div>Yes — I'm open to it</button>
           <button class="opt" data-val="Maybe" onclick="selOpt('q8',this)"><div class="opt-radio"></div>Maybe — I'd like to learn more</button>
@@ -501,14 +595,68 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
         <div id="reinforce-q8" class="reinforce-wrap"><div class="reinforce-bubble"><span class="reinforce-icon">🏢</span><span id="reinforce-q8-text"></span></div></div>
         <div class="nav">
           <button class="btn-back" onclick="goBack()">← Back</button>
-          <button class="btn-next" id="btnQ8" onclick="goNext('q9')" disabled>Continue →</button>
+          <button class="btn-next" id="btnQ8" onclick="goNext('qSit')" disabled>Continue →</button>
+        </div>
+      </div>
+
+      <!-- Q_SIT – CURRENT SITUATION -->
+      <div class="screen" id="screen-qSit">
+        <div class="q-eyebrow" id="qSitEyebrow">Question 9 of 13</div>
+        <div class="q-title">Which best describes your current professional situation?</div>
+        <div class="opts col2" id="opts-qSit">
+          <button class="opt" data-val="Employee" onclick="selOpt('qSit',this)"><div class="opt-radio"></div>Employee</button>
+          <button class="opt" data-val="Skilled Professional" onclick="selOpt('qSit',this)"><div class="opt-radio"></div>Skilled Professional</button>
+          <button class="opt" data-val="Business Owner" onclick="selOpt('qSit',this)"><div class="opt-radio"></div>Business Owner</button>
+          <button class="opt" data-val="Entrepreneur" onclick="selOpt('qSit',this)"><div class="opt-radio"></div>Entrepreneur</button>
+          <button class="opt" data-val="Investor" onclick="selOpt('qSit',this)"><div class="opt-radio"></div>Investor</button>
+          <button class="opt" data-val="Self-Employed" onclick="selOpt('qSit',this)"><div class="opt-radio"></div>Self-Employed</button>
+        </div>
+        <div id="reinforce-qSit" class="reinforce-wrap"><div class="reinforce-bubble"><span class="reinforce-icon">💼</span><span id="reinforce-qSit-text"></span></div></div>
+        <div class="nav">
+          <button class="btn-back" onclick="goBack()">← Back</button>
+          <button class="btn-next" id="btnQSit" onclick="goNext('qInvest')" disabled>Continue →</button>
+        </div>
+      </div>
+
+      <!-- Q_INVEST – INVESTMENT LEVEL (shown if business interest Yes/Maybe) -->
+      <div class="screen" id="screen-qInvest">
+        <div class="q-eyebrow">Question 10 of 13</div>
+        <div class="q-title">What investment level would you feel comfortable considering?</div>
+        <div class="q-sub">This helps us identify the most relevant business and investment pathways for your profile.</div>
+        <div class="opts col1" id="opts-qInvest">
+          <button class="opt" data-val="Under $50,000" onclick="selOpt('qInvest',this)"><div class="opt-radio"></div>Under $50,000</button>
+          <button class="opt" data-val="$50,000–$100,000" onclick="selOpt('qInvest',this)"><div class="opt-radio"></div>$50,000–$100,000</button>
+          <button class="opt" data-val="$100,000–$250,000" onclick="selOpt('qInvest',this)"><div class="opt-radio"></div>$100,000–$250,000</button>
+          <button class="opt" data-val="$250,000+" onclick="selOpt('qInvest',this)"><div class="opt-radio"></div>$250,000+</button>
+          <button class="opt" data-val="Prefer Not To Say" onclick="selOpt('qInvest',this)"><div class="opt-radio"></div>Prefer not to say</button>
+        </div>
+        <div id="reinforce-qInvest" class="reinforce-wrap"><div class="reinforce-bubble"><span class="reinforce-icon">💰</span><span id="reinforce-qInvest-text"></span></div></div>
+        <div class="nav">
+          <button class="btn-back" onclick="goBack()">← Back</button>
+          <button class="btn-next" id="btnQInvest" onclick="goNext('qStudy')" disabled>Continue →</button>
+        </div>
+      </div>
+
+      <!-- Q_STUDY – STUDY INTEREST -->
+      <div class="screen" id="screen-qStudy">
+        <div class="q-eyebrow">Question 11 of 13</div>
+        <div class="q-title" id="qStudyTitle">Would you be interested in studying in the U.S. if it opened additional immigration opportunities?</div>
+        <div class="opts col1" id="opts-qStudy">
+          <button class="opt" data-val="Yes" onclick="selOpt('qStudy',this)"><div class="opt-radio"></div>Yes — I'm open to it</button>
+          <button class="opt" data-val="Maybe" onclick="selOpt('qStudy',this)"><div class="opt-radio"></div>Maybe — I'd like to know more</button>
+          <button class="opt" data-val="No" onclick="selOpt('qStudy',this)"><div class="opt-radio"></div>No — not at this time</button>
+        </div>
+        <div id="reinforce-qStudy" class="reinforce-wrap"><div class="reinforce-bubble"><span class="reinforce-icon">🎓</span><span id="reinforce-qStudy-text"></span></div></div>
+        <div class="nav">
+          <button class="btn-back" onclick="goBack()">← Back</button>
+          <button class="btn-next" id="btnQStudy" onclick="goNext('q9')" disabled>Continue →</button>
         </div>
       </div>
 
       <!-- Q9 – FAMILY IN USA -->
       <div class="screen" id="screen-q9">
         <div class="q-eyebrow">Question 9 of 10</div>
-        <div class="q-title">Do you have close family members living legally in the United States?</div>
+        <div class="q-title" id="q9Title">Do you have close family members living legally in the United States?</div>
         <div class="opts col2" id="opts-q9">
           <button class="opt" data-val="Yes" onclick="selOpt('q9',this)"><div class="opt-radio"></div>Yes</button>
           <button class="opt" data-val="No" onclick="selOpt('q9',this)"><div class="opt-radio"></div>No</button>
@@ -523,7 +671,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
       <!-- Q10 – LEADERSHIP -->
       <div class="screen" id="screen-q10">
         <div class="q-eyebrow">Question 10 of 10</div>
-        <div class="q-title">Have you ever led a team or managed people at work?</div>
+        <div class="q-title" id="q10Title">Have you ever led a team or managed people at work?</div>
         <div class="opts col2" id="opts-q10">
           <button class="opt" data-val="Yes" onclick="selOpt('q10',this)"><div class="opt-radio"></div>Yes</button>
           <button class="opt" data-val="No" onclick="selOpt('q10',this)"><div class="opt-radio"></div>No</button>
@@ -565,9 +713,23 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
           <a id="ctaPayBtn" href="#" class="btn-cta">Open My Immigration File →</a>
         </div>
 
-        <!-- FAQ -->
-        <div class="faq-section">
-          <div class="faq-title">Common Questions</div>
+        <!-- FAQ trigger -->
+        <div style="text-align:center;margin-top:8px;margin-bottom:4px">
+          <button onclick="openFaq()" style="background:none;border:none;color:var(--blue-accent);font-size:14px;cursor:pointer;text-decoration:underline;font-family:'DM Sans',sans-serif;">💬 Have questions? See common answers</button>
+        </div>
+
+        <!-- FAQ PANEL (hidden, opened by FAB or link) -->
+        <div class="faq-overlay" id="faqOverlay" onclick="closeFaqOutside(event)">
+          <div class="faq-panel" id="faqPanel">
+            <div class="faq-panel-header">
+              <div class="faq-panel-title">Common Questions</div>
+              <button class="faq-close" onclick="closeFaq()">×</button>
+            </div>
+            <div class="faq-contact">
+              📧 <a href="mailto:support@immigrationadviceservice.org">support@immigrationadviceservice.org</a><br>
+              🌐 <a href="https://immigrationadviceservice.org" target="_blank">immigrationadviceservice.org</a>
+            </div>
+            <div class="faq-title" style="display:none">Common Questions</div>
 
           <div class="faq-item">
             <div class="faq-q" onclick="toggleFaq(this)">Is this assessment free? <span class="faq-arrow">▼</span></div>
@@ -610,7 +772,10 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
           </div>
         </div>
 
-        <p class="result-disclaimer">This assessment is an initial eligibility screening and does not constitute legal advice. A licensed immigration attorney will review your case upon file opening.</p>
+          </div><!-- /faq-panel -->
+        </div><!-- /faq-overlay -->
+
+        <p class="result-disclaimer">This assessment is an initial eligibility screening and does not constitute legal advice. A licensed immigration attorney will review your case upon file opening.<br>Questions? <a href="mailto:support@immigrationadviceservice.org" style="color:var(--blue-accent)">support@immigrationadviceservice.org</a></p>
       </div>
 
       <!-- DONE -->
@@ -622,14 +787,24 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
           <div style="margin-top:24px">
             <a id="donePayBtn" href="#" class="btn-cta">Open My Immigration File — $250</a>
           </div>
-          <p class="result-disclaimer" style="margin-top:16px">Didn't receive the email? Check your spam folder or <a href="mailto:info@immigrationadviceservice.org" style="color:var(--blue-accent)">contact us</a>.</p>
+          <p class="result-disclaimer" style="margin-top:16px">Didn't receive the email? Check your spam folder or contact us at <a href="mailto:support@immigrationadviceservice.org" style="color:var(--blue-accent)">support@immigrationadviceservice.org</a></p>
         </div>
       </div>
 
     </div><!-- /content -->
   </div><!-- /card -->
 
-  <p style="text-align:center;font-size:12px;color:var(--gray-400);margin-top:16px">© Immigration Advice Service · <a href="https://immigrationadviceservice.org" style="color:var(--gray-400)">immigrationadviceservice.org</a></p>
+  <!-- FAQ Floating Button -->
+  <button class="faq-fab" id="faqFab" onclick="openFaq()" style="display:none">
+    💬 Common Questions
+  </button>
+
+  <p style="text-align:center;font-size:12px;color:var(--gray-400);margin-top:16px">
+    © Immigration Advice Service &nbsp;·&nbsp;
+    <a href="https://immigrationadviceservice.org" target="_blank" style="color:var(--gray-400)">immigrationadviceservice.org</a>
+    &nbsp;·&nbsp;
+    <a href="mailto:support@immigrationadviceservice.org" style="color:var(--gray-400)">support@immigrationadviceservice.org</a>
+  </p>
 </div>
 
 <script>
@@ -827,11 +1002,11 @@ function editContact() {
 // ─────────────────────────────────────────────────────────
 // SCREEN NAVIGATION
 // ─────────────────────────────────────────────────────────
-const Q_SCREENS = ['q1','q2','q2b','q3','q3b','q3c','q4','q5','q6','q7','q8','q9','q10'];
+const Q_SCREENS = ['q1','q2','q2b','q3','q3b','q3c','q4','q5','q6','q6b','q7','q8','qSit','qInvest','qStudy','q9','q10'];
 const SCREEN_LABELS = {
   contact:'Your Details', q1:'Age', q2:'Country of Residence', q2b:'Country of Birth', q3:'Marital Status',
-  q3b:'Spouse Details', q3c:'Children', q4:'Your Goal', q5:'Education', q6:'Profession', q7:'Experience',
-  q8:'Business Interest', q9:'Family in U.S.', q10:'Final Question'
+  q3b:'Spouse Details', q3c:'Children', q4:'Your Goal', q5:'Education', q6:'Profession', q6b:'Retirement Details', q7:'Experience',
+  q8:'Business Interest', qSit:'Current Situation', qInvest:'Investment Level', qStudy:'Study Interest', q9:'Family in U.S.', q10:'Final Question'
 };
 
 function showScreen(id) {
@@ -870,7 +1045,65 @@ function showScreen(id) {
   if(id === 'q2') renderCountries('');
   if(id === 'q2b') renderBirthCountries('');
   if(id === 'q3b') renderSpouseCountries('');
-  if(id === 'q6') { renderProf(''); restoreProfDisplay(); }
+  if(id === 'q6') {
+    renderProf('');
+    restoreProfDisplay();
+    if(answers.q6 && answers.q6 !== 'Not Currently Employed' && !answers.q6.includes('Retired')) {
+      setTimeout(() => showSalaryBubble(answers.q6), 80);
+    }
+  }
+  if(id === 'q7') {
+    const t = document.getElementById('q7Title');
+    if(t) {
+      const prof = answers.q6 && answers.q6 !== 'Not Currently Employed' && !answers.q6.includes('Retired') ? answers.q6 : null;
+      t.textContent = prof ? 'How many years of experience do you have as a ' + prof + '?' : 'How many years of professional experience do you have?';
+    }
+  }
+  // Show encouragement messages at key points
+  showEncouragement(id);
+
+  // Personalize new screen titles
+  if(id === 'qStudy') {
+    const fn = answers.firstName ? answers.firstName + ', ' : '';
+    const t = document.getElementById('qStudyTitle');
+    if(t) t.textContent = (fn + 'would you be interested in studying in the U.S. if it opened additional immigration opportunities?').charAt(0).toUpperCase() + (fn + 'would you be interested in studying in the U.S. if it opened additional immigration opportunities?').slice(1).replace(/^./, fn ? fn[0].toUpperCase() + fn.slice(1) : 'W');
+  }
+  if(id === 'qSit') {
+    restoreOpts('qSit');
+    const fn = answers.firstName ? answers.firstName + ', ' : '';
+    const t = document.querySelector('#screen-qSit .q-title');
+    if(t) {
+      const msg = fn + 'which best describes your current professional situation?';
+      t.textContent = msg.charAt(0).toUpperCase() + msg.slice(1);
+    }
+  }
+  if(id === 'qInvest') restoreOpts('qInvest');
+  if(id === 'qStudy') restoreOpts('qStudy');
+
+  // Personalize titles with first name
+  const fn = answers.firstName ? answers.firstName + ', ' : '';
+  const titleMap = {
+    q3:  fn + 'what is your marital status?',
+    q5:  fn + 'what is your highest level of education?',
+    q8:  fn + ', would you be interested in opening or investing in a business in the U.S.?',
+    q9:  fn + 'do you have close family members living legally in the United States?',
+    q10: fn + 'have you ever led a team or managed people at work?'
+  };
+  if(titleMap[id]) {
+    const el = document.getElementById(id + 'Title');
+    if(el) {
+      // Capitalize first letter
+      const txt = titleMap[id];
+      el.textContent = txt.charAt(0).toUpperCase() + txt.slice(1);
+    }
+  }
+  if(id === 'q6b') {
+    restoreOpts('q6b');
+    setTimeout(() => {
+      const rp = document.getElementById('retProfInput');
+      if(rp && answers.retProfession) rp.value = answers.retProfession;
+    }, 50);
+  }
   window.scrollTo(0, 0);
 }
 
@@ -890,6 +1123,11 @@ function selOpt(key, el) {
   if(btn) btn.disabled = false;
   // Show reinforcement message
   showReinforcement(key, el.dataset.val);
+  // Show elaborate box for q4
+  if(key === 'q4') {
+    const elaborateBox = document.getElementById('q4-elaborate');
+    if(elaborateBox) elaborateBox.style.display = 'block';
+  }
 }
 
 function restoreOpts(id) {
@@ -1025,6 +1263,22 @@ function selProf(p) {
   document.getElementById('profPillText').textContent = p;
   document.getElementById('profSelected').style.display = 'block';
   document.getElementById('btnQ6').disabled = false;
+  showSalaryBubble(p);
+}
+
+function saveRetired() {
+  const rp = document.getElementById('retProfInput');
+  if(rp && rp.value.trim()) {
+    answers.retProfession = rp.value.trim();
+    answers.q6 = rp.value.trim() + ' (Retired)';
+  } else {
+    answers.q6 = 'Retired';
+  }
+  // If they have savings, pre-fill business interest
+  if(answers.q6b && answers.q6b.includes('Yes')) {
+    answers.q8 = 'Maybe';
+  }
+  goNext('q8'); // skip experience for retirees
 }
 
 function selProfDirect(val) {
@@ -1043,14 +1297,16 @@ function clearProf() {
   document.getElementById('profSelected').style.display = 'none';
   document.getElementById('btnQ6').disabled = true;
   renderProf('');
+  const b = document.getElementById('salaryBubble');
+  if(b) b.remove();
 }
 
 function restoreProfDisplay() {
   const v = answers.q6;
   if(!v) return;
   document.getElementById('btnQ6').disabled = false;
-  if(v === 'Not Currently Employed') {
-    selProfDirect(v);
+  if(v === 'Not Currently Employed' || v === 'Retired' || v.includes('Retired')) {
+    selProfDirect(v.includes('Retired') ? 'Retired' : v);
   } else {
     document.getElementById('profPillText').textContent = v;
     document.getElementById('profSelected').style.display = 'block';
@@ -1066,6 +1322,9 @@ function computePathways() {
   const exp = answers.q7||'';
   const leadership = answers.q10||'';
   const bizInterest = answers.q8||'';
+  const situation = answers.qSit||'';
+  const investment = answers.qInvest||'';
+  const studyInterest = answers.qStudy||'';
   const goal = answers.q4||'';
   const family = answers.q9||'';
   const highEdu = ["Bachelor's Degree","Master's Degree","Doctorate (PhD)"].includes(edu);
@@ -1074,6 +1333,10 @@ function computePathways() {
   if(highEdu && highExp){ scores.executive+=3; if(["Master's Degree","Doctorate (PhD)"].includes(edu)) scores.executive+=2; if(leadership==='Yes') scores.executive+=2; }
   if(['Starting or Expanding a Business','Investment Opportunities'].includes(goal)) scores.business+=2;
   if(['Yes','Maybe'].includes(bizInterest)) scores.business+=2;
+  if(['Business Owner','Entrepreneur','Investor'].includes(situation)) scores.business+=2;
+  if(['Employee','Skilled Professional','Self-Employed'].includes(situation)){ scores.employment+=2; if(highExp) scores.employment+=1; }
+  if(['$100,000–$250,000','$250,000+'].includes(investment)) scores.business+=2;
+  if(studyInterest==='Yes') scores.education+=2;
   scores.employment += 1;
   if(highExp) scores.employment += 1;
   if(goal==='Education') scores.education+=3;
@@ -1114,11 +1377,16 @@ async function submitAndShowResults() {
     `Children under 21: ${answers.q3c||''} ${answers.childrenCount?'('+answers.childrenCount+')':''}`,
     `Country: ${answers.q2||''}`,
     `Marital Status: ${answers.q3||''}`,
-    `Primary Goal: ${answers.q4||''}`,
+    `Primary Goal: ${answers.q4||''}${answers.q4_detail?' — '+answers.q4_detail:''}`,
     `Education: ${answers.q5||''}`,
     `Profession: ${answers.q6||''}`,
+    answers.retProfession ? `Pre-retirement profession: ${answers.retProfession}` : '',
+    answers.q6b ? `Retirement savings: ${answers.q6b}` : '',
     `Experience: ${answers.q7||''}`,
     `Business Interest: ${answers.q8||''}`,
+    answers.qSit ? `Current Situation: ${answers.qSit}` : '',
+    answers.qInvest ? `Investment Level: ${answers.qInvest}` : '',
+    answers.qStudy ? `Study Interest: ${answers.qStudy}` : '',
     `Family in USA: ${answers.q9||''}`,
     `Leadership: ${answers.q10||''}`,
     '',
@@ -1192,6 +1460,9 @@ async function submitAndShowResults() {
     document.getElementById('doneEmail').textContent = answers.email||'your email';
 
     showScreen('results');
+    // Show FAQ floating button
+    const fab = document.getElementById('faqFab');
+    if(fab) fab.style.display = 'flex';
   }, 2200);
 }
 
@@ -1200,6 +1471,32 @@ async function submitAndShowResults() {
 // REINFORCEMENT MESSAGES
 // ─────────────────────────────────────────────────────────
 const REINFORCE = {
+  qSit: {
+    'Employee': "Employment-based immigration is one of the most established pathways — your professional background will be key in identifying the right category for you.",
+    'Skilled Professional': "Skilled professionals are highly sought after in the U.S. — there are specific immigration categories designed around professional qualifications and expertise.",
+    'Business Owner': "Business ownership experience is a strong factor in several immigration pathways, particularly those related to entrepreneurship and investment.",
+    'Entrepreneur': "The U.S. actively welcomes entrepreneurs — there are immigration categories specifically designed for individuals who create businesses and generate employment.",
+    'Investor': "Investment-based immigration is one of the most direct and well-established pathways available — your background is highly relevant.",
+    'Self-Employed': "Self-employment demonstrates initiative and professional independence, which can be relevant to several immigration categories."
+  },
+  qInvest: {
+    'Under $50,000': "Even at a lower investment level, there are still pathways worth exploring — and your consultant will identify the most suitable ones for your situation.",
+    '$50,000–$100,000': "Good to know. This range opens the door to several business-based immigration options that we can explore together.",
+    '$100,000–$250,000': "Excellent. This investment range is very relevant to several strong U.S. immigration pathways, including the E-2 visa category.",
+    '$250,000+': "Outstanding. This level of investment places you in a very strong position for premium immigration pathways, including EB-5 and E-2.",
+    'Prefer Not To Say': "Completely understood — your consultant will discuss the investment options privately and find the best approach for your situation."
+  },
+  qStudy: {
+    'Yes': "A smart approach. Academic pathways in the U.S. can create additional immigration opportunities well beyond just the study period itself.",
+    'Maybe': "Worth keeping in mind. Even if it is not your primary plan, the education option gives us more flexibility in building your pathway.",
+    'No': "No problem at all — there are plenty of strong pathways that have nothing to do with studying, and we will focus on the ones that fit you best."
+  },
+  q6b: {
+    'Yes — significant savings': "Excellent. Retirees with savings are actually among the strongest candidates for investment-based immigration pathways like E-2 and EB-5 — this is a very encouraging profile.",
+    'Yes — modest savings': "Good to know. Even modest savings can open doors to certain investment and business-based immigration pathways. Every option is worth exploring.",
+    'Prefer not to say': "Completely understood — we will factor this in as we identify the best available pathways for your profile.",
+    'No': "No problem at all — there are strong immigration pathways based entirely on your professional background and life experience, with no investment required."
+  },
   q1: {
     '18–24': "Starting early is one of the biggest advantages you can have. The earlier you build your immigration strategy, the more options will be available to you.",
     '25–34': "This is one of the strongest age ranges for immigration opportunities — you have professional experience, but also time on your side.",
@@ -1215,6 +1512,7 @@ const REINFORCE = {
     'Widowed': "Your personal situation will be factored in carefully — and it will not hold you back from the pathways that are right for you."
   },
   q4: {
+    'Not Sure Yet': "That is completely fine — and actually a very common starting point. Many of our clients came to us unsure of exactly what they wanted, and together we found the right pathway. Your profile matters more than having a specific plan right now.",
     'Career Opportunities': "There are several immigration categories specifically designed for professionals looking to advance their careers in the U.S. — this is very achievable.",
     'Starting or Expanding a Business': "The U.S. is one of the best countries in the world for entrepreneurs, and there are immigration pathways specifically designed around business creation.",
     'Investment Opportunities': "Investment-based immigration is one of the most direct pathways available — your interest in this area is very relevant to what we are identifying.",
@@ -1268,17 +1566,135 @@ function showReinforcement(qid, val) {
 // ─────────────────────────────────────────────────────────
 // FAQ TOGGLE
 // ─────────────────────────────────────────────────────────
+function openFaq() {
+  document.getElementById('faqOverlay').classList.add('open');
+}
+function closeFaq() {
+  document.getElementById('faqOverlay').classList.remove('open');
+}
+function closeFaqOutside(e) {
+  if(e.target === document.getElementById('faqOverlay')) closeFaq();
+}
+
 function toggleFaq(el) {
   const ans = el.nextElementSibling;
   const isOpen = ans.classList.contains('open');
-  // Close all
   document.querySelectorAll('.faq-q').forEach(q => q.classList.remove('open'));
   document.querySelectorAll('.faq-a').forEach(a => a.classList.remove('open'));
-  // Open clicked if it was closed
   if(!isOpen) {
     el.classList.add('open');
     ans.classList.add('open');
   }
+}
+
+
+
+// ─────────────────────────────────────────────────────────
+// ENCOURAGEMENT MESSAGES
+// ─────────────────────────────────────────────────────────
+const ENCOURAGE = {
+  q5: (fn) => `${fn}your profile is looking great so far — keep going!`,
+  q7: (fn) => `${fn}you're making excellent progress. Almost halfway there!`,
+  qStudy: (fn) => `${fn}you're doing great — almost there!`,
+  q9: (fn) => `${fn}just 2 more questions to go!`,
+  q10: (fn) => `${fn}last question! Your assessment is almost complete.`
+};
+
+function showEncouragement(screenId) {
+  // Remove any existing toast first
+  const existing = document.getElementById('encourageToast');
+  if(existing) existing.remove();
+  const fn = answers.firstName ? answers.firstName + ', ' : '';
+  const msgFn = ENCOURAGE[screenId];
+  if(!msgFn) return;
+  const msg = msgFn(fn);
+  const toast = document.createElement('div');
+  toast.id = 'encourageToast';
+  toast.className = 'encourage-toast';
+  const icons = { q5:'🌟', q7:'💪', q9:'🎯', q10:'🏁' };
+  toast.innerHTML = `<span class="encourage-icon">${icons[screenId]||'✨'}</span><span>${msg.charAt(0).toUpperCase()+msg.slice(1)}</span>`;
+  // Insert at top of content area, before the q-eyebrow
+  const eyebrow = document.querySelector('#screen-'+screenId+' .q-eyebrow');
+  if(eyebrow) eyebrow.parentNode.insertBefore(toast, eyebrow);
+}
+
+// ─────────────────────────────────────────────────────────
+// PROFESSION SALARIES
+// ─────────────────────────────────────────────────────────
+const PROF_SALARIES = {
+  "Accountant":"$55,000–$95,000","Actor / Performer":"$45,000–$90,000",
+  "Administrative Worker":"$38,000–$60,000","Advertising Manager":"$70,000–$130,000",
+  "Agricultural Adviser":"$50,000–$85,000","Agronomist":"$55,000–$90,000",
+  "Air Traffic Controller":"$90,000–$180,000","Aircraft Mechanic":"$60,000–$100,000",
+  "Animator":"$55,000–$95,000","Anthropologist":"$50,000–$85,000",
+  "Architect":"$75,000–$130,000","Art Director":"$75,000–$140,000",
+  "Artist":"$45,000–$85,000","Attorney / Lawyer":"$90,000–$200,000",
+  "Auditor":"$60,000–$110,000","Banker":"$70,000–$150,000",
+  "Biochemist":"$75,000–$130,000","Biologist":"$65,000–$110,000",
+  "Biotechnologist":"$80,000–$140,000","Bookkeeper":"$42,000–$65,000",
+  "Business Analyst":"$70,000–$120,000","Business Owner":"$80,000–$250,000+",
+  "Camera Operator":"$45,000–$85,000","Chemical Engineer":"$85,000–$150,000",
+  "Civil Engineer":"$75,000–$130,000","Coach / Trainer":"$45,000–$90,000",
+  "Computer Engineer":"$90,000–$160,000","Computer Programmer":"$80,000–$150,000",
+  "Construction Manager":"$80,000–$140,000","Consultant":"$75,000–$160,000",
+  "Cook / Chef":"$45,000–$80,000","Creative Director":"$85,000–$160,000",
+  "Data Analyst":"$75,000–$130,000","Dentist":"$150,000–$250,000",
+  "Designer (Graphic / Industrial / Fashion)":"$55,000–$105,000",
+  "Detective / Investigator":"$55,000–$95,000","Dietician":"$55,000–$90,000",
+  "Doctor / Physician":"$200,000–$350,000","Economist":"$80,000–$150,000",
+  "Educator / Teacher":"$45,000–$80,000","Electrical Engineer":"$85,000–$150,000",
+  "Entrepreneur":"$80,000–$300,000+","Environmental Scientist":"$60,000–$105,000",
+  "Event Manager":"$50,000–$90,000","Financial Analyst":"$75,000–$140,000",
+  "Financial Officer":"$100,000–$200,000","Fire Officer":"$55,000–$95,000",
+  "Flight Attendant":"$50,000–$85,000","Food Technologist":"$60,000–$100,000",
+  "Geologist":"$65,000–$115,000","Government Official":"$60,000–$130,000",
+  "HR Manager":"$70,000–$125,000","Historian":"$50,000–$85,000",
+  "Hotel Manager":"$55,000–$100,000","Import / Export Manager":"$65,000–$110,000",
+  "Insurance Agent":"$55,000–$100,000","Interior Designer":"$55,000–$95,000",
+  "Interpreter / Translator":"$50,000–$90,000","Investor":"$100,000–$500,000+",
+  "IT Manager":"$90,000–$160,000","Journalist / Reporter":"$45,000–$90,000",
+  "Judge":"$100,000–$200,000","Landscape Architect":"$60,000–$100,000",
+  "Lecturer / Professor":"$65,000–$130,000","Legal Assistant":"$45,000–$75,000",
+  "Librarian":"$45,000–$75,000","Logistics Manager":"$65,000–$110,000",
+  "Marine Engineer":"$80,000–$140,000","Marketing Manager":"$75,000–$140,000",
+  "Mechanical Engineer":"$80,000–$140,000",
+  "Medical Laboratory Technician":"$55,000–$90,000",
+  "Midwife":"$75,000–$120,000","Military Officer":"$65,000–$120,000",
+  "Musician":"$40,000–$90,000","Nurse":"$70,000–$120,000",
+  "Nutritionist":"$55,000–$90,000","Operations Manager":"$75,000–$135,000",
+  "Optician":"$55,000–$90,000","Paramedic":"$45,000–$80,000",
+  "Pharmacist":"$110,000–$160,000","Photographer":"$45,000–$85,000",
+  "Physicist":"$85,000–$150,000","Physiotherapist":"$70,000–$110,000",
+  "Pilot":"$90,000–$200,000","Police Officer":"$55,000–$95,000",
+  "Project Manager":"$85,000–$150,000","Property Manager":"$55,000–$100,000",
+  "Psychiatrist":"$200,000–$300,000","Psychologist":"$80,000–$130,000",
+  "Public Relations Manager":"$65,000–$120,000","Publisher":"$55,000–$100,000",
+  "Quality Inspector":"$50,000–$85,000","Real Estate Agent":"$60,000–$150,000",
+  "Researcher":"$65,000–$120,000","Sales Manager":"$75,000–$150,000",
+  "Sales Representative":"$55,000–$110,000","Security Manager":"$60,000–$110,000",
+  "Skilled Tradesperson":"$55,000–$100,000","Social Worker":"$45,000–$75,000",
+  "Software Developer":"$95,000–$175,000","Statistician":"$80,000–$140,000",
+  "Surgeon":"$250,000–$450,000","Systems Analyst":"$80,000–$140,000",
+  "Tax Adviser":"$65,000–$120,000","Teacher (Primary / Secondary)":"$45,000–$80,000",
+  "Telecommunications Engineer":"$80,000–$140,000","Veterinarian":"$100,000–$160,000",
+  "Web Developer":"$75,000–$135,000"
+};
+
+function showSalaryBubble(prof) {
+  const existing = document.getElementById('salaryBubble');
+  if(existing) existing.remove();
+  const salary = PROF_SALARIES[prof];
+  if(!salary) return;
+  const fn = answers.firstName ? answers.firstName + ', ' : '';
+  const bubble = document.createElement('div');
+  bubble.id = 'salaryBubble';
+  bubble.className = 'salary-bubble';
+  bubble.innerHTML = `
+    <div class="salary-title">💰 Average salary in the U.S.</div>
+    <div class="salary-amount">${salary} / year</div>
+    <div class="salary-note">${fn}as a <strong>${prof}</strong> in the United States, you could earn significantly more than in your current market — and we can help make that happen.</div>`;
+  const nav = document.querySelector('#screen-q6 .nav');
+  if(nav) nav.parentNode.insertBefore(bubble, nav);
 }
 
 // ─────────────────────────────────────────────────────────
