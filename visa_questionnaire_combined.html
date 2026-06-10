@@ -1601,11 +1601,15 @@ function saveAndSubmit() {
   submitAll();
 }
 
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxD6bedKExT_oIiSHPFci7UzCPazwoey_S8RKRIWmMMEhlEU09CoF1vhHuYWRl1yEk/exec';
+
 async function submitAll() {
   document.getElementById('saving-overlay').classList.add('show');
   document.getElementById('saving-text').textContent = 'Saving your answers...';
   const summary = buildSummary();
   const fields = buildFields();
+
+  // 1. Save to Bitrix24 CRM
   try {
     if(contactId) {
       const params = Object.entries(fields).map(([k,v])=>`fields[${k}]=${encodeURIComponent(v)}`).join('&');
@@ -1614,6 +1618,22 @@ async function submitAll() {
       await fetch(`${WEBHOOK}crm.contact.update?ID=${contactId}&fields[${CRM.VISA_ASSESSMENT}]=${VISA_STATUS.RECEIVED}`);
     }
   } catch(e){}
+
+  // 2. Save to Google Sheets
+  try {
+    await fetch(SHEETS_URL, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        leadId: leadId,
+        contactId: contactId,
+        contactName: contactName,
+        contactEmail: contactEmail,
+        answers: answers
+      })
+    });
+  } catch(e){}
+
   document.getElementById('saving-overlay').classList.remove('show');
   goNext('thankyou');
 }
