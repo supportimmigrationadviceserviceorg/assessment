@@ -1635,8 +1635,8 @@ const REINFORCE = {
   q3: {
     'Single': "Being single gives us a lot of flexibility — we can focus entirely on building the strongest possible pathway around your individual profile.",
     'Married': "In many immigration processes, a spouse can be included as part of the strategy — which can actually strengthen certain applications.",
-    'Divorced': "Your personal situation will be factored in carefully — and it will not hold you back from the pathways that are right for you.",
-    'Widowed': "Your personal situation will be factored in carefully — and it will not hold you back from the pathways that are right for you."
+    'Divorced': '',
+    'Widowed': ''
   },
   q4: {
     'Not Sure Yet': "That is completely fine — and actually a very common starting point. Many of our clients came to us unsure of exactly what they wanted, and together we found the right pathway. Your profile matters more than having a specific plan right now.",
@@ -1648,8 +1648,8 @@ const REINFORCE = {
     'Exploring My Options': "That is actually the perfect place to start. Many clients come to us without knowing exactly what is available — and they are often surprised by what we find."
   },
   q5: {
-    'High School': "Education is just one part of the picture — your experience and background can absolutely open strong doors.",
-    'Trade School': "Trade and vocational training is actually highly valued in U.S. immigration — skilled professionals are in strong demand.",
+    'High School': '',
+    'Trade School': '',
     'Associate Degree': "Your academic background, combined with your experience, will help us identify the most relevant pathways for your profile.",
     "Bachelor's Degree": "A bachelor's degree opens the door to several professional immigration categories — it significantly strengthens your profile.",
     "Master's Degree": "A master's degree is a strong asset in U.S. immigration — it can qualify you for advanced professional categories.",
@@ -1680,13 +1680,16 @@ function showReinforcement(qid, val) {
   const wrap = document.getElementById('reinforce-'+qid);
   const textEl = document.getElementById('reinforce-'+qid+'-text');
   if(!wrap || !textEl) return;
+  // No message for "No" answers
+  if(val === 'No') { wrap.classList.remove('show'); return; }
   const msg = REINFORCE[qid] && REINFORCE[qid][val];
   if(msg) {
     textEl.textContent = msg;
-    // Trigger animation
     wrap.classList.remove('show');
-    void wrap.offsetWidth; // reflow
+    void wrap.offsetWidth;
     setTimeout(() => wrap.classList.add('show'), 50);
+  } else {
+    wrap.classList.remove('show');
   }
 }
 
