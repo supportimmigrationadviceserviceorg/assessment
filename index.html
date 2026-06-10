@@ -626,30 +626,40 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
       <!-- Q6c – MONTHLY INCOME -->
       <div class="screen" id="screen-q6c">
         <div class="q-eyebrow">Question 6 of 10</div>
-        <div class="q-title" id="q6cTitle">What is your monthly income?</div>
-        <div class="q-sub" id="q6cSub">Enter your income — we'll convert it to USD automatically.</div>
+        <div class="q-title" id="q6cTitle">What is your approximate monthly income?</div>
+        <div class="q-sub">Select the range that best describes your income in USD.</div>
 
-        <div style="background:var(--blue-light);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius);padding:16px;margin-bottom:16px">
-          <!-- Local currency row -->
-          <div class="field-label" style="margin-top:0">Monthly income in <span id="localCurrLabel">local currency</span></div>
-          <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
-            <input class="field-input" type="number" id="incomeLocal" min="0" placeholder="Amount..." style="flex:2;margin-bottom:0" oninput="calcIncomeUSD()"/>
-            <div id="currencyBadge" style="flex:1;display:flex;align-items:center;justify-content:center;background:var(--blue);border-radius:var(--radius);padding:11px;font-weight:600;font-size:15px;color:#fff;min-width:56px">USD</div>
-          </div>
+        <!-- Range selector -->
+        <div class="opts col1" id="opts-incomeRange" style="margin-bottom:12px">
+          <button class="opt" data-range="0-999"     data-usd="500"   onclick="selIncomeRange(this)"><div class="opt-radio"></div>Less than $1,000 / month</button>
+          <button class="opt" data-range="1000-2499" data-usd="1700"  onclick="selIncomeRange(this)"><div class="opt-radio"></div>$1,000 – $2,500 / month</button>
+          <button class="opt" data-range="2500-3999" data-usd="3200"  onclick="selIncomeRange(this)"><div class="opt-radio"></div>$2,500 – $4,000 / month</button>
+          <button class="opt" data-range="4000-5999" data-usd="5000"  onclick="selIncomeRange(this)"><div class="opt-radio"></div>$4,000 – $6,000 / month</button>
+          <button class="opt" data-range="6000-9999" data-usd="8000"  onclick="selIncomeRange(this)"><div class="opt-radio"></div>$6,000 – $10,000 / month</button>
+          <button class="opt" data-range="+10000"    data-usd="12000" onclick="selIncomeRange(this)"><div class="opt-radio"></div>Over $10,000 / month</button>
+        </div>
 
-          <!-- Auto USD conversion -->
-          <div id="incomeUsdRow" style="display:none;margin-bottom:12px">
-            <div class="field-label" style="margin-top:0">≈ Equivalent in USD per month</div>
-            <div id="incomeUsdDisplay" style="font-size:20px;font-weight:600;color:var(--blue);padding:4px 0"></div>
-          </div>
+        <!-- Not sure? currency converter tool -->
+        <div id="incomeConverterToggleWrap" style="margin-bottom:12px">
+          <button onclick="toggleIncomeConverter()" id="incomeConverterToggle" style="background:none;border:none;color:var(--blue-accent);font-size:13px;cursor:pointer;padding:4px 0;font-family:'DM Sans',sans-serif;">
+            💱 Not sure how much that is in USD? Use the converter
+          </button>
+        </div>
 
-          <!-- Manual USD field (required) -->
-          <div class="field-label" style="margin-top:0">Exact monthly income in USD <span style="color:var(--red)">*</span></div>
-          <div style="position:relative">
-            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-weight:600;color:var(--gray-600);font-size:15px">$</span>
-            <input class="field-input" type="number" id="incomeUsd" min="0" placeholder="e.g. 3500" style="padding-left:28px;margin-bottom:0" oninput="onIncomeUsdInput(this.value)"/>
+        <!-- Converter (hidden by default) -->
+        <div id="incomeConverterWrap" style="display:none;background:var(--blue-light);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius);padding:14px;margin-bottom:12px">
+          <div style="font-size:13px;font-weight:500;color:var(--blue);margin-bottom:10px">Currency Converter</div>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+            <div style="flex:2">
+              <div class="field-label" style="margin-top:0">Amount in <span id="localCurrLabel">local currency</span></div>
+              <input class="field-input" type="number" id="incomeLocal" min="0" placeholder="e.g. 12000" style="margin-bottom:0" oninput="calcIncomeUSD()"/>
+            </div>
+            <div id="currencyBadge" style="flex:1;display:flex;align-items:center;justify-content:center;background:var(--blue);border-radius:var(--radius);padding:11px;font-weight:600;font-size:15px;color:#fff;min-width:56px;margin-top:20px">USD</div>
           </div>
-          <div style="font-size:11px;color:var(--gray-400);margin-top:5px">This is the amount that will be recorded. You can edit it if the conversion is not accurate.</div>
+          <div id="incomeUsdRow" style="display:none">
+            <div style="font-size:22px;font-weight:700;color:var(--blue)" id="incomeUsdDisplay"></div>
+            <div style="font-size:12px;color:var(--gray-500);margin-top:4px">Use this to pick the matching range above.</div>
+          </div>
         </div>
 
         <div class="nav">
@@ -895,7 +905,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
               <div style="font-size:13px;font-weight:600;color:#92400e;margin-bottom:5px">Important — This is an initial assessment only</div>
               <div style="font-size:13px;color:#78350f;line-height:1.7">
                 Online assessments cannot capture the full picture. There may be additional visa categories and immigration pathways available to you that require a professional legal review to identify. To determine your best options accurately, your case must be reviewed by a licensed immigration attorney.
-                <br><span style="margin-top:6px;display:inline-block">Questions? <a href="mailto:support@immigrationadviceservice.org" style="color:#92400e;font-weight:600">support@immigrationadviceservice.org</a></span>
+                <br><span style="margin-top:6px;display:inline-block">Questions? <a href="mailto:support@immigrationadviceservice.org" onclick="event.stopPropagation()" style="color:#92400e;font-weight:600">support@immigrationadviceservice.org</a></span>
               </div>
             </div>
           </div>
@@ -936,7 +946,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
 
         <!-- Support line -->
         <div style="text-align:center;font-size:12px;color:var(--gray-500);margin-bottom:8px">
-          Questions? <a href="mailto:support@immigrationadviceservice.org" style="color:var(--blue-accent)">support@immigrationadviceservice.org</a>
+          Questions? <a href="mailto:support@immigrationadviceservice.org" onclick="event.stopPropagation()" style="color:var(--blue-accent)">support@immigrationadviceservice.org</a>
         </div>
 
         <!-- FAQ trigger -->
@@ -952,7 +962,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
               <button class="faq-close" onclick="closeFaq()">×</button>
             </div>
             <div class="faq-contact">
-              📧 <a href="mailto:support@immigrationadviceservice.org">support@immigrationadviceservice.org</a><br>
+              📧 <a href="mailto:support@immigrationadviceservice.org" onclick="event.stopPropagation()">support@immigrationadviceservice.org</a><br>
               🌐 <a href="https://immigrationadviceservice.org" target="_blank">immigrationadviceservice.org</a>
             </div>
             <div class="faq-title" style="display:none">Common Questions</div>
@@ -974,7 +984,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
 
           <div class="faq-item">
             <div class="faq-q" onclick="toggleFaq(this)">How will you keep me updated throughout the process? <span class="faq-arrow">▼</span></div>
-            <div class="faq-a"><div class="faq-a-inner">From the moment you activate your file, a personal immigration consultant is assigned exclusively to your case. Your consultant will contact you directly, guide you through every step, and keep you informed at every stage — from document preparation to the final approval. You can also reach us at any time at <a href="mailto:support@immigrationadviceservice.org" style="color:var(--blue-accent);font-weight:600">support@immigrationadviceservice.org</a> or visit <a href="https://immigrationadviceservice.org" target="_blank" style="color:var(--blue-accent);font-weight:600">immigrationadviceservice.org</a>.</div></div>
+            <div class="faq-a"><div class="faq-a-inner">From the moment you activate your file, a personal immigration consultant is assigned exclusively to your case. Your consultant will contact you directly, guide you through every step, and keep you informed at every stage — from document preparation to the final approval. You can also reach us at any time at <a href="mailto:support@immigrationadviceservice.org" onclick="event.stopPropagation()" style="color:var(--blue-accent);font-weight:600">support@immigrationadviceservice.org</a> or visit <a href="https://immigrationadviceservice.org" target="_blank" style="color:var(--blue-accent);font-weight:600">immigrationadviceservice.org</a>.</div></div>
           </div>
 
           <div class="faq-item">
@@ -1011,7 +1021,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
           </div><!-- /faq-panel -->
         </div><!-- /faq-overlay -->
 
-        <p class="result-disclaimer">This assessment is an initial eligibility screening and does not constitute legal advice. A licensed immigration attorney will review your case upon file opening.<br>Questions? <a href="mailto:support@immigrationadviceservice.org" style="color:var(--blue-accent)">support@immigrationadviceservice.org</a></p>
+        <p class="result-disclaimer">This assessment is an initial eligibility screening and does not constitute legal advice. A licensed immigration attorney will review your case upon file opening.<br>Questions? <a href="mailto:support@immigrationadviceservice.org" onclick="event.stopPropagation()" style="color:var(--blue-accent)">support@immigrationadviceservice.org</a></p>
       </div>
 
       <!-- DONE -->
@@ -1023,7 +1033,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
           <div style="margin-top:24px">
             <a id="donePayBtn" href="#" class="btn-cta">Activate My Immigration File — $200 →</a>
           </div>
-          <p class="result-disclaimer" style="margin-top:16px">Didn't receive the email? Check your spam folder or contact us at <a href="mailto:support@immigrationadviceservice.org" style="color:var(--blue-accent)">support@immigrationadviceservice.org</a></p>
+          <p class="result-disclaimer" style="margin-top:16px">Didn't receive the email? Check your spam folder or contact us at <a href="mailto:support@immigrationadviceservice.org" onclick="event.stopPropagation()" style="color:var(--blue-accent)">support@immigrationadviceservice.org</a></p>
         </div>
       </div>
 
@@ -1039,7 +1049,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
     © Immigration Advice Service &nbsp;·&nbsp;
     <a href="https://immigrationadviceservice.org" target="_blank" style="color:var(--gray-400)">immigrationadviceservice.org</a>
     &nbsp;·&nbsp;
-    <a href="mailto:support@immigrationadviceservice.org" style="color:var(--gray-400)">support@immigrationadviceservice.org</a>
+    <a href="mailto:support@immigrationadviceservice.org" onclick="event.stopPropagation()" style="color:var(--gray-400)">support@immigrationadviceservice.org</a>
   </p>
 </div>
 
@@ -1055,15 +1065,19 @@ let leadId = null;
 let utmParams = '';
 let emailLookupTimer = null;
 
-// UTM params from URL
+// UTM params — always include utm_campaign=INDEX1 as default source identifier
+// Passes through any existing UTM params from the page URL, then adds lead_id
 (function(){
   const p = new URLSearchParams(window.location.search);
   leadId = p.get('lead_id') || null;
   const utmKeys = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'];
   const parts = [];
+  // Default campaign tag so every payment is identifiable
+  if(!p.get('utm_campaign')) parts.push('utm_campaign=INDEX1');
+  if(!p.get('utm_source'))   parts.push('utm_source=assessment');
   utmKeys.forEach(k => { if(p.get(k)) parts.push(k+'='+encodeURIComponent(p.get(k))); });
   if(leadId) parts.push('lead_id='+leadId);
-  utmParams = parts.length ? '?'+parts.join('&') : '';
+  utmParams = '?' + parts.join('&');
 })();
 
 // ─────────────────────────────────────────────────────────
@@ -1215,6 +1229,7 @@ function saveContact() {
   answers.phone     = document.getElementById('contactPhone').value.trim() || answers.phone;
   answers.email = email;
   updateClientBar();
+  saveProgressToBitrix(true); // save contact details immediately
   goNext('q1');
 }
 
@@ -1406,23 +1421,24 @@ function showScreen(id) {
     if(usdEl && answers.spouse_income_usd) { usdEl.value = answers.spouse_income_usd; document.getElementById('btnQ6d').disabled = false; }
   }
   if(id === 'q6c') {
-    // Set currency badge and label based on country of residence
-    const country = answers.q2 || '';
-    const cur = (typeof CURRENCY_MAP !== 'undefined' && CURRENCY_MAP[country]) || 'USD';
-    const badge = document.getElementById('currencyBadge');
-    const label = document.getElementById('localCurrLabel');
-    if(badge) badge.textContent = cur;
-    if(label) label.textContent = cur === 'USD' ? 'USD' : cur + ' (' + (country || 'local') + ')';
-    // Restore
-    const localEl = document.getElementById('incomeLocal');
-    const usdEl = document.getElementById('incomeUsd');
-    if(localEl && answers.income_local) localEl.value = answers.income_local;
-    if(usdEl && answers.income_usd) { usdEl.value = answers.income_usd; document.getElementById('btnQ6c').disabled = false; }
     // Update title with profession
     const t = document.getElementById('q6cTitle');
-    if(t && answers.q6 && answers.q6 !== 'Not Currently Employed' && !answers.q6.includes('Retired')) {
-      t.textContent = 'What is your monthly income as a ' + answers.q6 + '?';
+    if(t) {
+      const prof = answers.q6 && answers.q6 !== 'Not Currently Employed' && !answers.q6.includes('Retired') ? answers.q6 : null;
+      t.textContent = prof ? 'What is your approximate monthly income as a ' + prof + '?' : 'What is your approximate monthly income?';
     }
+    // Restore selected range
+    if(answers.income_range) {
+      document.querySelectorAll('#opts-incomeRange .opt').forEach(b => {
+        b.classList.toggle('selected', b.dataset.range === answers.income_range);
+      });
+      document.getElementById('btnQ6c').disabled = false;
+    }
+    // Hide converter by default
+    const cw = document.getElementById('incomeConverterWrap');
+    if(cw) cw.style.display = 'none';
+    const ct = document.getElementById('incomeConverterToggle');
+    if(ct) ct.textContent = '💱 Not sure how much that is in USD? Use the converter';
   }
   if(id === 'q6b') {
     restoreOpts('q6b');
@@ -1764,9 +1780,75 @@ function computePathways() {
 // ─────────────────────────────────────────────────────────
 // SUBMIT
 // ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────
+// PROGRESSIVE SAVE — runs silently in background
+// Called after contact info + after each major section
+// ─────────────────────────────────────────────────────────
+async function saveProgressToBitrix(partial = false) {
+  if(!answers.email && !leadId) return; // nothing to save yet
+  const name = [answers.firstName, answers.lastName].filter(Boolean).join(' ') || 'Client';
+  const EDU_IDS = {'High School':'1100','Trade School':'1101','Associate Degree':'1102',"Bachelor's Degree":'1103',"Master's Degree":'1105','Doctorate (PhD)':'1107'};
+  const MARITAL_IDS = {'Single':'12552','Married':'4071','Divorced':'4072','Widowed':'4073'};
+
+  const fields = {};
+  if(answers.q2)    fields['UF_CRM_1449131599'] = answers.q2;
+  if(answers.q5 && EDU_IDS[answers.q5]) fields['UF_CRM_1484914608'] = EDU_IDS[answers.q5];
+  if(answers.q6)    fields['UF_CRM_1709560603'] = answers.q6;
+  if(answers.income_range) fields['UF_CRM_1484911973'] = answers.income_range;
+  if(answers.q3 && MARITAL_IDS[answers.q3]) fields['UF_CRM_1500181612'] = MARITAL_IDS[answers.q3];
+
+  // Build partial summary so far
+  const lines = [
+    partial ? '=== PARTIAL ASSESSMENT (in progress) ===' : '=== CLIENT SELF-ASSESSMENT ===',
+    `Name: ${name}`,
+    `Email: ${answers.email||''}`,
+    `Phone: ${answers.phone||''}`,
+    '',
+    answers.q1 ? `Age: ${answers.q1}` : '',
+    answers.q2 ? `Country of Residence: ${answers.q2}` : '',
+    answers.q2b ? `Country of Birth: ${answers.q2b}` : '',
+    answers.resDuration ? `Time living in ${answers.q2}: ${answers.resDuration}` : '',
+    answers.q3 ? `Marital Status: ${answers.q3}` : '',
+    answers.q3==='Married' ? `Spouse: ${[answers.spouseFirst,answers.spouseLast].filter(Boolean).join(' ')}` : '',
+    answers.q4 ? `Primary Goal: ${answers.q4}` : '',
+    answers.q4_dream ? `Dream: ${answers.q4_dream}` : '',
+    answers.q5 ? `Education: ${answers.q5}` : '',
+    answers.q6 ? `Profession: ${answers.q6}` : '',
+    answers.income_range ? `Monthly Income: ${answers.income_range} per month` : '',
+    answers.q7 ? `Experience: ${answers.q7}` : '',
+    answers.q8 ? `Business Interest: ${answers.q8}` : '',
+    answers.qSit ? `Current Situation: ${answers.qSit}` : '',
+    answers.q9 ? `Family in USA: ${answers.q9}` : '',
+    answers.q10 ? `Leadership: ${answers.q10}` : '',
+    partial ? '' : '',
+  ].filter(l => l !== '').join('\n');
+
+  fields['COMMENTS'] = lines;
+  if(partial) fields['STATUS_ID'] = 'NEW'; // keep as New while in progress
+  else { fields['STATUS_ID'] = 'TypeForm'; fields['UF_CRM_1780826001'] = 'Y'; fields['UF_CRM_1780906448'] = '13330'; }
+
+  try {
+    if(leadId) {
+      const url = WEBHOOK + 'crm.lead.update?ID=' + leadId + '&' +
+        Object.entries(fields).map(([k,v]) => `fields[${k}]=${encodeURIComponent(v)}`).join('&');
+      await fetch(url);
+    } else if(answers.email) {
+      // Create lead with partial data
+      const createFields = { ...fields, TITLE: 'Self-Assessment: ' + name, NAME: answers.firstName||'', LAST_NAME: answers.lastName||'' };
+      let url = WEBHOOK + 'crm.lead.add?' + Object.entries(createFields).map(([k,v]) => `fields[${k}]=${encodeURIComponent(v)}`).join('&');
+      url += '&fields[EMAIL][0][VALUE]=' + encodeURIComponent(answers.email) + '&fields[EMAIL][0][VALUE_TYPE]=WORK';
+      if(answers.phone) url += '&fields[PHONE][0][VALUE]=' + encodeURIComponent(answers.phone) + '&fields[PHONE][0][VALUE_TYPE]=WORK';
+      const res = await fetch(url);
+      const data = await res.json();
+      if(data.result) leadId = data.result;
+    }
+  } catch(e) { console.log('Progressive save error:', e); }
+}
+
 async function submitAndShowResults() {
   history.push('q10');
   showScreen('processing');
+  saveProgressToBitrix(false); // full save before showing results
 
   const pathways = computePathways();
   const name = [answers.firstName, answers.lastName].filter(Boolean).join(' ') || 'Client';
@@ -1782,7 +1864,7 @@ async function submitAndShowResults() {
     `Phone: ${answers.phone||''}`,
     '',
     '=== PATHWAY RESULTS ===',
-    pathways.map((p,i) => `#${i+1}: ${p.name}`).join('\n'),
+    pathways.map((p,i) => `#${i+1}: ${p.name} — ${p.desc}`).join('\n'),
     '',
     '=== ANSWERS ===',
     `Age: ${answers.q1||''}`,
@@ -1799,7 +1881,7 @@ async function submitAndShowResults() {
     `Profession: ${answers.q6||''}`,
     answers.retProfession ? `Pre-retirement profession: ${answers.retProfession}` : '',
     answers.q6b ? `Retirement savings: ${answers.q6b}` : '',
-    answers.income_usd ? `Monthly Income: $${answers.income_usd} USD per month` : '',
+    answers.income_range ? `Monthly Income: ${({'0-999':'Under $1,000','1000-2499':'$1,000–$2,500','2500-3999':'$2,500–$4,000','4000-5999':'$4,000–$6,000','6000-9999':'$6,000–$10,000','+10000':'Over $10,000'})[answers.income_range]||answers.income_range} per month` : '',
     answers.spouse_income_usd ? `Spouse Monthly Income: $${answers.spouse_income_usd} USD per month` : '',
     `Experience: ${answers.q7||''}`,
     `Business Interest: ${answers.q8||''}${answers.q8_detail?' — '+answers.q8_detail:''}`,
@@ -1821,11 +1903,17 @@ async function submitAndShowResults() {
     UF_CRM_1780826001: 'Y',   // triggers email automation
     UF_CRM_1780906448: '13330' // Assessment completed
   };
-  if(answers.q2) fields['UF_CRM_1449131599'] = answers.q2;
-  if(answers.q5 && EDU_IDS[answers.q5]) fields['UF_CRM_1484914608'] = EDU_IDS[answers.q5];
-  if(answers.q6) fields['UF_CRM_1709560603'] = answers.q6;
-  if(answers.income_range) fields['UF_CRM_1484911973'] = answers.income_range;
-  if(answers.q3 && MARITAL_IDS[answers.q3]) fields['UF_CRM_1500181612'] = MARITAL_IDS[answers.q3];
+  if(answers.q2)     fields['UF_CRM_1449131599']     = answers.q2;                         // Country
+  if(answers.q5 && EDU_IDS[answers.q5]) fields['UF_CRM_1484914608'] = EDU_IDS[answers.q5]; // Education (lead)
+  if(answers.q6)     fields['UF_CRM_1709560603']     = answers.q6;                         // Profession (lead)
+  if(answers.q6)     fields['UF_CRM_1484918121']     = answers.q6;                         // Profession (contact)
+  if(answers.income_range) fields['UF_CRM_1484911973'] = answers.income_range;             // Income range
+  if(answers.q3 && MARITAL_IDS[answers.q3]) fields['UF_CRM_1500181612'] = MARITAL_IDS[answers.q3]; // Marital (lead)
+  if(answers.q3)     fields['UF_CRM_64CBB649310F0']  = answers.q3;                         // Marital string (contact)
+  if(answers.q4)     fields['UF_CRM_1648031237']     = answers.q4;                         // Top reason/Why US
+  // Pathway results
+  const pathwayNames = pathways.map((p,i) => `#${i+1}: ${p.name}`).join(' | ');
+  fields['UF_CRM_1494160345'] = '3139';                                                     // Visa Assessment = "Questionnaire received"
 
   try {
     if(leadId) {
@@ -1880,12 +1968,11 @@ async function submitAndShowResults() {
         </div>
       </div>`).join('');
 
-    document.getElementById('ctaPayBtn').href = paymentUrl;
-    const btn2 = document.getElementById('ctaPayBtn2'); if(btn2) btn2.href = paymentUrl;
-    const fl1 = document.getElementById('faqPayLink1'); if(fl1) fl1.href = paymentUrl;
-    const fl2 = document.getElementById('faqPayLink2'); if(fl2) fl2.href = paymentUrl;
-    const fl3 = document.getElementById('faqPayLink3'); if(fl3) fl3.href = paymentUrl;
-    document.getElementById('donePayBtn').href = paymentUrl;
+    const _setPayLink = (id) => {
+      const el = document.getElementById(id);
+      if(el){ el.href = paymentUrl; el.target = '_blank'; el.rel = 'noopener'; }
+    };
+    ['ctaPayBtn','ctaPayBtn2','faqPayLink1','faqPayLink2','faqPayLink3','donePayBtn'].forEach(_setPayLink);
     document.getElementById('doneEmail').textContent = answers.email||'your email';
 
     showScreen('results');
@@ -2138,30 +2225,44 @@ function getIncomeRange(usd) {
   return '+10000';
 }
 
+function selIncomeRange(el) {
+  document.querySelectorAll('#opts-incomeRange .opt').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  answers.income_range = el.dataset.range;
+  answers.income_usd   = parseFloat(el.dataset.usd);
+  document.getElementById('btnQ6c').disabled = false;
+}
+
+function toggleIncomeConverter() {
+  const wrap = document.getElementById('incomeConverterWrap');
+  const btn  = document.getElementById('incomeConverterToggle');
+  const show = wrap.style.display === 'none';
+  wrap.style.display = show ? 'block' : 'none';
+  btn.textContent = show ? '✕ Close converter' : '💱 Not sure how much that is in USD? Use the converter';
+  if(show) {
+    // Set currency label
+    const country = answers.q2 || '';
+    const cur = CURRENCY_MAP[country] || 'USD';
+    const label = document.getElementById('localCurrLabel');
+    const badge = document.getElementById('currencyBadge');
+    if(label) label.textContent = cur === 'USD' ? 'USD' : cur;
+    if(badge) badge.textContent = cur;
+  }
+}
+
 function calcIncomeUSD() {
   const localAmt = parseFloat(document.getElementById('incomeLocal')?.value) || 0;
-  const country = answers.q2 || '';
-  const cur = CURRENCY_MAP[country] || 'USD';
-  const rate = RATE_MAP[cur] || 1;
-  const usd = Math.round(localAmt * rate);
-
-  const usdRow = document.getElementById('incomeUsdRow');
-  const usdDisplay = document.getElementById('incomeUsdDisplay');
-  const usdInput = document.getElementById('incomeUsd');
-
-  if(localAmt > 0 && cur !== 'USD') {
-    if(usdRow) usdRow.style.display = 'block';
-    if(usdDisplay) usdDisplay.textContent = '$' + usd.toLocaleString() + ' USD / month';
-    if(usdInput && !usdInput.value) {
-      usdInput.value = usd;
-      onIncomeUsdInput(usd);
-    }
-  } else if(localAmt > 0 && cur === 'USD') {
-    if(usdRow) usdRow.style.display = 'none';
-    if(usdInput && !usdInput.value) {
-      usdInput.value = localAmt;
-      onIncomeUsdInput(localAmt);
-    }
+  const country  = answers.q2 || '';
+  const cur      = CURRENCY_MAP[country] || 'USD';
+  const rate     = RATE_MAP[cur] || 1;
+  const usd      = Math.round(localAmt * rate);
+  const row      = document.getElementById('incomeUsdRow');
+  const disp     = document.getElementById('incomeUsdDisplay');
+  if(localAmt > 0) {
+    if(row)  row.style.display = 'block';
+    if(disp) disp.textContent  = '≈ $' + usd.toLocaleString() + ' USD / month';
+  } else {
+    if(row) row.style.display = 'none';
   }
 }
 
@@ -2171,11 +2272,8 @@ function onIncomeUsdInput(val) {
 }
 
 function saveIncome() {
-  const usd = parseFloat(document.getElementById('incomeUsd')?.value) || 0;
-  if(!usd) { shakeEl('incomeUsd'); return; }
-  answers.income_usd = usd;
-  answers.income_range = getIncomeRange(usd);
-  // If married AND low income (0-999 or 1000-2499) → ask spouse income
+  if(!answers.income_range) { shakeEl('opts-incomeRange'); return; }
+  saveProgressToBitrix(true); // save profession + income
   const lowIncome = ['0-999','1000-2499'].includes(answers.income_range);
   if(answers.q3 === 'Married' && lowIncome) {
     goNext('q6d');
