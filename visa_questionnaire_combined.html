@@ -1491,6 +1491,7 @@ function togFam2State(val) {
   if(el&&s)el.innerHTML=renderFam2CList(s.value);
 }
 function saveS2Extra(next) { const el=document.getElementById('s2_extra_inp'); if(el) answers['s2_extra']=el.value.trim(); goNext(next); }
+function saveS2USFamily(next) { const el=document.getElementById('s2_usfam_inp'); if(el) answers['s2_us_family']=el.value.trim(); goNext(next); }
 
 function renderS2Extra(main) {
   const sel = answers['s2_extra_q']||'';
