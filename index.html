@@ -619,7 +619,42 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
 
         <div class="nav" style="margin-top:16px">
           <button class="btn-back" onclick="goBack()">← Back</button>
-          <button class="btn-next" id="btnQ6" onclick="validateAndGoQ7()" disabled>Continue →</button>
+          <button class="btn-next" id="btnQ6" onclick="validateAndGoIncome()" disabled>Continue →</button>
+        </div>
+      </div>
+
+      <!-- Q6c – MONTHLY INCOME -->
+      <div class="screen" id="screen-q6c">
+        <div class="q-eyebrow">Question 6 of 10</div>
+        <div class="q-title" id="q6cTitle">What is your monthly income?</div>
+        <div class="q-sub" id="q6cSub">Enter your income — we'll convert it to USD automatically.</div>
+
+        <div style="background:var(--blue-light);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius);padding:16px;margin-bottom:16px">
+          <!-- Local currency row -->
+          <div class="field-label" style="margin-top:0">Monthly income in <span id="localCurrLabel">local currency</span></div>
+          <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+            <input class="field-input" type="number" id="incomeLocal" min="0" placeholder="Amount..." style="flex:2;margin-bottom:0" oninput="calcIncomeUSD()"/>
+            <div id="currencyBadge" style="flex:1;display:flex;align-items:center;justify-content:center;background:var(--blue);border-radius:var(--radius);padding:11px;font-weight:600;font-size:15px;color:#fff;min-width:56px">USD</div>
+          </div>
+
+          <!-- Auto USD conversion -->
+          <div id="incomeUsdRow" style="display:none;margin-bottom:12px">
+            <div class="field-label" style="margin-top:0">≈ Equivalent in USD per month</div>
+            <div id="incomeUsdDisplay" style="font-size:20px;font-weight:600;color:var(--blue);padding:4px 0"></div>
+          </div>
+
+          <!-- Manual USD field (required) -->
+          <div class="field-label" style="margin-top:0">Exact monthly income in USD <span style="color:var(--red)">*</span></div>
+          <div style="position:relative">
+            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-weight:600;color:var(--gray-600);font-size:15px">$</span>
+            <input class="field-input" type="number" id="incomeUsd" min="0" placeholder="e.g. 3500" style="padding-left:28px;margin-bottom:0" oninput="onIncomeUsdInput(this.value)"/>
+          </div>
+          <div style="font-size:11px;color:var(--gray-400);margin-top:5px">This is the amount that will be recorded. You can edit it if the conversion is not accurate.</div>
+        </div>
+
+        <div class="nav">
+          <button class="btn-back" onclick="goBack()">← Back</button>
+          <button class="btn-next" id="btnQ6c" onclick="saveIncome()" disabled>Continue →</button>
         </div>
       </div>
 
@@ -643,6 +678,38 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
         <div class="nav">
           <button class="btn-back" onclick="goBack()">← Back</button>
           <button class="btn-next" id="btnQ6b" onclick="saveRetired()" disabled>Continue →</button>
+        </div>
+      </div>
+
+      <!-- Q6d – SPOUSE INCOME (shown if married + low income) -->
+      <div class="screen" id="screen-q6d">
+        <div class="q-eyebrow">One more question</div>
+        <div class="q-title" id="q6dTitle">What is your spouse's monthly income?</div>
+        <div class="q-sub">This helps us build a more accurate picture of your household profile.</div>
+
+        <div style="background:var(--blue-light);border:1px solid rgba(59,130,246,0.15);border-radius:var(--radius);padding:16px;margin-bottom:16px">
+          <div class="field-label" style="margin-top:0">Monthly income in <span id="spouseLocalCurrLabel">local currency</span></div>
+          <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+            <input class="field-input" type="number" id="spouseIncomeLocal" min="0" placeholder="Amount..." style="flex:2;margin-bottom:0" oninput="calcSpouseIncomeUSD()"/>
+            <div id="spouseCurrencyBadge" style="flex:1;display:flex;align-items:center;justify-content:center;background:var(--blue);border-radius:var(--radius);padding:11px;font-weight:600;font-size:15px;color:#fff;min-width:56px">USD</div>
+          </div>
+
+          <div id="spouseIncomeUsdRow" style="display:none;margin-bottom:12px">
+            <div class="field-label" style="margin-top:0">≈ Equivalent in USD per month</div>
+            <div id="spouseIncomeUsdDisplay" style="font-size:20px;font-weight:600;color:var(--blue);padding:4px 0"></div>
+          </div>
+
+          <div class="field-label" style="margin-top:0">Exact monthly income in USD <span style="color:var(--red)">*</span></div>
+          <div style="position:relative">
+            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-weight:600;color:var(--gray-600);font-size:15px">$</span>
+            <input class="field-input" type="number" id="spouseIncomeUsd" min="0" placeholder="e.g. 2000" style="padding-left:28px;margin-bottom:0" oninput="onSpouseIncomeInput(this.value)"/>
+          </div>
+          <div style="font-size:11px;color:var(--gray-400);margin-top:5px">You can edit this if the auto-conversion is not accurate.</div>
+        </div>
+
+        <div class="nav">
+          <button class="btn-back" onclick="goBack()">← Back</button>
+          <button class="btn-next" id="btnQ6d" onclick="saveSpouseIncome()" disabled>Continue →</button>
         </div>
       </div>
 
@@ -673,6 +740,13 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
           <button class="opt" data-val="No" onclick="selOpt('q8',this)"><div class="opt-radio"></div>No — not at this time</button>
         </div>
         <div id="reinforce-q8" class="reinforce-wrap"><div class="reinforce-bubble"><span class="reinforce-icon">🏢</span><span id="reinforce-q8-text"></span></div></div>
+
+        <!-- Optional detail — shown for Yes/Maybe -->
+        <div id="q8Detail" style="display:none;margin-top:4px">
+          <div class="field-label">Tell us a bit more <span style="color:var(--gray-400)">(optional)</span></div>
+          <textarea id="q8DetailText" class="field-input" style="min-height:72px;resize:vertical;font-size:14px;padding:12px 15px;line-height:1.7" placeholder="e.g. I have an idea for a restaurant, or I'd like to invest in real estate, or I'm not sure yet but I'm open to the right opportunity..." oninput="answers.q8_detail=this.value"></textarea>
+        </div>
+
         <div class="nav">
           <button class="btn-back" onclick="goBack()">← Back</button>
           <button class="btn-next" id="btnQ8" onclick="goNext('qSit')" disabled>Continue →</button>
@@ -710,7 +784,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
           <button class="opt" data-val="$250,000+" onclick="selOpt('qInvest',this)"><div class="opt-radio"></div>$250,000+</button>
           <button class="opt" data-val="Prefer Not To Say" onclick="selOpt('qInvest',this)"><div class="opt-radio"></div>Prefer not to say</button>
         </div>
-        <div id="reinforce-qInvest" class="reinforce-wrap"><div class="reinforce-bubble"><span class="reinforce-icon">💰</span><span id="reinforce-qInvest-text"></span></div></div>
+
         <div class="nav">
           <button class="btn-back" onclick="goBack()">← Back</button>
           <button class="btn-next" id="btnQInvest" onclick="goNext('qStudy')" disabled>Continue →</button>
@@ -1151,10 +1225,10 @@ function editContact() {
 // ─────────────────────────────────────────────────────────
 // SCREEN NAVIGATION
 // ─────────────────────────────────────────────────────────
-const Q_SCREENS = ['q1','q2','q2b','q3','q3b','q3c','q4','q4b','q5','q6','q6b','q7','q8','qSit','qInvest','qStudy','q9','q10'];
+const Q_SCREENS = ['q1','q2','q2b','q3','q3b','q3c','q4','q4b','q5','q6','q6c','q6d','q7','q8','qSit','qInvest','qStudy','q9','q10'];
 const SCREEN_LABELS = {
   contact:'Your Details', q1:'Age', q2:'Country of Residence', q2b:'Country of Birth', q3:'Marital Status',
-  q3b:'Spouse Details', q3c:'Children', q4:'Your Goal', q4b:'Your Dream', q5:'Education', q6:'Profession', q6b:'Retirement Details', q7:'Experience',
+  q3b:'Spouse Details', q3c:'Children', q4:'Your Goal', q4b:'Your Dream', q6c:'Monthly Income', q6d:'Spouse Income', q5:'Education', q6:'Profession', q6b:'Retirement Details', q7:'Experience',
   q8:'Business Interest', qSit:'Current Situation', qInvest:'Investment Level', qStudy:'Study Interest', q9:'Family in U.S.', q10:'Final Question'
 };
 
@@ -1265,6 +1339,16 @@ function showScreen(id) {
     }
   }
   if(id === 'qInvest') restoreOpts('qInvest');
+  if(id === 'q8') {
+    restoreOpts('q8');
+    const box = document.getElementById('q8Detail');
+    if(box) {
+      const v = answers.q8;
+      box.style.display = (v === 'Yes' || v === 'Maybe') ? 'block' : 'none';
+      const txt = document.getElementById('q8DetailText');
+      if(txt && answers.q8_detail) txt.value = answers.q8_detail;
+    }
+  }
   if(id === 'qStudy') restoreOpts('qStudy');
 
   // Personalize titles with first name
@@ -1282,6 +1366,40 @@ function showScreen(id) {
       // Capitalize first letter
       const txt = titleMap[id];
       el.textContent = txt.charAt(0).toUpperCase() + txt.slice(1);
+    }
+  }
+  if(id === 'q6d') {
+    const country = answers.q2 || '';
+    const cur = (typeof CURRENCY_MAP !== 'undefined' && CURRENCY_MAP[country]) || 'USD';
+    const badge = document.getElementById('spouseCurrencyBadge');
+    const label = document.getElementById('spouseLocalCurrLabel');
+    if(badge) badge.textContent = cur;
+    if(label) label.textContent = cur === 'USD' ? 'USD' : cur;
+    // Personalize title with spouse name
+    const spouseName = answers.spouseFirst ? answers.spouseFirst : 'your spouse';
+    const t = document.getElementById('q6dTitle');
+    if(t) t.textContent = "What is " + spouseName + "'s monthly income?";
+    // Restore
+    const usdEl = document.getElementById('spouseIncomeUsd');
+    if(usdEl && answers.spouse_income_usd) { usdEl.value = answers.spouse_income_usd; document.getElementById('btnQ6d').disabled = false; }
+  }
+  if(id === 'q6c') {
+    // Set currency badge and label based on country of residence
+    const country = answers.q2 || '';
+    const cur = (typeof CURRENCY_MAP !== 'undefined' && CURRENCY_MAP[country]) || 'USD';
+    const badge = document.getElementById('currencyBadge');
+    const label = document.getElementById('localCurrLabel');
+    if(badge) badge.textContent = cur;
+    if(label) label.textContent = cur === 'USD' ? 'USD' : cur + ' (' + (country || 'local') + ')';
+    // Restore
+    const localEl = document.getElementById('incomeLocal');
+    const usdEl = document.getElementById('incomeUsd');
+    if(localEl && answers.income_local) localEl.value = answers.income_local;
+    if(usdEl && answers.income_usd) { usdEl.value = answers.income_usd; document.getElementById('btnQ6c').disabled = false; }
+    // Update title with profession
+    const t = document.getElementById('q6cTitle');
+    if(t && answers.q6 && answers.q6 !== 'Not Currently Employed' && !answers.q6.includes('Retired')) {
+      t.textContent = 'What is your monthly income as a ' + answers.q6 + '?';
     }
   }
   if(id === 'q6b') {
@@ -1314,6 +1432,11 @@ function selOpt(key, el) {
   if(key === 'q4') {
     const elaborateBox = document.getElementById('q4-elaborate');
     if(elaborateBox) elaborateBox.style.display = 'block';
+  }
+  // Show detail box for q8 Yes/Maybe
+  if(key === 'q8') {
+    const box = document.getElementById('q8Detail');
+    if(box) box.style.display = (el.dataset.val === 'Yes' || el.dataset.val === 'Maybe') ? 'block' : 'none';
   }
 }
 
@@ -1523,31 +1646,95 @@ function restoreProfDisplay() {
 // ─────────────────────────────────────────────────────────
 function computePathways() {
   const scores = { executive:0, business:0, employment:0, education:0, family:0 };
-  const edu = answers.q5||'';
-  const exp = answers.q7||'';
+  const edu        = answers.q5||'';
+  const exp        = answers.q7||'';
   const leadership = answers.q10||'';
-  const bizInterest = answers.q8||'';
-  const situation = answers.qSit||'';
+  const bizInterest= answers.q8||'';
+  const situation  = answers.qSit||'';
   const investment = answers.qInvest||'';
   const studyInterest = answers.qStudy||'';
-  const goal = answers.q4||'';
-  const family = answers.q9||'';
+  const goal       = answers.q4||'';
+  const family     = answers.q9||'';
+  const familyStatus = answers.familyStatus||'';
+  const retiredSavings = answers.q6b||'';
+  const incomeUsd  = parseFloat(answers.income_usd)||0;
+
   const highEdu = ["Bachelor's Degree","Master's Degree","Doctorate (PhD)"].includes(edu);
+  const topEdu  = ["Master's Degree","Doctorate (PhD)"].includes(edu);
   const highExp = ['5–10 years','More than 10 years'].includes(exp);
+  const midExp  = ['2–5 years','5–10 years','More than 10 years'].includes(exp);
 
-  if(highEdu && highExp){ scores.executive+=3; if(["Master's Degree","Doctorate (PhD)"].includes(edu)) scores.executive+=2; if(leadership==='Yes') scores.executive+=2; }
-  if(['Starting or Expanding a Business','Investment Opportunities'].includes(goal)) scores.business+=2;
-  if(['Yes','Maybe'].includes(bizInterest)) scores.business+=2;
-  if(['Business Owner','Entrepreneur','Investor'].includes(situation)) scores.business+=2;
-  if(['Employee','Skilled Professional','Self-Employed'].includes(situation)){ scores.employment+=2; if(highExp) scores.employment+=1; }
-  if(['$100,000–$250,000','$250,000+'].includes(investment)) scores.business+=2;
-  if(studyInterest==='Yes') scores.education+=2;
+  // ── EXECUTIVE (EB-1, EB-2, NIW) ───────────────────────────
+  if(highEdu) scores.executive += 2;
+  if(topEdu)  scores.executive += 2;                 // PhD / Masters extra
+  if(highExp) scores.executive += 2;
+  if(highEdu && highExp) scores.executive += 1;      // combo bonus
+  if(leadership === 'Yes') scores.executive += 2;
+  if(goal === 'Career Opportunities') scores.executive += 1;
+  // NIW hint: high edu + skilled professional + no employer needed
+  if(topEdu && situation === 'Skilled Professional') scores.executive += 2;
+
+  // ── BUSINESS (E-2, EB-5) ──────────────────────────────────
+  if(['Starting or Expanding a Business','Investment Opportunities'].includes(goal)) scores.business += 3;
+  if(bizInterest === 'Yes')   scores.business += 3;
+  if(bizInterest === 'Maybe') scores.business += 1;
+  if(['Business Owner','Entrepreneur'].includes(situation)) scores.business += 3;
+  if(situation === 'Investor') scores.business += 4;
+  if(investment === '$250,000+')         scores.business += 4;
+  if(investment === '$100,000–$250,000') scores.business += 3;
+  if(investment === '$50,000–$100,000')  scores.business += 2;
+  if(investment === 'Under $50,000')     scores.business += 1;
+  // Retired with savings
+  if(retiredSavings.includes('significant')) scores.business += 3;
+  if(retiredSavings.includes('modest'))      scores.business += 1;
+  // High income signals capacity to invest
+  if(incomeUsd >= 6000) scores.business += 1;
+
+  // ── EMPLOYMENT (EB-2, EB-3) ───────────────────────────────
+  // Baseline — everyone is a candidate
   scores.employment += 1;
+  if(['Employee','Skilled Professional','Self-Employed'].includes(situation)) scores.employment += 2;
+  if(midExp)  scores.employment += 1;
   if(highExp) scores.employment += 1;
-  if(goal==='Education') scores.education+=3;
-  if(family==='Yes') scores.family+=3;
+  if(highEdu) scores.employment += 1;
+  if(goal === 'Career Opportunities') scores.employment += 1;
 
-  const ranked = Object.entries(scores).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k])=>PATHWAY_LABELS[k]);
+  // ── EDUCATION ─────────────────────────────────────────────
+  if(goal === 'Education')       scores.education += 4;
+  if(studyInterest === 'Yes')    scores.education += 3;
+  if(studyInterest === 'Maybe')  scores.education += 1;
+  // Young + low exp = good student candidate
+  const age = answers.q1||'';
+  if(['18–24','25–34'].includes(age) && !highExp) scores.education += 1;
+
+  // ── FAMILY ────────────────────────────────────────────────
+  if(family === 'Yes') {
+    scores.family += 3;
+    // Closer family / stronger status = stronger pathway
+    if(familyStatus === 'U.S. Citizen') scores.family += 3;
+    if(familyStatus === 'Green Card holder (Permanent Resident)') scores.family += 2;
+    const familyWho = answers.familyWho||[];
+    if(familyWho.includes('Spouse/Partner')) scores.family += 2;
+    if(familyWho.includes('Parent(s)'))      scores.family += 1;
+    if(familyWho.includes('Child/Children')) scores.family += 1;
+  }
+  if(goal === 'Family Relocation') scores.family += 2;
+
+  // ── FILTER & RANK ─────────────────────────────────────────
+  // Don't show business if no interest at all
+  if(bizInterest === 'No' && situation !== 'Business Owner' && situation !== 'Entrepreneur' && situation !== 'Investor') {
+    scores.business = 0;
+  }
+  // Don't show education unless explicitly interested
+  if(goal !== 'Education' && studyInterest === 'No') scores.education = 0;
+  if(goal !== 'Education' && !studyInterest) scores.education = Math.min(scores.education, 0);
+
+  const ranked = Object.entries(scores)
+    .filter(([,v]) => v > 0)
+    .sort((a,b) => b[1]-a[1])
+    .slice(0,3)
+    .map(([k]) => PATHWAY_LABELS[k]);
+
   if(!ranked.length) ranked.push(PATHWAY_LABELS.employment);
   return ranked;
 }
@@ -1590,8 +1777,10 @@ async function submitAndShowResults() {
     `Profession: ${answers.q6||''}`,
     answers.retProfession ? `Pre-retirement profession: ${answers.retProfession}` : '',
     answers.q6b ? `Retirement savings: ${answers.q6b}` : '',
+    answers.income_usd ? `Monthly Income: $${answers.income_usd} USD per month` : '',
+    answers.spouse_income_usd ? `Spouse Monthly Income: $${answers.spouse_income_usd} USD per month` : '',
     `Experience: ${answers.q7||''}`,
-    `Business Interest: ${answers.q8||''}`,
+    `Business Interest: ${answers.q8||''}${answers.q8_detail?' — '+answers.q8_detail:''}`,
     answers.qSit ? `Current Situation: ${answers.qSit}` : '',
     answers.qInvest ? `Investment Level: ${answers.qInvest}` : '',
     answers.qStudy ? `Study Interest: ${answers.qStudy}` : '',
@@ -1613,6 +1802,7 @@ async function submitAndShowResults() {
   if(answers.q2) fields['UF_CRM_1449131599'] = answers.q2;
   if(answers.q5 && EDU_IDS[answers.q5]) fields['UF_CRM_1484914608'] = EDU_IDS[answers.q5];
   if(answers.q6) fields['UF_CRM_1709560603'] = answers.q6;
+  if(answers.income_range) fields['UF_CRM_1484911973'] = answers.income_range;
   if(answers.q3 && MARITAL_IDS[answers.q3]) fields['UF_CRM_1500181612'] = MARITAL_IDS[answers.q3];
 
   try {
@@ -1831,9 +2021,130 @@ function selQ4Loc(el) {
   el.classList.add('selected');
 }
 
+function validateAndGoIncome() {
+  if(!answers.q6) { shakeEl('profInput'); return; }
+  goNext('q6c');
+}
+
 function validateAndGoQ7() {
   if(!answers.q6) { shakeEl('profInput'); return; }
   goNext('q7');
+}
+
+// ─── Currency rates & income logic ───────────────────────
+const RATE_MAP = {
+  'ILS':0.27,'AED':0.27,'GBP':1.27,'EUR':1.08,'AUD':0.65,'CAD':0.74,
+  'JPY':0.0067,'CNY':0.14,'INR':0.012,'BRL':0.20,'MXN':0.058,'RUB':0.011,
+  'ZAR':0.055,'TRY':0.031,'SAR':0.27,'KWD':3.26,'QAR':0.27,'BHD':2.65,
+  'OMR':2.60,'PKR':0.0036,'BDT':0.0091,'NGN':0.00065,'EGP':0.020,
+  'PHP':0.017,'IDR':0.000062,'MYR':0.22,'THB':0.028,'SGD':0.74,
+  'CHF':1.13,'SEK':0.095,'NOK':0.093,'DKK':0.145,'PLN':0.25,
+  'UAH':0.024,'KRW':0.00073,'HKD':0.13,'NZD':0.61,'USD':1,
+  'COP':0.00025,'ARS':0.0010,'CLP':0.0011,'PEN':0.27,'VND':0.000039,
+  'CZK':0.044,'HUF':0.0028,'RON':0.22
+};
+const CURRENCY_MAP = {
+  'Israel':'ILS','United Arab Emirates':'AED','United Kingdom':'GBP',
+  'France':'EUR','Germany':'EUR','Italy':'EUR','Spain':'EUR',
+  'Netherlands':'EUR','Austria':'EUR','Belgium':'EUR','Portugal':'EUR',
+  'Finland':'EUR','Greece':'EUR','Ireland':'EUR','Australia':'AUD',
+  'Canada':'CAD','Japan':'JPY','China':'CNY','India':'INR',
+  'Brazil':'BRL','Mexico':'MXN','Russia':'RUB','South Africa':'ZAR',
+  'Turkey':'TRY','Saudi Arabia':'SAR','Kuwait':'KWD','Qatar':'QAR',
+  'Bahrain':'BHD','Oman':'OMR','Pakistan':'PKR','Bangladesh':'BDT',
+  'Nigeria':'NGN','Egypt':'EGP','Philippines':'PHP','Indonesia':'IDR',
+  'Malaysia':'MYR','Thailand':'THB','Singapore':'SGD','Switzerland':'CHF',
+  'Sweden':'SEK','Norway':'NOK','Denmark':'DKK','Poland':'PLN',
+  'Ukraine':'UAH','South Korea':'KRW','Hong Kong':'HKD','New Zealand':'NZD',
+  'Colombia':'COP','Argentina':'ARS','Chile':'CLP','Peru':'PEN','Vietnam':'VND',
+  'Czech Republic':'CZK','Hungary':'HUF','Romania':'RON'
+};
+
+function calcSpouseIncomeUSD() {
+  const localAmt = parseFloat(document.getElementById('spouseIncomeLocal')?.value) || 0;
+  const country = answers.q2 || '';
+  const cur = (typeof CURRENCY_MAP !== 'undefined' && CURRENCY_MAP[country]) || 'USD';
+  const rate = RATE_MAP[cur] || 1;
+  const usd = Math.round(localAmt * rate);
+  const row = document.getElementById('spouseIncomeUsdRow');
+  const disp = document.getElementById('spouseIncomeUsdDisplay');
+  const inp = document.getElementById('spouseIncomeUsd');
+  if(localAmt > 0 && cur !== 'USD') {
+    if(row) row.style.display = 'block';
+    if(disp) disp.textContent = '$' + usd.toLocaleString() + ' USD / month';
+    if(inp && !inp.value) { inp.value = usd; onSpouseIncomeInput(usd); }
+  } else if(localAmt > 0) {
+    if(row) row.style.display = 'none';
+    if(inp && !inp.value) { inp.value = localAmt; onSpouseIncomeInput(localAmt); }
+  }
+}
+
+function onSpouseIncomeInput(val) {
+  answers.spouse_income_usd = val;
+  document.getElementById('btnQ6d').disabled = !val || parseFloat(val) <= 0;
+}
+
+function saveSpouseIncome() {
+  const usd = parseFloat(document.getElementById('spouseIncomeUsd')?.value) || 0;
+  if(!usd) { shakeEl('spouseIncomeUsd'); return; }
+  answers.spouse_income_usd = usd;
+  goNext('q7');
+}
+
+function getIncomeRange(usd) {
+  const n = parseFloat(usd) || 0;
+  if(n < 1000) return '0-999';
+  if(n < 2500) return '1000-2499';
+  if(n < 4000) return '2500-3999';
+  if(n < 6000) return '4000-5999';
+  if(n < 10000) return '6000-9999';
+  return '+10000';
+}
+
+function calcIncomeUSD() {
+  const localAmt = parseFloat(document.getElementById('incomeLocal')?.value) || 0;
+  const country = answers.q2 || '';
+  const cur = CURRENCY_MAP[country] || 'USD';
+  const rate = RATE_MAP[cur] || 1;
+  const usd = Math.round(localAmt * rate);
+
+  const usdRow = document.getElementById('incomeUsdRow');
+  const usdDisplay = document.getElementById('incomeUsdDisplay');
+  const usdInput = document.getElementById('incomeUsd');
+
+  if(localAmt > 0 && cur !== 'USD') {
+    if(usdRow) usdRow.style.display = 'block';
+    if(usdDisplay) usdDisplay.textContent = '$' + usd.toLocaleString() + ' USD / month';
+    if(usdInput && !usdInput.value) {
+      usdInput.value = usd;
+      onIncomeUsdInput(usd);
+    }
+  } else if(localAmt > 0 && cur === 'USD') {
+    if(usdRow) usdRow.style.display = 'none';
+    if(usdInput && !usdInput.value) {
+      usdInput.value = localAmt;
+      onIncomeUsdInput(localAmt);
+    }
+  }
+}
+
+function onIncomeUsdInput(val) {
+  answers.income_usd = val;
+  document.getElementById('btnQ6c').disabled = !val || parseFloat(val) <= 0;
+}
+
+function saveIncome() {
+  const usd = parseFloat(document.getElementById('incomeUsd')?.value) || 0;
+  if(!usd) { shakeEl('incomeUsd'); return; }
+  answers.income_usd = usd;
+  answers.income_range = getIncomeRange(usd);
+  // If married AND low income (0-999 or 1000-2499) → ask spouse income
+  const lowIncome = ['0-999','1000-2499'].includes(answers.income_range);
+  if(answers.q3 === 'Married' && lowIncome) {
+    goNext('q6d');
+  } else {
+    goNext('q7');
+  }
 }
 
 function shakeEl(id) {
