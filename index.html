@@ -778,7 +778,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
         <div id="reinforce-qSit" class="reinforce-wrap"><div class="reinforce-bubble"><span class="reinforce-icon">💼</span><span id="reinforce-qSit-text"></span></div></div>
         <div class="nav">
           <button class="btn-back" onclick="goBack()">← Back</button>
-          <button class="btn-next" id="btnQSit" onclick="goNext('qInvest')" disabled>Continue →</button>
+          <button class="btn-next" id="btnQSit" onclick="goNextFromSit()" disabled>Continue →</button>
         </div>
       </div>
 
@@ -2397,6 +2397,16 @@ function checkFamilyComplete() {
   const hasWho = answers.familyWho && answers.familyWho.length > 0;
   const hasStatus = !!answers.familyStatus;
   document.getElementById('btnQ9').disabled = !(hasWho && hasStatus);
+}
+
+function goNextFromSit() {
+  // Skip investment question if client said No to business interest
+  const biz = answers.q8 || '';
+  if(biz === 'No') {
+    goNext('qStudy');
+  } else {
+    goNext('qInvest');
+  }
 }
 
 function openFaq() {
