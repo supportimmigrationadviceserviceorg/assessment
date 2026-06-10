@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>U.S. Immigration Pathway Assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#1a3a6b;--blue-mid:#2255a4;--blue-light:#e8f0fa;--blue-accent:#3b82f6;
+  --gold:#c9a84c;--gold-light:#fdf8ee;
+  --green:#15803d;--green-light:#f0fdf4;
+  --red:#dc2626;--red-light:#fef2f2;
+  --gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;
+  --gray-400:#9ca3af;--gray-600:#4b5563;--gray-800:#1f2937;
+  --radius:10px;--shadow:0 2px 16px rgba(26,58,107,0.10);
+}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 0%,#fafbff 60%,#f8f6f0 100%);min-height:100vh;color:var(--gray-800);padding:24px 16px 48px;}
+.wrap{max-width:620px;margin:0 auto;}
+.header{text-align:center;margin-bottom:32px;padding-top:8px;}
+.header-logo{display:inline-flex;align-items:center;gap:10px;background:var(--blue);color:#fff;border-radius:50px;padding:8px 18px 8px 12px;font-size:13px;font-weight:500;letter-spacing:0.02em;margin-bottom:20px;}
+.header h1{font-family:'Playfair Display',serif;font-size:clamp(24px,5vw,34px);font-weight:600;color:var(--blue);line-height:1.2;margin-bottom:10px;}
+.header-sub{font-size:15px;color:var(--gray-600);font-weight:300;line-height:1.6;}
+.card{background:#fff;border-radius:16px;box-shadow:var(--shadow);border:1px solid rgba(26,58,107,0.08);overflow:hidden;margin-bottom:16px;}
+.progress-wrap{padding:20px 24px 0;}
+.progress-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.progress-step{font-size:12px;color:var(--gray-400);}
+.progress-label{font-size:13px;color:var(--blue-mid);font-weight:500;}
+.progress-track{height:3px;background:var(--gray-200);border-radius:2px;overflow:hidden;}
+.progress-fill{height:3px;background:linear-gradient(90deg,var(--blue),var(--blue-accent));border-radius:2px;transition:width 0.5s cubic-bezier(.4,0,.2,1);}
+.client-bar{display:none;background:var(--blue-light);padding:14px 24px;border-bottom:1px solid rgba(26,58,107,0.08);align-items:center;gap:12px;}
+.client-avatar{width:40px;height:40px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:15px;flex-shrink:0;}
+.client-details{flex:1;}
+.client-name{font-size:15px;font-weight:500;color:var(--blue);}
+.client-info{font-size:12px;color:var(--blue-mid);margin-top:2px;}
+.client-edit{font-size:12px;color:var(--blue-accent);cursor:pointer;text-decoration:underline;white-space:nowrap;}
+.content{padding:28px 24px;}
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* INTRO */
+.intro-flag{display:inline-flex;align-items:center;gap:8px;background:var(--gold-light);border:1px solid rgba(201,168,76,0.3);color:var(--gold);border-radius:50px;padding:5px 14px;font-size:12px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:20px;}
+.intro-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--blue);line-height:1.35;margin-bottom:12px;}
+.intro-text{font-size:14px;color:var(--gray-600);line-height:1.75;margin-bottom:20px;}
+.intro-bullets{list-style:none;margin-bottom:24px;}
+.intro-bullets li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--gray-600);line-height:1.6;padding:8px 0;border-bottom:1px solid var(--gray-100);}
+.intro-bullets li:last-child{border-bottom:none;}
+.bullet-icon{width:22px;height:22px;border-radius:50%;background:var(--blue-light);color:var(--blue-mid);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;margin-top:1px;}
+.intro-note{background:var(--gold-light);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:12px 15px;font-size:13px;color:#78621a;line-height:1.6;margin-bottom:24px;}
+
+/* QUESTION */
+.q-eyebrow{font-size:11px;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;}
+.q-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--blue);line-height:1.3;margin-bottom:6px;}
+.q-sub{font-size:13px;color:var(--gray-400);line-height:1.6;margin-bottom:20px;}
+
+/* OPTIONS */
+.opts{display:grid;gap:9px;margin-bottom:20px;}
+.opts.col2{grid-template-columns:1fr 1fr;}
+.opts.col1{grid-template-columns:1fr;}
+.opt{padding:12px 16px;border:1.5px solid var(--gray-200);border-radius:var(--radius);background:#fff;color:var(--gray-800);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;text-align:left;transition:all 0.15s ease;display:flex;align-items:center;gap:10px;}
+.opt:hover{border-color:var(--blue-accent);background:var(--blue-light);}
+.opt.selected{border-color:var(--blue);background:var(--blue-light);color:var(--blue);font-weight:500;}
+.opt-radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--gray-300,#d1d5db);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+.opt.selected .opt-radio{border-color:var(--blue);background:var(--blue);}
+.opt.selected .opt-radio::after{content:'';width:6px;height:6px;border-radius:50%;background:#fff;}
+
+/* EMAIL LOOKUP */
+.email-wrap{position:relative;margin-bottom:8px;}
+.email-input{width:100%;padding:14px 50px 14px 16px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:15px;color:var(--gray-800);background:#fff;transition:border-color 0.2s;}
+.email-input:focus{outline:none;border-color:var(--blue-accent);}
+.email-input.valid{border-color:var(--green);}
+.email-input.searching{border-color:var(--blue-accent);}
+.email-status{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:18px;pointer-events:none;}
+.lookup-spinner{width:18px;height:18px;border-radius:50%;border:2px solid var(--gray-200);border-top-color:var(--blue-accent);animation:spin 0.7s linear infinite;position:absolute;right:14px;top:50%;transform:translateY(-50%);}
+@keyframes spin{to{transform:rotate(360deg) translateY(-50%) !important;}}
+
+.lookup-result{border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;font-size:13px;line-height:1.6;}
+.lookup-found{background:var(--green-light);border:1.5px solid rgba(21,128,61,0.25);}
+.lookup-found-title{font-weight:500;color:var(--green);margin-bottom:3px;display:flex;align-items:center;gap:6px;}
+.lookup-notfound{background:var(--blue-light);border:1.5px solid rgba(59,130,246,0.2);}
+.lookup-notfound-title{font-weight:500;color:var(--blue-mid);margin-bottom:3px;}
+
+/* FIELDS */
+.field-label{font-size:11px;color:var(--gray-400);font-weight:400;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;margin-top:12px;}
+.field-input{width:100%;padding:12px 15px;border:1.5px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--gray-800);background:#fff;margin-bottom:0;transition:border-color 0.15s;}
+.field-input:focus{outline:none;border-color:var(--blue-accent);}
+.field-autofilled{border-color:rgba(21,128,61,0.4);background:#fafff8;}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;}
+.contact-full{grid-column:1/-1;}
+.privacy-note{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:8px;padding:11px 14px;font-size:12px;color:var(--gray-400);line-height:1.6;margin-top:16px;margin-bottom:20px;}
+
+/* COUNTRY / PROFESSION SEARCH */
+.search-wrap{position:relative;margin-bottom:8px;}
+.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--gray-400);font-size:16px;pointer-events:none;}
+.search-input{width:100%;padding:11px 13px 11px 38px;border:1.5px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--gray-800);background:#fff;}
+.search-input:focus{outline:none;border-color:var(--blue-accent);}
+.country-list{border:1px solid var(--gray-200);border-radius:var(--radius);max-height:190px;overflow-y:auto;background:#fff;margin-bottom:16px;}
+.country-item{padding:10px 15px;font-size:13px;color:var(--gray-800);cursor:pointer;border-bottom:1px solid var(--gray-100);transition:background 0.1s;}
+.country-item:last-child{border-bottom:none;}
+.country-item:hover{background:var(--blue-light);}
+.country-item.selected{background:var(--blue-light);color:var(--blue);font-weight:500;}
+.selected-pill{display:inline-flex;align-items:center;gap:7px;background:var(--blue-light);color:var(--blue);border-radius:50px;padding:5px 12px;font-size:13px;font-weight:500;margin-bottom:10px;}
+.pill-x{cursor:pointer;font-size:16px;line-height:1;color:var(--blue-mid);}
+
+/* NAV */
+.nav{display:flex;align-items:center;justify-content:space-between;padding-top:8px;}
+.btn-back{background:none;border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--gray-600);cursor:pointer;transition:all 0.15s;}
+.btn-back:hover{border-color:var(--gray-400);color:var(--gray-800);}
+.btn-next{background:var(--blue);border:none;border-radius:var(--radius);padding:11px 28px;font-family:'DM Sans',sans-serif;font-size:14px;color:#fff;cursor:pointer;font-weight:500;transition:all 0.15s;display:flex;align-items:center;gap:8px;}
+.btn-next:hover:not(:disabled){background:var(--blue-mid);}
+.btn-next:disabled{opacity:0.35;cursor:not-allowed;}
+
+/* RESULTS */
+.result-hero{text-align:center;background:linear-gradient(160deg,var(--blue) 0%,#2255a4 100%);padding:32px 24px;color:#fff;margin:-28px -24px 24px;}
+.result-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.3);border-radius:50px;padding:5px 14px;font-size:12px;font-weight:500;color:#fff;letter-spacing:0.04em;margin-bottom:14px;}
+.result-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:#fff;line-height:1.3;margin-bottom:8px;}
+.result-sub{font-size:14px;color:rgba(255,255,255,0.8);line-height:1.6;}
+.pathway-card{border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:16px 18px;margin-bottom:10px;display:flex;align-items:flex-start;gap:14px;}
+.pathway-rank{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;margin-top:1px;}
+.rank-1{background:var(--blue);color:#fff;}
+.rank-2{background:var(--blue-light);color:var(--blue);}
+.rank-3{background:var(--gray-100);color:var(--gray-600);}
+.pathway-name{font-size:14px;font-weight:500;color:var(--blue);margin-bottom:3px;}
+.pathway-desc{font-size:13px;color:var(--gray-600);line-height:1.55;}
+.cta-section{background:var(--green-light);border:1.5px solid rgba(21,128,61,0.2);border-radius:12px;padding:20px;margin:20px 0;}
+.cta-price{font-family:'Playfair Display',serif;font-size:28px;color:var(--green);font-weight:600;margin-bottom:4px;}
+.cta-price-note{font-size:13px;color:var(--gray-600);margin-bottom:14px;}
+.cta-points{list-style:none;margin-bottom:18px;}
+.cta-points li{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--gray-600);padding:5px 0;}
+.cta-check{color:var(--green);font-size:16px;flex-shrink:0;}
+.btn-cta{display:block;width:100%;background:var(--green);border:none;border-radius:var(--radius);padding:14px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:500;color:#fff;cursor:pointer;text-align:center;text-decoration:none;transition:background 0.15s;}
+.btn-cta:hover{background:#166534;}
+.result-disclaimer{font-size:11px;color:var(--gray-400);line-height:1.7;text-align:center;margin-top:20px;padding:0 4px;}
+.separator{border:none;border-top:1px solid var(--gray-100);margin:20px 0;}
+
+/* PROCESSING / DONE */
+.status-wrap{text-align:center;padding:32px 16px;}
+.status-icon{font-size:48px;margin-bottom:16px;}
+.status-title{font-family:'Playfair Display',serif;font-size:22px;color:var(--blue);margin-bottom:8px;}
+.status-sub{font-size:14px;color:var(--gray-600);line-height:1.7;}
+.spinner{width:40px;height:40px;border-radius:50%;border:3px solid var(--gray-200);border-top-color:var(--blue);animation:spin2 0.8s linear infinite;margin:0 auto 16px;}
+@keyframes spin2{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="header-logo">✈ Immigration Advice Service</div>
+    <h1>Your Free U.S. Immigration<br>Pathway Assessment</h1>
+    <p class="header-sub">Answer a few quick questions — we'll identify the strongest<br>immigration options available for your profile.</p>
+  </div>
+
+  <div class="card">
+    <!-- CLIENT BAR -->
+    <div class="client-bar" id="clientBar">
+      <div class="client-avatar" id="clientAvatar">?</div>
+      <div class="client-details">
+        <div class="client-name" id="clientNameDisplay"></div>
+        <div class="client-info" id="clientInfoDisplay"></div>
+      </div>
+      <span class="client-edit" onclick="editContact()">Edit</span>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="progress-wrap" id="progressWrap" style="display:none">
+      <div class="progress-meta">
+        <span class="progress-step" id="progressStep"></span>
+        <span class="progress-label" id="progressLabel"></span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+
+    <div class="content">
+
+      <!-- ══════════════════════════════════════
+           INTRO
+      ══════════════════════════════════════ -->
+      <div class="screen active" id="screen-intro">
+        <div class="intro-flag">🇺🇸 U.S. Green Card Assessment</div>
+        <div class="intro-title">Find out which U.S. immigration pathway matches your profile.</div>
+        <p class="intro-text">This free assessment takes under 3 minutes. Based on your answers, our system will identify the immigration pathways that best match your background and goals.</p>
+        <ul class="intro-bullets">
+          <li><div class="bullet-icon">1</div><span>Answer a few simple questions about your background and goals</span></li>
+          <li><div class="bullet-icon">2</div><span>Receive your personalized pathway results instantly</span></li>
+          <li><div class="bullet-icon">3</div><span>A licensed immigration attorney reviews your profile</span></li>
+        </ul>
+        <div class="intro-note">🔒 Your information is confidential and only used to identify immigration pathways available to you.</div>
+        <div class="nav" style="justify-content:flex-end">
+          <button class="btn-next" onclick="goNext('contact')">Begin Assessment →</button>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           CONTACT — with email lookup
+      ══════════════════════════════════════ -->
+      <div class="screen" id="screen-contact">
+        <div class="q-eyebrow">Your details</div>
+        <div class="q-title">Let's start with your email</div>
+        <div class="q-sub">Enter your email — we'll check if we already have your details on file.</div>
+
+        <!-- EMAIL FIELD with live lookup -->
+        <div class="field-label">Email Address *</div>
+        <div class="email-wrap">
+          <input class="email-input" type="email" id="emailInput"
+            placeholder="your@email.com"
+            oninput="onEmailInput(this.value)"
+            autocomplete="email"/>
+          <span class="email-status" id="emailStatus"></span>
+          <div class="lookup-spinner" id="lookupSpinner" style="display:none"></div>
+        </div>
+
+        <!-- Lookup result message -->
+        <div id="lookupResult" style="display:none"></div>
+
+        <!-- Rest of contact form (shown after email) -->
+        <div id="contactFields" style="display:none">
+          <div class="contact-grid">
+            <div>
+              <div class="field-label">First Name *</div>
+              <input class="field-input" type="text" id="contactFirst" placeholder="First name" oninput="answers.firstName=this.value;updateClientBar()"/>
+            </div>
+            <div>
+              <div class="field-label">Last Name</div>
+              <input class="field-input" type="text" id="contactLast" placeholder="Last name" oninput="answers.lastName=this.value;updateClientBar()"/>
+            </div>
+            <div class="contact-full">
+              <div class="field-label">Phone Number</div>
+              <input class="field-input" type="tel" id="contactPhone" placeholder="+1 (555) 000-0000" oninput="answers.phone=this.value;updateClientBar()"/>
+            </div>
+          </div>
+          <div class="privacy-note">🔒 Your details are used only to send your results and will never be shared with third parties.</div>
+        </div>
+
+        <div class="nav">
+          <button class="btn-back" onclick="goBack()">← Back</button>
+          <button class="btn-next" id="btnContact" onclick="saveContact()" disabled>Continue →</button>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           Q1 – AGE
+      ══════════════════════════════════════ -->
+      <div class="screen" id="screen-q1">
+        <div class="q-eyebrow">Question 1 of 10</div>
+        <div class="q-title">What is your age?</div>
+        <div class="opts col2" id="opts-q1">
+          <button class="opt" data-val="18–24" onclick="selOpt('q1',this)"><div class="opt-radio"></div>18–24</button>
+          <button class="opt" data-val="25–34" onclick="selOpt('q1',this)"><div class="opt-radio"></div>25–34</button>
+          <button class="opt" data-val="35–44" onclick="selOpt('q1',this)"><div class="opt-radio"></div>35–44</button>
+          <button class="opt" data-val="45–54" onclick="selOpt('q1',this)"><div class="opt-radio"></div>45–54</button>
+          <button class="opt" data-val="55–64" onclick="selOpt('q1',this)"><div class="opt-radio"></div>55–64</button>
+          <button class="opt" data-val="65+" onclick="selOpt('q1',this)"><div class="opt-radio"></div>65+</button>
+        </div>
+        <div class="nav">
+          <button class="btn-back" onclick="goBack()">← Back</button>
+          <button class="btn-next" id="btnQ1" onclick="goNext('q2')" disabled>Continue →</button>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════
+           Q2 – COUNTRY
+      ══════════════════════════════════════ -->
+      <div class="screen" id="screen-q2">
+        <div class="q-eyebrow">Question 2 of 10</div>
+        <div class="q-title">Where do you currently live?</div>
+        <div id="countryPill"></div>
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" type="text" id="countrySearch" placeholder="Search your country..." oninput="filterCountries()" autocomplete="off"/>
+        </div>
+        <div class="country-list" id="countryList"></div>
+        <div class="nav">
+          <button class="btn-back" onclick="goBack()">← Back</button>
+          <button class="btn-next" id="btnQ2" onclick="goNext('q3')" disabled>Continue →</button>
+        </div>
+      </div>
+
+      <!-- Q3 – MARITAL STATUS -->
+      <div class="screen" id="screen-q3">
+        <div class="q-eyebrow">Question 3 of 10</div>
+        <div class="q-title">What is your marital status?</div>
+        <div class="opts col2" id="opts-q3">
+          <button class="opt" data-val="Single" onclick="selOpt('q3',this)"><div class="opt-radio"></div>Single</button>
+          <button class="opt" data-val="Married" onclick="selOpt('q3',this)"><div class="opt-radio"></div>Married</button>
+          <button class="opt" data-val="Divorced" onclick="selOpt('q3',this)"><div class="opt-radio"></div>Divorced</button>
+          <button class="opt" data-val="Widowed" onclick="selOpt('q3',this)"><div class="opt-radio"></div>Widowed</button>
+        </div>
+        <div class="nav">
+          <button class="btn-back" onclick="goBack()">← Back</button>
+          <button class="btn-next" id="btnQ3" onclick="goNext('q4')" disabled>Continue →</button>
+        </div>
+      </div>
+
+      <!-- Q4 – GOAL -->
+      <div class="screen" id="screen-q4">
+        <div class="q-eyebrow">Question 4 of 10</div>
+        <div class="q-title">What is your primary goal in the United States?</div>
+        <div class="opts col1" id="opts-q4">
+          <button class="opt" data-val="Career Opportunities" onclick="selOpt('q4',this)"><div class="opt-radio"></div>Career Opportunities</button>
+          <button class="opt" data-val="Starting or Expanding a Business" onclick="selOpt('q4',this)"><div class="opt-radio"></div>Starting or Expanding a Business</button>
+          <button class="opt" data-val="Investment Opportunities" onclick="selOpt('q4',this)"><div class="opt-radio"></div>Investment Opportunities</button>
+          <button class="opt" data-val="Education" onclick="selOpt('q4',this)"><div class="opt-radio"></div>Education</button>
+          <button class="opt" data-val="Family Relocation" onclick="selOpt('q4',this)"><div class="opt-radio"></div>Family Relocation</button>
+          <button class="opt" data-val="Exploring My Options" onclick="selOpt('q4',this)"><div class="opt-radio"></div>Exploring My Options</button>
+        </div>
+        <div class="nav">
+          <button class="btn-back" onclick="goBack()">← Back</button>
+          <button class="btn-next" id="btnQ4" onclick="goNext('q5')" disabled>Continue →</button>
+        </div>
+      </div>
+
+      <!-- Q5 – EDUCATION -->
+      <div class="screen" id="screen-q5">
+        <div class="q-eyebrow">Question 5 of 10</div>
+        <div class="q-title">What is your highest level of education?</div>
+        <div class="opts col2" id="opts-q5">
+          <button class="opt" data-val="High School" onclick="selOpt('q5',this)"><div class="opt-radio"></div>High School</button>
+          <button class="opt" data-val="Trade School" onclick="selOpt('q5',this)"><div class="opt-radio"></div>Trade School</button>
+          <button class="opt" data-val="Associate Degree" onclick="selOpt('q5',this)"><div class="opt-radio"></div>Associate Degree</button>
+          <button class="opt" data-val="Bachelor's Degree" onclick="selOpt('q5',this)"><div class="opt-radio"></div>Bachelor's Degree</button>
+          <button class="opt" data-val="Master's Degree" onclick="selOpt('q5',this)"><div class="opt-radio"></div>Master's Degree</button>
+          <button class="opt" data-val="Doctorate (PhD)" onclick="selOpt('q5',this)"><div class="opt-radio"></div>Doctorate (PhD)</button>
+        </div>
+        <div class="nav">
+          <button class="btn-back" onclick="goBack()">← Back</button>
+          <button class="btn-next" id="btnQ5" onclick="goNext('q6')" disabled>Continue →</button>
+        </div>
+      </div>
+
+      <!-- Q6 – PROFESSION -->
+      <div class="screen" id="screen-q6">
+        <div class="q-eyebrow">Question 6 of 10</div>
+        <div class="q-title">What do you do for a living?</div>
+        <div class="field-label">Your profession</div>
+        <input class="field-input" type="text" id="profInput" placeholder="e.g. Software Developer, Doctor, Engineer..." oninput="filterProf(this.value)" style="margin-bottom:8px"/>
+        <div class="country-list" id="profList" style="max-height:160px"></div>
+        <div id="profSelected" style="display:none">
+          <div class="selected-pill" id="profPill"><span id="profPillText"></span> <span class="pill-x" onclick="clearProf()">×</span></div>
+        </div>
+        <div class="separator"></div>
+        <button class="opt" style="width:100%;margin-bottom:0" data-val="Not Currently Employed" onclick="selProfDirect('Not Currently Employed')"><div class="opt-radio" id="optRadioUnemployed"></div>Not currently employed</button>
+        <div class="nav" style="margin-top:16px">
+          <button class="btn-back" onclick="goBack()">← Back</button>
+          <button class="btn-next" id="btnQ6" onclick="goNext('q7')" disabled>Continue →</button>
+        </div>
+      </div>
+
+      <!-- Q7 – EXPERIENCE -->
+      <div class="screen" id="screen-q7">
+        <div class="q-eyebrow">Question 7 of 10</div>
+        <div class="q-title">How many years of professional experience do you have?</div>
+        <div class="opts col1" id="opts-q7">
+          <button class="opt" data-val="Less than 2 years" onclick="selOpt('q7',this)"><div class="opt-radio"></div>Less than 2 years</button>
+          <button class="opt" data-val="2–5 years" onclick="selOpt('q7',this)"><div class="opt-radio"></div>2–5 years</button>
+          <button class="opt" data-val="5–10 years" onclick="selOpt('q7',this)"><div class="opt-radio"></div>5–10 years</button>
+          <button class="opt" data-val="More than 10 years" onclick="selOpt('q7',this)"><div class="opt-radio"></div>More than 10 years</button>
+        </div>
+        <div class="nav">
+          <button class="btn-back" onclick="goBack()">← Back</button>
+          <button class="btn-next" id="btnQ7" onclick="goNext('q8')" disabled>Continue →</button>
+        </div>
+      </div>
+
+      <!-- Q8 – BUSINESS INTEREST -->
+      <div class="screen" id="screen-q8">
+        <div class="q-eyebrow">Question 8 of 10</div>
+        <div class="q-title">Would you be interested in opening or investing in a business in the U.S.?</div>
+        <div class="opts col1" id="opts-q8">
+          <button class="opt" data-val="Yes" onclick="selOpt('q8',this)"><div class="opt-radio"></div>Yes — I'm open to it</button>
+          <button class="opt" data-val="Maybe" onclick="selOpt('q8',this)"><div class="opt-radio"></div>Maybe — I'd like to learn more</button>
+          <button class="opt" data-val="No" onclick="selOpt('q8',this)"><div class="opt-radio"></div>No — not at this time</button>
+        </div>
+        <div class="nav">
+          <button class="btn-back" onclick="goBack()">← Back</button>
+          <button class="btn-next" id="btnQ8" onclick="goNext('q9')" disabled>Continue →</button>
+        </div>
+      </div>
+
+      <!-- Q9 – FAMILY IN USA -->
+      <div class="screen" id="screen-q9">
+        <div class="q-eyebrow">Question 9 of 10</div>
+        <div class="q-title">Do you have close family members living legally in the United States?</div>
+        <div class="opts col2" id="opts-q9">
+          <button class="opt" data-val="Yes" onclick="selOpt('q9',this)"><div class="opt-radio"></div>Yes</button>
+          <button class="opt" data-val="No" onclick="selOpt('q9',this)"><div class="opt-radio"></div>No</button>
+        </div>
+        <div class="nav">
+          <button class="btn-back" onclick="goBack()">← Back</button>
+          <button class="btn-next" id="btnQ9" onclick="goNext('q10')" disabled>Continue →</button>
+        </div>
+      </div>
+
+      <!-- Q10 – LEADERSHIP -->
+      <div class="screen" id="screen-q10">
+        <div class="q-eyebrow">Question 10 of 10</div>
+        <div class="q-title">Have you ever led a team or managed people at work?</div>
+        <div class="opts col2" id="opts-q10">
+          <button class="opt" data-val="Yes" onclick="selOpt('q10',this)"><div class="opt-radio"></div>Yes</button>
+          <button class="opt" data-val="No" onclick="selOpt('q10',this)"><div class="opt-radio"></div>No</button>
+        </div>
+        <div class="nav">
+          <button class="btn-back" onclick="goBack()">← Back</button>
+          <button class="btn-next" id="btnQ10" onclick="submitAndShowResults()" disabled>See My Results →</button>
+        </div>
+      </div>
+
+      <!-- PROCESSING -->
+      <div class="screen" id="screen-processing">
+        <div class="status-wrap">
+          <div class="spinner"></div>
+          <div class="status-title">Analyzing Your Profile…</div>
+          <p class="status-sub">Our system is identifying the strongest immigration pathways for your background.</p>
+        </div>
+      </div>
+
+      <!-- RESULTS -->
+      <div class="screen" id="screen-results">
+        <div class="result-hero">
+          <div class="result-badge">✅ Assessment Complete</div>
+          <div class="result-title" id="resultTitle">Great news — your profile qualifies!</div>
+          <div class="result-sub">Based on your answers, we identified immigration pathways that match your profile.</div>
+        </div>
+        <div id="pathwayCards"></div>
+        <div class="separator"></div>
+        <div class="cta-section">
+          <div class="cta-price">$250</div>
+          <div class="cta-price-note">One-time file opening fee — no hidden costs</div>
+          <ul class="cta-points">
+            <li><span class="cta-check">✓</span> Personal review by a licensed immigration attorney</li>
+            <li><span class="cta-check">✓</span> Dedicated immigration consultant assigned to your case</li>
+            <li><span class="cta-check">✓</span> Detailed eligibility report + recommended next steps</li>
+            <li><span class="cta-check">✓</span> Confirmation email with your case number immediately</li>
+          </ul>
+          <a id="ctaPayBtn" href="#" class="btn-cta">Open My Immigration File →</a>
+        </div>
+        <p class="result-disclaimer">This assessment is an initial eligibility screening and does not constitute legal advice. A licensed immigration attorney will review your case upon file opening.</p>
+      </div>
+
+      <!-- DONE -->
+      <div class="screen" id="screen-done">
+        <div class="status-wrap">
+          <div class="status-icon">✅</div>
+          <div class="status-title">Check Your Inbox</div>
+          <p class="status-sub">We've sent your personalized assessment results to <strong id="doneEmail"></strong>.<br><br>Ready to take the next step?</p>
+          <div style="margin-top:24px">
+            <a id="donePayBtn" href="#" class="btn-cta">Open My Immigration File — $250</a>
+          </div>
+          <p class="result-disclaimer" style="margin-top:16px">Didn't receive the email? Check your spam folder or <a href="mailto:info@immigrationadviceservice.org" style="color:var(--blue-accent)">contact us</a>.</p>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /card -->
+
+  <p style="text-align:center;font-size:12px;color:var(--gray-400);margin-top:16px">© Immigration Advice Service · <a href="https://immigrationadviceservice.org" style="color:var(--gray-400)">immigrationadviceservice.org</a></p>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────
+const WEBHOOK = 'https://immiworld.org/rest/147/47yrflms2cje1cbe/';
+const PAYMENT_BASE = 'https://immigrationadviceservice.org/visa_assessment-payment-29/';
+
+const answers = {};
+let history = [];
+let currentScreen = 'intro';
+let leadId = null;
+let utmParams = '';
+let emailLookupTimer = null;
+
+// UTM params from URL
+(function(){
+  const p = new URLSearchParams(window.location.search);
+  leadId = p.get('lead_id') || null;
+  const utmKeys = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'];
+  const parts = [];
+  utmKeys.forEach(k => { if(p.get(k)) parts.push(k+'='+encodeURIComponent(p.get(k))); });
+  if(leadId) parts.push('lead_id='+leadId);
+  utmParams = parts.length ? '?'+parts.join('&') : '';
+})();
+
+// ─────────────────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────────────────
+const COUNTRIES = ["Afghanistan","Albania","Algeria","Angola","Argentina","Armenia","Australia","Austria","Azerbaijan","Bahrain","Bangladesh","Belarus","Belgium","Bolivia","Bosnia and Herzegovina","Brazil","Bulgaria","Cambodia","Cameroon","Canada","Chile","China","Colombia","Costa Rica","Croatia","Cuba","Czech Republic","Denmark","Dominican Republic","Ecuador","Egypt","El Salvador","Ethiopia","Finland","France","Georgia","Germany","Ghana","Greece","Guatemala","Honduras","Hong Kong","Hungary","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan","Kazakhstan","Kenya","Kuwait","Kyrgyzstan","Lebanon","Libya","Malaysia","Mexico","Moldova","Mongolia","Morocco","Mozambique","Myanmar (Burma)","Nepal","Netherlands","New Zealand","Nicaragua","Nigeria","Norway","Oman","Pakistan","Palestine","Panama","Peru","Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","Saudi Arabia","Senegal","Serbia","Singapore","Somalia","South Africa","South Korea","Spain","Sri Lanka","Sudan","Sweden","Switzerland","Syria","Taiwan","Tanzania","Thailand","Tunisia","Turkey","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uzbekistan","Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"];
+const PROFESSIONS = ["Accountant","Actor / Performer","Administrative Worker","Advertising Manager","Agricultural Adviser","Architect","Art Director","Artist","Attorney / Lawyer","Auditor","Banker","Biochemist","Biologist","Biotechnologist","Bookkeeper","Business Analyst","Business Owner","Camera Operator","Chemical Engineer","Civil Engineer","Coach / Trainer","Computer Engineer","Computer Programmer","Construction Manager","Consultant","Cook / Chef","Creative Director","Data Analyst","Dentist","Designer (Graphic / Industrial / Fashion)","Detective / Investigator","Dietician","Doctor / Physician","Economist","Educator / Teacher","Electrical Engineer","Entrepreneur","Environmental Scientist","Event Manager","Financial Analyst","Financial Officer","Fire Officer","Flight Attendant","Food Technologist","Geologist","Government Official","HR Manager","Historian","Hotel Manager","Import / Export Manager","Insurance Agent","Interior Designer","Interpreter / Translator","Investor","IT Manager","Journalist / Reporter","Judge","Landscape Architect","Lecturer / Professor","Legal Assistant","Librarian","Logistics Manager","Marine Engineer","Marketing Manager","Mechanical Engineer","Medical Laboratory Technician","Midwife","Military Officer","Musician","Nurse","Nutritionist","Operations Manager","Optician","Paramedic","Pharmacist","Photographer","Physicist","Physiotherapist","Pilot","Police Officer","Project Manager","Property Manager","Psychiatrist","Psychologist","Public Relations Manager","Publisher","Quality Inspector","Real Estate Agent","Researcher","Sales Manager","Sales Representative","Security Manager","Skilled Tradesperson","Social Worker","Software Developer","Statistician","Surgeon","Systems Analyst","Tax Adviser","Teacher (Primary / Secondary)","Telecommunications Engineer","Veterinarian","Web Developer","Other"];
+
+const PATHWAY_LABELS = {
+  executive: { name:'Executive & Professional Category', desc:'For individuals with advanced education and significant professional experience — including EB-1, EB-2, and NIW categories.' },
+  business:  { name:'Business & Investment Category',   desc:'For entrepreneurs, business owners, and investors — including E-2 and EB-5 visas.' },
+  employment:{ name:'Employment Category',              desc:'Skill-based pathways for qualified professionals sponsored by U.S. employers — including EB-2 and EB-3.' },
+  education: { name:'Education Category',               desc:'Immigration options through accredited U.S. academic programs.' },
+  family:    { name:'Family-Based Category',            desc:'Pathways based on close family relationships with U.S. citizens or lawful permanent residents.' }
+};
+
+// ─────────────────────────────────────────────────────────
+// EMAIL LOOKUP — core feature
+// ─────────────────────────────────────────────────────────
+function isValidEmail(e) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+}
+
+function onEmailInput(val) {
+  answers.email = val.trim();
+  const spinner = document.getElementById('lookupSpinner');
+  const status  = document.getElementById('emailStatus');
+  const result  = document.getElementById('lookupResult');
+  const fields  = document.getElementById('contactFields');
+  const btn     = document.getElementById('btnContact');
+
+  clearTimeout(emailLookupTimer);
+  status.textContent = '';
+  result.style.display = 'none';
+  btn.disabled = true;
+
+  if(!isValidEmail(val.trim())) {
+    spinner.style.display = 'none';
+    fields.style.display = 'none';
+    return;
+  }
+
+  // Valid email — start lookup after 600ms debounce
+  spinner.style.display = 'block';
+  document.getElementById('emailInput').className = 'email-input searching';
+
+  emailLookupTimer = setTimeout(() => lookupEmail(val.trim()), 600);
+}
+
+async function lookupEmail(email) {
+  const spinner = document.getElementById('lookupSpinner');
+  const status  = document.getElementById('emailStatus');
+  const result  = document.getElementById('lookupResult');
+  const fields  = document.getElementById('contactFields');
+  const btn     = document.getElementById('btnContact');
+
+  try {
+    // Search leads by email in Bitrix24
+    const url = WEBHOOK + 'crm.lead.list?filter[EMAIL]=' + encodeURIComponent(email) +
+      '&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=EMAIL&select[]=STATUS_ID' +
+      '&order[DATE_CREATE]=DESC&start=0';
+
+    const res  = await fetch(url);
+    const data = await res.json();
+    spinner.style.display = 'none';
+
+    const leads = data.result || [];
+
+    if(leads.length > 0) {
+      // ✅ FOUND — load first (most recent) lead
+      const ld = leads[0];
+      leadId = ld.ID;
+
+      answers.firstName = ld.NAME || '';
+      answers.lastName  = ld.LAST_NAME || '';
+      answers.phone     = (ld.PHONE && ld.PHONE[0] && ld.PHONE[0].VALUE) || '';
+
+      // Fill fields
+      document.getElementById('contactFirst').value = answers.firstName;
+      document.getElementById('contactLast').value  = answers.lastName;
+      document.getElementById('contactPhone').value  = answers.phone;
+
+      // Mark fields as autofilled
+      ['contactFirst','contactLast','contactPhone'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el && el.value) el.classList.add('field-autofilled');
+      });
+
+      // Show found message
+      const name = [answers.firstName, answers.lastName].filter(Boolean).join(' ');
+      result.innerHTML = `
+        <div class="lookup-result lookup-found">
+          <div class="lookup-found-title">✅ We found your profile${name ? ' — '+name : ''}!</div>
+          <div style="color:var(--gray-600)">Your details have been filled in automatically. Please review and continue.</div>
+        </div>`;
+      result.style.display = 'block';
+
+      document.getElementById('emailInput').className = 'email-input valid';
+      status.textContent = '✅';
+      updateClientBar();
+
+    } else {
+      // ✗ NOT FOUND — new lead will be created at end
+      leadId = null;
+      result.innerHTML = `
+        <div class="lookup-result lookup-notfound">
+          <div class="lookup-notfound-title">ℹ️ No existing profile found</div>
+          <div style="color:var(--gray-600)">Please fill in your details below — we'll create your profile automatically.</div>
+        </div>`;
+      result.style.display = 'block';
+      document.getElementById('emailInput').className = 'email-input valid';
+      status.textContent = '';
+    }
+
+    // Show the rest of the contact form
+    fields.style.display = 'block';
+    btn.disabled = !(answers.firstName || document.getElementById('contactFirst').value.trim());
+    // Re-listen on first name to enable button
+    document.getElementById('contactFirst').oninput = function() {
+      answers.firstName = this.value;
+      updateClientBar();
+      document.getElementById('btnContact').disabled = !this.value.trim();
+    };
+
+  } catch(e) {
+    spinner.style.display = 'none';
+    document.getElementById('emailInput').className = 'email-input';
+    result.innerHTML = `<div class="lookup-result" style="background:var(--red-light);border:1px solid rgba(220,38,38,0.2)"><div style="color:var(--red);font-weight:500">⚠️ Connection error</div><div style="color:var(--gray-600)">Please fill in your details manually.</div></div>`;
+    result.style.display = 'block';
+    fields.style.display = 'block';
+    btn.disabled = false;
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// CONTACT
+// ─────────────────────────────────────────────────────────
+function saveContact() {
+  answers.firstName = document.getElementById('contactFirst').value.trim() || answers.firstName;
+  answers.lastName  = document.getElementById('contactLast').value.trim()  || answers.lastName;
+  answers.phone     = document.getElementById('contactPhone').value.trim() || answers.phone;
+  updateClientBar();
+  goNext('q1');
+}
+
+function updateClientBar() {
+  const first = (answers.firstName||'').trim();
+  const last  = (answers.lastName||'').trim();
+  const name  = [first,last].filter(Boolean).join(' ');
+  if(!name) return;
+  const initials = [first[0], last?last[0]:null].filter(Boolean).join('').toUpperCase();
+  document.getElementById('clientAvatar').textContent = initials || '?';
+  document.getElementById('clientNameDisplay').textContent = name;
+  const info = [answers.email, answers.phone].filter(Boolean).join(' · ');
+  document.getElementById('clientInfoDisplay').textContent = info;
+  document.getElementById('clientBar').style.display = 'flex';
+}
+
+function editContact() {
+  history.push(currentScreen);
+  showScreen('contact');
+  setTimeout(() => {
+    document.getElementById('emailInput').value   = answers.email||'';
+    document.getElementById('contactFirst').value = answers.firstName||'';
+    document.getElementById('contactLast').value  = answers.lastName||'';
+    document.getElementById('contactPhone').value = answers.phone||'';
+    document.getElementById('contactFields').style.display = 'block';
+    document.getElementById('btnContact').disabled = false;
+  }, 50);
+}
+
+// ─────────────────────────────────────────────────────────
+// SCREEN NAVIGATION
+// ─────────────────────────────────────────────────────────
+const Q_SCREENS = ['q1','q2','q3','q4','q5','q6','q7','q8','q9','q10'];
+const SCREEN_LABELS = {
+  contact:'Your Details', q1:'Age', q2:'Country', q3:'Marital Status',
+  q4:'Your Goal', q5:'Education', q6:'Profession', q7:'Experience',
+  q8:'Business Interest', q9:'Family in U.S.', q10:'Final Question'
+};
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('screen-'+id);
+  if(el) el.classList.add('active');
+  currentScreen = id;
+
+  const pw = document.getElementById('progressWrap');
+  if(['intro','processing','results','done'].includes(id)) {
+    pw.style.display = 'none';
+  } else {
+    pw.style.display = 'block';
+    const idx = Q_SCREENS.indexOf(id);
+    const pct = id === 'contact' ? 3 : idx >= 0 ? Math.round(((idx+1)/Q_SCREENS.length)*100) : 0;
+    document.getElementById('progressFill').style.width = pct+'%';
+    document.getElementById('progressStep').textContent = idx >= 0 ? 'Question '+(idx+1)+' of '+Q_SCREENS.length : '';
+    document.getElementById('progressLabel').textContent = SCREEN_LABELS[id]||'';
+  }
+
+  if(Q_SCREENS.includes(id)) restoreOpts(id);
+  if(id === 'q2') renderCountries('');
+  if(id === 'q6') { renderProf(''); restoreProfDisplay(); }
+  window.scrollTo(0, 0);
+}
+
+function goNext(to) { history.push(currentScreen); showScreen(to); }
+function goBack()   { if(history.length) showScreen(history.pop()); }
+
+// ─────────────────────────────────────────────────────────
+// OPTION SELECTION
+// ─────────────────────────────────────────────────────────
+function selOpt(key, el) {
+  answers[key] = el.dataset.val;
+  el.closest('.opts').querySelectorAll('.opt').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  const K = key.charAt(0).toUpperCase()+key.slice(1);
+  const btn = document.getElementById('btn'+K);
+  if(btn) btn.disabled = false;
+}
+
+function restoreOpts(id) {
+  if(!answers[id]) return;
+  const container = document.getElementById('opts-'+id);
+  if(!container) return;
+  container.querySelectorAll('.opt').forEach(b => {
+    b.classList.toggle('selected', b.dataset.val === answers[id]);
+  });
+  const K = id.charAt(0).toUpperCase()+id.slice(1);
+  const btn = document.getElementById('btn'+K);
+  if(btn) btn.disabled = false;
+}
+
+// ─────────────────────────────────────────────────────────
+// COUNTRY
+// ─────────────────────────────────────────────────────────
+function renderCountries(filter) {
+  const fl = filter.toLowerCase();
+  const list = COUNTRIES.filter(c => c.toLowerCase().includes(fl));
+  document.getElementById('countryList').innerHTML = list.map(c =>
+    `<div class="country-item ${answers.q2===c?'selected':''}" onclick="selCountry('${c.replace(/'/g,"\\'")}'">${c}</div>`
+  ).join('') || '<div style="padding:12px;font-size:13px;color:var(--gray-400)">No results</div>';
+}
+
+function filterCountries() { renderCountries(document.getElementById('countrySearch').value); }
+
+function selCountry(c) {
+  answers.q2 = c;
+  document.getElementById('countryPill').innerHTML = `<div class="selected-pill">${c} <span class="pill-x" onclick="clearCountry()">×</span></div>`;
+  document.getElementById('btnQ2').disabled = false;
+  renderCountries(document.getElementById('countrySearch').value);
+}
+
+function clearCountry() {
+  delete answers.q2;
+  document.getElementById('countryPill').innerHTML = '';
+  document.getElementById('btnQ2').disabled = true;
+  renderCountries('');
+}
+
+// ─────────────────────────────────────────────────────────
+// PROFESSION
+// ─────────────────────────────────────────────────────────
+function renderProf(filter) {
+  const fl = filter.toLowerCase();
+  const list = PROFESSIONS.filter(p => p.toLowerCase().includes(fl)).slice(0, 30);
+  document.getElementById('profList').innerHTML = list.map(p =>
+    `<div class="country-item ${answers.q6===p?'selected':''}" onclick="selProf('${p.replace(/'/g,"\\'")}'">${p}</div>`
+  ).join('') || '<div style="padding:12px;font-size:13px;color:var(--gray-400)">No results</div>';
+}
+
+function filterProf(v) {
+  if(!v) { renderProf(''); return; }
+  renderProf(v);
+  document.getElementById('profSelected').style.display = 'none';
+}
+
+function selProf(p) {
+  answers.q6 = p;
+  document.getElementById('profInput').value = '';
+  document.getElementById('profList').innerHTML = '';
+  document.getElementById('profPillText').textContent = p;
+  document.getElementById('profSelected').style.display = 'block';
+  document.getElementById('btnQ6').disabled = false;
+}
+
+function selProfDirect(val) {
+  answers.q6 = val;
+  document.getElementById('profInput').value = '';
+  document.getElementById('profList').innerHTML = '';
+  document.getElementById('profSelected').style.display = 'none';
+  document.getElementById('btnQ6').disabled = false;
+  document.querySelectorAll('#screen-q6 .opt').forEach(b => b.classList.remove('selected'));
+  const btn = document.querySelector(`#screen-q6 .opt[data-val="${val}"]`);
+  if(btn) btn.classList.add('selected');
+}
+
+function clearProf() {
+  delete answers.q6;
+  document.getElementById('profSelected').style.display = 'none';
+  document.getElementById('btnQ6').disabled = true;
+  renderProf('');
+}
+
+function restoreProfDisplay() {
+  const v = answers.q6;
+  if(!v) return;
+  document.getElementById('btnQ6').disabled = false;
+  if(v === 'Not Currently Employed') {
+    selProfDirect(v);
+  } else {
+    document.getElementById('profPillText').textContent = v;
+    document.getElementById('profSelected').style.display = 'block';
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// COMPUTE PATHWAYS
+// ─────────────────────────────────────────────────────────
+function computePathways() {
+  const scores = { executive:0, business:0, employment:0, education:0, family:0 };
+  const edu = answers.q5||'';
+  const exp = answers.q7||'';
+  const leadership = answers.q10||'';
+  const bizInterest = answers.q8||'';
+  const goal = answers.q4||'';
+  const family = answers.q9||'';
+  const highEdu = ["Bachelor's Degree","Master's Degree","Doctorate (PhD)"].includes(edu);
+  const highExp = ['5–10 years','More than 10 years'].includes(exp);
+
+  if(highEdu && highExp){ scores.executive+=3; if(["Master's Degree","Doctorate (PhD)"].includes(edu)) scores.executive+=2; if(leadership==='Yes') scores.executive+=2; }
+  if(['Starting or Expanding a Business','Investment Opportunities'].includes(goal)) scores.business+=2;
+  if(['Yes','Maybe'].includes(bizInterest)) scores.business+=2;
+  scores.employment += 1;
+  if(highExp) scores.employment += 1;
+  if(goal==='Education') scores.education+=3;
+  if(family==='Yes') scores.family+=3;
+
+  const ranked = Object.entries(scores).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k])=>PATHWAY_LABELS[k]);
+  if(!ranked.length) ranked.push(PATHWAY_LABELS.employment);
+  return ranked;
+}
+
+// ─────────────────────────────────────────────────────────
+// SUBMIT
+// ─────────────────────────────────────────────────────────
+async function submitAndShowResults() {
+  history.push('q10');
+  showScreen('processing');
+
+  const pathways = computePathways();
+  const name = [answers.firstName, answers.lastName].filter(Boolean).join(' ') || 'Client';
+  const paymentUrl = PAYMENT_BASE + utmParams;
+
+  const EDU_IDS = {'High School':'1100','Trade School':'1101','Associate Degree':'1102',"Bachelor's Degree":'1103',"Master's Degree":'1105','Doctorate (PhD)':'1107'};
+  const MARITAL_IDS = {'Single':'12552','Married':'4071','Divorced':'4072','Widowed':'4073'};
+
+  const summary = [
+    '=== CLIENT SELF-ASSESSMENT ===',
+    `Name: ${name}`,
+    `Email: ${answers.email||''}`,
+    `Phone: ${answers.phone||''}`,
+    '',
+    '=== PATHWAY RESULTS ===',
+    pathways.map((p,i) => `#${i+1}: ${p.name}`).join('\n'),
+    '',
+    '=== ANSWERS ===',
+    `Age: ${answers.q1||''}`,
+    `Country: ${answers.q2||''}`,
+    `Marital Status: ${answers.q3||''}`,
+    `Primary Goal: ${answers.q4||''}`,
+    `Education: ${answers.q5||''}`,
+    `Profession: ${answers.q6||''}`,
+    `Experience: ${answers.q7||''}`,
+    `Business Interest: ${answers.q8||''}`,
+    `Family in USA: ${answers.q9||''}`,
+    `Leadership: ${answers.q10||''}`,
+    '',
+    `Payment URL: ${paymentUrl}`
+  ].join('\n');
+
+  // Bitrix24 fields
+  const fields = {
+    COMMENTS: summary,
+    STATUS_ID: 'TypeForm',
+    UF_CRM_1780826001: 'Y',   // triggers email automation
+    UF_CRM_1780906448: '13330' // Assessment completed
+  };
+  if(answers.q2) fields['UF_CRM_1449131599'] = answers.q2;
+  if(answers.q5 && EDU_IDS[answers.q5]) fields['UF_CRM_1484914608'] = EDU_IDS[answers.q5];
+  if(answers.q6) fields['UF_CRM_1709560603'] = answers.q6;
+  if(answers.q3 && MARITAL_IDS[answers.q3]) fields['UF_CRM_1500181612'] = MARITAL_IDS[answers.q3];
+
+  try {
+    if(leadId) {
+      // ── UPDATE existing lead ──────────────────────────
+      const updateUrl = WEBHOOK + 'crm.lead.update?ID=' + leadId + '&' +
+        Object.entries(fields).map(([k,v]) => `fields[${k}]=${encodeURIComponent(v)}`).join('&');
+      await fetch(updateUrl);
+
+      // Add timeline comment
+      await fetch(WEBHOOK + 'crm.timeline.comment.add', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ fields: { ENTITY_TYPE:'lead', ENTITY_ID: leadId, COMMENT: summary } })
+      });
+
+    } else {
+      // ── CREATE new lead ───────────────────────────────
+      const createFields = {
+        ...fields,
+        TITLE: 'Self-Assessment: ' + name,
+        NAME: answers.firstName||'',
+        LAST_NAME: answers.lastName||''
+      };
+      let createUrl = WEBHOOK + 'crm.lead.add?' +
+        Object.entries(createFields).map(([k,v]) => `fields[${k}]=${encodeURIComponent(v)}`).join('&');
+      if(answers.email) createUrl += '&fields[EMAIL][0][VALUE]='+encodeURIComponent(answers.email)+'&fields[EMAIL][0][VALUE_TYPE]=WORK';
+      if(answers.phone) createUrl += '&fields[PHONE][0][VALUE]='+encodeURIComponent(answers.phone)+'&fields[PHONE][0][VALUE_TYPE]=WORK';
+
+      const res = await fetch(createUrl);
+      const data = await res.json();
+      if(data.result) leadId = data.result;
+    }
+  } catch(e) {
+    console.log('Bitrix24 error:', e);
+  }
+
+  // Show results after processing animation
+  setTimeout(() => {
+    const fn = answers.firstName ? answers.firstName + ', great' : 'Great';
+    document.getElementById('resultTitle').textContent = fn + ' news — your profile qualifies!';
+
+    const rankClass = ['rank-1','rank-2','rank-3'];
+    document.getElementById('pathwayCards').innerHTML = pathways.map((p,i) => `
+      <div class="pathway-card">
+        <div class="pathway-rank ${rankClass[i]}">${i+1}</div>
+        <div>
+          <div class="pathway-name">${p.name}</div>
+          <div class="pathway-desc">${p.desc}</div>
+        </div>
+      </div>`).join('');
+
+    document.getElementById('ctaPayBtn').href = paymentUrl;
+    document.getElementById('donePayBtn').href = paymentUrl;
+    document.getElementById('doneEmail').textContent = answers.email||'your email';
+
+    showScreen('results');
+  }, 2200);
+}
+
+// ─────────────────────────────────────────────────────────
+// LOAD LEAD BY lead_id (if in URL)
+// ─────────────────────────────────────────────────────────
+async function loadLeadById() {
+  if(!leadId) return;
+  try {
+    const res = await fetch(`${WEBHOOK}crm.lead.get?ID=${leadId}`);
+    const data = await res.json();
+    if(data.result) {
+      const ld = data.result;
+      answers.firstName = ld.NAME||'';
+      answers.lastName  = ld.LAST_NAME||'';
+      answers.email     = (ld.EMAIL && ld.EMAIL[0] && ld.EMAIL[0].VALUE)||'';
+      answers.phone     = (ld.PHONE && ld.PHONE[0] && ld.PHONE[0].VALUE)||'';
+    }
+  } catch(e) { console.log('Lead load error:', e); }
+}
+
+// INIT
+(async () => {
+  await loadLeadById();
+  showScreen('intro');
+  // Pre-fill contact screen if lead loaded by URL
+  if(leadId && answers.email) {
+    setTimeout(() => {
+      const ei = document.getElementById('emailInput');
+      const cf = document.getElementById('contactFirst');
+      const cl = document.getElementById('contactLast');
+      const cp = document.getElementById('contactPhone');
+      if(ei) { ei.value = answers.email; ei.className = 'email-input valid'; }
+      if(cf) cf.value = answers.firstName;
+      if(cl) cl.value = answers.lastName;
+      if(cp) cp.value = answers.phone;
+      document.getElementById('contactFields').style.display = 'block';
+      document.getElementById('btnContact').disabled = !answers.firstName;
+      const r = document.getElementById('lookupResult');
+      const name = [answers.firstName, answers.lastName].filter(Boolean).join(' ');
+      r.innerHTML = `<div class="lookup-result lookup-found"><div class="lookup-found-title">✅ Welcome back${name?' — '+name:''}!</div><div style="color:var(--gray-600)">Your details have been loaded from your profile.</div></div>`;
+      r.style.display = 'block';
+      updateClientBar();
+    }, 300);
+  }
+})();
+</script>
+</body>
+</html>
