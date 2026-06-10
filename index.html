@@ -1135,25 +1135,43 @@ async function lookupEmail(email) {
   const btn     = document.getElementById('btnContact');
 
   try {
-    // Search leads by email in Bitrix24
-    const url = WEBHOOK + 'crm.lead.list?filter[EMAIL]=' + encodeURIComponent(email) +
-      '&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=EMAIL&select[]=STATUS_ID' +
-      '&order[DATE_CREATE]=DESC&start=0';
+    // Search Contact first, then Lead as fallback
+    let found = null;
+    let sourceType = '';
 
-    const res  = await fetch(url);
-    const data = await res.json();
+    // 1. Try Contact
+    const contactUrl = WEBHOOK + 'crm.contact.list?filter[EMAIL]=' + encodeURIComponent(email) +
+      '&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=EMAIL&order[DATE_CREATE]=DESC&start=0';
+    const contactRes  = await fetch(contactUrl);
+    const contactData = await contactRes.json();
+    const contacts = contactData.result || [];
+
+    if(contacts.length > 0) {
+      found = contacts[0];
+      sourceType = 'contact';
+    } else {
+      // 2. Fallback to Lead
+      const leadUrl = WEBHOOK + 'crm.lead.list?filter[EMAIL]=' + encodeURIComponent(email) +
+        '&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=EMAIL&select[]=STATUS_ID' +
+        '&order[DATE_CREATE]=DESC&start=0';
+      const leadRes  = await fetch(leadUrl);
+      const leadData = await leadRes.json();
+      const leads = leadData.result || [];
+      if(leads.length > 0) {
+        found = leads[0];
+        sourceType = 'lead';
+      }
+    }
+
     spinner.style.display = 'none';
 
-    const leads = data.result || [];
+    if(found) {
+      // ✅ FOUND
+      if(sourceType === 'lead') leadId = found.ID;
 
-    if(leads.length > 0) {
-      // ✅ FOUND — load first (most recent) lead
-      const ld = leads[0];
-      leadId = ld.ID;
-
-      answers.firstName = ld.NAME || '';
-      answers.lastName  = ld.LAST_NAME || '';
-      answers.phone     = (ld.PHONE && ld.PHONE[0] && ld.PHONE[0].VALUE) || '';
+      answers.firstName = found.NAME || '';
+      answers.lastName  = found.LAST_NAME || '';
+      answers.phone     = (found.PHONE && found.PHONE[0] && found.PHONE[0].VALUE) || '';
 
       // Fill fields
       document.getElementById('contactFirst').value = answers.firstName;
