@@ -1915,14 +1915,24 @@ async function submitAndShowResults() {
   const pathwayNames = pathways.map((p,i) => `#${i+1}: ${p.name}`).join(' | ');
   fields['UF_CRM_1494160345'] = '3139';                                                     // Visa Assessment = "Questionnaire received"
 
+  // ── Contact fields (subset relevant to Contacts entity) ──
+  const contactFields = {};
+  if(answers.q5 && EDU_IDS[answers.q5]) contactFields['UF_CRM_1465285867'] = EDU_IDS[answers.q5];
+  if(answers.q6)   contactFields['UF_CRM_1484918121']    = answers.q6;
+  if(answers.q3)   contactFields['UF_CRM_64CBB649310F0'] = answers.q3;
+  if(answers.q4)   contactFields['UF_CRM_1648031237']    = answers.q4;
+  contactFields['UF_CRM_1494160345'] = '3139';
+  contactFields['UF_CRM_1780906448'] = '13330';
+  contactFields['COMMENTS']          = summary;
+
   try {
+    // ── 1. LEAD: update or create ─────────────────────
     if(leadId) {
-      // ── UPDATE existing lead ──────────────────────────
       const updateUrl = WEBHOOK + 'crm.lead.update?ID=' + leadId + '&' +
         Object.entries(fields).map(([k,v]) => `fields[${k}]=${encodeURIComponent(v)}`).join('&');
       await fetch(updateUrl);
 
-      // Add timeline comment
+      // Timeline comment on lead
       await fetch(WEBHOOK + 'crm.timeline.comment.add', {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
@@ -1930,7 +1940,7 @@ async function submitAndShowResults() {
       });
 
     } else {
-      // ── CREATE new lead ───────────────────────────────
+      // CREATE new lead
       const createFields = {
         ...fields,
         TITLE: 'Self-Assessment: ' + name,
@@ -1941,11 +1951,49 @@ async function submitAndShowResults() {
         Object.entries(createFields).map(([k,v]) => `fields[${k}]=${encodeURIComponent(v)}`).join('&');
       if(answers.email) createUrl += '&fields[EMAIL][0][VALUE]='+encodeURIComponent(answers.email)+'&fields[EMAIL][0][VALUE_TYPE]=WORK';
       if(answers.phone) createUrl += '&fields[PHONE][0][VALUE]='+encodeURIComponent(answers.phone)+'&fields[PHONE][0][VALUE_TYPE]=WORK';
-
-      const res = await fetch(createUrl);
+      const res  = await fetch(createUrl);
       const data = await res.json();
       if(data.result) leadId = data.result;
     }
+
+    // ── 2. CONTACT: find by email, update or create ───
+    if(answers.email) {
+      let contactId = null;
+
+      // Search for existing contact by email
+      const searchRes  = await fetch(WEBHOOK + 'crm.contact.list?filter[EMAIL]=' + encodeURIComponent(answers.email) + '&select[]=ID');
+      const searchData = await searchRes.json();
+      if(searchData.result && searchData.result.length > 0) {
+        contactId = searchData.result[0].ID;
+      }
+
+      if(contactId) {
+        // UPDATE existing contact
+        const updateParams = Object.entries(contactFields).map(([k,v]) => `fields[${k}]=${encodeURIComponent(v)}`).join('&');
+        await fetch(WEBHOOK + 'crm.contact.update?ID=' + contactId + '&' + updateParams);
+
+        // Timeline comment on contact
+        await fetch(WEBHOOK + 'crm.timeline.comment.add', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ fields: { ENTITY_TYPE:'contact', ENTITY_ID: contactId, COMMENT: summary } })
+        });
+
+      } else {
+        // CREATE new contact
+        const newContact = {
+          ...contactFields,
+          NAME: answers.firstName||'',
+          LAST_NAME: answers.lastName||''
+        };
+        let contactUrl = WEBHOOK + 'crm.contact.add?' +
+          Object.entries(newContact).map(([k,v]) => `fields[${k}]=${encodeURIComponent(v)}`).join('&');
+        contactUrl += '&fields[EMAIL][0][VALUE]='  + encodeURIComponent(answers.email) + '&fields[EMAIL][0][VALUE_TYPE]=WORK';
+        if(answers.phone) contactUrl += '&fields[PHONE][0][VALUE]=' + encodeURIComponent(answers.phone) + '&fields[PHONE][0][VALUE_TYPE]=WORK';
+        await fetch(contactUrl);
+      }
+    }
+
   } catch(e) {
     console.log('Bitrix24 error:', e);
   }
