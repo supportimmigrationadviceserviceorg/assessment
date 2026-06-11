@@ -1165,34 +1165,16 @@ async function lookupEmail(email) {
 
     if(paidLead || deals.length > 0) {
       // ── SCENARIO 1: HAS PAID LEAD OR DEAL = paying client ─
-      // Load name from paid lead or contact
       found      = contacts.length > 0 ? contacts[0] : (paidLead || allLeads[0]);
       sourceType = contacts.length > 0 ? 'contact' : 'lead_readonly';
-
-      // Change ALL non-protected leads to Not Relevant Paid (silent)
-      allLeads
-        .filter(l => !PROTECTED_STATUSES.includes(l.STATUS_ID))
-        .forEach(l => {
-          fetch(WEBHOOK + 'crm.lead.update?ID=' + l.ID + '&fields[STATUS_ID]=' + STATUS_NOT_REL_PAID)
-            .catch(()=>{});
-        });
       answers.hasDeal = true;
 
     } else if(allLeads.length > 1) {
       // ── SCENARIO 2: MULTIPLE LEADS, NO PAYMENT ───────────
-      // Keep newest lead, mark rest as Not Relevant
-      const mainLead = allLeads[0]; // sorted DESC = newest first
+      const mainLead = allLeads[0];
       found      = contacts.length > 0 ? contacts[0] : mainLead;
       sourceType = contacts.length > 0 ? 'contact' : 'lead';
       leadId     = mainLead.ID;
-
-      // Mark ALL other leads as Not Relevant (silent)
-      allLeads.slice(1).forEach(l => {
-        if(!PROTECTED_STATUSES.includes(l.STATUS_ID)) {
-          fetch(WEBHOOK + 'crm.lead.update?ID=' + l.ID + '&fields[STATUS_ID]=' + STATUS_NOT_REL)
-            .catch(()=>{});
-        }
-      });
 
     } else if(allLeads.length === 1) {
       // ── SCENARIO 3: SINGLE LEAD ───────────────────────────
