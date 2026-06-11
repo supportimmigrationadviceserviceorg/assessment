@@ -2602,15 +2602,15 @@ async function loadLeadById() {
   showScreen('intro');
 
   // If email came from URL (campaign link) — auto-fill and auto-lookup
-  const initEmail = answers.email || (leadId ? null : null);
-  if(initEmail) {
+  const initEmail = (answers.email && answers.email.includes('@')) ? answers.email : null;
+  if(initEmail && leadId) {
+    // Only auto-lookup if we have BOTH a valid email AND a valid lead_id
     setTimeout(async () => {
       const ei = document.getElementById('emailInput');
       if(ei) {
         ei.value = initEmail;
         ei.className = 'email-input searching';
       }
-      // Auto-trigger full lookup (deals + leads + contacts)
       await lookupEmail(initEmail);
       // If we got a name back, show the contact screen pre-filled
       if(answers.firstName) {
