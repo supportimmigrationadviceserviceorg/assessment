@@ -1263,12 +1263,12 @@ async function lookupEmail(email) {
     };
 
   } catch(e) {
+    // Silent CORS fail — just show form, no error message
     spinner.style.display = 'none';
-    document.getElementById('emailInput').className = 'email-input';
-    result.innerHTML = `<div class="lookup-result" style="background:var(--red-light);border:1px solid rgba(220,38,38,0.2)"><div style="color:var(--red);font-weight:500">⚠️ Connection error</div><div style="color:var(--gray-600)">Please fill in your details manually.</div></div>`;
-    result.style.display = 'block';
+    document.getElementById('emailInput').className = 'email-input valid';
+    result.style.display = 'none';
     fields.style.display = 'block';
-    btn.disabled = false;
+    btn.disabled = !(answers.firstName || document.getElementById('contactFirst').value.trim());
   }
 }
 
