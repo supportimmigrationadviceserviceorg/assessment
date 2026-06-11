@@ -1069,9 +1069,7 @@ let emailLookupTimer = null;
 // Passes through any existing UTM params from the page URL, then adds lead_id
 (function(){
   const p = new URLSearchParams(window.location.search);
-  const rawLeadId = p.get('lead_id');
-  // Only use lead_id if it's a real number (not empty or placeholder)
-  leadId = (rawLeadId && /^\d+$/.test(rawLeadId.trim())) ? rawLeadId.trim() : null;
+  leadId = p.get('lead_id') || null;
   const urlEmail = p.get('email') ? decodeURIComponent(p.get('email')) : null;
   if(urlEmail) answers.email = urlEmail;
   const utmKeys = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'];
