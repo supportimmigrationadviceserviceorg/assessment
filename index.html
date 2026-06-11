@@ -1070,6 +1070,8 @@ let emailLookupTimer = null;
 (function(){
   const p = new URLSearchParams(window.location.search);
   leadId = p.get('lead_id') || null;
+  const urlEmail = p.get('email') ? decodeURIComponent(p.get('email')) : null;
+  if(urlEmail) answers.email = urlEmail;
   const utmKeys = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'];
   const parts = [];
   // Default campaign tag so every payment is identifiable
@@ -1135,39 +1137,69 @@ async function lookupEmail(email) {
   const btn     = document.getElementById('btnContact');
 
   try {
-    // Search Contact first, then Lead as fallback
-    let found = null;
-    let sourceType = '';
-
-    // 1. Try Contact
-    const contactUrl = WEBHOOK + 'crm.contact.list?filter[EMAIL]=' + encodeURIComponent(email) +
-      '&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=EMAIL&order[DATE_CREATE]=DESC&start=0';
-    const contactRes  = await fetch(contactUrl);
-    const contactData = await contactRes.json();
-    const contacts = contactData.result || [];
-
-    if(contacts.length > 0) {
-      found = contacts[0];
-      sourceType = 'contact';
-    } else {
-      // 2. Fallback to Lead
-      const leadUrl = WEBHOOK + 'crm.lead.list?filter[EMAIL]=' + encodeURIComponent(email) +
+    // ── STEP 1: Fetch ALL leads + contact + deals in parallel ──
+    const [allLeadsData, contactData, dealData] = await Promise.all([
+      fetch(WEBHOOK + 'crm.lead.list?filter[EMAIL]=' + encodeURIComponent(email) +
         '&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=EMAIL&select[]=STATUS_ID' +
-        '&order[DATE_CREATE]=DESC&start=0';
-      const leadRes  = await fetch(leadUrl);
-      const leadData = await leadRes.json();
-      const leads = leadData.result || [];
-      if(leads.length > 0) {
-        found = leads[0];
-        sourceType = 'lead';
-      }
-    }
+        '&order[DATE_CREATE]=DESC&start=0').then(r=>r.json()),
+      fetch(WEBHOOK + 'crm.contact.list?filter[EMAIL]=' + encodeURIComponent(email) +
+        '&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=EMAIL' +
+        '&order[DATE_CREATE]=DESC&start=0').then(r=>r.json()),
+      fetch(WEBHOOK + 'crm.deal.list?filter[EMAIL]=' + encodeURIComponent(email) +
+        '&select[]=ID&select[]=STAGE_ID&order[DATE_CREATE]=DESC&start=0').then(r=>r.json())
+    ]);
+
+    const allLeads = allLeadsData.result || [];
+    const contacts = contactData.result  || [];
+    const deals    = dealData.result     || [];
 
     spinner.style.display = 'none';
+
+    let found      = null;
+    let sourceType = '';
+
+    if(deals.length > 0) {
+      // ── SCENARIO 1: HAS DEAL = paying client ─────────────
+      // Update contact only, do NOT touch any leads
+      found      = contacts.length > 0 ? contacts[0] : null;
+      sourceType = 'contact';
+      // If no contact but has deal — still show their name from lead
+      if(!found && allLeads.length > 0) {
+        found = allLeads[0];
+        sourceType = 'lead_readonly'; // load name only, don't change anything
+      }
+
+    } else if(allLeads.length > 1) {
+      // ── SCENARIO 2: MULTIPLE LEADS, NO DEAL ──────────────
+      // Keep newest lead, mark rest as Not Relevant
+      const mainLead = allLeads[0]; // already sorted DESC = newest first
+      found      = contacts.length > 0 ? contacts[0] : mainLead;
+      sourceType = contacts.length > 0 ? 'contact' : 'lead';
+      leadId     = mainLead.ID;
+
+      // Mark ALL other leads as Not Relevant (background, silent)
+      const dupes = allLeads.slice(1);
+      dupes.forEach(l => {
+        fetch(WEBHOOK + 'crm.lead.update?ID=' + l.ID + '&fields[STATUS_ID]=NotRelevant')
+          .catch(()=>{}); // silent fail
+      });
+
+    } else if(allLeads.length === 1) {
+      // ── SCENARIO 3: SINGLE LEAD ───────────────────────────
+      found      = contacts.length > 0 ? contacts[0] : allLeads[0];
+      sourceType = contacts.length > 0 ? 'contact' : 'lead';
+      if(sourceType === 'lead') leadId = allLeads[0].ID;
+
+    } else if(contacts.length > 0) {
+      // ── SCENARIO 4: NO LEADS, JUST CONTACT ───────────────
+      found      = contacts[0];
+      sourceType = 'contact';
+    }
 
     if(found) {
       // ✅ FOUND
       if(sourceType === 'lead') leadId = found.ID;
+      answers.hasDeal = deals.length > 0; // flag for submitAndShowResults
 
       answers.firstName = found.NAME || '';
       answers.lastName  = found.LAST_NAME || '';
@@ -2558,8 +2590,33 @@ async function loadLeadById() {
 (async () => {
   await loadLeadById();
   showScreen('intro');
-  // Pre-fill contact screen if lead loaded by URL
-  if(leadId && answers.email) {
+
+  // If email came from URL (campaign link) — auto-fill and auto-lookup
+  const initEmail = answers.email || (leadId ? null : null);
+  if(initEmail) {
+    setTimeout(async () => {
+      const ei = document.getElementById('emailInput');
+      if(ei) {
+        ei.value = initEmail;
+        ei.className = 'email-input searching';
+      }
+      // Auto-trigger full lookup (deals + leads + contacts)
+      await lookupEmail(initEmail);
+      // If we got a name back, show the contact screen pre-filled
+      if(answers.firstName) {
+        const cf = document.getElementById('contactFirst');
+        const cl = document.getElementById('contactLast');
+        const cp = document.getElementById('contactPhone');
+        if(cf) cf.value = answers.firstName;
+        if(cl) cl.value = answers.lastName;
+        if(cp) cp.value = answers.phone;
+        document.getElementById('contactFields').style.display = 'block';
+        document.getElementById('btnContact').disabled = false;
+        updateClientBar();
+      }
+    }, 400);
+  } else if(leadId && answers.email) {
+    // lead_id only (old flow) — pre-fill contact screen
     setTimeout(() => {
       const ei = document.getElementById('emailInput');
       const cf = document.getElementById('contactFirst');
@@ -2571,9 +2628,7 @@ async function loadLeadById() {
       if(cp) cp.value = answers.phone;
       document.getElementById('contactFields').style.display = 'block';
       document.getElementById('btnContact').disabled = !answers.firstName;
-      const r = document.getElementById('lookupResult');
-      const name = [answers.firstName, answers.lastName].filter(Boolean).join(' ');
-      r.style.display = 'none';
+      document.getElementById('lookupResult').style.display = 'none';
       updateClientBar();
     }, 300);
   }
