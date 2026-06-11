@@ -1069,9 +1069,7 @@ let emailLookupTimer = null;
 // Passes through any existing UTM params from the page URL, then adds lead_id
 (function(){
   const p = new URLSearchParams(window.location.search);
-  const rawLeadId = p.get('lead_id');
-  // Only use lead_id if it's a real number (not empty or placeholder)
-  leadId = (rawLeadId && /^\d+$/.test(rawLeadId.trim())) ? rawLeadId.trim() : null;
+  leadId = p.get('lead_id') || null;
   const urlEmail = p.get('email') ? decodeURIComponent(p.get('email')) : null;
   if(urlEmail) answers.email = urlEmail;
   const utmKeys = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'];
@@ -2582,7 +2580,6 @@ async function loadLeadById() {
 (async () => {
   await loadLeadById();
   showScreen('intro');
-
   // Pre-fill contact screen if lead loaded by URL
   if(leadId && answers.email) {
     setTimeout(() => {
@@ -2596,7 +2593,10 @@ async function loadLeadById() {
       if(cp) cp.value = answers.phone;
       document.getElementById('contactFields').style.display = 'block';
       document.getElementById('btnContact').disabled = !answers.firstName;
-      document.getElementById('lookupResult').style.display = 'none';
+      const r = document.getElementById('lookupResult');
+      const name = [answers.firstName, answers.lastName].filter(Boolean).join(' ');
+      r.innerHTML = `<div class="lookup-result lookup-found"><div class="lookup-found-title">✅ Welcome back${name?' — '+name:''}!</div><div style="color:var(--gray-600)">Your details have been loaded from your profile.</div></div>`;
+      r.style.display = 'block';
       updateClientBar();
     }, 300);
   }
