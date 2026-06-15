@@ -938,6 +938,13 @@ function togFamState(val) {
 
 // ── PHASE 2 QUESTIONS ──
 
+function saveFamilyUSA(next) {
+  const el = document.getElementById('family_usa_detail');
+  if(el) answers['family_usa_detail'] = el.value.trim();
+  answers['s1_family_usa_confirmed'] = true;
+  goNext(next);
+}
+
 function renderS2EduLevel(main) {
   // Auto-map from s1_edu if s2_edu_level not set
   if(!answers['s2_edu_level'] && answers['s1_edu']) {
