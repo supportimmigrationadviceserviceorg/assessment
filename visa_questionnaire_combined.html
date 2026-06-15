@@ -290,8 +290,11 @@ async function loadContactFields(cid) {
     // ── Map Contact fields → answers ──
 
     // Country of birth / residence
-    if(c.UF_CRM_566016C18B2CC) answers['s1_birth'] = c.UF_CRM_566016C18B2CC;
-    if(c.UF_CRM_1449131599) answers['s1_country'] = c.UF_CRM_1449131599; // from lead field if exists
+    // Country - only use text fields for Contact, not Lead list fields
+    if(c.UF_CRM_566016C18B2CC && !c.UF_CRM_566016C18B2CC.match(/^\d+$/)) 
+      answers['s1_birth'] = c.UF_CRM_566016C18B2CC;
+    if(c.UF_CRM_1464603245 && !c.UF_CRM_1464603245.match(/^\d+$/)) 
+      answers['s1_country'] = c.UF_CRM_1464603245;
 
     // Marital status (string field)
     if(c.UF_CRM_64CBB649310F0) {
