@@ -1175,7 +1175,7 @@ function renderS2EduDetail(main) {
     `<div class="q-num">Question 17 (continued)</div>
      <div class="q-title">Describe your academic background in detail.</div>
      <div class="q-hint">Every degree, institution, field of study, graduation year, GPA or honors. If you wrote a thesis or dissertation, describe the topic.</div>
-     <div class="q-example"><strong>Example:</strong> "B.Sc. Computer Science, Tel Aviv University, 2008, GPA 94/100. M.Sc. Machine Learning, Technion, 2011. Thesis: real-time object detection — later published in NeurIPS."</div>
+     <div class="q-example"><strong>Example:</strong> "B.Sc. Computer Science, University of Buenos Aires, 2008, GPA 94/100. M.Sc. Machine Learning, University of Toronto, 2011. Thesis: real-time object detection — later published in NeurIPS."</div>
      <textarea class="inp" id="s2_edu_detail_inp" style="min-height:110px" placeholder="List all degrees, institutions, years, and any honors...">${answers['s2_edu_detail']||''}</textarea>
      <button class="opt" style="width:100%;margin-top:4px;color:#6b7280;font-size:12px" onclick="answers['s2_edu_detail']='Not applicable';goNext('s2_awards_q')">⬜ Not applicable / Prefer not to say</button>` +
     nav("goBack()","saveS2EduDetail('s2_awards_q')"), 2);
