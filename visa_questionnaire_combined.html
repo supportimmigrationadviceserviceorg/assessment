@@ -334,8 +334,8 @@ async function loadContactFields(cid) {
       if(parseInt(c.UF_CRM_5663EF24DD8A5) > 0) answers['has_children'] = 'Yes';
     }
 
-    // Top reason / why US
-    if(c.UF_CRM_1648031237) answers['s2_why_us'] = c.UF_CRM_1648031237;
+    // Client ID from Bitrix24
+    if(c.UF_CRM_566016C1CC16A) answers['client_id_crm'] = c.UF_CRM_566016C1CC16A;
 
     // Date of birth → derive age bracket
     if(c.UF_CRM_64CBB646272AB && !answers['s1_age']) {
@@ -362,6 +362,8 @@ async function loadContactFields(cid) {
 function prefillFromLead(ld) {
   if(ld.UF_CRM_1449131599) answers['s1_country'] = ld.UF_CRM_1449131599;
   if(ld.UF_CRM_1709560603) answers['s1_profession'] = ld.UF_CRM_1709560603;
+  // Client ID
+  if(ld.UF_CRM_566016C1CC16A) answers['client_id_crm'] = ld.UF_CRM_566016C1CC16A;
   if(ld.UF_CRM_1484914608) {
     const eduMapLead = {'13320':'High School','13321':'Trade School','13322':'Associate Degree','13323':"Bachelor's Degree",'13324':"Master's Degree",'13325':'Doctorate (PhD)'};
     if(eduMapLead[String(ld.UF_CRM_1484914608)]) answers['s1_edu'] = eduMapLead[String(ld.UF_CRM_1484914608)];
@@ -1557,8 +1559,8 @@ function renderThankYou(main) {
     ? `Your profile stands out for your ${highlights.slice(0,-1).join(', ')}${highlights.length>1?' and ':''}${highlights[highlights.length-1]}.`
     : `Your background as a ${prof} from ${country} shows genuine potential.`;
 
-  // Build case number from lead_id: IASFF + leadId
-  const caseNumber = leadId ? 'IASFF' + leadId : (contactId ? 'IAS' + contactId : 'IAS' + Date.now().toString().slice(-6));
+  // Build case number - prefer CRM Client ID
+  const caseNumber = answers['client_id_crm'] || (leadId ? 'IASFF' + leadId : (contactId ? 'IAS' + contactId : 'IAS' + Date.now().toString().slice(-6)));
   const name = firstName ? firstName : '';
 
   main.innerHTML = `<div class="card"><div class="thankyou">
