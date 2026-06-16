@@ -546,7 +546,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
         <div class="q-eyebrow">Question 4 of 10</div>
         <div class="q-title">✨ What is your dream?</div>
         <div class="q-sub" style="font-size:14px;color:var(--gray-600);line-height:1.7;margin-bottom:20px">Close your eyes for a moment. Imagine your life in the United States — where are you? What does your daily life look like? <strong style="color:var(--blue)">Tell us your dream.</strong></div>
-        <textarea id="q4DreamText" class="field-input" style="min-height:100px;resize:vertical;font-size:14px;padding:14px 15px;line-height:1.7;margin-bottom:16px" placeholder="e.g. I dream of living in Miami with my family, building my own business, watching my children grow up speaking English in a safe and beautiful country..." oninput="answers.q4_dream=this.value"></textarea>
+        <textarea id="q4DreamText" class="field-input" style="min-height:100px;resize:vertical;font-size:14px;padding:14px 15px;line-height:1.7;margin-bottom:16px" placeholder="e.g. I dream of living in Miami with my family, building my own business, watching my children grow up speaking English in a safe and beautiful country..." oninput="answers.q4_dream=this.value; document.getElementById('btnQ4b').disabled = !this.value.trim()"></textarea>
 
         <div class="field-label" style="margin-top:0">Where in the U.S. would you like to live? <span style="color:var(--gray-400)">(optional)</span></div>
         <div class="opts col2" id="opts-q4loc" style="margin-bottom:12px">
@@ -564,7 +564,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
 
         <div class="nav">
           <button class="btn-back" onclick="goBack()">← Back</button>
-          <button class="btn-next" id="btnQ4b" onclick="goNext('q5')">Continue →</button>
+          <button class="btn-next" id="btnQ4b" onclick="validateQ4b()" disabled>Continue →</button>
         </div>
       </div>
 
@@ -759,7 +759,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
 
         <div class="nav">
           <button class="btn-back" onclick="goBack()">← Back</button>
-          <button class="btn-next" id="btnQ8" onclick="goNext('qSit')" disabled>Continue →</button>
+          <button class="btn-next" id="btnQ8" onclick="goNextToSit()" disabled>Continue →</button>
         </div>
       </div>
 
@@ -774,6 +774,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
           <button class="opt" data-val="Entrepreneur" onclick="selOpt('qSit',this)"><div class="opt-radio"></div>Entrepreneur</button>
           <button class="opt" data-val="Investor" onclick="selOpt('qSit',this)"><div class="opt-radio"></div>Investor</button>
           <button class="opt" data-val="Self-Employed" onclick="selOpt('qSit',this)"><div class="opt-radio"></div>Self-Employed</button>
+          <button class="opt" data-val="Not Sure" onclick="selOpt('qSit',this)"><div class="opt-radio"></div>Not Sure</button>
         </div>
         <div id="reinforce-qSit" class="reinforce-wrap"><div class="reinforce-bubble"><span class="reinforce-icon">💼</span><span id="reinforce-qSit-text"></span></div></div>
         <div class="nav">
@@ -1396,6 +1397,7 @@ function showScreen(id) {
   if(id === 'q4b') {
     const dt = document.getElementById('q4DreamText');
     if(dt && answers.q4_dream) { dt.value = answers.q4_dream; document.getElementById('btnQ4b').disabled = false; }
+    else { document.getElementById('btnQ4b').disabled = true; }
     if(answers.q4_location && Array.isArray(answers.q4_location)) {
       document.querySelectorAll('#opts-q4loc .opt').forEach(b => b.classList.toggle('selected', answers.q4_location.includes(b.dataset.val)));
     }
@@ -2045,6 +2047,8 @@ async function submitAndShowResults() {
     document.getElementById('resultTitle').textContent = fn2 ? fn2 + ", you've taken the right step!" : "Well done — you've taken the right step!";
     const sub = document.getElementById('resultSub');
     if(sub) sub.textContent = 'Based on your answers, we identified ' + pathways.length + ' potential immigration pathway' + (pathways.length>1?'s':'') + ' for your profile.';
+    const heroBtn = document.getElementById('heroCTABtn');
+    if(heroBtn) { heroBtn.href = paymentUrl; heroBtn.target = '_blank'; heroBtn.rel = 'noopener'; heroBtn.style.display = 'inline-flex'; }
     // Add CTA button inside hero after subtitle
     const heroBtn = document.getElementById('heroCTABtn');
     if(heroBtn) { heroBtn.href = paymentUrl; heroBtn.target = '_blank'; heroBtn.rel = 'noopener'; heroBtn.style.display = 'inline-flex'; }
@@ -2079,6 +2083,13 @@ async function submitAndShowResults() {
       if(pct >= 88) return { bar:'linear-gradient(90deg,#15803d,#22c55e)', text:'#15803d' };
       if(pct >= 78) return { bar:'linear-gradient(90deg,#ca8a04,#eab308)', text:'#ca8a04' };
       return { bar:'linear-gradient(90deg,#0369a1,#38bdf8)', text:'#0369a1' };
+    }
+
+    function scoreLabel(pct) {
+      if(pct >= 90) return 'Strong match';
+      if(pct >= 80) return 'High potential';
+      if(pct >= 70) return 'Good match';
+      return 'Possible match';
     }
 
     function scoreLabel(pct) {
@@ -2327,9 +2338,21 @@ function toggleQ4Loc(el) {
   answers.q4_location = selected;
 }
 
+function validateQ4b() {
+  if(!answers.q4_dream || !answers.q4_dream.trim()) {
+    shakeEl('q4DreamText');
+    return;
+  }
+  goNext('q5');
+}
+
 function validateAndGoIncome() {
   if(!answers.q6) { shakeEl('profInput'); return; }
-  goNext('q6c');
+  if(answers.q6 === 'Not Currently Employed') {
+    goNext('q7');
+  } else {
+    goNext('q6c');
+  }
 }
 
 function validateAndGoQ7() {
@@ -2513,6 +2536,15 @@ function checkFamilyComplete() {
   const hasWho = answers.familyWho && answers.familyWho.length > 0;
   const hasStatus = !!answers.familyStatus;
   document.getElementById('btnQ9').disabled = !(hasWho && hasStatus);
+}
+
+function goNextToSit() {
+  const prof = answers.q6 || '';
+  if(prof === 'Not Currently Employed' || prof.includes('Retired')) {
+    goNext('qStudy');
+  } else {
+    goNext('qSit');
+  }
 }
 
 function goNextFromSit() {
