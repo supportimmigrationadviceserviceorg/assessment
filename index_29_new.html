@@ -890,6 +890,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
           <div class="result-badge">✅ Assessment Complete</div>
           <div class="result-title" id="resultTitle">Well done — you've taken the right step!</div>
           <div class="result-sub" id="resultSub">Based on your answers, we identified potential immigration pathways for your profile.</div>
+          <a id="heroCTABtn" href="#" target="_blank" rel="noopener" style="display:none;margin-top:18px;background:#16a34a;color:#fff;padding:12px 24px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;text-decoration:none;align-items:center;gap:8px;border:2px solid rgba(255,255,255,0.3);">🔓 Unlock All Pathways — $29 →</a>
         </div>
 
         <!-- PATHWAY CARDS -->
@@ -2044,6 +2045,9 @@ async function submitAndShowResults() {
     document.getElementById('resultTitle').textContent = fn2 ? fn2 + ", you've taken the right step!" : "Well done — you've taken the right step!";
     const sub = document.getElementById('resultSub');
     if(sub) sub.textContent = 'Based on your answers, we identified ' + pathways.length + ' potential immigration pathway' + (pathways.length>1?'s':'') + ' for your profile.';
+    // Add CTA button inside hero after subtitle
+    const heroBtn = document.getElementById('heroCTABtn');
+    if(heroBtn) { heroBtn.href = paymentUrl; heroBtn.target = '_blank'; heroBtn.rel = 'noopener'; heroBtn.style.display = 'inline-flex'; }
 
     // Compute scores as percentages for display
     const rawScores = { executive:0, business:0, employment:0, education:0, family:0 };
@@ -2077,6 +2081,13 @@ async function submitAndShowResults() {
       return { bar:'linear-gradient(90deg,#0369a1,#38bdf8)', text:'#0369a1' };
     }
 
+    function scoreLabel(pct) {
+      if(pct >= 90) return 'Strong match';
+      if(pct >= 80) return 'High potential';
+      if(pct >= 70) return 'Good match';
+      return 'Possible match';
+    }
+
     function scoreFactors(pathwayName) {
       const tags = [];
       const key = PATHWAY_KEYS[pathwayName];
@@ -2102,7 +2113,7 @@ async function submitAndShowResults() {
             <div style="flex:1">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
                 <div class="pathway-name">${p.name}</div>
-                <div style="font-size:15px;font-weight:500;color:${col.text};flex-shrink:0;margin-left:12px">${pct}%</div>
+                <div style="font-size:13px;font-weight:500;color:${col.text};flex-shrink:0;margin-left:12px">${scoreLabel(pct)} — ${pct}%</div>
               </div>
               <div style="height:6px;background:#e5e7eb;border-radius:3px;margin-bottom:8px;overflow:hidden">
                 <div style="height:6px;width:${pct}%;background:${col.bar};border-radius:3px"></div>
@@ -2118,16 +2129,16 @@ async function submitAndShowResults() {
         const lockColor = i===1 ? '#1a3a6b' : '#888';
         return `<div style="border:1.5px solid var(--gray-200);border-radius:10px;padding:16px;margin-bottom:10px;position:relative;overflow:hidden">
           <div style="position:absolute;inset:0;background:rgba(255,255,255,0.75);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:1;border-radius:10px;display:flex;align-items:center;justify-content:center">
-            <div style="display:flex;align-items:center;gap:8px;color:#1a3a6b;font-size:13px;font-weight:500;background:#fff;padding:8px 16px;border-radius:50px;border:1px solid #e5e7eb">
+            <a href="${paymentUrl}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;color:#1a3a6b;font-size:13px;font-weight:600;background:#fff;padding:8px 16px;border-radius:50px;border:1.5px solid #1a3a6b;text-decoration:none;cursor:pointer;">
               🔒 Unlock to reveal
-            </div>
+            </a>
           </div>
           <div style="display:flex;align-items:flex-start;gap:14px">
             <div style="width:28px;height:28px;border-radius:50%;background:${lockBg};color:${lockColor};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0">${i+1}</div>
             <div style="flex:1">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
                 <div class="pathway-name">${p.name}</div>
-                <div style="font-size:15px;font-weight:500;color:${col.text};flex-shrink:0;margin-left:12px">${pct}%</div>
+                <div style="font-size:13px;font-weight:500;color:${col.text};flex-shrink:0;margin-left:12px">${scoreLabel(pct)} — ${pct}%</div>
               </div>
               <div style="height:6px;background:#e5e7eb;border-radius:3px;margin-bottom:8px;overflow:hidden">
                 <div style="height:6px;width:${pct}%;background:${col.bar};border-radius:3px"></div>
