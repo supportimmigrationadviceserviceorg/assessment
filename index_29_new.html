@@ -1866,8 +1866,8 @@ async function saveProgressToBitrix(partial = false) {
   ].filter(l => l !== '').join('\n');
 
   fields['COMMENTS'] = lines;
-  if(partial) fields['STATUS_ID'] = 'NEW'; // keep as New while in progress
-  else { fields['STATUS_ID'] = 'TypeForm'; fields['UF_CRM_1780826001'] = 'Y'; fields['UF_CRM_1780906448'] = '13330'; }
+  if(partial) { fields['STATUS_ID'] = 'NEW'; fields['UF_CRM_1780906448'] = '13331'; } // Partial
+  else { fields['STATUS_ID'] = 'TypeForm'; fields['UF_CRM_1780826001'] = 'Y'; fields['UF_CRM_1780906448'] = '13330'; } // Full
 
   try {
     if(leadId) {
