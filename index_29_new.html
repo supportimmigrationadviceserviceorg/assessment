@@ -2733,13 +2733,13 @@ window.addEventListener('beforeunload', function(e) {
   e.returnValue = '';
 });
 
-// Step 2: Show our custom popup after user confirms leave
-// We detect this via visibilitychange — when tab becomes hidden after beforeunload was triggered
-document.addEventListener('visibilitychange', function() {
-  if(document.visibilityState === 'hidden' && answers.email && !exitIntentShown &&
+// Step 2: Show popup BEFORE user leaves using mouseout on desktop
+// and pagehide as fallback
+document.addEventListener('mouseleave', function(e) {
+  if(e.clientY <= 0 && answers.email && !exitIntentShown &&
      currentScreen !== 'results' && currentScreen !== 'done' && currentScreen !== 'intro') {
     exitIntentShown = true;
-    setTimeout(showExitPopup, 300);
+    showExitPopup();
   }
 });
 
