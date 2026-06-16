@@ -2050,9 +2050,6 @@ async function submitAndShowResults() {
     const heroBtn = document.getElementById('heroCTABtn');
     if(heroBtn) { heroBtn.href = paymentUrl; heroBtn.target = '_blank'; heroBtn.rel = 'noopener'; heroBtn.style.display = 'inline-flex'; }
     // Add CTA button inside hero after subtitle
-    const heroBtn = document.getElementById('heroCTABtn');
-    if(heroBtn) { heroBtn.href = paymentUrl; heroBtn.target = '_blank'; heroBtn.rel = 'noopener'; heroBtn.style.display = 'inline-flex'; }
-
     // Compute scores as percentages for display
     const rawScores = { executive:0, business:0, employment:0, education:0, family:0 };
     const edu2=answers.q5||'',exp2=answers.q7||'',lead2=answers.q10||'',biz2=answers.q8||'',sit2=answers.qSit||'',inv2=answers.qInvest||'',study2=answers.qStudy||'',goal2=answers.q4||'',fam2=answers.q9||'',famSt2=answers.familyStatus||'';
