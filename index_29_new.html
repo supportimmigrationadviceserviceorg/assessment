@@ -2717,6 +2717,100 @@ async function loadLeadById() {
     }, 300);
   }
 })();
+
+
+// ─────────────────────────────────────────────────────────
+// EXIT INTENT
+// ─────────────────────────────────────────────────────────
+let exitIntentShown = false;
+let userConfirmedLeave = false;
+
+// Step 1: beforeunload — browser dialog
+window.addEventListener('beforeunload', function(e) {
+  // Only trigger if user has entered email and hasn't finished
+  if(!answers.email || currentScreen === 'results' || currentScreen === 'done' || currentScreen === 'intro') return;
+  e.preventDefault();
+  e.returnValue = '';
+});
+
+// Step 2: Show our custom popup after user confirms leave
+// We detect this via visibilitychange — when tab becomes hidden after beforeunload was triggered
+document.addEventListener('visibilitychange', function() {
+  if(document.visibilityState === 'hidden' && answers.email && !exitIntentShown &&
+     currentScreen !== 'results' && currentScreen !== 'done' && currentScreen !== 'intro') {
+    exitIntentShown = true;
+    setTimeout(showExitPopup, 300);
+  }
+});
+
+function showExitPopup() {
+  const existing = document.getElementById('exitPopupOverlay');
+  if(existing) return;
+
+  const name = answers.firstName || '';
+  const emailDisplay = answers.email || '';
+
+  const overlay = document.createElement('div');
+  overlay.id = 'exitPopupOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:16px;padding:28px 24px;max-width:380px;width:100%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+      <div style="width:48px;height:48px;border-radius:50%;background:#e8f0fa;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:22px;">✉️</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:#1a3a6b;margin-bottom:8px;">Before you go${name ? ', ' + name : ''} —</div>
+      <p style="font-size:14px;color:#4b5563;line-height:1.65;margin-bottom:18px;">Want us to send you a link so you can continue your assessment later?</p>
+      <div style="background:#f3f4f6;border-radius:8px;padding:10px 14px;font-size:13px;color:#6b7280;margin-bottom:16px;text-align:left;">
+        📧 ${emailDisplay}
+      </div>
+      <button id="exitYesBtn" style="width:100%;background:#1a3a6b;color:#fff;border:none;border-radius:10px;padding:13px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;margin-bottom:10px;">Yes, send me the link</button>
+      <button id="exitNoBtn" style="width:100%;background:none;border:1.5px solid #e5e7eb;border-radius:10px;padding:11px;font-family:'DM Sans',sans-serif;font-size:14px;color:#6b7280;cursor:pointer;">No thanks</button>
+    </div>`;
+
+  document.body.appendChild(overlay);
+
+  document.getElementById('exitYesBtn').addEventListener('click', async () => {
+    await logExitToBitrix('link_sent');
+    // Send email automation trigger
+    if(leadId) {
+      try {
+        await fetch('${WEBHOOK}crm.lead.update?ID=' + leadId +
+          '&fields[UF_CRM_1780826001]=Y' +
+          '&fields[COMMENTS]=' + encodeURIComponent(
+            (answers.q1 ? '[Partial assessment saved]\n' : '') +
+            'Exit intent: client started assessment, left the page and requested a link — link sent'
+          ));
+      } catch(e) {}
+    }
+    overlay.innerHTML = `<div style="background:#fff;border-radius:16px;padding:32px 24px;max-width:380px;width:100%;text-align:center;">
+      <div style="font-size:36px;margin-bottom:12px;">✅</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;color:#1a3a6b;margin-bottom:8px;">Link sent!</div>
+      <p style="font-size:14px;color:#4b5563;line-height:1.65;">Check your inbox at <strong>${emailDisplay}</strong> — your assessment link is on its way.</p>
+    </div>`;
+    setTimeout(() => overlay.remove(), 3000);
+  });
+
+  document.getElementById('exitNoBtn').addEventListener('click', async () => {
+    await logExitToBitrix('declined');
+    overlay.remove();
+  });
+}
+
+async function logExitToBitrix(action) {
+  if(!leadId && !answers.email) return;
+  const commentText = action === 'link_sent'
+    ? 'Exit intent: client started assessment, left the page and requested a link — link sent'
+    : 'Exit intent: client started assessment, left the page and chose not to receive a link';
+  try {
+    if(leadId) {
+      await fetch('${WEBHOOK}crm.timeline.comment.add', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ fields: { ENTITY_TYPE:'lead', ENTITY_ID: leadId, COMMENT: commentText }})
+      });
+    }
+  } catch(e) {}
+}
+
 </script>
 </body>
 </html>
