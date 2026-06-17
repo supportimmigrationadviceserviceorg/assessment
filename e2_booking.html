@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>קביעת שיחת ייעוץ E2 חינמית</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#1a3a6b;--blue-mid:#2255a4;--blue-light:#e8f0fa;--blue-accent:#3b82f6;
+  --gold:#c9a84c;--gold-light:#fdf8ee;
+  --green:#15803d;--green-light:#f0fdf4;
+  --red:#dc2626;--red-light:#fef2f2;
+  --gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;
+  --gray-400:#9ca3af;--gray-600:#4b5563;--gray-800:#1f2937;
+  --radius:10px;--shadow:0 2px 16px rgba(26,58,107,0.10);
+}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 0%,#fafbff 60%,#f8f6f0 100%);min-height:100vh;color:var(--gray-800);padding:24px 16px 48px;}
+.wrap{max-width:620px;margin:0 auto;}
+
+/* HEADER */
+.header{text-align:center;margin-bottom:32px;padding-top:8px;}
+.header-logo{display:inline-flex;align-items:center;gap:10px;background:var(--blue);color:#fff;border-radius:50px;padding:8px 18px 8px 12px;font-size:13px;font-weight:500;letter-spacing:0.02em;margin-bottom:20px;}
+.header h1{font-family:'Playfair Display',serif;font-size:clamp(24px,5vw,34px);font-weight:600;color:var(--blue);line-height:1.2;margin-bottom:10px;direction:rtl;}
+.header-sub{font-size:15px;color:var(--gray-600);font-weight:300;line-height:1.6;}
+
+/* CARD */
+.card{background:#fff;border-radius:16px;box-shadow:var(--shadow);border:1px solid rgba(26,58,107,0.08);overflow:hidden;margin-bottom:16px;}
+
+/* PROGRESS */
+.progress-wrap{padding:20px 24px 0;}
+.progress-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.progress-step{font-size:12px;color:var(--gray-400);}
+.progress-label{font-size:13px;color:var(--blue-mid);font-weight:500;}
+.progress-track{height:3px;background:var(--gray-200);border-radius:2px;overflow:hidden;}
+.progress-fill{height:3px;background:linear-gradient(90deg,var(--blue),var(--blue-accent));border-radius:2px;transition:width 0.5s cubic-bezier(.4,0,.2,1);}
+
+/* CLIENT BAR */
+.client-bar{display:none;background:var(--blue-light);padding:14px 24px;border-bottom:1px solid rgba(26,58,107,0.08);align-items:center;gap:12px;}
+.client-avatar{width:40px;height:40px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:15px;flex-shrink:0;}
+.client-details{flex:1;}
+.client-name{font-size:15px;font-weight:500;color:var(--blue);}
+.client-info{font-size:12px;color:var(--blue-mid);margin-top:2px;}
+.client-edit{font-size:12px;color:var(--blue-accent);cursor:pointer;text-decoration:underline;white-space:nowrap;}
+
+.content{padding:28px 24px;}
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* EMAIL LOOKUP */
+.email-wrap{position:relative;margin-bottom:8px;}
+.email-input{width:100%;padding:14px 50px 14px 16px;border:2px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:15px;color:var(--gray-800);background:#fff;transition:border-color 0.2s;direction:ltr;text-align:left;}
+.email-input:focus{outline:none;border-color:var(--blue-accent);}
+.email-input.valid{border-color:var(--green);}
+.email-input.searching{border-color:var(--blue-accent);}
+.email-status{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:18px;pointer-events:none;}
+.lookup-spinner{width:18px;height:18px;border-radius:50%;border:2px solid var(--gray-200);border-top-color:var(--blue-accent);animation:spin 0.7s linear infinite;position:absolute;left:14px;top:50%;margin-top:-9px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lookup-result{border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;font-size:13px;line-height:1.6;}
+.lookup-found{background:var(--green-light);border:1.5px solid rgba(21,128,61,0.25);}
+.lookup-found-title{font-weight:500;color:var(--green);margin-bottom:3px;display:flex;align-items:center;gap:6px;}
+.lookup-notfound{background:var(--blue-light);border:1.5px solid rgba(59,130,246,0.2);}
+.lookup-notfound-title{font-weight:500;color:var(--blue-mid);margin-bottom:3px;}
+
+/* FIELDS */
+.field-label{font-size:11px;color:var(--gray-400);font-weight:400;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;margin-top:14px;display:block;}
+.field-input{width:100%;padding:12px 15px;border:1.5px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--gray-800);background:#fff;transition:border-color 0.15s;}
+.field-input:focus{outline:none;border-color:var(--blue-accent);}
+.field-autofilled{border-color:rgba(21,128,61,0.4) !important;background:#fafff8 !important;}
+
+/* PHONE ROW */
+.phone-row{display:flex;gap:8px;align-items:stretch;}
+.phone-flag-select{
+  display:flex;align-items:center;gap:6px;
+  border:1.5px solid var(--gray-200);border-radius:var(--radius);
+  padding:0 12px;background:#fff;cursor:pointer;
+  font-family:'DM Sans',sans-serif;font-size:14px;color:var(--gray-800);
+  white-space:nowrap;position:relative;user-select:none;
+  transition:border-color 0.15s;min-width:110px;
+}
+.phone-flag-select:hover{border-color:var(--blue-accent);}
+.phone-flag{font-size:18px;}
+.phone-dial{font-size:13px;color:var(--gray-600);}
+.phone-chevron{font-size:10px;color:var(--gray-400);margin-right:auto;}
+.phone-input{flex:1;padding:12px 15px;border:1.5px solid var(--gray-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--gray-800);background:#fff;direction:ltr;transition:border-color 0.15s;}
+.phone-input:focus{outline:none;border-color:var(--blue-accent);}
+
+/* COUNTRY DROPDOWN */
+.dial-dropdown{
+  position:absolute;top:calc(100% + 6px);right:0;left:0;
+  background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius);
+  box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:200;
+  max-height:260px;overflow:hidden;display:flex;flex-direction:column;
+  min-width:260px;
+}
+.dial-search{padding:10px 12px;border:none;border-bottom:1px solid var(--gray-100);font-family:'DM Sans',sans-serif;font-size:13px;width:100%;outline:none;direction:ltr;}
+.dial-list{overflow-y:auto;flex:1;}
+.dial-item{padding:9px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--gray-100);transition:background 0.1s;}
+.dial-item:last-child{border-bottom:none;}
+.dial-item:hover{background:var(--blue-light);}
+.dial-item.selected{background:var(--blue-light);color:var(--blue);font-weight:500;}
+.dial-item-flag{font-size:16px;flex-shrink:0;}
+.dial-item-name{flex:1;}
+.dial-item-code{color:var(--gray-400);font-size:12px;}
+
+/* CALENDAR */
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.cal-nav{background:none;border:1.5px solid var(--gray-200);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--blue);transition:all 0.15s;}
+.cal-nav:hover{border-color:var(--blue);background:var(--blue-light);}
+.cal-month{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--blue);}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.cal-dow{text-align:center;font-size:11px;color:var(--gray-400);font-weight:500;padding:4px 0;text-transform:uppercase;}
+.cal-day{
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  border-radius:8px;font-size:14px;cursor:pointer;border:1.5px solid transparent;
+  transition:all 0.15s;color:var(--gray-800);
+}
+.cal-day:hover:not(.disabled):not(.empty){background:var(--blue-light);border-color:var(--blue-accent);color:var(--blue);}
+.cal-day.selected{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:500;}
+.cal-day.today{border-color:var(--blue-accent);color:var(--blue);}
+.cal-day.disabled{color:var(--gray-200);cursor:not-allowed;}
+.cal-day.empty{cursor:default;}
+
+/* TIME SLOTS */
+.slots-wrap{margin-top:20px;}
+.slots-label{font-size:11px;color:var(--gray-400);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;display:block;}
+.slots-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.slot{
+  padding:10px 6px;text-align:center;border:1.5px solid var(--gray-200);
+  border-radius:var(--radius);font-size:13px;cursor:pointer;
+  transition:all 0.15s;color:var(--gray-800);background:#fff;
+  font-family:'DM Sans',sans-serif;
+}
+.slot:hover{border-color:var(--blue-accent);background:var(--blue-light);color:var(--blue);}
+.slot.selected{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:500;}
+
+/* SUMMARY BOX */
+.summary-box{background:var(--blue-light);border:1.5px solid rgba(26,58,107,0.15);border-radius:12px;padding:18px 20px;margin-bottom:20px;}
+.summary-row{display:flex;align-items:flex-start;gap:10px;padding:6px 0;font-size:14px;color:var(--gray-600);}
+.summary-row:not(:last-child){border-bottom:1px solid rgba(26,58,107,0.08);}
+.summary-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.summary-val{color:var(--blue);font-weight:500;}
+
+/* NAV */
+.nav{display:flex;align-items:center;justify-content:space-between;padding-top:16px;}
+.btn-back{background:none;border:1.5px solid var(--gray-200);border-radius:var(--radius);padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--gray-600);cursor:pointer;transition:all 0.15s;}
+.btn-back:hover{border-color:var(--gray-400);color:var(--gray-800);}
+.btn-next{background:var(--blue);border:none;border-radius:var(--radius);padding:11px 28px;font-family:'DM Sans',sans-serif;font-size:14px;color:#fff;cursor:pointer;font-weight:500;transition:all 0.15s;display:flex;align-items:center;gap:8px;}
+.btn-next:hover:not(:disabled){background:var(--blue-mid);}
+.btn-next:disabled{opacity:0.35;cursor:not-allowed;}
+
+/* STATUS */
+.status-wrap{text-align:center;padding:32px 16px;}
+.spinner{width:40px;height:40px;border-radius:50%;border:3px solid var(--gray-200);border-top-color:var(--blue);animation:spin2 0.8s linear infinite;margin:0 auto 20px;}
+@keyframes spin2{to{transform:rotate(360deg)}}
+.status-icon{font-size:52px;margin-bottom:16px;}
+.status-title{font-family:'Playfair Display',serif;font-size:22px;color:var(--blue);margin-bottom:10px;}
+.status-sub{font-size:14px;color:var(--gray-600);line-height:1.75;}
+
+/* INTRO */
+.intro-badge{display:inline-flex;align-items:center;gap:8px;background:var(--gold-light);border:1px solid rgba(201,168,76,0.3);color:var(--gold);border-radius:50px;padding:5px 14px;font-size:12px;font-weight:500;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:18px;}
+.intro-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--blue);line-height:1.35;margin-bottom:12px;}
+.intro-text{font-size:14px;color:var(--gray-600);line-height:1.75;margin-bottom:18px;}
+.intro-bullets{list-style:none;margin-bottom:20px;}
+.intro-bullets li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--gray-600);line-height:1.6;padding:8px 0;border-bottom:1px solid var(--gray-100);}
+.intro-bullets li:last-child{border-bottom:none;}
+.bullet-icon{width:22px;height:22px;border-radius:50%;background:var(--blue-light);color:var(--blue-mid);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;margin-top:1px;}
+.free-badge{display:inline-flex;align-items:center;gap:6px;background:var(--green-light);border:1px solid rgba(21,128,61,0.2);border-radius:8px;padding:10px 16px;font-size:14px;color:var(--green);font-weight:500;margin-bottom:20px;width:100%;}
+
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,0.45);}50%{box-shadow:0 0 0 10px rgba(37,99,235,0);}}
+.btn-begin{
+  background:var(--blue);border:none;border-radius:var(--radius);
+  padding:15px 36px;font-family:'DM Sans',sans-serif;font-size:17px;color:#fff;
+  cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:10px;
+  animation:pulse 1.8s ease infinite;transition:background 0.15s,transform 0.15s;width:100%;justify-content:center;
+}
+.btn-begin:hover{background:var(--blue-mid);transform:translateY(-2px);animation:none;}
+
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.shake{animation:shake 0.35s ease;border-color:var(--red)!important;}
+
+.privacy-note{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--gray-400);line-height:1.6;margin-top:12px;}
+.error-msg{font-size:12px;color:var(--red);margin-top:4px;display:none;}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn 0.3s ease;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="header-logo">🇺🇸 Immigration Advice Service</div>
+    <h1>שיחת ייעוץ E-2<br>חינמית עם עורך דין</h1>
+    <p class="header-sub">קבעו שיחה של 30 דקות עם עורך דין מורשה — ללא עלות</p>
+  </div>
+
+  <div class="card">
+    <!-- PROGRESS BAR -->
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-meta">
+        <span class="progress-step" id="progressStep">שלב 1 מתוך 3</span>
+        <span class="progress-label" id="progressLabel">פרטים אישיים</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:33%"></div></div>
+    </div>
+
+    <!-- CLIENT BAR (shown after email lookup) -->
+    <div class="client-bar" id="clientBar">
+      <div class="client-avatar" id="clientAvatar">?</div>
+      <div class="client-details">
+        <div class="client-name" id="clientName">—</div>
+        <div class="client-info" id="clientInfo">—</div>
+      </div>
+      <span class="client-edit" onclick="resetEmail()">שנה</span>
+    </div>
+
+    <div class="content">
+
+      <!-- ═══════════════════════════════════════════
+           SCREEN 0 — INTRO
+      ══════════════════════════════════════════════ -->
+      <div class="screen active" id="screen-intro">
+        <div class="intro-badge">✦ הזדמנות חינמית</div>
+        <div class="intro-title">קבעו שיחה אישית על ויזת E-2 לישראלים</div>
+        <div class="intro-text">עורך דין מורשה יבדוק את הפרופיל שלכם, יענה על שאלות, ויסביר האם ויזת E-2 מתאימה לכם — ללא מחויבות וללא עלות.</div>
+        <div class="free-badge">✅ &nbsp;השיחה חינמית לחלוטין — אין צורך בכרטיס אשראי</div>
+        <ul class="intro-bullets">
+          <li><div class="bullet-icon">30</div>שיחה של 30 דקות עם עורך דין מורשה</li>
+          <li><div class="bullet-icon">E2</div>הסבר מותאם אישית על ויזת E-2 לישראלים</li>
+          <li><div class="bullet-icon">📋</div>בדיקה ראשונית של הזכאות שלכם</li>
+          <li><div class="bullet-icon">🔒</div>ללא מחויבות — השיחה היא של כם</li>
+        </ul>
+        <button class="btn-begin" onclick="goScreen('email')">קבעו שיחה עכשיו →</button>
+      </div>
+
+      <!-- ═══════════════════════════════════════════
+           SCREEN 1 — EMAIL + DETAILS
+      ══════════════════════════════════════════════ -->
+      <div class="screen" id="screen-email">
+        <div style="font-family:'Playfair Display',serif;font-size:19px;font-weight:600;color:var(--blue);margin-bottom:6px;">הפרטים שלכם</div>
+        <div style="font-size:13px;color:var(--gray-400);margin-bottom:20px;">נכניסו את האימייל שלכם ונמצא את הפרטים אוטומטית</div>
+
+        <!-- EMAIL FIELD -->
+        <label class="field-label">כתובת אימייל</label>
+        <div class="email-wrap">
+          <input type="email" class="email-input" id="emailInput" placeholder="your@email.com" oninput="onEmailInput()" dir="ltr">
+          <span class="email-status" id="emailStatus"></span>
+          <div class="lookup-spinner" id="emailSpinner" style="display:none"></div>
+        </div>
+        <div id="lookupResult"></div>
+
+        <!-- NAME FIELDS -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;">
+          <div>
+            <label class="field-label">שם פרטי</label>
+            <input type="text" class="field-input" id="firstNameInput" placeholder="שם פרטי">
+          </div>
+          <div>
+            <label class="field-label">שם משפחה</label>
+            <input type="text" class="field-input" id="lastNameInput" placeholder="שם משפחה">
+          </div>
+        </div>
+
+        <!-- PHONE FOR CONSULTATION -->
+        <label class="field-label" style="margin-top:18px;">מספר טלפון לשיחה</label>
+        <div style="font-size:12px;color:var(--gray-400);margin-bottom:8px;">המספר שבו תהיו זמינים לשיחה — יישמר בנוסף לפרטים הקיימים</div>
+        <div class="phone-row">
+          <div class="phone-flag-select" id="phoneFlagBtn" onclick="toggleDialDropdown()">
+            <span class="phone-flag" id="selectedFlag">🇮🇱</span>
+            <span class="phone-dial" id="selectedDial">+972</span>
+            <span class="phone-chevron">▾</span>
+            <!-- DROPDOWN -->
+            <div class="dial-dropdown" id="dialDropdown" style="display:none" onclick="event.stopPropagation()">
+              <input class="dial-search" type="text" placeholder="חפש מדינה..." oninput="filterDial(this.value)" id="dialSearch">
+              <div class="dial-list" id="dialList"></div>
+            </div>
+          </div>
+          <input type="tel" class="phone-input" id="phoneInput" placeholder="050-000-0000" dir="ltr">
+        </div>
+        <div class="error-msg" id="phoneError">נא להכניס מספר טלפון תקין</div>
+
+        <div class="privacy-note">🔒 המידע נשמר בצורה מאובטחת ולא יועבר לצד שלישי</div>
+
+        <div class="nav" style="justify-content:flex-end;margin-top:16px;">
+          <button class="btn-next" id="btnEmail" onclick="goToCalendar()" disabled>המשך לבחירת מועד →</button>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════
+           SCREEN 2 — CALENDAR + TIME
+      ══════════════════════════════════════════════ -->
+      <div class="screen" id="screen-calendar">
+        <div style="font-family:'Playfair Display',serif;font-size:19px;font-weight:600;color:var(--blue);margin-bottom:6px;">בחרו מועד לשיחה</div>
+        <div style="font-size:13px;color:var(--gray-400);margin-bottom:20px;">ימים א׳–ה׳, 10:30–17:30 שעון ישראל</div>
+
+        <!-- CALENDAR -->
+        <div class="cal-header">
+          <button class="cal-nav" onclick="changeMonth(-1)">‹</button>
+          <span class="cal-month" id="calMonth"></span>
+          <button class="cal-nav" onclick="changeMonth(1)">›</button>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+
+        <!-- TIME SLOTS -->
+        <div class="slots-wrap" id="slotsWrap" style="display:none">
+          <span class="slots-label">שעות פנויות — <span id="slotsDateLabel"></span></span>
+          <div class="slots-grid" id="slotsGrid"></div>
+        </div>
+
+        <div class="nav">
+          <button class="btn-back" onclick="goScreen('email')">← חזור</button>
+          <button class="btn-next" id="btnCalendar" onclick="goScreen('confirm')" disabled>המשך לאישור →</button>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════
+           SCREEN 3 — CONFIRM
+      ══════════════════════════════════════════════ -->
+      <div class="screen" id="screen-confirm">
+        <div style="font-family:'Playfair Display',serif;font-size:19px;font-weight:600;color:var(--blue);margin-bottom:6px;">אישור פגישה</div>
+        <div style="font-size:13px;color:var(--gray-400);margin-bottom:20px;">בדקו את הפרטים ואשרו את הקביעה</div>
+
+        <div class="summary-box" id="summaryBox">
+          <div class="summary-row"><span class="summary-icon">👤</span><div>שם: <span class="summary-val" id="sumName">—</span></div></div>
+          <div class="summary-row"><span class="summary-icon">📧</span><div>אימייל: <span class="summary-val" id="sumEmail">—</span></div></div>
+          <div class="summary-row"><span class="summary-icon">📱</span><div>טלפון לשיחה: <span class="summary-val" id="sumPhone">—</span></div></div>
+          <div class="summary-row"><span class="summary-icon">📅</span><div>תאריך: <span class="summary-val" id="sumDate">—</span></div></div>
+          <div class="summary-row"><span class="summary-icon">🕐</span><div>שעה (שעון ישראל): <span class="summary-val" id="sumTime">—</span></div></div>
+          <div class="summary-row"><span class="summary-icon">⏱</span><div>משך: <span class="summary-val">30 דקות</span></div></div>
+        </div>
+
+        <div style="background:var(--gold-light);border-right:3px solid var(--gold);border-radius:0 8px 8px 0;padding:12px 15px;font-size:13px;color:#78621a;line-height:1.6;margin-bottom:20px;">
+          💡 עורך הדין יתקשר אליכם במועד שנקבע. אנא הישארו זמינים 5 דקות לפני השיחה.
+        </div>
+
+        <div class="nav">
+          <button class="btn-back" onclick="goScreen('calendar')">← חזור</button>
+          <button class="btn-next" onclick="submitBooking()">✓ אשרו קביעת פגישה</button>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════
+           SCREEN — PROCESSING
+      ══════════════════════════════════════════════ -->
+      <div class="screen" id="screen-processing">
+        <div class="status-wrap">
+          <div class="spinner"></div>
+          <div class="status-title">שומרים את הפגישה...</div>
+          <div class="status-sub">מעבד את הבקשה, אנא המתינו</div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════
+           SCREEN — SUCCESS
+      ══════════════════════════════════════════════ -->
+      <div class="screen" id="screen-success">
+        <div class="status-wrap fade-in">
+          <div class="status-icon">✅</div>
+          <div class="status-title">הפגישה נקבעה בהצלחה!</div>
+          <div class="status-sub" id="successMsg">
+            עורך הדין שלנו יתקשר אליכם במועד שנקבע.<br><br>
+            <strong id="successDateTime"></strong><br><br>
+            אם יש שינוי בתוכניות, אנא צרו קשר בהקדם האפשרי.
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /card -->
+
+</div><!-- /wrap -->
+
+<script>
+// ─────────────────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────────────────
+const WEBHOOK = 'https://immiworld.org/rest/147/47yrflms2cje1cbe/';
+
+// ─────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────
+let state = {
+  email: '',
+  firstName: '',
+  lastName: '',
+  leadId: null,
+  contactId: null,
+  dialCode: '+972',
+  dialFlag: '🇮🇱',
+  dialCountry: 'Israel',
+  phoneLocal: '',
+  selectedDate: null,   // Date object
+  selectedSlot: null,   // e.g. '10:30'
+};
+
+let calYear, calMonth;
+
+// ─────────────────────────────────────────────────────────
+// DIAL CODES
+// ─────────────────────────────────────────────────────────
+const DIAL_COUNTRIES = [
+  {name:'Israel',flag:'🇮🇱',code:'+972'},
+  {name:'United States',flag:'🇺🇸',code:'+1'},
+  {name:'United Kingdom',flag:'🇬🇧',code:'+44'},
+  {name:'Canada',flag:'🇨🇦',code:'+1'},
+  {name:'Australia',flag:'🇦🇺',code:'+61'},
+  {name:'Germany',flag:'🇩🇪',code:'+49'},
+  {name:'France',flag:'🇫🇷',code:'+33'},
+  {name:'Brazil',flag:'🇧🇷',code:'+55'},
+  {name:'Mexico',flag:'🇲🇽',code:'+52'},
+  {name:'India',flag:'🇮🇳',code:'+91'},
+  {name:'China',flag:'🇨🇳',code:'+86'},
+  {name:'Japan',flag:'🇯🇵',code:'+81'},
+  {name:'South Korea',flag:'🇰🇷',code:'+82'},
+  {name:'South Africa',flag:'🇿🇦',code:'+27'},
+  {name:'Argentina',flag:'🇦🇷',code:'+54'},
+  {name:'Colombia',flag:'🇨🇴',code:'+57'},
+  {name:'Chile',flag:'🇨🇱',code:'+56'},
+  {name:'Spain',flag:'🇪🇸',code:'+34'},
+  {name:'Italy',flag:'🇮🇹',code:'+39'},
+  {name:'Netherlands',flag:'🇳🇱',code:'+31'},
+  {name:'Belgium',flag:'🇧🇪',code:'+32'},
+  {name:'Switzerland',flag:'🇨🇭',code:'+41'},
+  {name:'Austria',flag:'🇦🇹',code:'+43'},
+  {name:'Sweden',flag:'🇸🇪',code:'+46'},
+  {name:'Norway',flag:'🇳🇴',code:'+47'},
+  {name:'Denmark',flag:'🇩🇰',code:'+45'},
+  {name:'Finland',flag:'🇫🇮',code:'+358'},
+  {name:'Poland',flag:'🇵🇱',code:'+48'},
+  {name:'Czech Republic',flag:'🇨🇿',code:'+420'},
+  {name:'Hungary',flag:'🇭🇺',code:'+36'},
+  {name:'Romania',flag:'🇷🇴',code:'+40'},
+  {name:'Turkey',flag:'🇹🇷',code:'+90'},
+  {name:'Russia',flag:'🇷🇺',code:'+7'},
+  {name:'Ukraine',flag:'🇺🇦',code:'+380'},
+  {name:'Portugal',flag:'🇵🇹',code:'+351'},
+  {name:'Greece',flag:'🇬🇷',code:'+30'},
+  {name:'Singapore',flag:'🇸🇬',code:'+65'},
+  {name:'New Zealand',flag:'🇳🇿',code:'+64'},
+  {name:'UAE',flag:'🇦🇪',code:'+971'},
+  {name:'Saudi Arabia',flag:'🇸🇦',code:'+966'},
+  {name:'Egypt',flag:'🇪🇬',code:'+20'},
+  {name:'Nigeria',flag:'🇳🇬',code:'+234'},
+  {name:'Kenya',flag:'🇰🇪',code:'+254'},
+  {name:'Ghana',flag:'🇬🇭',code:'+233'},
+  {name:'Philippines',flag:'🇵🇭',code:'+63'},
+  {name:'Indonesia',flag:'🇮🇩',code:'+62'},
+  {name:'Malaysia',flag:'🇲🇾',code:'+60'},
+  {name:'Thailand',flag:'🇹🇭',code:'+66'},
+  {name:'Vietnam',flag:'🇻🇳',code:'+84'},
+  {name:'Pakistan',flag:'🇵🇰',code:'+92'},
+  {name:'Bangladesh',flag:'🇧🇩',code:'+880'},
+].sort((a,b)=>a.name.localeCompare(b.name));
+
+let filteredDial = [...DIAL_COUNTRIES];
+
+function renderDialList(list) {
+  const el = document.getElementById('dialList');
+  el.innerHTML = '';
+  list.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'dial-item' + (state.dialCountry===c.name?' selected':'');
+    div.innerHTML = `<span class="dial-item-flag">${c.flag}</span><span class="dial-item-name">${c.name}</span><span class="dial-item-code">${c.code}</span>`;
+    div.onclick = () => selectDial(c);
+    el.appendChild(div);
+  });
+}
+
+function filterDial(q) {
+  const fl = q.toLowerCase();
+  filteredDial = DIAL_COUNTRIES.filter(c => c.name.toLowerCase().includes(fl) || c.code.includes(fl));
+  renderDialList(filteredDial);
+}
+
+function selectDial(c) {
+  state.dialCode = c.code;
+  state.dialFlag = c.flag;
+  state.dialCountry = c.name;
+  document.getElementById('selectedFlag').textContent = c.flag;
+  document.getElementById('selectedDial').textContent = c.code;
+  document.getElementById('dialDropdown').style.display = 'none';
+  renderDialList(filteredDial);
+  validateEmailScreen();
+}
+
+function toggleDialDropdown() {
+  const dd = document.getElementById('dialDropdown');
+  const open = dd.style.display !== 'none';
+  dd.style.display = open ? 'none' : 'flex';
+  if(!open) {
+    renderDialList(DIAL_COUNTRIES);
+    document.getElementById('dialSearch').value = '';
+    filteredDial = [...DIAL_COUNTRIES];
+    setTimeout(()=>document.getElementById('dialSearch').focus(),50);
+  }
+}
+
+// Close dropdown on outside click
+document.addEventListener('click', e => {
+  if(!document.getElementById('phoneFlagBtn').contains(e.target)) {
+    document.getElementById('dialDropdown').style.display = 'none';
+  }
+});
+
+// ─────────────────────────────────────────────────────────
+// SCREEN NAVIGATION
+// ─────────────────────────────────────────────────────────
+const SCREENS = ['intro','email','calendar','confirm','processing','success'];
+const PROGRESS = {
+  intro:    {step:'',       label:'',                pct:0},
+  email:    {step:'שלב 1 מתוך 3', label:'פרטים אישיים',  pct:33},
+  calendar: {step:'שלב 2 מתוך 3', label:'בחירת מועד',    pct:66},
+  confirm:  {step:'שלב 3 מתוך 3', label:'אישור',          pct:90},
+  processing:{step:'',      label:'',                pct:100},
+  success:  {step:'',       label:'',                pct:100},
+};
+
+function goScreen(id) {
+  SCREENS.forEach(s => {
+    const el = document.getElementById('screen-'+s);
+    if(el) el.classList.toggle('active', s===id);
+  });
+  const p = PROGRESS[id];
+  const pw = document.getElementById('progressWrap');
+  if(p && p.step) {
+    pw.style.display = 'block';
+    document.getElementById('progressStep').textContent  = p.step;
+    document.getElementById('progressLabel').textContent = p.label;
+    document.getElementById('progressFill').style.width  = p.pct+'%';
+  } else {
+    pw.style.display = 'none';
+  }
+  if(id==='confirm') populateSummary();
+  if(id==='calendar') { initCalendar(); }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ─────────────────────────────────────────────────────────
+// EMAIL LOOKUP
+// ─────────────────────────────────────────────────────────
+let lookupTimer = null;
+
+function onEmailInput() {
+  const val = document.getElementById('emailInput').value.trim();
+  state.email = val;
+  clearTimeout(lookupTimer);
+  document.getElementById('lookupResult').innerHTML = '';
+  document.getElementById('emailStatus').textContent = '';
+  document.getElementById('emailSpinner').style.display = 'none';
+  document.getElementById('emailInput').className = 'email-input';
+  document.getElementById('clientBar').style.display = 'none';
+  state.leadId = null; state.contactId = null;
+  validateEmailScreen();
+
+  if(!isValidEmail(val)) return;
+
+  document.getElementById('emailInput').className = 'email-input searching';
+  document.getElementById('emailSpinner').style.display = 'block';
+  lookupTimer = setTimeout(()=>lookupEmail(val), 700);
+}
+
+function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+async function lookupEmail(email) {
+  try {
+    const res  = await fetch(WEBHOOK + 'crm.lead.list?filter[EMAIL]=' + encodeURIComponent(email) + '&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=EMAIL&select[]=STATUS_ID&order[DATE_CREATE]=DESC');
+    const data = await res.json();
+    document.getElementById('emailSpinner').style.display = 'none';
+
+    if(data.result && data.result.length > 0) {
+      const lead = data.result[0];
+      state.leadId    = lead.ID;
+      state.firstName = lead.NAME      || '';
+      state.lastName  = lead.LAST_NAME || '';
+
+      document.getElementById('firstNameInput').value = state.firstName;
+      document.getElementById('lastNameInput').value  = state.lastName;
+      document.getElementById('firstNameInput').classList.add('field-autofilled');
+      document.getElementById('lastNameInput').classList.add('field-autofilled');
+
+      // Show client bar
+      const fullName = [state.firstName, state.lastName].filter(Boolean).join(' ') || email;
+      document.getElementById('clientAvatar').textContent = (state.firstName||email)[0].toUpperCase();
+      document.getElementById('clientName').textContent   = fullName;
+      document.getElementById('clientInfo').textContent   = 'ליד #' + lead.ID;
+      document.getElementById('clientBar').style.display  = 'flex';
+
+      document.getElementById('emailInput').className = 'email-input valid';
+      document.getElementById('emailStatus').textContent = '✓';
+      document.getElementById('lookupResult').innerHTML = `
+        <div class="lookup-result lookup-found fade-in">
+          <div class="lookup-found-title">✓ מצאנו את הפרטים שלכם</div>
+          <div>שם: <strong>${fullName}</strong> — פרטים מולאו אוטומטית</div>
+        </div>`;
+
+      // Also look up contact
+      try {
+        const cRes  = await fetch(WEBHOOK + 'crm.contact.list?filter[EMAIL]=' + encodeURIComponent(email) + '&select[]=ID');
+        const cData = await cRes.json();
+        if(cData.result && cData.result.length > 0) state.contactId = cData.result[0].ID;
+      } catch(e){}
+
+    } else {
+      // Not found
+      document.getElementById('emailInput').className = 'email-input';
+      document.getElementById('lookupResult').innerHTML = `
+        <div class="lookup-result lookup-notfound fade-in">
+          <div class="lookup-notfound-title">לא מצאנו רשומה קיימת</div>
+          <div>אנא מלאו את שמכם למטה — ניצור רשומה חדשה</div>
+        </div>`;
+    }
+  } catch(e) {
+    document.getElementById('emailSpinner').style.display = 'none';
+  }
+  validateEmailScreen();
+}
+
+function validateEmailScreen() {
+  const emailOk = isValidEmail(state.email);
+  const fName   = document.getElementById('firstNameInput').value.trim();
+  const phone   = document.getElementById('phoneInput').value.trim();
+  const ok = emailOk && fName.length > 0 && phone.length >= 6;
+  document.getElementById('btnEmail').disabled = !ok;
+}
+
+function resetEmail() {
+  state.leadId = null; state.contactId = null; state.firstName = ''; state.lastName = '';
+  document.getElementById('emailInput').value = '';
+  document.getElementById('emailInput').className = 'email-input';
+  document.getElementById('emailStatus').textContent = '';
+  document.getElementById('lookupResult').innerHTML = '';
+  document.getElementById('firstNameInput').value = '';
+  document.getElementById('lastNameInput').value  = '';
+  document.getElementById('firstNameInput').classList.remove('field-autofilled');
+  document.getElementById('lastNameInput').classList.remove('field-autofilled');
+  document.getElementById('clientBar').style.display = 'none';
+  validateEmailScreen();
+}
+
+// Live validation on name/phone input
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.getElementById('firstNameInput').addEventListener('input', validateEmailScreen);
+  document.getElementById('lastNameInput').addEventListener('input',  validateEmailScreen);
+  document.getElementById('phoneInput').addEventListener('input',     validateEmailScreen);
+  initCalendar();
+  renderDialList(DIAL_COUNTRIES);
+});
+
+// ─────────────────────────────────────────────────────────
+// GO TO CALENDAR
+// ─────────────────────────────────────────────────────────
+function goToCalendar() {
+  state.firstName = document.getElementById('firstNameInput').value.trim();
+  state.lastName  = document.getElementById('lastNameInput').value.trim();
+  state.email     = document.getElementById('emailInput').value.trim();
+  state.phoneLocal= document.getElementById('phoneInput').value.trim();
+  if(state.phoneLocal.length < 6) {
+    document.getElementById('phoneInput').classList.add('shake');
+    document.getElementById('phoneError').style.display = 'block';
+    setTimeout(()=>document.getElementById('phoneInput').classList.remove('shake'),400);
+    return;
+  }
+  document.getElementById('phoneError').style.display = 'none';
+  goScreen('calendar');
+}
+
+// ─────────────────────────────────────────────────────────
+// CALENDAR
+// ─────────────────────────────────────────────────────────
+const HEB_MONTHS = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+const HEB_DAYS   = ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳']; // Sun–Sat
+
+// Available: Monday(1)–Friday(5) in JS (0=Sun)
+function isAvailableDay(d) { return d.getDay() >= 1 && d.getDay() <= 5; }
+
+function initCalendar() {
+  const now = new Date();
+  calYear  = now.getFullYear();
+  calMonth = now.getMonth();
+  renderCalendar();
+}
+
+function changeMonth(dir) {
+  calMonth += dir;
+  if(calMonth < 0) { calMonth = 11; calYear--; }
+  if(calMonth > 11){ calMonth = 0;  calYear++; }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  document.getElementById('calMonth').textContent = HEB_MONTHS[calMonth] + ' ' + calYear;
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+
+  // Day-of-week headers (Sun–Sat)
+  HEB_DAYS.forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'cal-dow';
+    el.textContent = d;
+    grid.appendChild(el);
+  });
+
+  const today   = new Date(); today.setHours(0,0,0,0);
+  const first   = new Date(calYear, calMonth, 1);
+  const startDow= first.getDay(); // 0=Sun
+
+  // Empty cells before 1st
+  for(let i=0; i<startDow; i++) {
+    const el=document.createElement('div'); el.className='cal-day empty'; grid.appendChild(el);
+  }
+
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  for(let d=1; d<=daysInMonth; d++) {
+    const date = new Date(calYear, calMonth, d);
+    const el = document.createElement('div');
+    el.className = 'cal-day';
+    el.textContent = d;
+
+    const isToday    = date.getTime()===today.getTime();
+    const isPast     = date < today;
+    const isAvail    = isAvailableDay(date);
+    const isSelected = state.selectedDate && state.selectedDate.getTime()===date.getTime();
+
+    if(isSelected) el.classList.add('selected');
+    else if(isToday && isAvail) el.classList.add('today');
+
+    if(isPast || !isAvail) {
+      el.classList.add('disabled');
+    } else {
+      el.onclick = () => selectDate(date);
+    }
+    grid.appendChild(el);
+  }
+}
+
+function selectDate(date) {
+  state.selectedDate = date;
+  state.selectedSlot = null;
+  document.getElementById('btnCalendar').disabled = true;
+  renderCalendar();
+  renderSlots(date);
+}
+
+function renderSlots(date) {
+  const wrap = document.getElementById('slotsWrap');
+  const grid = document.getElementById('slotsGrid');
+  wrap.style.display = 'block';
+
+  const opts = ['10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00'];
+  const label = date.toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('slotsDateLabel').textContent = label;
+
+  grid.innerHTML = '';
+  opts.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'slot' + (state.selectedSlot===t?' selected':'');
+    btn.textContent = t;
+    btn.onclick = () => selectSlot(t);
+    grid.appendChild(btn);
+  });
+}
+
+function selectSlot(t) {
+  state.selectedSlot = t;
+  document.querySelectorAll('.slot').forEach(b => b.classList.toggle('selected', b.textContent===t));
+  document.getElementById('btnCalendar').disabled = false;
+}
+
+// ─────────────────────────────────────────────────────────
+// CONFIRM SUMMARY
+// ─────────────────────────────────────────────────────────
+function populateSummary() {
+  const fullName = [state.firstName, state.lastName].filter(Boolean).join(' ');
+  const fullPhone = state.dialCode + ' ' + state.phoneLocal;
+  const dateStr  = state.selectedDate
+    ? state.selectedDate.toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
+    : '—';
+
+  document.getElementById('sumName').textContent  = fullName  || '—';
+  document.getElementById('sumEmail').textContent = state.email || '—';
+  document.getElementById('sumPhone').textContent = fullPhone;
+  document.getElementById('sumDate').textContent  = dateStr;
+  document.getElementById('sumTime').textContent  = state.selectedSlot || '—';
+}
+
+// ─────────────────────────────────────────────────────────
+// SUBMIT TO BITRIX24
+// ─────────────────────────────────────────────────────────
+async function submitBooking() {
+  goScreen('processing');
+
+  const fullName  = [state.firstName, state.lastName].filter(Boolean).join(' ');
+  const fullPhone = state.dialCode + ' ' + state.phoneLocal;
+
+  // Build ISO datetime for the meeting (Israel is UTC+3)
+  const [hStr, mStr] = state.selectedSlot.split(':');
+  const meetStart = new Date(state.selectedDate);
+  meetStart.setHours(parseInt(hStr), parseInt(mStr), 0, 0);
+  // Convert Israel time (UTC+3) to UTC
+  const startUTC = new Date(meetStart.getTime() - 3*60*60*1000);
+  const endUTC   = new Date(startUTC.getTime() + 30*60*1000);
+
+  const toISO = d => d.toISOString().replace('.000','');
+
+  const dateLabel = state.selectedDate.toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const comment = [
+    '=== E2 FREE CONSULTATION BOOKING ===',
+    `Name: ${fullName}`,
+    `Email: ${state.email}`,
+    `Consultation Phone: ${fullPhone}`,
+    '',
+    `Date: ${dateLabel}`,
+    `Time (Israel): ${state.selectedSlot}`,
+    `Duration: 30 minutes`,
+    '',
+    'Booked via E2 consultation form',
+  ].join('\n');
+
+  try {
+    // ── 1. Find or create lead ──────────────────────────
+    let leadId = state.leadId;
+
+    if(!leadId) {
+      // Create new lead
+      let url = WEBHOOK + 'crm.lead.add?fields[TITLE]=' + encodeURIComponent('E2 Consultation: ' + fullName)
+        + '&fields[NAME]='      + encodeURIComponent(state.firstName)
+        + '&fields[LAST_NAME]=' + encodeURIComponent(state.lastName)
+        + '&fields[EMAIL][0][VALUE]=' + encodeURIComponent(state.email)
+        + '&fields[EMAIL][0][VALUE_TYPE]=WORK'
+        + '&fields[STATUS_ID]=NEW';
+      const res  = await fetch(url); const data = await res.json();
+      if(data.result) leadId = data.result;
+    }
+
+    // ── 2. Add consultation phone as ADDITIONAL phone ──
+    if(leadId) {
+      // Get existing phones first
+      const lRes  = await fetch(WEBHOOK + 'crm.lead.get?ID=' + leadId);
+      const lData = await lRes.json();
+      const existingPhones = (lData.result && lData.result.PHONE) ? lData.result.PHONE : [];
+
+      // Build updated phone array — keep existing, add new
+      const phonesUpdate = existingPhones.map((p,i) => `fields[PHONE][${i}][VALUE]=${encodeURIComponent(p.VALUE)}&fields[PHONE][${i}][VALUE_TYPE]=${p.VALUE_TYPE}`).join('&');
+      const newIdx = existingPhones.length;
+      const newPhoneParam = `fields[PHONE][${newIdx}][VALUE]=${encodeURIComponent(fullPhone)}&fields[PHONE][${newIdx}][VALUE_TYPE]=MOBILE`;
+
+      await fetch(WEBHOOK + 'crm.lead.update?ID=' + leadId + '&' + (phonesUpdate ? phonesUpdate + '&' : '') + newPhoneParam);
+
+      // ── 3. Timeline comment ──
+      await fetch(WEBHOOK + 'crm.timeline.comment.add', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ fields:{ ENTITY_TYPE:'lead', ENTITY_ID: leadId, COMMENT: comment } })
+      });
+
+      // ── 4. Create Activity (Meeting) on lead ──
+      await fetch(WEBHOOK + 'crm.activity.add', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          fields: {
+            OWNER_TYPE_ID: 1,           // 1 = Lead
+            OWNER_ID: leadId,
+            TYPE_ID: 1,                 // 1 = Meeting
+            SUBJECT: 'Free E2 Consultation — ' + fullName,
+            DESCRIPTION: comment,
+            DESCRIPTION_TYPE: 1,
+            START_TIME: toISO(startUTC),
+            END_TIME:   toISO(endUTC),
+            COMPLETED: 'N',
+            DIRECTION: 2,               // Outgoing
+            NOTIFY_TYPE: 1,
+            COMMUNICATIONS: [{
+              VALUE: state.email,
+              ENTITY_ID: leadId,
+              ENTITY_TYPE_ID: 1
+            }]
+          }
+        })
+      });
+
+      // ── 5. Update contact if found ──
+      if(state.contactId) {
+        const cRes  = await fetch(WEBHOOK + 'crm.contact.get?ID=' + state.contactId);
+        const cData = await cRes.json();
+        const cPhones = (cData.result && cData.result.PHONE) ? cData.result.PHONE : [];
+        const cExisting = cPhones.map((p,i) => `fields[PHONE][${i}][VALUE]=${encodeURIComponent(p.VALUE)}&fields[PHONE][${i}][VALUE_TYPE]=${p.VALUE_TYPE}`).join('&');
+        const cIdx = cPhones.length;
+        const cNew = `fields[PHONE][${cIdx}][VALUE]=${encodeURIComponent(fullPhone)}&fields[PHONE][${cIdx}][VALUE_TYPE]=MOBILE`;
+        await fetch(WEBHOOK + 'crm.contact.update?ID=' + state.contactId + '&' + (cExisting ? cExisting+'&' : '') + cNew);
+
+        await fetch(WEBHOOK + 'crm.activity.add', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            fields: {
+              OWNER_TYPE_ID: 3,         // 3 = Contact
+              OWNER_ID: state.contactId,
+              TYPE_ID: 1,
+              SUBJECT: 'Free E2 Consultation — ' + fullName,
+              DESCRIPTION: comment,
+              DESCRIPTION_TYPE: 1,
+              START_TIME: toISO(startUTC),
+              END_TIME:   toISO(endUTC),
+              COMPLETED: 'N',
+              DIRECTION: 2
+            }
+          })
+        });
+      }
+    }
+  } catch(e) {
+    console.log('Bitrix24 error:', e);
+  }
+
+  // ── Show success ──
+  const dateLabel = state.selectedDate.toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('successDateTime').textContent = dateLabel + ' בשעה ' + state.selectedSlot + ' (שעון ישראל)';
+  goScreen('success');
+}
+</script>
+</body>
+</html>
