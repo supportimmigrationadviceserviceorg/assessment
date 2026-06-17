@@ -194,8 +194,8 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
 
   <div class="header">
     <div class="header-logo">🇺🇸 Immigration Advice Service</div>
-    <h1>שיחת ייעוץ E-2<br>חינמית עם עורך דין</h1>
-    <p class="header-sub">קבעו שיחה של 30 דקות עם עורך דין מורשה — ללא עלות</p>
+    <h1>שיחת ייעוץ E-2<br>חינמית עם יועץ הגירה</h1>
+    <p class="header-sub">קבעו שיחה של 30 דקות עם יועץ הגירה — ללא עלות</p>
   </div>
 
   <div class="card">
@@ -224,16 +224,32 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
            SCREEN 0 — INTRO
       ══════════════════════════════════════════════ -->
       <div class="screen active" id="screen-intro">
-        <div class="intro-badge">✦ הזדמנות חינמית</div>
-        <div class="intro-title">קבעו שיחה אישית על ויזת E-2 לישראלים</div>
-        <div class="intro-text">עורך דין מורשה יבדוק את הפרופיל שלכם, יענה על שאלות, ויסביר האם ויזת E-2 מתאימה לכם — ללא מחויבות וללא עלות.</div>
-        <div class="free-badge">✅ &nbsp;השיחה חינמית לחלוטין — אין צורך בכרטיס אשראי</div>
+        <div class="intro-badge">✦ הזדמנות חינמית לישראלים</div>
+        <div class="intro-title">ויזת E-2 לישראלים — בדיקת התאמה ללא עלות</div>
+        <div class="intro-text">מאז שישראל הצטרפה באופן רשמי לתוכנית ויזות ה-E-2 של ארצות הברית, נפתחה בפני אזרחים ישראלים אפשרות לחיות ולעבוד בארה״ב באמצעות השקעה בעסק.</div>
+
+        <!-- E2 INFO BOX -->
+        <div style="background:var(--blue-light);border-right:3px solid var(--blue-mid);border-radius:0 10px 10px 0;padding:16px 18px;margin-bottom:18px;font-size:13px;line-height:1.75;color:var(--blue);">
+          <div style="font-weight:600;margin-bottom:8px;font-size:14px;">ויזת E-2 — עיקרי היתרונות:</div>
+          ✅ מגורים חוקיים בארצות הברית<br>
+          ✅ ניהול עסק אמריקאי באופן פעיל<br>
+          ✅ בן/בת הזוג יכולים לקבל אישור עבודה בארה״ב<br>
+          ✅ ילדים עד גיל 21 יכולים להצטרף לתהליך<br>
+          ✅ אין דרישה לסכום השקעה קבוע — כל מקרה נבחן לגופו<br>
+          ✅ ניתן לחדש את הוויזה כל עוד העסק פועל
+        </div>
+
+        <div style="font-size:14px;font-weight:600;color:var(--gray-800);margin-bottom:10px;">במהלך שיחת הייעוץ נבחן:</div>
         <ul class="intro-bullets">
-          <li><div class="bullet-icon">30</div>שיחה של 30 דקות עם עורך דין מורשה</li>
-          <li><div class="bullet-icon">E2</div>הסבר מותאם אישית על ויזת E-2 לישראלים</li>
-          <li><div class="bullet-icon">📋</div>בדיקה ראשונית של הזכאות שלכם</li>
-          <li><div class="bullet-icon">🔒</div>ללא מחויבות — השיחה היא של כם</li>
+          <li><div class="bullet-icon">✓</div>האם אתם עומדים בתנאים הבסיסיים למסלול E-2</li>
+          <li><div class="bullet-icon">💰</div>מהו גובה ההשקעה המקובל לפי סוג העסק</li>
+          <li><div class="bullet-icon">🏢</div>אילו עסקים מתאימים למסלול</li>
+          <li><div class="bullet-icon">👨‍👩‍👧</div>כיצד לשלב את בני המשפחה בתהליך</li>
+          <li><div class="bullet-icon">📋</div>מהם השלבים והמסמכים הנדרשים</li>
         </ul>
+
+        <div class="free-badge">✅ &nbsp;שיחת ייעוץ ראשונית — ללא עלות וללא התחייבות</div>
+
         <button class="btn-begin" onclick="goScreen('email')">קבעו שיחה עכשיו →</button>
       </div>
 
@@ -334,7 +350,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
         </div>
 
         <div style="background:var(--gold-light);border-right:3px solid var(--gold);border-radius:0 8px 8px 0;padding:12px 15px;font-size:13px;color:#78621a;line-height:1.6;margin-bottom:20px;">
-          💡 עורך הדין יתקשר אליכם במועד שנקבע. אנא הישארו זמינים 5 דקות לפני השיחה.
+          💡 יועץ ההגירה יתקשר אליכם במועד שנקבע. אנא הישארו זמינים 5 דקות לפני השיחה.
         </div>
 
         <div class="nav">
@@ -362,7 +378,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
           <div class="status-icon">✅</div>
           <div class="status-title">הפגישה נקבעה בהצלחה!</div>
           <div class="status-sub" id="successMsg">
-            עורך הדין שלנו יתקשר אליכם במועד שנקבע.<br><br>
+            יועץ ההגירה שלנו יתקשר אליכם במועד שנקבע.<br><br>
             <strong id="successDateTime"></strong><br><br>
             אם יש שינוי בתוכניות, אנא צרו קשר בהקדם האפשרי.
           </div>
@@ -915,7 +931,6 @@ async function submitBooking() {
   }
 
   // ── Show success ──
-  const dateLabel = state.selectedDate.toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   document.getElementById('successDateTime').textContent = dateLabel + ' בשעה ' + state.selectedSlot + ' (שעון ישראל)';
   goScreen('success');
 }
