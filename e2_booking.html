@@ -865,27 +865,7 @@ async function submitBooking() {
         body: JSON.stringify({ fields:{ ENTITY_TYPE:'lead', ENTITY_ID: leadId, COMMENT: comment } })
       });
 
-      // ── 4. Create Calendar Event (Meeting) linked to lead ──
-      await fetch(WEBHOOK + 'calendar.event.add', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-          type: 'user',
-          ownerId: 147,
-          name: 'Free E2 Consultation — ' + fullName,
-          description: comment,
-          from: toISO(startUTC),
-          to:   toISO(endUTC),
-          skipTime: 'N',
-          color: '#1a3a6b',
-          textColor: '#ffffff',
-          accessibility: 'busy',
-          importance: 'normal',
-          remind: [{ type: 'min', count: 30 }],
-          attendees: [861]
-        })
-      });
-
-      // ── 5. Also create crm.activity for the lead timeline ──
+      // ── 4. Create CRM Activity (Meeting) on lead — appears in CRM Activities list ──
       await fetch(WEBHOOK + 'crm.activity.add', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
@@ -898,9 +878,11 @@ async function submitBooking() {
             DESCRIPTION_TYPE: 1,
             START_TIME: toISO(startUTC),
             END_TIME:   toISO(endUTC),
+            DEADLINE:   toISO(endUTC),
             COMPLETED: 'N',
             DIRECTION: 2,
-            DEADLINE: toISO(endUTC)
+            RESPONSIBLE_ID: 861,
+            NOTIFY_TYPE: 1
           }
         })
       });
