@@ -852,19 +852,12 @@ async function submitBooking() {
       if(data.result) leadId = data.result;
     }
 
-    // ── 2. Add consultation phone as ADDITIONAL phone ──
+    // ── 2. Update lead: FAX = consultation phone, COMMENTS = booking summary ──
     if(leadId) {
-      // Get existing phones first
-      const lRes  = await fetch(WEBHOOK + 'crm.lead.get?ID=' + leadId);
-      const lData = await lRes.json();
-      const existingPhones = (lData.result && lData.result.PHONE) ? lData.result.PHONE : [];
-
-      // Build updated phone array — keep existing, add new
-      const phonesUpdate = existingPhones.map((p,i) => `fields[PHONE][${i}][VALUE]=${encodeURIComponent(p.VALUE)}&fields[PHONE][${i}][VALUE_TYPE]=${p.VALUE_TYPE}`).join('&');
-      const newIdx = existingPhones.length;
-      const newPhoneParam = `fields[PHONE][${newIdx}][VALUE]=${encodeURIComponent(fullPhone)}&fields[PHONE][${newIdx}][VALUE_TYPE]=MOBILE`;
-
-      await fetch(WEBHOOK + 'crm.lead.update?ID=' + leadId + '&' + (phonesUpdate ? phonesUpdate + '&' : '') + newPhoneParam);
+      const updateUrl = WEBHOOK + 'crm.lead.update?ID=' + leadId
+        + '&fields[FAX]='      + encodeURIComponent(fullPhone)
+        + '&fields[COMMENTS]=' + encodeURIComponent(comment);
+      await fetch(updateUrl);
 
       // ── 3. Timeline comment ──
       await fetch(WEBHOOK + 'crm.timeline.comment.add', {
@@ -877,16 +870,16 @@ async function submitBooking() {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
           fields: {
-            OWNER_TYPE_ID: 1,           // 1 = Lead
+            OWNER_TYPE_ID: 1,
             OWNER_ID: leadId,
-            TYPE_ID: 1,                 // 1 = Meeting
+            TYPE_ID: 1,
             SUBJECT: 'Free E2 Consultation — ' + fullName,
             DESCRIPTION: comment,
             DESCRIPTION_TYPE: 1,
             START_TIME: toISO(startUTC),
             END_TIME:   toISO(endUTC),
             COMPLETED: 'N',
-            DIRECTION: 2,               // Outgoing
+            DIRECTION: 2,
             NOTIFY_TYPE: 1,
             COMMUNICATIONS: [{
               VALUE: state.email,
@@ -899,19 +892,20 @@ async function submitBooking() {
 
       // ── 5. Update contact if found ──
       if(state.contactId) {
-        const cRes  = await fetch(WEBHOOK + 'crm.contact.get?ID=' + state.contactId);
-        const cData = await cRes.json();
-        const cPhones = (cData.result && cData.result.PHONE) ? cData.result.PHONE : [];
-        const cExisting = cPhones.map((p,i) => `fields[PHONE][${i}][VALUE]=${encodeURIComponent(p.VALUE)}&fields[PHONE][${i}][VALUE_TYPE]=${p.VALUE_TYPE}`).join('&');
-        const cIdx = cPhones.length;
-        const cNew = `fields[PHONE][${cIdx}][VALUE]=${encodeURIComponent(fullPhone)}&fields[PHONE][${cIdx}][VALUE_TYPE]=MOBILE`;
-        await fetch(WEBHOOK + 'crm.contact.update?ID=' + state.contactId + '&' + (cExisting ? cExisting+'&' : '') + cNew);
+        await fetch(WEBHOOK + 'crm.contact.update?ID=' + state.contactId
+          + '&fields[FAX]='      + encodeURIComponent(fullPhone)
+          + '&fields[COMMENTS]=' + encodeURIComponent(comment));
+
+        await fetch(WEBHOOK + 'crm.timeline.comment.add', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ fields:{ ENTITY_TYPE:'contact', ENTITY_ID: state.contactId, COMMENT: comment } })
+        });
 
         await fetch(WEBHOOK + 'crm.activity.add', {
           method:'POST', headers:{'Content-Type':'application/json'},
           body: JSON.stringify({
             fields: {
-              OWNER_TYPE_ID: 3,         // 3 = Contact
+              OWNER_TYPE_ID: 3,
               OWNER_ID: state.contactId,
               TYPE_ID: 1,
               SUBJECT: 'Free E2 Consultation — ' + fullName,
