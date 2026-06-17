@@ -865,7 +865,28 @@ async function submitBooking() {
         body: JSON.stringify({ fields:{ ENTITY_TYPE:'lead', ENTITY_ID: leadId, COMMENT: comment } })
       });
 
-      // ── 4. Create CRM Activity (Meeting) on lead — appears in CRM Activities list ──
+      // ── 4a. Calendar event — appears in /crm/lead/calendar/ ──
+      await fetch(WEBHOOK + 'calendar.event.add', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          type: 'user',
+          ownerId: 861,
+          name: 'Free E2 Consultation — ' + fullName,
+          description: comment,
+          from: toISO(startUTC),
+          to:   toISO(endUTC),
+          skipTime: 'N',
+          accessibility: 'busy',
+          importance: 'normal',
+          remind: [{ type: 'min', count: 30 }],
+          attendees: [861, 147],
+          crm: {
+            LEAD: [leadId]
+          }
+        })
+      });
+
+      // ── 4b. CRM Activity — appears in Activities list ──
       await fetch(WEBHOOK + 'crm.activity.add', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
