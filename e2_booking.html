@@ -865,7 +865,27 @@ async function submitBooking() {
         body: JSON.stringify({ fields:{ ENTITY_TYPE:'lead', ENTITY_ID: leadId, COMMENT: comment } })
       });
 
-      // ── 4. Create Activity (Meeting) on lead ──
+      // ── 4. Create Calendar Event (Meeting) linked to lead ──
+      await fetch(WEBHOOK + 'calendar.event.add', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          type: 'user',
+          ownerId: 147,
+          name: 'Free E2 Consultation — ' + fullName,
+          description: comment,
+          from: toISO(startUTC),
+          to:   toISO(endUTC),
+          skipTime: 'N',
+          color: '#1a3a6b',
+          textColor: '#ffffff',
+          accessibility: 'busy',
+          importance: 'normal',
+          remind: [{ type: 'min', count: 30 }],
+          attendees: []
+        })
+      });
+
+      // ── 5. Also create crm.activity for the lead timeline ──
       await fetch(WEBHOOK + 'crm.activity.add', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
@@ -880,17 +900,12 @@ async function submitBooking() {
             END_TIME:   toISO(endUTC),
             COMPLETED: 'N',
             DIRECTION: 2,
-            NOTIFY_TYPE: 1,
-            COMMUNICATIONS: [{
-              VALUE: state.email,
-              ENTITY_ID: leadId,
-              ENTITY_TYPE_ID: 1
-            }]
+            DEADLINE: toISO(endUTC)
           }
         })
       });
 
-      // ── 5. Update contact if found ──
+      // ── 6. Update contact if found ──
       if(state.contactId) {
         await fetch(WEBHOOK + 'crm.contact.update?ID=' + state.contactId
           + '&fields[FAX]='      + encodeURIComponent(fullPhone)
@@ -914,7 +929,8 @@ async function submitBooking() {
               START_TIME: toISO(startUTC),
               END_TIME:   toISO(endUTC),
               COMPLETED: 'N',
-              DIRECTION: 2
+              DIRECTION: 2,
+              DEADLINE: toISO(endUTC)
             }
           })
         });
