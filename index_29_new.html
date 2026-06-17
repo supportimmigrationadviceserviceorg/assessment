@@ -2318,14 +2318,17 @@ function toggleQ4Loc(el) {
     document.querySelectorAll('#opts-q4loc .opt').forEach(b => b.classList.remove('selected'));
     el.classList.add('selected');
     answers.q4_location = ['Not sure yet'];
-    return;
+  } else {
+    // Remove "Not sure yet" if selecting a real location
+    const notSure = document.querySelector('#opts-q4loc .opt[data-val="Not sure yet"]');
+    if(notSure) notSure.classList.remove('selected');
+    el.classList.toggle('selected');
+    const selected = [...document.querySelectorAll('#opts-q4loc .opt.selected')].map(b => b.dataset.val);
+    answers.q4_location = selected;
   }
-  // Remove "Not sure yet" if selecting a real location
-  const notSure = document.querySelector('#opts-q4loc .opt[data-val="Not sure yet"]');
-  if(notSure) notSure.classList.remove('selected');
-  el.classList.toggle('selected');
-  const selected = [...document.querySelectorAll('#opts-q4loc .opt.selected')].map(b => b.dataset.val);
-  answers.q4_location = selected;
+  // Enable button if dream text is filled (location is optional)
+  const btn = document.getElementById('btnQ4b');
+  if(btn && answers.q4_dream && answers.q4_dream.trim()) btn.disabled = false;
 }
 
 function validateQ4b() {
