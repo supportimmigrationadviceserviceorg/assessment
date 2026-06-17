@@ -2313,26 +2313,32 @@ function validateSpouse() {
 
 function toggleQ4Loc(el) {
   const val = el.dataset.val;
-  // "Not sure yet" is exclusive
   if(val === 'Not sure yet') {
     document.querySelectorAll('#opts-q4loc .opt').forEach(b => b.classList.remove('selected'));
     el.classList.add('selected');
     answers.q4_location = ['Not sure yet'];
   } else {
-    // Remove "Not sure yet" if selecting a real location
     const notSure = document.querySelector('#opts-q4loc .opt[data-val="Not sure yet"]');
     if(notSure) notSure.classList.remove('selected');
     el.classList.toggle('selected');
-    const selected = [...document.querySelectorAll('#opts-q4loc .opt.selected')].map(b => b.dataset.val);
-    answers.q4_location = selected;
+    answers.q4_location = [...document.querySelectorAll('#opts-q4loc .opt.selected')].map(b => b.dataset.val);
   }
-  // Enable button if dream text is filled (location is optional)
+  // Location is optional — button state is controlled only by dream text
+  // Re-check in case dream was already typed
   const btn = document.getElementById('btnQ4b');
-  if(btn && answers.q4_dream && answers.q4_dream.trim()) btn.disabled = false;
+  if(btn) btn.disabled = !(answers.q4_dream && answers.q4_dream.trim());
 }
 
 function validateQ4b() {
   if(!answers.q4_dream || !answers.q4_dream.trim()) {
+    const el = document.getElementById('q4DreamText');
+    if(el) {
+      el.scrollIntoView({behavior:'smooth', block:'center'});
+      el.focus();
+      el.style.borderColor = 'var(--red)';
+      el.placeholder = 'Please share your dream before continuing...';
+      setTimeout(() => { el.style.borderColor = ''; el.placeholder = 'e.g. I dream of living in Miami with my family, building my own business...'; }, 3000);
+    }
     shakeEl('q4DreamText');
     return;
   }
