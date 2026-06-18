@@ -286,8 +286,8 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
         <div style="font-size:12px;color:var(--gray-400);margin-bottom:8px;">The number you'll be available on for the call</div>
         <div class="phone-row">
           <div class="phone-flag-select" id="phoneFlagBtn" onclick="toggleDialDropdown()">
-            <span class="phone-flag" id="selectedFlag">🇮🇱</span>
-            <span class="phone-dial" id="selectedDial">+972</span>
+            <span class="phone-flag" id="selectedFlag">🇺🇸</span>
+            <span class="phone-dial" id="selectedDial">+1</span>
             <span class="phone-chevron">▾</span>
             <!-- DROPDOWN -->
             <div class="dial-dropdown" id="dialDropdown" style="display:none" onclick="event.stopPropagation()">
@@ -381,7 +381,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
             Please schedule your call:<br><br>
             <a href="https://calendly.com/support-ias/e-2-visa-consultation" target="_blank"
                style="display:inline-block;background:#1a3a6b;color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-size:15px;font-weight:bold;">
-              Schedule Your Call ←
+              Choose a Date ←
             </a><br><br>
             You will receive a confirmation email after scheduling.
           </div>
@@ -659,7 +659,23 @@ function resetEmail() {
 }
 
 // Live validation on name/phone input
-document.addEventListener('DOMContentLoaded', ()=>{
+document.addEventListener('DOMContentLoaded', async ()=>{
+  // Auto-detect country by IP
+  try {
+    const geo = await fetch('https://ipapi.co/json/');
+    const data = await geo.json();
+    if(data && data.country_calling_code) {
+      const code = data.country_calling_code;
+      const match = DIAL_COUNTRIES.find(c => c.code === code);
+      if(match) {
+        state.dialCode    = match.code;
+        state.dialFlag    = match.flag;
+        state.dialCountry = match.name;
+        document.getElementById('selectedFlag').textContent = match.flag;
+        document.getElementById('selectedDial').textContent = match.code;
+      }
+    }
+  } catch(e) {}
   document.getElementById('firstNameInput').addEventListener('input', validateEmailScreen);
   document.getElementById('lastNameInput').addEventListener('input',  validateEmailScreen);
   document.getElementById('phoneInput').addEventListener('input',     validateEmailScreen);
