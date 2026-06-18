@@ -886,14 +886,14 @@ async function submitBooking() {
         })
       });
 
-      // ── 4b. CRM Activity — appears in Activities list ──
+      // ── 4b. CRM Activity (Call) — appears in Activities list ──
       await fetch(WEBHOOK + 'crm.activity.add', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
           fields: {
             OWNER_TYPE_ID: 1,
             OWNER_ID: leadId,
-            TYPE_ID: 1,
+            TYPE_ID: 2,
             SUBJECT: 'Free E2 Consultation — ' + fullName,
             DESCRIPTION: comment,
             DESCRIPTION_TYPE: 1,
@@ -925,7 +925,7 @@ async function submitBooking() {
             fields: {
               OWNER_TYPE_ID: 3,
               OWNER_ID: state.contactId,
-              TYPE_ID: 1,
+              TYPE_ID: 2,
               SUBJECT: 'Free E2 Consultation — ' + fullName,
               DESCRIPTION: comment,
               DESCRIPTION_TYPE: 1,
@@ -933,7 +933,8 @@ async function submitBooking() {
               END_TIME:   toISO(endUTC),
               COMPLETED: 'N',
               DIRECTION: 2,
-              DEADLINE: toISO(endUTC)
+              DEADLINE: toISO(endUTC),
+              RESPONSIBLE_ID: 861
             }
           })
         });
