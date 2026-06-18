@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>קביעת שיחת ייעוץ E2 חינמית</title>
+<title>קביעת שיחת ייעוץ ויזת עסקים/השקעה</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
@@ -194,7 +194,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
 
   <div class="header">
     <div class="header-logo">🇺🇸 Immigration Advice Service</div>
-    <h1>שיחת ייעוץ E-2<br>חינמית עם יועץ הגירה</h1>
+    <h1>שיחת ייעוץ ויזת עסקים/השקעה<br>חינמית עם יועץ הגירה</h1>
     <p class="header-sub">קבעו שיחה של 30 דקות עם יועץ הגירה — ללא עלות</p>
   </div>
 
@@ -225,12 +225,12 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
       ══════════════════════════════════════════════ -->
       <div class="screen active" id="screen-intro">
         <div class="intro-badge">✦ הזדמנות חינמית לישראלים</div>
-        <div class="intro-title">ויזת E-2 לישראלים — בדיקת התאמה ללא עלות</div>
-        <div class="intro-text">מאז שישראל הצטרפה באופן רשמי לתוכנית ויזות ה-E-2 של ארצות הברית, נפתחה בפני אזרחים ישראלים אפשרות לחיות ולעבוד בארה״ב באמצעות השקעה בעסק.</div>
+        <div class="intro-title">ויזת עסקים/השקעה לישראלים — בדיקת התאמה ללא עלות</div>
+        <div class="intro-text">מאז שישראל הצטרפה באופן רשמי לתוכנית ויזות ה-ויזת עסקים/השקעה של ארצות הברית, נפתחה בפני אזרחים ישראלים אפשרות לחיות ולעבוד בארה״ב באמצעות השקעה בעסק.</div>
 
-        <!-- E2 INFO BOX -->
+        <!-- BUSINESS VISA INFO BOX -->
         <div style="background:var(--blue-light);border-right:3px solid var(--blue-mid);border-radius:0 10px 10px 0;padding:16px 18px;margin-bottom:18px;font-size:13px;line-height:1.75;color:var(--blue);">
-          <div style="font-weight:600;margin-bottom:8px;font-size:14px;">ויזת E-2 — עיקרי היתרונות:</div>
+          <div style="font-weight:600;margin-bottom:8px;font-size:14px;">ויזת עסקים/השקעה — עיקרי היתרונות:</div>
           ✅ מגורים חוקיים בארצות הברית<br>
           ✅ ניהול עסק אמריקאי באופן פעיל<br>
           ✅ בן/בת הזוג יכולים לקבל אישור עבודה בארה״ב<br>
@@ -241,7 +241,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
 
         <div style="font-size:14px;font-weight:600;color:var(--gray-800);margin-bottom:10px;">במהלך שיחת הייעוץ נבחן:</div>
         <ul class="intro-bullets">
-          <li><div class="bullet-icon">✓</div>האם אתם עומדים בתנאים הבסיסיים למסלול E-2</li>
+          <li><div class="bullet-icon">✓</div>האם אתם עומדים בתנאים הבסיסיים למסלול ויזת עסקים/השקעה</li>
           <li><div class="bullet-icon">💰</div>מהו גובה ההשקעה המקובל לפי סוג העסק</li>
           <li><div class="bullet-icon">🏢</div>אילו עסקים מתאימים למסלול</li>
           <li><div class="bullet-icon">👨‍👩‍👧</div>כיצד לשלב את בני המשפחה בתהליך</li>
@@ -824,7 +824,7 @@ async function submitBooking() {
 
   const dateLabel = state.selectedDate.toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   const comment = [
-    '=== E2 FREE CONSULTATION BOOKING ===',
+    '=== BUSINESS/INVESTMENT VISA CONSULTATION BOOKING ===',
     `Name: ${fullName}`,
     `Email: ${state.email}`,
     `Consultation Phone: ${fullPhone}`,
@@ -833,7 +833,7 @@ async function submitBooking() {
     `Time (Israel): ${state.selectedSlot}`,
     `Duration: 30 minutes`,
     '',
-    'Booked via E2 consultation form',
+    'Booked via Business/Investment Visa consultation form',
   ].join('\n');
 
   try {
@@ -842,7 +842,7 @@ async function submitBooking() {
 
     if(!leadId) {
       // Create new lead
-      let url = WEBHOOK + 'crm.lead.add?fields[TITLE]=' + encodeURIComponent('E2 Consultation: ' + fullName)
+      let url = WEBHOOK + 'crm.lead.add?fields[TITLE]=' + encodeURIComponent('Business Visa Consultation: ' + fullName)
         + '&fields[NAME]='      + encodeURIComponent(state.firstName)
         + '&fields[LAST_NAME]=' + encodeURIComponent(state.lastName)
         + '&fields[EMAIL][0][VALUE]=' + encodeURIComponent(state.email)
@@ -871,7 +871,7 @@ async function submitBooking() {
         body: JSON.stringify({
           type: 'user',
           ownerId: 861,
-          name: 'Free E2 Consultation — ' + fullName,
+          name: 'Free Business Visa Consultation — ' + fullName,
           description: comment,
           from: toISO(startUTC),
           to:   toISO(endUTC),
@@ -894,7 +894,7 @@ async function submitBooking() {
             OWNER_TYPE_ID: 1,
             OWNER_ID: leadId,
             TYPE_ID: 2,
-            SUBJECT: 'Free E2 Consultation — ' + fullName,
+            SUBJECT: 'Free Business Visa Consultation — ' + fullName,
             DESCRIPTION: comment,
             DESCRIPTION_TYPE: 1,
             START_TIME: toISO(startUTC),
@@ -926,7 +926,7 @@ async function submitBooking() {
               OWNER_TYPE_ID: 3,
               OWNER_ID: state.contactId,
               TYPE_ID: 2,
-              SUBJECT: 'Free E2 Consultation — ' + fullName,
+              SUBJECT: 'Free Business Visa Consultation — ' + fullName,
               DESCRIPTION: comment,
               DESCRIPTION_TYPE: 1,
               START_TIME: toISO(startUTC),
