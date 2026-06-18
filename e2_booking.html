@@ -378,10 +378,12 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
           <div class="status-icon">✅</div>
           <div class="status-title">הפרטים נשמרו בהצלחה!</div>
           <div class="status-sub" id="successMsg">
-            הפרטים שלכם נשמרו!<br><br>
-            נפתח חלון לבחירת מועד השיחה.<br>
-            אם החלון לא נפתח — <a href="https://calendly.com/support-ias/e-2-visa-consultation" target="_blank" style="color:#3b82f6;">לחצו כאן</a><br><br>
-            לאחר הבחירה תקבלו אישור במייל.
+            נא לקבוע מועד מדויק לשיחה:<br><br>
+            <a href="https://calendly.com/support-ias/e-2-visa-consultation" target="_blank"
+               style="display:inline-block;background:#1a3a6b;color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-size:15px;font-weight:bold;">
+              קבעו מועד לשיחה ←
+            </a><br><br>
+            לאחר הקביעה תקבלו אישור במייל.
           </div>
         </div>
       </div>
@@ -601,7 +603,7 @@ async function lookupEmail(email) {
       const fullName = [state.firstName, state.lastName].filter(Boolean).join(' ') || email;
       document.getElementById('clientAvatar').textContent = (state.firstName||email)[0].toUpperCase();
       document.getElementById('clientName').textContent   = fullName;
-      document.getElementById('clientInfo').textContent   = 'IASGF' + lead.ID;
+      document.getElementById('clientInfo').textContent   = 'מספר תיק: IASGF' + lead.ID;
       document.getElementById('clientBar').style.display  = 'flex';
 
       document.getElementById('emailInput').className = 'email-input valid';
