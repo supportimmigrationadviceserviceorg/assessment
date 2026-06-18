@@ -1836,7 +1836,8 @@ async function saveProgressToBitrix(partial = false) {
   if(answers.q2)    fields['UF_CRM_1449131599'] = answers.q2;
   if(answers.q5 && EDU_IDS[answers.q5]) fields['UF_CRM_1484914608'] = EDU_IDS[answers.q5];
   if(answers.q6)    fields['UF_CRM_1709560603'] = answers.q6;
-  if(answers.income_range) fields['UF_CRM_1484911973'] = answers.income_range;
+  const INCOME_IDS = {'0-999':'390','1000-2499':'391','2500-3999':'392','4000-5999':'393','6000-9999':'394','+10000':'395'};
+  if(answers.income_range) fields['UF_CRM_1484911973'] = INCOME_IDS[answers.income_range] || answers.income_range;
   if(answers.q3 && MARITAL_IDS[answers.q3]) fields['UF_CRM_1500181612'] = MARITAL_IDS[answers.q3];
 
   // Build partial summary so far
@@ -1949,7 +1950,8 @@ async function submitAndShowResults() {
   if(answers.q5 && EDU_IDS[answers.q5]) fields['UF_CRM_1484914608'] = EDU_IDS[answers.q5]; // Education (lead)
   if(answers.q6)     fields['UF_CRM_1709560603']     = answers.q6;                         // Profession (lead)
   if(answers.q6)     fields['UF_CRM_1484918121']     = answers.q6;                         // Profession (contact)
-  if(answers.income_range) fields['UF_CRM_1484911973'] = answers.income_range;             // Income range
+  const INCOME_IDS = {'0-999':'390','1000-2499':'391','2500-3999':'392','4000-5999':'393','6000-9999':'394','+10000':'395'};
+  if(answers.income_range) fields['UF_CRM_1484911973'] = INCOME_IDS[answers.income_range] || answers.income_range;             // Income range
   if(answers.q3 && MARITAL_IDS[answers.q3]) fields['UF_CRM_1500181612'] = MARITAL_IDS[answers.q3]; // Marital (lead)
   if(answers.q3)     fields['UF_CRM_64CBB649310F0']  = answers.q3;                         // Marital string (contact)
   if(answers.q4)     fields['UF_CRM_1648031237']     = answers.q4;                         // Top reason/Why US
@@ -1998,7 +2000,7 @@ async function submitAndShowResults() {
       if(data.result) leadId = data.result;
     }
 
-    // ── 2. CONTACT: find by email, update or create ───
+    // ── 2. CONTACT: update only if already exists (no creation) ───
     if(answers.email) {
       let contactId = null;
 
@@ -2010,7 +2012,7 @@ async function submitAndShowResults() {
       }
 
       if(contactId) {
-        // UPDATE existing contact
+        // UPDATE existing contact only — never create new
         const updateParams = Object.entries(contactFields).map(([k,v]) => `fields[${k}]=${encodeURIComponent(v)}`).join('&');
         await fetch(WEBHOOK + 'crm.contact.update?ID=' + contactId + '&' + updateParams);
 
@@ -2020,20 +2022,8 @@ async function submitAndShowResults() {
           headers: {'Content-Type':'application/json'},
           body: JSON.stringify({ fields: { ENTITY_TYPE:'contact', ENTITY_ID: contactId, COMMENT: summary } })
         });
-
-      } else {
-        // CREATE new contact
-        const newContact = {
-          ...contactFields,
-          NAME: answers.firstName||'',
-          LAST_NAME: answers.lastName||''
-        };
-        let contactUrl = WEBHOOK + 'crm.contact.add?' +
-          Object.entries(newContact).map(([k,v]) => `fields[${k}]=${encodeURIComponent(v)}`).join('&');
-        contactUrl += '&fields[EMAIL][0][VALUE]='  + encodeURIComponent(answers.email) + '&fields[EMAIL][0][VALUE_TYPE]=WORK';
-        if(answers.phone) contactUrl += '&fields[PHONE][0][VALUE]=' + encodeURIComponent(answers.phone) + '&fields[PHONE][0][VALUE_TYPE]=WORK';
-        await fetch(contactUrl);
       }
+      // If no existing contact found — do nothing (no creation)
     }
 
   } catch(e) {
