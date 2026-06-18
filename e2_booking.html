@@ -195,7 +195,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
   <div class="header">
     <div class="header-logo">🇺🇸 Immigration Advice Service</div>
     <h1>שיחת ייעוץ ויזת עסקים/השקעה<br>חינמית עם יועץ הגירה</h1>
-    <p class="header-sub">קבעו שיחה של 30 דקות עם יועץ הגירה — ללא עלות</p>
+    <p class="header-sub">קבעו שיחה של 15 דקות עם יועץ הגירה — ללא עלות</p>
   </div>
 
   <div class="card">
@@ -224,7 +224,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
            SCREEN 0 — INTRO
       ══════════════════════════════════════════════ -->
       <div class="screen active" id="screen-intro">
-        <div class="intro-badge">✦ הזדמנות חינמית לישראלים</div>
+        <div class="intro-badge">המסלול שלכם לגרין קארד בארצות הברית ✅</div>
         <div class="intro-title">ויזת עסקים/השקעה לישראלים — בדיקת התאמה ללא עלות</div>
         <div class="intro-text">מאז שישראל הצטרפה באופן רשמי לתוכנית ויזות ה-ויזת עסקים/השקעה של ארצות הברית, נפתחה בפני אזרחים ישראלים אפשרות לחיות ולעבוד בארה״ב באמצעות השקעה בעסק.</div>
 
@@ -283,7 +283,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
 
         <!-- PHONE FOR CONSULTATION -->
         <label class="field-label" style="margin-top:18px;">מספר טלפון לשיחה</label>
-        <div style="font-size:12px;color:var(--gray-400);margin-bottom:8px;">המספר שבו תהיו זמינים לשיחה — יישמר בנוסף לפרטים הקיימים</div>
+        <div style="font-size:12px;color:var(--gray-400);margin-bottom:8px;">המספר שבו תהיו זמינים לשיחה</div>
         <div class="phone-row">
           <div class="phone-flag-select" id="phoneFlagBtn" onclick="toggleDialDropdown()">
             <span class="phone-flag" id="selectedFlag">🇮🇱</span>
@@ -299,10 +299,10 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
         </div>
         <div class="error-msg" id="phoneError">נא להכניס מספר טלפון תקין</div>
 
-        <div class="privacy-note">🔒 המידע נשמר בצורה מאובטחת ולא יועבר לצד שלישי</div>
+        <div class="privacy-note">🔒 המידע נשמר בצורה מאובטחת</div>
 
         <div class="nav" style="justify-content:flex-end;margin-top:16px;">
-          <button class="btn-next" id="btnEmail" onclick="goToCalendar()" disabled>המשך לקביעת זמן בקאלנדלי →</button>
+          <button class="btn-next" id="btnEmail" onclick="goToCalendar()" disabled>המשך לבחירת מועד לשיחה →</button>
         </div>
       </div>
 
@@ -346,7 +346,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
           <div class="summary-row"><span class="summary-icon">📱</span><div>טלפון לשיחה: <span class="summary-val" id="sumPhone">—</span></div></div>
           <div class="summary-row"><span class="summary-icon">📅</span><div>תאריך: <span class="summary-val" id="sumDate">—</span></div></div>
           <div class="summary-row"><span class="summary-icon">🕐</span><div>שעה (שעון ישראל): <span class="summary-val" id="sumTime">—</span></div></div>
-          <div class="summary-row"><span class="summary-icon">⏱</span><div>משך: <span class="summary-val">30 דקות</span></div></div>
+          <div class="summary-row"><span class="summary-icon">⏱</span><div>משך: <span class="summary-val">15 דקות</span></div></div>
         </div>
 
         <div style="background:var(--gold-light);border-right:3px solid var(--gold);border-radius:0 8px 8px 0;padding:12px 15px;font-size:13px;color:#78621a;line-height:1.6;margin-bottom:20px;">
@@ -365,8 +365,8 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
       <div class="screen" id="screen-processing">
         <div class="status-wrap">
           <div class="spinner"></div>
-          <div class="status-title">שומרים את הפגישה...</div>
-          <div class="status-sub">מעבד את הבקשה, אנא המתינו</div>
+          <div class="status-title">שומרים פרטים...</div>
+          <div class="status-sub">אנא המתינו רגע...</div>
         </div>
       </div>
 
@@ -376,12 +376,12 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
       <div class="screen" id="screen-success">
         <div class="status-wrap fade-in">
           <div class="status-icon">✅</div>
-          <div class="status-title">הפגישה נקבעה בהצלחה!</div>
+          <div class="status-title">הפרטים נשמרו בהצלחה!</div>
           <div class="status-sub" id="successMsg">
-            הפרטים שלכם נשמרו בהצלחה!<br><br>
-            חלון Calendly נפתח לבחירת מועד השיחה.<br><br>
-            אם החלון לא נפתח — <a href="https://calendly.com/support-ias/e-2-visa-consultation" target="_blank" style="color:#3b82f6;">לחצו כאן לקביעה</a><br><br>
-            לאחר הקביעה תקבלו אישור במייל.
+            הפרטים שלכם נשמרו!<br><br>
+            נפתח חלון לבחירת מועד השיחה.<br>
+            אם החלון לא נפתח — <a href="https://calendly.com/support-ias/e-2-visa-consultation" target="_blank" style="color:#3b82f6;">לחצו כאן</a><br><br>
+            לאחר הבחירה תקבלו אישור במייל.
           </div>
         </div>
       </div>
@@ -601,7 +601,7 @@ async function lookupEmail(email) {
       const fullName = [state.firstName, state.lastName].filter(Boolean).join(' ') || email;
       document.getElementById('clientAvatar').textContent = (state.firstName||email)[0].toUpperCase();
       document.getElementById('clientName').textContent   = fullName;
-      document.getElementById('clientInfo').textContent   = 'ליד #' + lead.ID;
+      document.getElementById('clientInfo').textContent   = 'IASGF' + lead.ID;
       document.getElementById('clientBar').style.display  = 'flex';
 
       document.getElementById('emailInput').className = 'email-input valid';
