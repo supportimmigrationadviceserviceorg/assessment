@@ -865,25 +865,26 @@ async function submitBooking() {
         body: JSON.stringify({ fields:{ ENTITY_TYPE:'lead', ENTITY_ID: leadId, COMMENT: comment } })
       });
 
-      // ── 4a. Calendar event — appears in /crm/lead/calendar/ ──
+      // ── 4a. Calendar events for Mark (861) and user 147 ──
+      const calBody = {
+        type: 'user',
+        name: 'Business/Investment Visa Consultation — ' + fullName,
+        description: comment,
+        from: toISO(startUTC),
+        to:   toISO(endUTC),
+        skipTime: 'N',
+        accessibility: 'busy',
+        importance: 'normal',
+        remind: [{ type: 'min', count: 30 }],
+        attendees: [861, 147]
+      };
       await fetch(WEBHOOK + 'calendar.event.add', {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-          type: 'user',
-          ownerId: 861,
-          name: 'Free Business Visa Consultation — ' + fullName,
-          description: comment,
-          from: toISO(startUTC),
-          to:   toISO(endUTC),
-          skipTime: 'N',
-          accessibility: 'busy',
-          importance: 'normal',
-          remind: [{ type: 'min', count: 30 }],
-          attendees: [861, 147],
-          crm: {
-            LEAD: [leadId]
-          }
-        })
+        body: JSON.stringify({ ...calBody, ownerId: 861 })
+      });
+      await fetch(WEBHOOK + 'calendar.event.add', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ ...calBody, ownerId: 147 })
       });
 
       // ── 4b. CRM Activity (Call) — appears in Activities list ──
