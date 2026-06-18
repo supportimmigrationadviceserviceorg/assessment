@@ -302,7 +302,7 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
         <div class="privacy-note">🔒 המידע נשמר בצורה מאובטחת ולא יועבר לצד שלישי</div>
 
         <div class="nav" style="justify-content:flex-end;margin-top:16px;">
-          <button class="btn-next" id="btnEmail" onclick="goToCalendar()" disabled>המשך לבחירת מועד →</button>
+          <button class="btn-next" id="btnEmail" onclick="goToCalendar()" disabled>המשך לקביעת זמן בקאלנדלי →</button>
         </div>
       </div>
 
@@ -378,9 +378,10 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
           <div class="status-icon">✅</div>
           <div class="status-title">הפגישה נקבעה בהצלחה!</div>
           <div class="status-sub" id="successMsg">
-            יועץ ההגירה שלנו יתקשר אליכם במועד שנקבע.<br><br>
-            <strong id="successDateTime"></strong><br><br>
-            אם יש שינוי בתוכניות, אנא צרו קשר בהקדם האפשרי.
+            הפרטים שלכם נשמרו בהצלחה!<br><br>
+            חלון Calendly נפתח לבחירת מועד השיחה.<br><br>
+            אם החלון לא נפתח — <a href="https://calendly.com/support-ias/e-2-visa-consultation" target="_blank" style="color:#3b82f6;">לחצו כאן לקביעה</a><br><br>
+            לאחר הקביעה תקבלו אישור במייל.
           </div>
         </div>
       </div>
@@ -527,12 +528,10 @@ document.addEventListener('click', e => {
 // ─────────────────────────────────────────────────────────
 const SCREENS = ['intro','email','calendar','confirm','processing','success'];
 const PROGRESS = {
-  intro:    {step:'',       label:'',                pct:0},
-  email:    {step:'שלב 1 מתוך 3', label:'פרטים אישיים',  pct:33},
-  calendar: {step:'שלב 2 מתוך 3', label:'בחירת מועד',    pct:66},
-  confirm:  {step:'שלב 3 מתוך 3', label:'אישור',          pct:90},
-  processing:{step:'',      label:'',                pct:100},
-  success:  {step:'',       label:'',                pct:100},
+  intro:    {step:'',            label:'',              pct:0},
+  email:    {step:'שלב 1 מתוך 1', label:'פרטים אישיים',  pct:66},
+  processing:{step:'',           label:'',              pct:100},
+  success:  {step:'',            label:'',              pct:100},
 };
 
 function goScreen(id) {
@@ -669,7 +668,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 // ─────────────────────────────────────────────────────────
 // GO TO CALENDAR
 // ─────────────────────────────────────────────────────────
-function goToCalendar() {
+async function goToCalendar() {
   state.firstName = document.getElementById('firstNameInput').value.trim();
   state.lastName  = document.getElementById('lastNameInput').value.trim();
   state.email     = document.getElementById('emailInput').value.trim();
@@ -681,7 +680,19 @@ function goToCalendar() {
     return;
   }
   document.getElementById('phoneError').style.display = 'none';
-  goScreen('calendar');
+
+  // Save to Bitrix24 then open Calendly
+  goScreen('processing');
+  await saveToBitrix();
+
+  // Open Calendly with pre-filled name and email
+  const fullName  = [state.firstName, state.lastName].filter(Boolean).join(' ');
+  const calendlyUrl = 'https://calendly.com/support-ias/e-2-visa-consultation'
+    + '?name=' + encodeURIComponent(fullName)
+    + '&email=' + encodeURIComponent(state.email);
+  window.open(calendlyUrl, '_blank');
+
+  goScreen('success');
 }
 
 // ─────────────────────────────────────────────────────────
@@ -806,33 +817,23 @@ function populateSummary() {
 // ─────────────────────────────────────────────────────────
 // SUBMIT TO BITRIX24
 // ─────────────────────────────────────────────────────────
-async function submitBooking() {
-  goScreen('processing');
+async function saveToBitrix() {
 
   const fullName  = [state.firstName, state.lastName].filter(Boolean).join(' ');
   const fullPhone = state.dialCode + ' ' + state.phoneLocal;
 
-  // Build ISO datetime for the meeting (Israel is UTC+3)
-  const [hStr, mStr] = state.selectedSlot.split(':');
-  const meetStart = new Date(state.selectedDate);
-  meetStart.setHours(parseInt(hStr), parseInt(mStr), 0, 0);
-  // Convert Israel time (UTC+3) to UTC
-  const startUTC = new Date(meetStart.getTime() - 3*60*60*1000);
+  const toISO = d => d.toISOString().replace('.000','');
+  // Use current time as placeholder — actual time chosen in Calendly
+  const startUTC = new Date();
   const endUTC   = new Date(startUTC.getTime() + 30*60*1000);
 
-  const toISO = d => d.toISOString().replace('.000','');
-
-  const dateLabel = state.selectedDate.toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   const comment = [
     '=== BUSINESS/INVESTMENT VISA CONSULTATION BOOKING ===',
     `Name: ${fullName}`,
     `Email: ${state.email}`,
     `Consultation Phone: ${fullPhone}`,
     '',
-    `Date: ${dateLabel}`,
-    `Time (Israel): ${state.selectedSlot}`,
-    `Duration: 30 minutes`,
-    '',
+    'Scheduling link sent to Calendly',
     'Booked via Business/Investment Visa consultation form',
   ].join('\n');
 
@@ -945,8 +946,11 @@ async function submitBooking() {
     console.log('Bitrix24 error:', e);
   }
 
-  // ── Show success ──
-  document.getElementById('successDateTime').textContent = dateLabel + ' בשעה ' + state.selectedSlot + ' (שעון ישראל)';
+}
+
+async function submitBooking() {
+  goScreen('processing');
+  await saveToBitrix();
   goScreen('success');
 }
 </script>
