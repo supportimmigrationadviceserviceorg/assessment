@@ -365,8 +365,8 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
       <div class="screen" id="screen-processing">
         <div class="status-wrap">
           <div class="spinner"></div>
-          <div class="status-title">שומרים פרטים...</div>
-          <div class="status-sub">אנא המתינו רגע...</div>
+          <div class="status-title">הפרטים נשמרו! ✓</div>
+          <div class="status-sub">מיד תועברו לבחירת מועד מדויק לשיחה...</div>
         </div>
       </div>
 
@@ -687,7 +687,9 @@ async function goToCalendar() {
   goScreen('processing');
   await saveToBitrix();
 
-  // Open Calendly with pre-filled name and email
+  // Wait 2 seconds so user reads the message, then open Calendly
+  await new Promise(r => setTimeout(r, 2000));
+
   const fullName  = [state.firstName, state.lastName].filter(Boolean).join(' ');
   const calendlyUrl = 'https://calendly.com/support-ias/e-2-visa-consultation'
     + '?name=' + encodeURIComponent(fullName)
