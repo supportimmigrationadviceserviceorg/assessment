@@ -2653,11 +2653,16 @@ function toggleFaq(el) {
 // ENCOURAGEMENT MESSAGES
 // ─────────────────────────────────────────────────────────
 const ENCOURAGE = {
-  q5: (fn) => `${fn}your profile is looking great so far — keep going!`,
-  q7: (fn) => `${fn}you're making excellent progress. Almost halfway there!`,
+  q2c: (fn) => `${fn}great start — your profile is already taking shape!`,
+  q4b: (fn) => `${fn}you're doing great — tell us where you'd like to live!`,
+  q4c: (fn) => `${fn}this is the part we love — share your dream with us 🌟`,
+  q5:  (fn) => `${fn}your profile is looking great so far — keep going!`,
+  q6:  (fn) => `${fn}almost halfway there — you're doing brilliantly!`,
+  q7:  (fn) => `${fn}excellent progress — your file is building up nicely!`,
+  q8:  (fn) => `${fn}looking good — just a few more questions to go!`,
   qStudy: (fn) => `${fn}you're doing great — almost there!`,
-  q9: (fn) => `${fn}just 2 more questions to go!`,
-  q10: (fn) => `${fn}last question! Your assessment is almost complete.`
+  q9:  (fn) => `${fn}just 2 more questions — the finish line is in sight!`,
+  q10: (fn) => `${fn}last question! Your assessment is almost complete 🎉`
 };
 
 function showEncouragement(screenId) {
@@ -2671,7 +2676,7 @@ function showEncouragement(screenId) {
   const toast = document.createElement('div');
   toast.id = 'encourageToast';
   toast.className = 'encourage-toast';
-  const icons = { q5:'🌟', q7:'💪', q9:'🎯', q10:'🏁' };
+  const icons = { q2c:'✨', q4b:'🗺️', q4c:'💫', q5:'🌟', q6:'📈', q7:'💪', q8:'🎯', qStudy:'⭐', q9:'🎯', q10:'🏁' };
   toast.innerHTML = `<span class="encourage-icon">${icons[screenId]||'✨'}</span><span>${msg.charAt(0).toUpperCase()+msg.slice(1)}</span>`;
   // Insert at top of content area, before the q-eyebrow
   const eyebrow = document.querySelector('#screen-'+screenId+' .q-eyebrow');
