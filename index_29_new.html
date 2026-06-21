@@ -1094,8 +1094,11 @@ const PATHWAY_LABELS = {
   business:  { name:'Business & Investment Category',   desc:'For entrepreneurs, business owners, and investors — including E-2 and EB-5 visas.' },
   employment:{ name:'Employment Category',              desc:'Skill-based pathways for qualified professionals sponsored by U.S. employers — including EB-2 and EB-3.' },
   education: { name:'Education Category',               desc:'Immigration options through accredited U.S. academic programs.' },
-  family:    { name:'Family-Based Category',            desc:'Pathways based on close family relationships with U.S. citizens or lawful permanent residents.' }
+  family:    { name:'Family-Based Category',            desc:'Pathways based on close family relationships with U.S. citizens or lawful permanent residents.' },
+  dv:        { name:'Diversity Visa Program (Green Card Program)', desc:'The U.S. government annually awards up to 55,000 green cards by random selection to applicants from eligible countries. Based on your profile, you may qualify to enter.' }
 };
+
+const DV_INELIGIBLE_COUNTRIES = ["India","China","Philippines","Vietnam","South Korea","Pakistan","Bangladesh","Mexico","Canada","Cuba","Dominican Republic","El Salvador","Haiti","Honduras","Jamaica","Brazil","Colombia","Venezuela","Nigeria","Hong Kong"];
 
 // ─────────────────────────────────────────────────────────
 // EMAIL LOOKUP — core feature
@@ -1725,7 +1728,7 @@ function restoreProfDisplay() {
 // COMPUTE PATHWAYS
 // ─────────────────────────────────────────────────────────
 function computePathways() {
-  const scores = { executive:0, business:0, employment:0, education:0, family:0 };
+  const scores = { executive:0, business:0, employment:0, education:0, family:0, dv:0 };
   const edu        = answers.q5||'';
   const exp        = answers.q7||'';
   const leadership = answers.q10||'';
@@ -1799,6 +1802,23 @@ function computePathways() {
     if(familyWho.includes('Child/Children')) scores.family += 1;
   }
   if(goal === 'Family Relocation') scores.family += 2;
+
+  // ── DIVERSITY VISA (DV LOTTERY) ───────────────────────────
+  const birthCountry = answers.q2b || answers.q2 || '';
+  const spouseCountry = answers.spouseCountry || '';
+  const isDVEligibleBirth = birthCountry && !DV_INELIGIBLE_COUNTRIES.includes(birthCountry);
+  const isDVEligibleSpouse = spouseCountry && !DV_INELIGIBLE_COUNTRIES.includes(spouseCountry) && answers.q3 === 'Married';
+  const hasDiploma = ['High School','Trade School','Associate Degree',"Bachelor's Degree","Master's Degree","Doctorate (PhD)"].includes(edu);
+  const hasWorkExp = ['2–5 years','5–10 years','More than 10 years'].includes(exp);
+
+  if((isDVEligibleBirth || isDVEligibleSpouse) && (hasDiploma || hasWorkExp)) {
+    scores.dv += 5; // base eligibility
+    if(isDVEligibleBirth) scores.dv += 2; // own birth country eligible
+    if(isDVEligibleSpouse && !isDVEligibleBirth) scores.dv += 1; // spouse route
+    if(hasDiploma) scores.dv += 1;
+    if(hasWorkExp) scores.dv += 1;
+    if(answers.q3 === 'Married') scores.dv += 1; // can submit 2 entries
+  }
 
   // ── FILTER & RANK ─────────────────────────────────────────
   // Don't show business if no interest at all
@@ -2041,7 +2061,7 @@ async function submitAndShowResults() {
     if(heroBtn) { heroBtn.href = paymentUrl; heroBtn.target = '_blank'; heroBtn.rel = 'noopener'; heroBtn.style.display = 'inline-flex'; }
     // Add CTA button inside hero after subtitle
     // Compute scores as percentages for display
-    const rawScores = { executive:0, business:0, employment:0, education:0, family:0 };
+    const rawScores = { executive:0, business:0, employment:0, education:0, family:0, dv:0 };
     const edu2=answers.q5||'',exp2=answers.q7||'',lead2=answers.q10||'',biz2=answers.q8||'',sit2=answers.qSit||'',inv2=answers.qInvest||'',study2=answers.qStudy||'',goal2=answers.q4||'',fam2=answers.q9||'',famSt2=answers.familyStatus||'';
     const highEdu2=["Bachelor's Degree","Master's Degree","Doctorate (PhD)"].includes(edu2);
     const topEdu2=["Master's Degree","Doctorate (PhD)"].includes(edu2);
@@ -2052,9 +2072,13 @@ async function submitAndShowResults() {
     rawScores.employment+=1; if(['Employee','Skilled Professional','Self-Employed'].includes(sit2)) rawScores.employment+=2; if(midExp2) rawScores.employment+=1; if(highExp2) rawScores.employment+=1; if(highEdu2) rawScores.employment+=1; if(goal2==='Career Opportunities') rawScores.employment+=1;
     if(goal2==='Education') rawScores.education+=4; if(study2==='Yes') rawScores.education+=3; if(study2==='Maybe') rawScores.education+=1;
     if(fam2==='Yes'){rawScores.family+=3;if(famSt2==='U.S. Citizen')rawScores.family+=3;if(famSt2==='Green Card holder (Permanent Resident)')rawScores.family+=2;} if(goal2==='Family Relocation') rawScores.family+=2;
+    const bc2=answers.q2b||answers.q2||''; const sc2=answers.spouseCountry||'';
+    const dvEl2=bc2&&!DV_INELIGIBLE_COUNTRIES.includes(bc2); const dvSpEl2=sc2&&!DV_INELIGIBLE_COUNTRIES.includes(sc2)&&answers.q3==='Married';
+    const hasDip2=['High School','Trade School','Associate Degree',"Bachelor's Degree","Master's Degree","Doctorate (PhD)"].includes(edu2); const hasExp2=['2–5 years','5–10 years','More than 10 years'].includes(exp2);
+    if((dvEl2||dvSpEl2)&&(hasDip2||hasExp2)){rawScores.dv+=5;if(dvEl2)rawScores.dv+=2;if(dvSpEl2&&!dvEl2)rawScores.dv+=1;if(hasDip2)rawScores.dv+=1;if(hasExp2)rawScores.dv+=1;if(answers.q3==='Married')rawScores.dv+=1;}
 
-    const MAX_SCORES = { executive:12, business:14, employment:7, education:7, family:8 };
-    const PATHWAY_KEYS = { 'Executive & Professional Category':'executive','Business & Investment Category':'business','Employment Category':'employment','Education Category':'education','Family-Based Category':'family' };
+    const MAX_SCORES = { executive:12, business:14, employment:7, education:7, family:8, dv:10 };
+    const PATHWAY_KEYS = { 'Executive & Professional Category':'executive','Business & Investment Category':'business','Employment Category':'employment','Education Category':'education','Family-Based Category':'family','Diversity Visa Program (Green Card Program)':'dv' };
 
     function getScore(pathwayName) {
       const key = PATHWAY_KEYS[pathwayName];
