@@ -410,26 +410,29 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
         </div>
         <div class="country-list" id="birthCountryList"></div>
 
-        <!-- Duration section — shown only if birth country ≠ residence country -->
-        <div id="residenceDurationWrap" style="display:none;margin-top:4px">
-          <div style="background:var(--blue-light);border:1px solid rgba(59,130,246,0.2);border-radius:var(--radius);padding:14px;margin-top:8px">
-            <div class="field-label" style="margin-top:0">How long have you been living in <span id="residenceCountryName">your current country</span>?</div>
-            <div class="opts col2" id="opts-resDuration" style="margin-bottom:0">
-              <button class="opt" data-val="Less than 1 year" onclick="selResDuration(this)"><div class="opt-radio"></div>Less than 1 year</button>
-              <button class="opt" data-val="1–3 years" onclick="selResDuration(this)"><div class="opt-radio"></div>1–3 years</button>
-              <button class="opt" data-val="3–5 years" onclick="selResDuration(this)"><div class="opt-radio"></div>3–5 years</button>
-              <button class="opt" data-val="5–10 years" onclick="selResDuration(this)"><div class="opt-radio"></div>5–10 years</button>
-              <button class="opt" data-val="More than 10 years" onclick="selResDuration(this)"><div class="opt-radio"></div>More than 10 years</button>
-            </div>
-          </div>
-        </div>
-
         <div class="nav">
           <button class="btn-back" onclick="goBack()">← Back</button>
-          <button class="btn-next" id="btnQ2b" onclick="goNext('q3')" disabled>Continue →</button>
+          <button class="btn-next" id="btnQ2b" onclick="goNextFromQ2b()" disabled>Continue →</button>
         </div>
       </div>
 
+
+      <!-- Q2c – DURATION IN RESIDENCE COUNTRY -->
+      <div class="screen" id="screen-q2c">
+        <div class="q-eyebrow">Question 2 of 10</div>
+        <div class="q-title">How long have you been living in <span id="residenceCountryNameQ2c">your current country</span>?</div>
+        <div class="opts col2" id="opts-resDuration">
+          <button class="opt" data-val="Less than 1 year" onclick="selResDuration(this)"><div class="opt-radio"></div>Less than 1 year</button>
+          <button class="opt" data-val="1–3 years" onclick="selResDuration(this)"><div class="opt-radio"></div>1–3 years</button>
+          <button class="opt" data-val="3–5 years" onclick="selResDuration(this)"><div class="opt-radio"></div>3–5 years</button>
+          <button class="opt" data-val="5–10 years" onclick="selResDuration(this)"><div class="opt-radio"></div>5–10 years</button>
+          <button class="opt" data-val="More than 10 years" onclick="selResDuration(this)"><div class="opt-radio"></div>More than 10 years</button>
+        </div>
+        <div class="nav">
+          <button class="btn-back" onclick="goBack()">← Back</button>
+          <button class="btn-next" id="btnQ2c" onclick="goNext('q3')" disabled>Continue →</button>
+        </div>
+      </div>
       <!-- Q3 – MARITAL STATUS -->
       <div class="screen" id="screen-q3">
         <div class="q-eyebrow">Question 3 of 10</div>
@@ -541,14 +544,11 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
         </div>
       </div>
 
-      <!-- Q4b – DREAM / LOCATION -->
+      <!-- Q4b – LOCATION -->
       <div class="screen" id="screen-q4b">
         <div class="q-eyebrow">Question 4 of 10</div>
-        <div class="q-title">✨ What is your dream?</div>
-        <div class="q-sub" style="font-size:14px;color:var(--gray-600);line-height:1.7;margin-bottom:20px">Close your eyes for a moment. Imagine your life in the United States — where are you? What does your daily life look like? <strong style="color:var(--blue)">Tell us your dream.</strong></div>
-        <textarea id="q4DreamText" class="field-input" style="min-height:100px;resize:vertical;font-size:14px;padding:14px 15px;line-height:1.7;margin-bottom:16px" placeholder="e.g. I dream of living in Miami with my family, building my own business, watching my children grow up speaking English in a safe and beautiful country..." oninput="answers.q4_dream=this.value; document.getElementById('btnQ4b').disabled = !this.value.trim()"></textarea>
-
-        <div class="field-label" style="margin-top:0">Where in the U.S. would you like to live? <span style="color:var(--gray-400)">(optional)</span></div>
+        <div class="q-title">Where in the U.S. would you like to live?</div>
+        <div class="q-sub">Optional — select all that interest you, or skip to continue.</div>
         <div class="opts col2" id="opts-q4loc" style="margin-bottom:12px">
           <button class="opt" data-val="New York" onclick="toggleQ4Loc(this)"><div class="opt-radio" style="border-radius:3px"></div>🗽 New York</button>
           <button class="opt" data-val="Florida" onclick="toggleQ4Loc(this)"><div class="opt-radio" style="border-radius:3px"></div>🌴 Florida</button>
@@ -561,10 +561,21 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
           <button class="opt" data-val="Washington State" onclick="toggleQ4Loc(this)"><div class="opt-radio" style="border-radius:3px"></div>🌲 Washington State</button>
           <button class="opt" data-val="Not sure yet" onclick="toggleQ4Loc(this)"><div class="opt-radio" style="border-radius:3px"></div>💭 Not sure yet</button>
         </div>
-
         <div class="nav">
           <button class="btn-back" onclick="goBack()">← Back</button>
-          <button class="btn-next" id="btnQ4b" onclick="validateQ4b()" disabled>Continue →</button>
+          <button class="btn-next" id="btnQ4b" onclick="goNext('q4c')">Continue →</button>
+        </div>
+      </div>
+
+      <!-- Q4c – DREAM -->
+      <div class="screen" id="screen-q4c">
+        <div class="q-eyebrow">Question 4 of 10</div>
+        <div class="q-title">✨ What is your dream?</div>
+        <div class="q-sub" style="font-size:14px;color:var(--gray-600);line-height:1.7;margin-bottom:20px">Close your eyes for a moment. Imagine your life in the United States — where are you? What does your daily life look like? <strong style="color:var(--blue)">Tell us your dream.</strong></div>
+        <textarea id="q4DreamText" class="field-input" style="min-height:100px;resize:vertical;font-size:14px;padding:14px 15px;line-height:1.7;margin-bottom:16px" placeholder="e.g. I dream of living in Miami with my family, building my own business, watching my children grow up speaking English in a safe and beautiful country..." oninput="answers.q4_dream=this.value; document.getElementById('btnQ4c').disabled = !this.value.trim()"></textarea>
+        <div class="nav">
+          <button class="btn-back" onclick="goBack()">← Back</button>
+          <button class="btn-next" id="btnQ4c" onclick="validateQ4c()" disabled>Continue →</button>
         </div>
       </div>
 
@@ -1017,6 +1028,36 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
             <div class="faq-q" onclick="toggleFaq(this)">What happens after I pay? <span class="faq-arrow">▼</span></div>
             <div class="faq-a"><div class="faq-a-inner">Immediately after payment, you receive a confirmation email with your receipt, your unique immigration case number, all required documents and next steps, and the direct contact details of your personal immigration consultant. Your attorney review begins within 1–2 business days.</div></div>
           </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">Who can participate in the Diversity Visa (Green Card) Program? <span class="faq-arrow">▼</span></div>
+            <div class="faq-a"><div class="faq-a-inner">To participate in the Diversity Visa Program, you must meet three main requirements: (1) You must have been born in an eligible country — countries that have sent large numbers of immigrants to the U.S. in recent years are not eligible. (2) You must have at least a high school diploma or equivalent. (3) If you do not have a diploma, you must have at least two years of work experience in the past five years in a qualifying occupation that requires at least two years of training. A licensed immigration attorney can help you confirm whether you qualify.</div></div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">Which countries are NOT eligible for the Diversity Visa Program? <span class="faq-arrow">▼</span></div>
+            <div class="faq-a"><div class="faq-a-inner">Countries that are typically not eligible include: India, China (mainland and Hong Kong), Philippines, Vietnam, South Korea, Pakistan, Bangladesh, Mexico, Canada, Cuba, Dominican Republic, El Salvador, Haiti, Honduras, Jamaica, Brazil, Colombia, Venezuela, and Nigeria. This list can change slightly each year. If you were born in an ineligible country but your spouse was born in an eligible country, you may still be able to apply based on your spouse's birth country.</div></div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">What if I was born in an ineligible country but live somewhere else? <span class="faq-arrow">▼</span></div>
+            <div class="faq-a"><div class="faq-a-inner">Eligibility for the Diversity Visa Program is based on your country of birth — not where you currently live. However, there are two exceptions: if your spouse was born in an eligible country, you may apply based on their birth country. Alternatively, if both of your parents were born in eligible countries and you were born in an ineligible country only because they were temporarily there (for work or study), you may also qualify. Our immigration attorneys can review your specific situation.</div></div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">Can married couples both apply to the Diversity Visa Program? <span class="faq-arrow">▼</span></div>
+            <div class="faq-a"><div class="faq-a-inner">Yes — and it is actually recommended. Married couples can and should submit two separate applications: one where the husband is the primary applicant and the wife is listed as spouse, and one where the wife is the primary applicant and the husband is listed as spouse. This doubles the family's chances of being selected. If either application is selected, both spouses can immigrate together.</div></div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">Does being selected in the DV Program guarantee a Green Card? <span class="faq-arrow">▼</span></div>
+            <div class="faq-a"><div class="faq-a-inner">No. Being selected means you are invited to apply — it does not guarantee a Green Card. You will still need to go through a full visa interview and background checks. Applicants may be disqualified if they have a serious criminal record, certain health conditions, security concerns, or cannot demonstrate financial self-sufficiency. This is why professional legal preparation is so important.</div></div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">Are there other immigration options besides the Green Card Program? <span class="faq-arrow">▼</span></div>
+            <div class="faq-a"><div class="faq-a-inner">Absolutely. The Diversity Visa Program is just one of many pathways to the United States. Depending on your background, education, work experience, business interests, and family situation, there may be additional options available — including employment-based visas, investment visas, family-based immigration, and more. Our assessment is designed to identify all pathways that may apply to your profile, not just the DV Program.</div></div>
+          </div>
         </div>
 
           </div><!-- /faq-panel -->
@@ -1329,7 +1370,7 @@ function showScreen(id) {
     const qIdx = Q_ONLY.indexOf(id);
     const pct = id === 'contact' ? 3 : idx >= 0 ? Math.round(((idx+1)/Q_SCREENS.length)*100) : 0;
     document.getElementById('progressFill').style.width = pct+'%';
-    document.getElementById('progressStep').textContent = qIdx >= 0 ? 'Question '+(qIdx+1)+' of '+Q_ONLY.length : '';
+    document.getElementById('progressStep').textContent = qIdx >= 0 ? 'Your Green Card Journey · Question '+(qIdx+1)+' of '+Q_ONLY.length : '';
     document.getElementById('progressLabel').textContent = SCREEN_LABELS[id]||'';
     // Remaining
     const remEl = document.getElementById('progressRemaining');
@@ -1349,19 +1390,6 @@ function showScreen(id) {
   if(id === 'q2') renderCountries('');
   if(id === 'q2b') {
     renderBirthCountries('');
-    // Restore duration section if needed
-    if(answers.q2b && answers.q2 && answers.q2b !== answers.q2) {
-      const durWrap = document.getElementById('residenceDurationWrap');
-      const resName = document.getElementById('residenceCountryName');
-      if(durWrap) durWrap.style.display = 'block';
-      if(resName) resName.textContent = answers.q2;
-      // Restore selected duration
-      if(answers.resDuration) {
-        document.querySelectorAll('#opts-resDuration .opt').forEach(b => {
-          b.classList.toggle('selected', b.dataset.val === answers.resDuration);
-        });
-      }
-    }
   }
   if(id === 'q3b') renderSpouseCountries('');
   if(id === 'q6') {
@@ -1398,12 +1426,16 @@ function showScreen(id) {
   showEncouragement(id);
 
   if(id === 'q4b') {
-    const dt = document.getElementById('q4DreamText');
-    if(dt && answers.q4_dream) { dt.value = answers.q4_dream; document.getElementById('btnQ4b').disabled = false; }
-    else { document.getElementById('btnQ4b').disabled = true; }
+    // Restore location selections
     if(answers.q4_location && Array.isArray(answers.q4_location)) {
       document.querySelectorAll('#opts-q4loc .opt').forEach(b => b.classList.toggle('selected', answers.q4_location.includes(b.dataset.val)));
     }
+    document.getElementById('btnQ4b').disabled = false;
+  }
+  if(id === 'q4c') {
+    const dt = document.getElementById('q4DreamText');
+    if(dt && answers.q4_dream) { dt.value = answers.q4_dream; document.getElementById('btnQ4c').disabled = false; }
+    else if(dt) { dt.value = ''; document.getElementById('btnQ4c').disabled = true; }
   }
   // Personalize new screen titles
   if(id === 'qStudy') {
@@ -1564,14 +1596,32 @@ function selBirthCountry(c) {
   const durWrap = document.getElementById('residenceDurationWrap');
   const resName = document.getElementById('residenceCountryName');
   if(answers.q2 && c !== answers.q2) {
-    if(resName) resName.textContent = answers.q2;
-    if(durWrap) durWrap.style.display = 'block';
-    // Only enable next if duration is also selected
-    document.getElementById('btnQ2b').disabled = !answers.resDuration;
+    // Will go to q2c for duration question
+    document.getElementById('btnQ2b').disabled = false;
   } else {
-    if(durWrap) durWrap.style.display = 'none';
     delete answers.resDuration;
     document.getElementById('btnQ2b').disabled = false;
+  }
+}
+
+function goNextFromQ2b() {
+  // If birth country differs from residence — go to duration question first
+  if(answers.q2b && answers.q2 && answers.q2b !== answers.q2) {
+    const nameEl = document.getElementById('residenceCountryNameQ2c');
+    if(nameEl) nameEl.textContent = answers.q2;
+    // Restore duration selection if already answered
+    if(answers.resDuration) {
+      document.querySelectorAll('#opts-resDuration .opt').forEach(b => {
+        b.classList.toggle('selected', b.dataset.val === answers.resDuration);
+      });
+      document.getElementById('btnQ2c').disabled = false;
+    } else {
+      document.querySelectorAll('#opts-resDuration .opt').forEach(b => b.classList.remove('selected'));
+      document.getElementById('btnQ2c').disabled = true;
+    }
+    goNext('q2c');
+  } else {
+    goNext('q3');
   }
 }
 
@@ -1579,7 +1629,8 @@ function selResDuration(el) {
   answers.resDuration = el.dataset.val;
   document.querySelectorAll('#opts-resDuration .opt').forEach(b => b.classList.remove('selected'));
   el.classList.add('selected');
-  document.getElementById('btnQ2b').disabled = false;
+  const btn = document.getElementById('btnQ2c') || document.getElementById('btnQ2b');
+  if(btn) btn.disabled = false;
 }
 function clearBirthCountry() {
   delete answers.q2b;
@@ -2344,6 +2395,11 @@ function toggleQ4Loc(el) {
 }
 
 function validateQ4b() {
+  // q4b is now location (optional) — always allow continue
+  goNext('q4c');
+}
+
+function validateQ4c() {
   if(!answers.q4_dream || !answers.q4_dream.trim()) {
     const el = document.getElementById('q4DreamText');
     if(el) {
