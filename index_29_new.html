@@ -2388,10 +2388,9 @@ function toggleQ4Loc(el) {
     el.classList.toggle('selected');
     answers.q4_location = [...document.querySelectorAll('#opts-q4loc .opt.selected')].map(b => b.dataset.val);
   }
-  // Location is optional — button state is controlled only by dream text
-  // Re-check in case dream was already typed
+  // Location is optional — button always enabled
   const btn = document.getElementById('btnQ4b');
-  if(btn) btn.disabled = !(answers.q4_dream && answers.q4_dream.trim());
+  if(btn) btn.disabled = false;
 }
 
 function validateQ4b() {
