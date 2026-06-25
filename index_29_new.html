@@ -1938,6 +1938,7 @@ async function saveProgressToBitrix(partial = false) {
   ].filter(l => l !== '').join('\n');
 
   fields['COMMENTS'] = lines;
+  fields['SOURCE_ID'] = 'EMAIL';
   if(partial) { fields['STATUS_ID'] = 'NEW'; fields['UF_CRM_1780906448'] = '13331'; } // Partial
   else { fields['STATUS_ID'] = 'TypeForm'; fields['UF_CRM_1780826001'] = 'Y'; fields['UF_CRM_1780906448'] = '13330'; } // Full
 
@@ -1986,8 +1987,14 @@ async function submitAndShowResults() {
     answers.resDuration ? `Time living in ${answers.q2||''}: ${answers.resDuration}` : '',
     answers.q3==='Married' ? `Spouse: ${[answers.spouseFirst,answers.spouseLast].filter(Boolean).join(' ')} | Country: ${answers.spouseCountry||''} | Edu: ${answers.spouseEdu||''} | Immigrating: ${answers.spouseImmigrate||''}` : '',
     `Children under 21: ${answers.q3c||''} ${answers.childrenCount?'('+answers.childrenCount+')':''}`,
-    `Country: ${answers.q2||''}`,
+    `Country of Residence: ${answers.q2||''}`,
+    `Country of Birth: ${answers.q2b||''}`,
+    answers.resDuration ? `Time living in ${answers.q2||''}: ${answers.resDuration}` : '',
     `Marital Status: ${answers.q3||''}`,
+    answers.q3==='Married' && answers.spouseFirst ? `Spouse Name: ${[answers.spouseFirst,answers.spouseLast].filter(Boolean).join(' ')}` : '',
+    answers.spouseCountry ? `Spouse Country of Birth: ${answers.spouseCountry}` : '',
+    answers.spouseEdu ? `Spouse Education: ${answers.spouseEdu}` : '',
+    answers.spouseImmigrate ? `Spouse Immigrating: ${answers.spouseImmigrate}` : '',
     `Primary Goal: ${answers.q4||''}${answers.q4_detail?' — '+answers.q4_detail:''}`,
     answers.q4_dream ? `Dream: ${answers.q4_dream}` : '',
     answers.q4_location && answers.q4_location.length ? `Preferred U.S. location: ${Array.isArray(answers.q4_location) ? answers.q4_location.join(', ') : answers.q4_location}` : '',
@@ -2004,8 +2011,9 @@ async function submitAndShowResults() {
     answers.qStudy ? `Study Interest: ${answers.qStudy}` : '',
     `Family in USA: ${answers.q9||''}`,
     answers.familyWho && answers.familyWho.length ? `Family members: ${answers.familyWho.join(', ')}` : '',
-    answers.familyStatus ? `Their status: ${answers.familyStatus}` : '',
-    `Leadership: ${answers.q10||''}`,
+    answers.familyStatus ? `Family immigration status: ${answers.familyStatus}` : '',
+    `Leadership Experience: ${answers.q10||''}`,
+    `Age: ${answers.q1||''}`,
     '',
     `Payment URL: ${paymentUrl}`
   ].join('\n');
@@ -2024,6 +2032,7 @@ async function submitAndShowResults() {
   const INCOME_IDS = {'0-999':'390','1000-2499':'391','2500-3999':'392','4000-5999':'393','6000-9999':'394','+10000':'395'};
   if(answers.income_range) fields['UF_CRM_1484911973'] = INCOME_IDS[answers.income_range] || answers.income_range;             // Income range
   if(answers.q3 && MARITAL_IDS[answers.q3]) fields['UF_CRM_1500181612'] = MARITAL_IDS[answers.q3]; // Marital (lead)
+  fields['SOURCE_ID'] = 'EMAIL'; // Email Marketing
   if(answers.q3)     fields['UF_CRM_64CBB649310F0']  = answers.q3;                         // Marital string (contact)
   if(answers.q4)     fields['UF_CRM_1648031237']     = answers.q4;                         // Top reason/Why US
   // Pathway results
