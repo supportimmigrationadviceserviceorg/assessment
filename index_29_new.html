@@ -1938,7 +1938,7 @@ async function saveProgressToBitrix(partial = false) {
   ].filter(l => l !== '').join('\n');
 
   fields['COMMENTS'] = lines;
-  fields['SOURCE_ID'] = 'EMAIL';
+  fields['SOURCE_ID'] = '4';
   if(partial) { fields['STATUS_ID'] = 'NEW'; fields['UF_CRM_1780906448'] = '13331'; } // Partial
   else { fields['STATUS_ID'] = 'TypeForm'; fields['UF_CRM_1780826001'] = 'Y'; fields['UF_CRM_1780906448'] = '13330'; } // Full
 
@@ -2032,7 +2032,7 @@ async function submitAndShowResults() {
   const INCOME_IDS = {'0-999':'390','1000-2499':'391','2500-3999':'392','4000-5999':'393','6000-9999':'394','+10000':'395'};
   if(answers.income_range) fields['UF_CRM_1484911973'] = INCOME_IDS[answers.income_range] || answers.income_range;             // Income range
   if(answers.q3 && MARITAL_IDS[answers.q3]) fields['UF_CRM_1500181612'] = MARITAL_IDS[answers.q3]; // Marital (lead)
-  fields['SOURCE_ID'] = 'EMAIL'; // Email Marketing
+  fields['SOURCE_ID'] = '4'; // Email Marketing
   if(answers.q3)     fields['UF_CRM_64CBB649310F0']  = answers.q3;                         // Marital string (contact)
   if(answers.q4)     fields['UF_CRM_1648031237']     = answers.q4;                         // Top reason/Why US
   // Pathway results
