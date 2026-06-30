@@ -13,18 +13,17 @@
     align-items: center;
     justify-content: center;
     min-height: 100vh;
+    padding: 20px;
   }
   .card {
     background: #fff;
     border-radius: 10px;
     padding: 48px 40px;
     max-width: 480px;
-    width: 90%;
+    width: 100%;
     text-align: center;
     box-shadow: 0 2px 16px rgba(0,0,0,0.08);
   }
-  .logo { margin-bottom: 24px; }
-  .logo img { height: 48px; }
   h2 { font-size: 22px; color: #1a1a1a; margin-bottom: 12px; }
   p { color: #555; font-size: 15px; line-height: 1.6; margin-bottom: 24px; }
   .spinner {
@@ -59,13 +58,58 @@
   .btn-pay:hover { background: #155a99; }
   .success-icon { font-size: 48px; margin-bottom: 16px; }
   .hidden { display: none; }
+  .email-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    margin-bottom: 16px;
+    font-family: Arial, sans-serif;
+  }
+  .email-input:focus { outline: none; border-color: #1a6bb5; }
+  .btn-confirm {
+    display: block;
+    width: 100%;
+    background: #1a6bb5;
+    color: #fff;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+  }
+  .btn-confirm:hover { background: #155a99; }
+  .btn-confirm:disabled { background: #ccc; cursor: not-allowed; }
+  .error-msg {
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: #991b1b;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    margin-bottom: 16px;
+    text-align: left;
+  }
 </style>
 </head>
 <body>
 <div class="card">
 
+  <!-- STEP 1: Email entry -->
+  <div id="state-email-entry">
+    <div class="success-icon">📧</div>
+    <h2 id="entryTitle">Confirm your details</h2>
+    <p id="entrySub">Please enter the email address you used when you registered, so we can find your file.</p>
+    <div id="errorBox"></div>
+    <input type="email" id="emailField" class="email-input" placeholder="your@email.com" />
+    <button id="confirmBtn" class="btn-confirm" onclick="findLead()">Continue</button>
+  </div>
+
   <!-- Loading state -->
-  <div id="state-loading">
+  <div id="state-loading" class="hidden">
     <div class="spinner"></div>
     <p>Please wait...</p>
   </div>
@@ -89,6 +133,14 @@
     <p>We've updated your file. If you change your mind in the future, you're always welcome to reach out to us.<br><br>We wish you all the best!</p>
   </div>
 
+  <!-- Not found state -->
+  <div id="state-notfound" class="hidden">
+    <div class="success-icon">🔍</div>
+    <h2>We couldn't find your file</h2>
+    <p>We couldn't locate a record with that email address. Please double check the email, or contact us directly and we'll be happy to assist you.</p>
+    <button class="btn-confirm" onclick="resetForm()">Try Again</button>
+  </div>
+
   <!-- Error state -->
   <div id="state-error" class="hidden">
     <div class="success-icon">⚠️</div>
@@ -103,26 +155,57 @@ const WEBHOOK = "https://immiworld.org/rest/147/47yrflms2cje1cbe/";
 const FIELD_ID = "UF_CRM_1547484113";
 const PAYMENT_URL = "https://immigrationadviceservice.org/new-va-payment-29/?utm_campaign=reengagement";
 
+const params = new URLSearchParams(window.location.search);
+const answer = (params.get("answer") || "").toLowerCase();
+
 function show(id) {
-  ["state-loading","state-yes","state-no","state-error"].forEach(s => {
+  ["state-email-entry","state-loading","state-yes","state-no","state-notfound","state-error"].forEach(s => {
     document.getElementById(s).classList.toggle("hidden", s !== id);
   });
 }
 
-async function run() {
-  const params = new URLSearchParams(window.location.search);
-  const leadId = params.get("lead_id");
-  const answer = (params.get("answer") || "").toLowerCase();
+function resetForm() {
+  document.getElementById("emailField").value = "";
+  document.getElementById("errorBox").innerHTML = "";
+  show("state-email-entry");
+}
 
-  if (!leadId || !["yes","no"].includes(answer)) {
+function isValidEmail(e) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+}
+
+async function findLead() {
+  const email = document.getElementById("emailField").value.trim();
+  const errorBox = document.getElementById("errorBox");
+  errorBox.innerHTML = "";
+
+  if (!isValidEmail(email)) {
+    errorBox.innerHTML = '<div class="error-msg">Please enter a valid email address.</div>';
+    return;
+  }
+
+  if (!["yes","no"].includes(answer)) {
     show("state-error");
     return;
   }
 
-  const value = answer === "yes" ? "Yes" : "No";
+  show("state-loading");
 
   try {
-    const res = await fetch(`${WEBHOOK}crm.lead.update`, {
+    const searchRes = await fetch(WEBHOOK + "crm.lead.list?filter[EMAIL]=" + encodeURIComponent(email) +
+      "&select[]=ID&select[]=STATUS_ID&order[DATE_CREATE]=DESC");
+    const searchData = await searchRes.json();
+    const leads = searchData.result || [];
+
+    if (!leads.length) {
+      show("state-notfound");
+      return;
+    }
+
+    const leadId = leads[0].ID;
+    const value = answer === "yes" ? "Yes" : "No";
+
+    await fetch(WEBHOOK + "crm.lead.update", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -130,22 +213,32 @@ async function run() {
         FIELDS: { [FIELD_ID]: value }
       })
     });
-    const data = await res.json();
-    if (!data.result) throw new Error("CRM update failed");
-  } catch(e) {
-    // Still show the relevant page even if CRM fails
-    console.error(e);
-  }
 
-  if (answer === "yes") {
-    document.getElementById("pay-link").href = PAYMENT_URL + "&lead_id=" + leadId;
-    show("state-yes");
-  } else {
-    show("state-no");
+    if (answer === "yes") {
+      document.getElementById("pay-link").href = PAYMENT_URL + "&lead_id=" + leadId;
+      show("state-yes");
+    } else {
+      show("state-no");
+    }
+
+  } catch(e) {
+    console.error(e);
+    show("state-error");
   }
 }
 
-run();
+(function init() {
+  if (!["yes","no"].includes(answer)) {
+    show("state-error");
+    return;
+  }
+  const title = document.getElementById("entryTitle");
+  const sub = document.getElementById("entrySub");
+  if (answer === "no") {
+    title.textContent = "Confirm your details";
+    sub.textContent = "Please enter your email address to confirm — we'll update your file accordingly.";
+  }
+})();
 </script>
 </body>
 </html>
