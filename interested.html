@@ -117,13 +117,14 @@
   <!-- YES state: show payment info -->
   <div id="state-yes" class="hidden">
     <div class="success-icon">✅</div>
-    <h2>Great! Let's move forward.</h2>
+    <h2>Congratulations on Taking the First Step</h2>
+    <p>Your journey begins with the official opening of your case and an initial review by a licensed U.S. immigration attorney.</p>
+    <p id="caseNumberLine" style="font-size:14px;color:#1a6bb5;font-weight:bold;margin-top:-12px"></p>
     <div class="payment-box">
-      <h3>Case Opening Fee — $29</h3>
-      <p>To begin processing your U.S. immigration case, a one-time case opening fee of <strong>$29</strong> is required. This covers the initial review of your file by our team.</p>
+      <h3>Special Offer — Only $29</h3>
+      <p>Open your case file today for a one-time fee of just <strong>$29</strong> — covering your case opening and initial attorney review.</p>
     </div>
-    <p>Click below to complete your payment and get started:</p>
-    <a id="pay-link" href="#" class="btn-pay">Pay $29 &amp; Open My Case</a>
+    <a id="pay-link" href="#" class="btn-pay">Claim My $29 Offer &amp; Open My Case</a>
   </div>
 
   <!-- NO state -->
@@ -199,13 +200,13 @@ async function findLead() {
   try {
     // 1. Fetch all leads with this email, newest first
     const leadsRes = await fetch(WEBHOOK + "crm.lead.list?filter[EMAIL]=" + encodeURIComponent(email) +
-      "&select[]=ID&select[]=STATUS_ID&order[DATE_CREATE]=DESC");
+      "&select[]=ID&select[]=STATUS_ID&select[]=UF_CRM_566016C1CC16A&order[DATE_CREATE]=DESC");
     const leadsData = await leadsRes.json();
     const leads = leadsData.result || [];
 
     // 2. Fetch contact with this email (if any)
     const contactRes = await fetch(WEBHOOK + "crm.contact.list?filter[EMAIL]=" + encodeURIComponent(email) +
-      "&select[]=ID&order[DATE_CREATE]=DESC");
+      "&select[]=ID&select[]=UF_CRM_566016C1CC16A&order[DATE_CREATE]=DESC");
     const contactData = await contactRes.json();
     const contacts = contactData.result || [];
 
@@ -220,6 +221,7 @@ async function findLead() {
 
     let targetEntityType = null;
     let targetEntityId = null;
+    let targetClientId = null;
 
     if (isProtected || (!newestLead && contacts.length)) {
       // Newest lead is protected (paid/not relevant/opted out) OR no lead at all but a contact exists
@@ -227,18 +229,22 @@ async function findLead() {
       if (contacts.length) {
         targetEntityType = "contact";
         targetEntityId = contacts[0].ID;
+        targetClientId = contacts[0].UF_CRM_566016C1CC16A;
       } else if (newestLead) {
         // Protected lead but no contact found — still update the lead's field only, never touch status
         targetEntityType = "lead";
         targetEntityId = newestLead.ID;
+        targetClientId = newestLead.UF_CRM_566016C1CC16A;
       }
     } else if (newestLead) {
       // Newest lead is not protected -> update it directly
       targetEntityType = "lead";
       targetEntityId = newestLead.ID;
+      targetClientId = newestLead.UF_CRM_566016C1CC16A;
     } else if (contacts.length) {
       targetEntityType = "contact";
       targetEntityId = contacts[0].ID;
+      targetClientId = contacts[0].UF_CRM_566016C1CC16A;
     }
 
     if (!targetEntityType) {
@@ -283,6 +289,8 @@ async function findLead() {
 
     // 5. Show appropriate screen
     if (answer === "yes") {
+      const displayCaseId = targetClientId || ("#" + targetEntityId);
+      document.getElementById("caseNumberLine").textContent = "Client ID: " + displayCaseId;
       document.getElementById("pay-link").href = PAYMENT_URL + "&lead_id=" + (targetEntityType === "lead" ? targetEntityId : "");
       show("state-yes");
     } else {
