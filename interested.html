@@ -153,7 +153,11 @@
 <script>
 const WEBHOOK = "https://immiworld.org/rest/147/47yrflms2cje1cbe/";
 const FIELD_ID = "UF_CRM_1547484113";
+const FIELD_ID_CONTACT = "UF_CRM_1547484113"; // update if Contact field ID differs
 const PAYMENT_URL = "https://immigrationadviceservice.org/new-va-payment-29/?utm_campaign=reengagement";
+
+// Protected statuses — these mean the client already has a Contact / paid / explicitly opted out
+const PROTECTED_STATUSES = ["CONVERTED", "26", "27", "31"];
 
 const params = new URLSearchParams(window.location.search);
 const answer = (params.get("answer") || "").toLowerCase();
@@ -190,32 +194,96 @@ async function findLead() {
   }
 
   show("state-loading");
+  const value = answer === "yes" ? "Yes" : "No";
 
   try {
-    const searchRes = await fetch(WEBHOOK + "crm.lead.list?filter[EMAIL]=" + encodeURIComponent(email) +
+    // 1. Fetch all leads with this email, newest first
+    const leadsRes = await fetch(WEBHOOK + "crm.lead.list?filter[EMAIL]=" + encodeURIComponent(email) +
       "&select[]=ID&select[]=STATUS_ID&order[DATE_CREATE]=DESC");
-    const searchData = await searchRes.json();
-    const leads = searchData.result || [];
+    const leadsData = await leadsRes.json();
+    const leads = leadsData.result || [];
 
-    if (!leads.length) {
+    // 2. Fetch contact with this email (if any)
+    const contactRes = await fetch(WEBHOOK + "crm.contact.list?filter[EMAIL]=" + encodeURIComponent(email) +
+      "&select[]=ID&order[DATE_CREATE]=DESC");
+    const contactData = await contactRes.json();
+    const contacts = contactData.result || [];
+
+    if (!leads.length && !contacts.length) {
+      // Nothing found at all
       show("state-notfound");
       return;
     }
 
-    const leadId = leads[0].ID;
-    const value = answer === "yes" ? "Yes" : "No";
+    const newestLead = leads.length ? leads[0] : null;
+    const isProtected = newestLead && PROTECTED_STATUSES.includes(newestLead.STATUS_ID);
 
-    await fetch(WEBHOOK + "crm.lead.update", {
+    let targetEntityType = null;
+    let targetEntityId = null;
+
+    if (isProtected || (!newestLead && contacts.length)) {
+      // Newest lead is protected (paid/not relevant/opted out) OR no lead at all but a contact exists
+      // -> update the Contact instead
+      if (contacts.length) {
+        targetEntityType = "contact";
+        targetEntityId = contacts[0].ID;
+      } else if (newestLead) {
+        // Protected lead but no contact found — still update the lead's field only, never touch status
+        targetEntityType = "lead";
+        targetEntityId = newestLead.ID;
+      }
+    } else if (newestLead) {
+      // Newest lead is not protected -> update it directly
+      targetEntityType = "lead";
+      targetEntityId = newestLead.ID;
+    } else if (contacts.length) {
+      targetEntityType = "contact";
+      targetEntityId = contacts[0].ID;
+    }
+
+    if (!targetEntityType) {
+      show("state-notfound");
+      return;
+    }
+
+    // 3. Update the Interested in Visa field
+    const updateFields = { [FIELD_ID]: value };
+
+    // If answer is YES and target is a lead that's not NEW, and not protected, move it to NEW
+    if (answer === "yes" && targetEntityType === "lead" && !isProtected) {
+      updateFields["STATUS_ID"] = "NEW";
+    }
+
+    if (targetEntityType === "lead") {
+      await fetch(WEBHOOK + "crm.lead.update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ID: targetEntityId, FIELDS: updateFields })
+      });
+    } else {
+      await fetch(WEBHOOK + "crm.contact.update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ID: targetEntityId, FIELDS: { [FIELD_ID_CONTACT]: value } })
+      });
+    }
+
+    // 4. Add timeline comment
+    const commentText = answer === "yes"
+      ? "Client received the re-engagement email (\"Notice: New Immigration Pathways May Affect Your Eligibility\") and confirmed they are still interested in proceeding (answered Yes). Field 'Interested in Visa' updated to Yes."
+      : "Client received the re-engagement email (\"Notice: New Immigration Pathways May Affect Your Eligibility\") and indicated they are no longer interested in proceeding (answered No). Field 'Interested in Visa' updated to No.";
+
+    await fetch(WEBHOOK + "crm.timeline.comment.add", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        ID: leadId,
-        FIELDS: { [FIELD_ID]: value }
+        fields: { ENTITY_TYPE: targetEntityType, ENTITY_ID: targetEntityId, COMMENT: commentText }
       })
     });
 
+    // 5. Show appropriate screen
     if (answer === "yes") {
-      document.getElementById("pay-link").href = PAYMENT_URL + "&lead_id=" + leadId;
+      document.getElementById("pay-link").href = PAYMENT_URL + "&lead_id=" + (targetEntityType === "lead" ? targetEntityId : "");
       show("state-yes");
     } else {
       show("state-no");
