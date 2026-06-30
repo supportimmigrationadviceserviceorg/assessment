@@ -58,6 +58,16 @@
   .btn-pay:hover { background: #155a99; }
   .success-icon { font-size: 48px; margin-bottom: 16px; }
   .hidden { display: none; }
+  .cta-arrow {
+    font-size: 28px;
+    color: #1a6bb5;
+    animation: bounce 1.2s infinite;
+    margin-bottom: 4px;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); opacity: 0.6; }
+    50% { transform: translateY(8px); opacity: 1; }
+  }
   .email-input {
     width: 100%;
     padding: 14px 16px;
@@ -124,6 +134,7 @@
       <h3>Special Offer — Only $29</h3>
       <p>Open your case file today for a one-time fee of just <strong>$29</strong> — covering your case opening and initial attorney review.</p>
     </div>
+    <div class="cta-arrow">⬇</div>
     <a id="pay-link" href="#" class="btn-pay">Claim My $29 Offer &amp; Open My Case</a>
   </div>
 
@@ -131,7 +142,17 @@
   <div id="state-no" class="hidden">
     <div class="success-icon">👍</div>
     <h2>Thank you for letting us know.</h2>
-    <p>We've updated your file. If you change your mind in the future, you're always welcome to reach out to us.<br><br>We wish you all the best!</p>
+    <p>We've updated your file. If you change your mind in the future, you're always welcome to reach out to us.</p>
+    <div style="text-align:left;margin-bottom:20px">
+      <label style="font-size:13px;color:#555;font-weight:bold;display:block;margin-bottom:6px">Would you like to share why? (optional)</label>
+      <textarea id="noReasonField" placeholder="Let us know if you'd like..." style="width:100%;min-height:80px;padding:12px 14px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px;font-family:Arial,sans-serif;resize:vertical;margin-bottom:10px"></textarea>
+      <button class="btn-confirm" onclick="submitNoReason()" style="background:#1a6bb5">Send Feedback</button>
+    </div>
+    <p id="noReasonThanks" class="hidden" style="color:#1a6bb5;font-weight:bold">Thank you for your feedback!</p>
+    <p style="font-size:13px;color:#888;border-top:1px solid #eee;padding-top:16px;margin-top:8px">
+      Questions or concerns? Reach us directly at<br>
+      <a href="mailto:support@immigrationadviceservice.org" style="color:#1a6bb5;font-weight:bold;text-decoration:none">support@immigrationadviceservice.org</a>
+    </p>
   </div>
 
   <!-- Not found state -->
@@ -162,6 +183,8 @@ const PROTECTED_STATUSES = ["CONVERTED", "26", "27", "31"];
 
 const params = new URLSearchParams(window.location.search);
 const answer = (params.get("answer") || "").toLowerCase();
+let lastEntityType = null;
+let lastEntityId = null;
 
 function show(id) {
   ["state-email-entry","state-loading","state-yes","state-no","state-notfound","state-error"].forEach(s => {
@@ -200,13 +223,13 @@ async function findLead() {
   try {
     // 1. Fetch all leads with this email, newest first
     const leadsRes = await fetch(WEBHOOK + "crm.lead.list?filter[EMAIL]=" + encodeURIComponent(email) +
-      "&select[]=ID&select[]=STATUS_ID&select[]=UF_CRM_566016C1CC16A&order[DATE_CREATE]=DESC");
+      "&select[]=ID&select[]=STATUS_ID&select[]=UF_CRM_1449131692&order[DATE_CREATE]=DESC");
     const leadsData = await leadsRes.json();
     const leads = leadsData.result || [];
 
     // 2. Fetch contact with this email (if any)
     const contactRes = await fetch(WEBHOOK + "crm.contact.list?filter[EMAIL]=" + encodeURIComponent(email) +
-      "&select[]=ID&select[]=UF_CRM_566016C1CC16A&order[DATE_CREATE]=DESC");
+      "&select[]=ID&select[]=UF_CRM_1449131692&order[DATE_CREATE]=DESC");
     const contactData = await contactRes.json();
     const contacts = contactData.result || [];
 
@@ -229,22 +252,22 @@ async function findLead() {
       if (contacts.length) {
         targetEntityType = "contact";
         targetEntityId = contacts[0].ID;
-        targetClientId = contacts[0].UF_CRM_566016C1CC16A;
+        targetClientId = contacts[0].UF_CRM_1449131692;
       } else if (newestLead) {
         // Protected lead but no contact found — still update the lead's field only, never touch status
         targetEntityType = "lead";
         targetEntityId = newestLead.ID;
-        targetClientId = newestLead.UF_CRM_566016C1CC16A;
+        targetClientId = newestLead.UF_CRM_1449131692;
       }
     } else if (newestLead) {
       // Newest lead is not protected -> update it directly
       targetEntityType = "lead";
       targetEntityId = newestLead.ID;
-      targetClientId = newestLead.UF_CRM_566016C1CC16A;
+      targetClientId = newestLead.UF_CRM_1449131692;
     } else if (contacts.length) {
       targetEntityType = "contact";
       targetEntityId = contacts[0].ID;
-      targetClientId = contacts[0].UF_CRM_566016C1CC16A;
+      targetClientId = contacts[0].UF_CRM_1449131692;
     }
 
     if (!targetEntityType) {
@@ -288,6 +311,8 @@ async function findLead() {
     });
 
     // 5. Show appropriate screen
+    lastEntityType = targetEntityType;
+    lastEntityId = targetEntityId;
     if (answer === "yes") {
       const displayCaseId = targetClientId || ("#" + targetEntityId);
       document.getElementById("caseNumberLine").textContent = "Client ID: " + displayCaseId;
@@ -301,6 +326,28 @@ async function findLead() {
     console.error(e);
     show("state-error");
   }
+}
+
+async function submitNoReason() {
+  const reason = document.getElementById("noReasonField").value.trim();
+  if (!reason || !lastEntityType || !lastEntityId) {
+    document.getElementById("noReasonThanks").classList.remove("hidden");
+    return;
+  }
+  try {
+    await fetch(WEBHOOK + "crm.timeline.comment.add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fields: {
+          ENTITY_TYPE: lastEntityType,
+          ENTITY_ID: lastEntityId,
+          COMMENT: "Client's reason for not proceeding: " + reason
+        }
+      })
+    });
+  } catch(e) { console.error(e); }
+  document.getElementById("noReasonThanks").classList.remove("hidden");
 }
 
 (function init() {
