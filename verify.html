@@ -239,6 +239,8 @@ async function findContact() {
 }
 
 async function updateContact(fields, commentText) {
+  // Add comment to the card field (left side) as well as timeline (right side)
+  fields["COMMENTS"] = commentText;
   await fetch(WEBHOOK + "crm.contact.update", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
