@@ -359,14 +359,23 @@ async function confirmDetails() {
       }
     }
 
+    // Timeline comment
+    let commentText = answer === "yes"
+      ? "Client received the re-engagement email (\"Notice: New Immigration Pathways May Affect Your Eligibility\") and confirmed they are still interested in proceeding (answered Yes). Field 'Interested in Visa' updated to Yes."
+      : "Client received the re-engagement email (\"Notice: New Immigration Pathways May Affect Your Eligibility\") and indicated they are no longer interested in proceeding (answered No). Field 'Interested in Visa' updated to No.";
+
+    if (newPhone && newPhone !== originalPhone) {
+      commentText += " Phone number updated to: " + newPhone;
+    }
+
     if (lastEntityType === "lead") {
       await fetch(WEBHOOK + "crm.lead.update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ID: lastEntityId, FIELDS: updateFields })
+        body: JSON.stringify({ ID: lastEntityId, FIELDS: { ...updateFields, COMMENTS: commentText, ASSIGNED_BY_ID: 902 } })
       });
     } else {
-      const contactFields = { [FIELD_ID_CONTACT]: value };
+      const contactFields = { [FIELD_ID_CONTACT]: value, COMMENTS: commentText };
       if (newPhone && newPhone !== originalPhone) {
         contactFields["PHONE"] = [{ VALUE: newPhone, VALUE_TYPE: "WORK" }];
       }
@@ -375,15 +384,6 @@ async function confirmDetails() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ID: lastEntityId, FIELDS: contactFields })
       });
-    }
-
-    // Timeline comment
-    let commentText = answer === "yes"
-      ? "Client received the re-engagement email (\"Notice: New Immigration Pathways May Affect Your Eligibility\") and confirmed they are still interested in proceeding (answered Yes). Field 'Interested in Visa' updated to Yes."
-      : "Client received the re-engagement email (\"Notice: New Immigration Pathways May Affect Your Eligibility\") and indicated they are no longer interested in proceeding (answered No). Field 'Interested in Visa' updated to No.";
-
-    if (newPhone && newPhone !== originalPhone) {
-      commentText += " Phone number updated to: " + newPhone;
     }
 
     await fetch(WEBHOOK + "crm.timeline.comment.add", {
