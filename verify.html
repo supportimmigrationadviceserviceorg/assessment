@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Immigration Advice Service — File Verification</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 40px 36px;
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  }
+  h2 { font-size: 21px; color: #1a1a1a; margin-bottom: 10px; }
+  p { color: #555; font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 4px solid #e0e0e0;
+    border-top-color: #1a3a6b;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .success-icon { font-size: 44px; margin-bottom: 14px; }
+  .hidden { display: none; }
+  .field-label {
+    font-size: 11px; color: #888; text-align: left;
+    margin-bottom: 4px; font-weight: bold;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .field-static {
+    width: 100%; padding: 11px 14px;
+    background: #f3f4f6; border: 2px solid #e5e7eb;
+    border-radius: 8px; font-size: 14px; color: #374151;
+    text-align: left; margin-bottom: 14px;
+  }
+  .field-input {
+    width: 100%; padding: 11px 14px;
+    border: 2px solid #e0e0e0; border-radius: 8px;
+    font-size: 14px; font-family: Arial, sans-serif;
+    margin-bottom: 14px;
+  }
+  .field-input:focus { outline: none; border-color: #1a3a6b; }
+  textarea.field-input { min-height: 80px; resize: vertical; }
+  .btn-primary {
+    display: block; width: 100%;
+    background: #1a3a6b; color: #fff;
+    border: none; padding: 13px;
+    border-radius: 8px; font-size: 15px;
+    font-weight: bold; cursor: pointer;
+    font-family: Arial, sans-serif; margin-bottom: 10px;
+  }
+  .btn-primary:hover { background: #152f5a; }
+  .btn-secondary {
+    display: block; width: 100%;
+    background: transparent; color: #9a917c;
+    border: 1px solid #c7bfa8; padding: 10px;
+    border-radius: 8px; font-size: 13px;
+    cursor: pointer; font-family: Arial, sans-serif;
+  }
+  .btn-secondary:hover { background: #f9f7f3; }
+  .email-input {
+    width: 100%; padding: 13px 16px;
+    border: 2px solid #e0e0e0; border-radius: 8px;
+    font-size: 15px; margin-bottom: 14px;
+    font-family: Arial, sans-serif;
+  }
+  .email-input:focus { outline: none; border-color: #1a3a6b; }
+  .error-msg {
+    background: #fef2f2; border: 1px solid #fca5a5;
+    color: #991b1b; border-radius: 8px;
+    padding: 11px 14px; font-size: 13px;
+    margin-bottom: 14px; text-align: left;
+  }
+  .section-divider {
+    border: none; border-top: 1px solid #eee;
+    margin: 16px 0;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- STEP 1: Email entry -->
+  <div id="state-email-entry">
+    <div class="success-icon">📋</div>
+    <h2 id="entryTitle">File Verification</h2>
+    <p id="entrySub">Please enter the email address associated with your file so we can locate your details.</p>
+    <div id="errorBox"></div>
+    <input type="email" id="emailField" class="email-input" placeholder="your@email.com" />
+    <button class="btn-primary" onclick="findContact()">Continue</button>
+  </div>
+
+  <!-- Loading -->
+  <div id="state-loading" class="hidden">
+    <div class="spinner"></div>
+    <p>Please wait...</p>
+  </div>
+
+  <!-- STEP 2: Verify form -->
+  <div id="state-verify" class="hidden">
+    <div class="success-icon">👤</div>
+    <h2>Please verify your details</h2>
+    <p>Review the information below. Update anything that has changed — then click Confirm.</p>
+
+    <div style="text-align:left">
+      <div class="field-label">Full Name</div>
+      <div class="field-static" id="verifyName">—</div>
+
+      <div class="field-label">Phone Number</div>
+      <input type="tel" id="verifyPhone" class="field-input" placeholder="Enter your phone number" />
+
+      <div class="field-label">Additional Email <span style="color:#aaa;font-weight:normal;text-transform:none">(optional)</span></div>
+      <input type="email" id="verifyEmail2" class="field-input" placeholder="another@email.com" />
+
+      <hr class="section-divider">
+
+      <div class="field-label">Additional Information <span style="color:#aaa;font-weight:normal;text-transform:none">(optional)</span></div>
+      <textarea id="verifyNotes" class="field-input" placeholder="Any updates, changes in your situation, or information you'd like to share with your consultant..."></textarea>
+    </div>
+
+    <button class="btn-primary" onclick="submitVerify()">Confirm & Update My Details</button>
+    <button class="btn-secondary" onclick="submitNoChange()">My information is correct — no changes needed</button>
+  </div>
+
+  <!-- SUCCESS state -->
+  <div id="state-success" class="hidden">
+    <div class="success-icon">✅</div>
+    <h2>Thank you!</h2>
+    <p>Your details have been updated. Your consultant will be in touch with you shortly.</p>
+    <p style="font-size:13px;color:#888;border-top:1px solid #eee;padding-top:14px;margin-top:4px">
+      Questions? Contact us at<br>
+      <a href="mailto:support@immigrationadviceservice.org" style="color:#1a3a6b;font-weight:bold;text-decoration:none;">support@immigrationadviceservice.org</a>
+    </p>
+  </div>
+
+  <!-- NO state -->
+  <div id="state-no" class="hidden">
+    <div class="success-icon">👍</div>
+    <h2>Thank you for letting us know.</h2>
+    <p>We've updated your file. If you change your mind in the future, you're always welcome to reach out to us.</p>
+    <div style="text-align:left;margin-bottom:16px">
+      <label style="font-size:13px;color:#555;font-weight:bold;display:block;margin-bottom:6px">Would you like to share why? (optional)</label>
+      <textarea id="noReasonField" class="field-input" placeholder="Let us know if you'd like..."></textarea>
+      <button class="btn-primary" onclick="submitNoReason()" style="margin-top:4px">Send Feedback</button>
+    </div>
+    <p id="noReasonThanks" class="hidden" style="color:#1a3a6b;font-weight:bold;margin-bottom:12px">Thank you for your feedback!</p>
+    <p style="font-size:13px;color:#888;border-top:1px solid #eee;padding-top:14px;">
+      Questions? Contact us at<br>
+      <a href="mailto:support@immigrationadviceservice.org" style="color:#1a3a6b;font-weight:bold;text-decoration:none;">support@immigrationadviceservice.org</a>
+    </p>
+  </div>
+
+  <!-- Not found -->
+  <div id="state-notfound" class="hidden">
+    <div class="success-icon">🔍</div>
+    <h2>We couldn't find your file</h2>
+    <p>We couldn't locate a record with that email address. Please check the email or contact us directly.</p>
+    <button class="btn-primary" onclick="resetForm()">Try Again</button>
+  </div>
+
+  <!-- Error -->
+  <div id="state-error" class="hidden">
+    <div class="success-icon">⚠️</div>
+    <h2>Something went wrong.</h2>
+    <p>Please contact us directly and we'll be happy to assist you.</p>
+  </div>
+
+</div>
+
+<script>
+const WEBHOOK = "https://immiworld.org/rest/147/47yrflms2cje1cbe/";
+const INTERESTED_FIELD = "UF_CRM_1547484113";
+
+const params = new URLSearchParams(window.location.search);
+const answer = (params.get("answer") || "").toLowerCase();
+
+let lastContactId = null;
+let originalPhone = "";
+
+const STATES = ["state-email-entry","state-loading","state-verify","state-success","state-no","state-notfound","state-error"];
+function show(id) { STATES.forEach(s => document.getElementById(s).classList.toggle("hidden", s !== id)); }
+function resetForm() { document.getElementById("emailField").value = ""; document.getElementById("errorBox").innerHTML = ""; show("state-email-entry"); }
+function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+async function findContact() {
+  const email = document.getElementById("emailField").value.trim();
+  const errorBox = document.getElementById("errorBox");
+  errorBox.innerHTML = "";
+
+  if (!isValidEmail(email)) {
+    errorBox.innerHTML = '<div class="error-msg">Please enter a valid email address.</div>';
+    return;
+  }
+  if (!["verify","no"].includes(answer)) { show("state-error"); return; }
+
+  show("state-loading");
+
+  try {
+    const res = await fetch(WEBHOOK + "crm.contact.list?filter[EMAIL]=" + encodeURIComponent(email) +
+      "&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&order[DATE_CREATE]=DESC");
+    const data = await res.json();
+    const contacts = data.result || [];
+
+    if (!contacts.length) { show("state-notfound"); return; }
+
+    const contact = contacts[0];
+    lastContactId = contact.ID;
+    originalPhone = (contact.PHONE && contact.PHONE[0] && contact.PHONE[0].VALUE) || "";
+
+    if (answer === "no") {
+      // Skip verify form — go straight to update + no screen
+      await updateContact({ [INTERESTED_FIELD]: "No" }, "Client received the verification email and indicated they are no longer interested in proceeding.");
+      show("state-no");
+      return;
+    }
+
+    // Show verify form
+    const fullName = [contact.NAME, contact.LAST_NAME].filter(Boolean).join(" ") || "—";
+    document.getElementById("verifyName").textContent = fullName;
+    document.getElementById("verifyPhone").value = originalPhone;
+    show("state-verify");
+
+  } catch(e) { console.error(e); show("state-error"); }
+}
+
+async function updateContact(fields, commentText) {
+  await fetch(WEBHOOK + "crm.contact.update", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ID: lastContactId, FIELDS: fields })
+  });
+  await fetch(WEBHOOK + "crm.timeline.comment.add", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ fields: { ENTITY_TYPE: "contact", ENTITY_ID: lastContactId, COMMENT: commentText } })
+  });
+}
+
+async function submitVerify() {
+  show("state-loading");
+
+  const phone = document.getElementById("verifyPhone").value.trim();
+  const email2 = document.getElementById("verifyEmail2").value.trim();
+  const notes = document.getElementById("verifyNotes").value.trim();
+
+  const fields = { [INTERESTED_FIELD]: "Yes" };
+  const commentParts = ["Client received the verification email and confirmed their details."];
+
+  if (phone && phone !== originalPhone) {
+    fields["PHONE"] = [{ VALUE: phone, VALUE_TYPE: "WORK" }];
+    commentParts.push("Phone updated to: " + phone);
+  } else if (phone) {
+    commentParts.push("Phone confirmed: " + phone);
+  }
+
+  if (email2) {
+    fields["EMAIL"] = [
+      { VALUE: document.getElementById("emailField").value.trim(), VALUE_TYPE: "WORK" },
+      { VALUE: email2, VALUE_TYPE: "HOME" }
+    ];
+    commentParts.push("Additional email provided: " + email2);
+  }
+
+  if (notes) commentParts.push("Additional information from client: " + notes);
+
+  try {
+    await updateContact(fields, commentParts.join(" | "));
+    show("state-success");
+  } catch(e) { console.error(e); show("state-error"); }
+}
+
+async function submitNoChange() {
+  show("state-loading");
+  const phone = document.getElementById("verifyPhone").value.trim();
+  const commentParts = ["Client confirmed their details are correct — no changes needed."];
+  if (phone) commentParts.push("Phone on file: " + phone);
+  try {
+    await updateContact({ [INTERESTED_FIELD]: "Yes" }, commentParts.join(" | "));
+    show("state-success");
+  } catch(e) { console.error(e); show("state-error"); }
+}
+
+async function submitNoReason() {
+  const reason = document.getElementById("noReasonField").value.trim();
+  if (!reason || !lastContactId) { document.getElementById("noReasonThanks").classList.remove("hidden"); return; }
+  try {
+    await fetch(WEBHOOK + "crm.timeline.comment.add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fields: { ENTITY_TYPE: "contact", ENTITY_ID: lastContactId, COMMENT: "Client's reason for no longer being interested: " + reason } })
+    });
+  } catch(e) { console.error(e); }
+  document.getElementById("noReasonThanks").classList.remove("hidden");
+}
+
+(function init() {
+  if (!["verify","no"].includes(answer)) { show("state-error"); return; }
+  if (answer === "no") {
+    document.getElementById("entryTitle").textContent = "Confirm your details";
+    document.getElementById("entrySub").textContent = "Please enter your email so we can update your file.";
+  }
+})();
+</script>
+</body>
+</html>
