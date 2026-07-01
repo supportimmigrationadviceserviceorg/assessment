@@ -233,7 +233,7 @@ const WEBHOOK = "https://immiworld.org/rest/147/47yrflms2cje1cbe/";
 const FIELD_ID = "UF_CRM_1547484113";
 const FIELD_ID_CONTACT = "UF_CRM_1547484113";
 const PAYMENT_URL = "https://immigrationadviceservice.org/new-va-payment-29/?utm_campaign=reengagement";
-const PROTECTED_STATUSES = ["CONVERTED", "26", "27", "31"];
+const PROTECTED_STATUSES = ["CONVERTED", "26", "27", "31", "DETAILS"];
 
 const params = new URLSearchParams(window.location.search);
 const answer = (params.get("answer") || "").toLowerCase();
@@ -241,6 +241,7 @@ const answer = (params.get("answer") || "").toLowerCase();
 let lastEntityType = null;
 let lastEntityId = null;
 let lastClientId = null;
+let lastLeadStatus = null;
 let originalPhone = null;
 
 const STATES = ["state-email-entry","state-loading","state-verify","state-yes","state-no","state-notfound","state-error"];
@@ -313,6 +314,7 @@ async function findLead() {
 
     lastEntityId = targetRecord.ID;
     lastClientId = targetRecord.UF_CRM_1449131692;
+    lastLeadStatus = targetRecord.STATUS_ID || null;
 
     // Build display name
     const fullName = [targetRecord.NAME, targetRecord.LAST_NAME].filter(Boolean).join(" ") || "—";
@@ -341,8 +343,10 @@ async function confirmDetails() {
     // Update fields
     const updateFields = { [FIELD_ID]: value };
 
-    // Update status to NEW if Yes and lead
-    if (answer === "yes" && lastEntityType === "lead") {
+    // Update status to NEW if Yes, lead, and not protected
+    const currentStatus = lastEntityType === "lead" ? lastLeadStatus : null;
+    const isCurrentlyProtected = currentStatus && PROTECTED_STATUSES.includes(currentStatus);
+    if (answer === "yes" && lastEntityType === "lead" && !isCurrentlyProtected) {
       updateFields["STATUS_ID"] = "NEW";
     }
 
