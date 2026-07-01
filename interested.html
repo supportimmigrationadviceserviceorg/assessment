@@ -68,6 +68,37 @@
     0%, 100% { transform: translateY(0); opacity: 0.6; }
     50% { transform: translateY(8px); opacity: 1; }
   }
+  .field-label {
+    font-size: 12px;
+    color: #888;
+    text-align: left;
+    margin-bottom: 4px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .field-static {
+    width: 100%;
+    padding: 12px 14px;
+    background: #f3f4f6;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 15px;
+    color: #374151;
+    text-align: left;
+    margin-bottom: 16px;
+  }
+  .field-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: Arial, sans-serif;
+    margin-bottom: 16px;
+    box-sizing: border-box;
+  }
+  .field-input:focus { outline: none; border-color: #1a6bb5; }
   .email-input {
     width: 100%;
     padding: 14px 16px;
@@ -103,6 +134,13 @@
     margin-bottom: 16px;
     text-align: left;
   }
+  .verify-note {
+    font-size: 12px;
+    color: #6b7280;
+    text-align: left;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
 </style>
 </head>
 <body>
@@ -122,6 +160,24 @@
   <div id="state-loading" class="hidden">
     <div class="spinner"></div>
     <p>Please wait...</p>
+  </div>
+
+  <!-- STEP 2: Verify details -->
+  <div id="state-verify" class="hidden">
+    <div class="success-icon">👤</div>
+    <h2>Please verify your details</h2>
+    <p style="margin-bottom:20px">We found your file. Please confirm your information below before continuing.</p>
+
+    <div style="text-align:left">
+      <div class="field-label">Full Name</div>
+      <div class="field-static" id="verifyName">—</div>
+
+      <div class="field-label">Phone Number</div>
+      <input type="tel" id="verifyPhone" class="field-input" placeholder="Enter your phone number" />
+      <p class="verify-note">If your phone number is incorrect or missing, please update it above — we may need to reach you regarding your case.</p>
+    </div>
+
+    <button class="btn-confirm" onclick="confirmDetails()">Confirm & Continue</button>
   </div>
 
   <!-- YES state: show payment info -->
@@ -175,21 +231,22 @@
 <script>
 const WEBHOOK = "https://immiworld.org/rest/147/47yrflms2cje1cbe/";
 const FIELD_ID = "UF_CRM_1547484113";
-const FIELD_ID_CONTACT = "UF_CRM_1547484113"; // update if Contact field ID differs
+const FIELD_ID_CONTACT = "UF_CRM_1547484113";
 const PAYMENT_URL = "https://immigrationadviceservice.org/new-va-payment-29/?utm_campaign=reengagement";
-
-// Protected statuses — these mean the client already has a Contact / paid / explicitly opted out
 const PROTECTED_STATUSES = ["CONVERTED", "26", "27", "31"];
 
 const params = new URLSearchParams(window.location.search);
 const answer = (params.get("answer") || "").toLowerCase();
+
 let lastEntityType = null;
 let lastEntityId = null;
+let lastClientId = null;
+let originalPhone = null;
+
+const STATES = ["state-email-entry","state-loading","state-verify","state-yes","state-no","state-notfound","state-error"];
 
 function show(id) {
-  ["state-email-entry","state-loading","state-yes","state-no","state-notfound","state-error"].forEach(s => {
-    document.getElementById(s).classList.toggle("hidden", s !== id);
-  });
+  STATES.forEach(s => document.getElementById(s).classList.toggle("hidden", s !== id));
 }
 
 function resetForm() {
@@ -212,111 +269,132 @@ async function findLead() {
     return;
   }
 
-  if (!["yes","no"].includes(answer)) {
-    show("state-error");
-    return;
-  }
+  if (!["yes","no"].includes(answer)) { show("state-error"); return; }
 
   show("state-loading");
-  const value = answer === "yes" ? "Yes" : "No";
 
   try {
-    // 1. Fetch all leads with this email, newest first
+    // 1. Fetch leads
     const leadsRes = await fetch(WEBHOOK + "crm.lead.list?filter[EMAIL]=" + encodeURIComponent(email) +
-      "&select[]=ID&select[]=STATUS_ID&select[]=UF_CRM_1449131692&order[DATE_CREATE]=DESC");
+      "&select[]=ID&select[]=STATUS_ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=UF_CRM_1449131692&order[DATE_CREATE]=DESC");
     const leadsData = await leadsRes.json();
     const leads = leadsData.result || [];
 
-    // 2. Fetch contact with this email (if any)
+    // 2. Fetch contacts
     const contactRes = await fetch(WEBHOOK + "crm.contact.list?filter[EMAIL]=" + encodeURIComponent(email) +
-      "&select[]=ID&select[]=UF_CRM_1449131692&order[DATE_CREATE]=DESC");
+      "&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=UF_CRM_1449131692&order[DATE_CREATE]=DESC");
     const contactData = await contactRes.json();
     const contacts = contactData.result || [];
 
-    if (!leads.length && !contacts.length) {
-      // Nothing found at all
-      show("state-notfound");
-      return;
-    }
+    if (!leads.length && !contacts.length) { show("state-notfound"); return; }
 
     const newestLead = leads.length ? leads[0] : null;
     const isProtected = newestLead && PROTECTED_STATUSES.includes(newestLead.STATUS_ID);
 
-    let targetEntityType = null;
-    let targetEntityId = null;
-    let targetClientId = null;
+    let targetRecord = null;
 
     if (isProtected || (!newestLead && contacts.length)) {
-      // Newest lead is protected (paid/not relevant/opted out) OR no lead at all but a contact exists
-      // -> update the Contact instead
       if (contacts.length) {
-        targetEntityType = "contact";
-        targetEntityId = contacts[0].ID;
-        targetClientId = contacts[0].UF_CRM_1449131692;
+        lastEntityType = "contact";
+        targetRecord = contacts[0];
       } else if (newestLead) {
-        // Protected lead but no contact found — still update the lead's field only, never touch status
-        targetEntityType = "lead";
-        targetEntityId = newestLead.ID;
-        targetClientId = newestLead.UF_CRM_1449131692;
+        lastEntityType = "lead";
+        targetRecord = newestLead;
       }
     } else if (newestLead) {
-      // Newest lead is not protected -> update it directly
-      targetEntityType = "lead";
-      targetEntityId = newestLead.ID;
-      targetClientId = newestLead.UF_CRM_1449131692;
+      lastEntityType = "lead";
+      targetRecord = newestLead;
     } else if (contacts.length) {
-      targetEntityType = "contact";
-      targetEntityId = contacts[0].ID;
-      targetClientId = contacts[0].UF_CRM_1449131692;
+      lastEntityType = "contact";
+      targetRecord = contacts[0];
     }
 
-    if (!targetEntityType) {
-      show("state-notfound");
-      return;
-    }
+    if (!targetRecord) { show("state-notfound"); return; }
 
-    // 3. Update the Interested in Visa field
+    lastEntityId = targetRecord.ID;
+    lastClientId = targetRecord.UF_CRM_1449131692;
+
+    // Build display name
+    const fullName = [targetRecord.NAME, targetRecord.LAST_NAME].filter(Boolean).join(" ") || "—";
+    document.getElementById("verifyName").textContent = fullName;
+
+    // Pre-fill phone if exists
+    originalPhone = (targetRecord.PHONE && targetRecord.PHONE[0] && targetRecord.PHONE[0].VALUE) || "";
+    document.getElementById("verifyPhone").value = originalPhone;
+
+    show("state-verify");
+
+  } catch(e) {
+    console.error(e);
+    show("state-error");
+  }
+}
+
+async function confirmDetails() {
+  show("state-loading");
+
+  const newPhone = document.getElementById("verifyPhone").value.trim();
+  const value = answer === "yes" ? "Yes" : "No";
+  const isProtected = false; // already filtered above
+
+  try {
+    // Update fields
     const updateFields = { [FIELD_ID]: value };
 
-    // If answer is YES and target is a lead that's not NEW, and not protected, move it to NEW
-    if (answer === "yes" && targetEntityType === "lead" && !isProtected) {
+    // Update status to NEW if Yes and lead
+    if (answer === "yes" && lastEntityType === "lead") {
       updateFields["STATUS_ID"] = "NEW";
     }
 
-    if (targetEntityType === "lead") {
+    // Update phone if changed
+    if (newPhone && newPhone !== originalPhone) {
+      if (lastEntityType === "lead") {
+        updateFields["PHONE"] = [{ VALUE: newPhone, VALUE_TYPE: "WORK" }];
+      } else {
+        updateFields["PHONE"] = [{ VALUE: newPhone, VALUE_TYPE: "WORK" }];
+      }
+    }
+
+    if (lastEntityType === "lead") {
       await fetch(WEBHOOK + "crm.lead.update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ID: targetEntityId, FIELDS: updateFields })
+        body: JSON.stringify({ ID: lastEntityId, FIELDS: updateFields })
       });
     } else {
+      const contactFields = { [FIELD_ID_CONTACT]: value };
+      if (newPhone && newPhone !== originalPhone) {
+        contactFields["PHONE"] = [{ VALUE: newPhone, VALUE_TYPE: "WORK" }];
+      }
       await fetch(WEBHOOK + "crm.contact.update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ID: targetEntityId, FIELDS: { [FIELD_ID_CONTACT]: value } })
+        body: JSON.stringify({ ID: lastEntityId, FIELDS: contactFields })
       });
     }
 
-    // 4. Add timeline comment
-    const commentText = answer === "yes"
+    // Timeline comment
+    let commentText = answer === "yes"
       ? "Client received the re-engagement email (\"Notice: New Immigration Pathways May Affect Your Eligibility\") and confirmed they are still interested in proceeding (answered Yes). Field 'Interested in Visa' updated to Yes."
       : "Client received the re-engagement email (\"Notice: New Immigration Pathways May Affect Your Eligibility\") and indicated they are no longer interested in proceeding (answered No). Field 'Interested in Visa' updated to No.";
+
+    if (newPhone && newPhone !== originalPhone) {
+      commentText += " Phone number updated to: " + newPhone;
+    }
 
     await fetch(WEBHOOK + "crm.timeline.comment.add", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        fields: { ENTITY_TYPE: targetEntityType, ENTITY_ID: targetEntityId, COMMENT: commentText }
+        fields: { ENTITY_TYPE: lastEntityType, ENTITY_ID: lastEntityId, COMMENT: commentText }
       })
     });
 
-    // 5. Show appropriate screen
-    lastEntityType = targetEntityType;
-    lastEntityId = targetEntityId;
+    // Show result
     if (answer === "yes") {
-      const displayCaseId = targetClientId || ("#" + targetEntityId);
+      const displayCaseId = lastClientId || ("#" + lastEntityId);
       document.getElementById("caseNumberLine").textContent = "Client ID: " + displayCaseId;
-      document.getElementById("pay-link").href = PAYMENT_URL + "&lead_id=" + (targetEntityType === "lead" ? targetEntityId : "");
+      document.getElementById("pay-link").href = PAYMENT_URL + "&lead_id=" + (lastEntityType === "lead" ? lastEntityId : "");
       show("state-yes");
     } else {
       show("state-no");
@@ -351,15 +429,10 @@ async function submitNoReason() {
 }
 
 (function init() {
-  if (!["yes","no"].includes(answer)) {
-    show("state-error");
-    return;
-  }
-  const title = document.getElementById("entryTitle");
-  const sub = document.getElementById("entrySub");
+  if (!["yes","no"].includes(answer)) { show("state-error"); return; }
   if (answer === "no") {
-    title.textContent = "Confirm your details";
-    sub.textContent = "Please enter your email address to confirm — we'll update your file accordingly.";
+    document.getElementById("entryTitle").textContent = "Confirm your details";
+    document.getElementById("entrySub").textContent = "Please enter your email address to confirm — we'll update your file accordingly.";
   }
 })();
 </script>
