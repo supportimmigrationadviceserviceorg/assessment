@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>E-2 Visa Assessment | Honey Badger Consulting Ltd.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0B1525;--navy2:#111E30;--navy3:#162236;
+  --gold:#C9A84C;--gold2:#E2C17A;--gold3:rgba(201,168,76,0.15);
+  --cream:#F5F0E8;--muted:#8A96A8;--white:#FFFFFF;
+  --err:#E05555;--success:#4CAF6E;
+}
+html,body{background:var(--navy);color:var(--white);font-family:'Inter',sans-serif;font-weight:300;min-height:100vh}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 48px;background:rgba(11,21,37,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,0.15)}
+.logo{display:flex;align-items:center;gap:12px;text-decoration:none}
+.logo-icon{width:38px;height:38px;flex-shrink:0}
+.logo-text{display:flex;flex-direction:column;line-height:1.1}
+.logo-text .top{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;letter-spacing:0.08em;color:var(--white)}
+.logo-text .sub{font-size:9px;font-weight:400;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold)}
+.nav-right{display:flex;align-items:center;gap:20px}
+.nav-tag{font-size:10.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);opacity:0.8}
+
+/* HERO */
+.hero{padding:130px 48px 60px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 0%,rgba(201,168,76,0.07) 0%,transparent 70%);pointer-events:none}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:10px;letter-spacing:0.26em;text-transform:uppercase;color:var(--gold);margin-bottom:22px}
+.hero-eyebrow::before,.hero-eyebrow::after{content:'';display:block;width:24px;height:1px;background:var(--gold);opacity:0.5}
+.hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(38px,5.5vw,64px);font-weight:300;line-height:1.05;color:var(--white);margin-bottom:8px}
+.hero h1 em{font-style:italic;color:var(--gold2)}
+.hero-sub{font-size:14px;color:var(--muted);line-height:1.75;max-width:500px;margin:18px auto 0}
+
+/* TRUST */
+.trust{display:flex;justify-content:center;gap:40px;padding:30px 48px;border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);flex-wrap:wrap}
+.trust-item{display:flex;flex-direction:column;align-items:center;gap:3px}
+.trust-item .val{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:var(--gold)}
+.trust-item .lbl{font-size:9.5px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted)}
+
+/* FORM WRAPPER */
+.form-outer{max-width:760px;margin:0 auto;padding:64px 48px 80px}
+
+/* PROGRESS */
+.progress-wrap{margin-bottom:40px}
+.progress-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.progress-label{font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)}
+.progress-count{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold)}
+.progress-bar-bg{height:2px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:2px;transition:width 0.4s ease}
+
+/* SECTION HEADER */
+.section-header{margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid rgba(201,168,76,0.18)}
+.section-eyebrow{font-size:9.5px;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(22px,3vw,30px);font-weight:300;color:var(--white)}
+
+/* QUESTION CARD */
+.q-card{background:var(--navy2);border:1px solid rgba(201,168,76,0.12);border-radius:4px;padding:28px 28px 24px;margin-bottom:18px;transition:border-color 0.2s}
+.q-card:focus-within{border-color:rgba(201,168,76,0.4)}
+.q-label{display:block;font-size:13px;color:var(--cream);font-weight:400;line-height:1.5;margin-bottom:14px}
+.q-label .q-num{font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--gold);margin-right:6px;font-weight:600}
+.q-optional{font-size:10px;color:var(--muted);letter-spacing:0.06em;margin-left:6px}
+
+/* INPUTS */
+input[type=text],input[type=email],input[type=number],input[type=date],textarea,select{
+  width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);
+  border-radius:3px;color:var(--white);font-family:'Inter',sans-serif;font-size:13.5px;
+  font-weight:300;padding:12px 14px;outline:none;transition:border-color 0.2s;
+  -webkit-appearance:none;appearance:none
+}
+input[type=text]:focus,input[type=email]:focus,input[type=number]:focus,input[type=date]:focus,textarea:focus,select:focus{border-color:var(--gold);background:rgba(201,168,76,0.05)}
+input::placeholder,textarea::placeholder{color:var(--muted);font-size:13px}
+textarea{resize:vertical;min-height:100px;line-height:1.6}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C9A84C' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer}
+select option{background:var(--navy2);color:var(--white)}
+
+/* RADIO / CHECKBOX */
+.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.options-grid.single-col{grid-template-columns:1fr}
+.opt-label{display:flex;align-items:center;gap:10px;padding:11px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:3px;cursor:pointer;transition:all 0.2s;font-size:13px;color:var(--cream);font-weight:300}
+.opt-label:hover{border-color:rgba(201,168,76,0.35);background:rgba(201,168,76,0.05)}
+.opt-label input{display:none}
+.opt-custom{width:16px;height:16px;border:1.5px solid rgba(255,255,255,0.25);border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.opt-label.checkbox .opt-custom{border-radius:3px}
+.opt-label input:checked~.opt-custom{border-color:var(--gold);background:var(--gold)}
+.opt-label input:checked~.opt-custom::after{content:'';display:block;width:6px;height:6px;background:var(--navy);border-radius:50%}
+.opt-label.checkbox input:checked~.opt-custom::after{width:4px;height:7px;border:2px solid var(--navy);border-top:none;border-left:none;border-radius:0;transform:rotate(45deg);background:transparent;margin-top:-2px}
+.opt-label input:checked{color:var(--gold)}
+.opt-label:has(input:checked){border-color:rgba(201,168,76,0.5);background:rgba(201,168,76,0.08);color:var(--gold2)}
+
+/* FILE UPLOAD */
+.file-upload-area{border:1.5px dashed rgba(201,168,76,0.3);border-radius:4px;padding:28px;text-align:center;cursor:pointer;transition:all 0.2s;background:rgba(255,255,255,0.02)}
+.file-upload-area:hover{border-color:var(--gold);background:rgba(201,168,76,0.04)}
+.file-upload-area .upload-icon{color:var(--gold);margin-bottom:8px;font-size:24px}
+.file-upload-area p{font-size:12.5px;color:var(--muted);line-height:1.6}
+.file-upload-area .file-hint{font-size:10.5px;color:rgba(138,150,168,0.6);margin-top:4px}
+#logo-input{display:none}
+#file-name{font-size:12px;color:var(--gold);margin-top:10px;font-style:italic}
+
+/* NAV BUTTONS */
+.form-nav{display:flex;justify-content:space-between;align-items:center;margin-top:36px;gap:16px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;font-family:'Inter',sans-serif;font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;border:none;border-radius:2px;cursor:pointer;transition:all 0.25s}
+.btn-primary{background:var(--gold);color:var(--navy);min-width:160px;justify-content:center}
+.btn-primary:hover{background:var(--gold2)}
+.btn-secondary{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.12);padding:13px 24px}
+.btn-secondary:hover{border-color:rgba(201,168,76,0.4);color:var(--white)}
+.btn-submit{background:var(--gold);color:var(--navy);padding:16px 48px;font-size:13px;width:100%}
+.btn-submit:hover{background:var(--gold2)}
+
+/* SECTIONS */
+.form-section{display:none}
+.form-section.active{display:block}
+
+/* SUCCESS */
+.success-screen{display:none;text-align:center;padding:80px 40px}
+.success-screen.active{display:block}
+.success-icon{width:72px;height:72px;background:rgba(76,175,110,0.12);border:1px solid rgba(76,175,110,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 28px;font-size:28px}
+.success-screen h2{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:300;color:var(--white);margin-bottom:12px}
+.success-screen p{font-size:14px;color:var(--muted);line-height:1.7;max-width:440px;margin:0 auto 32px}
+.success-divider{width:40px;height:1px;background:var(--gold);margin:24px auto}
+
+/* VALIDATION */
+.field-error{font-size:11px;color:var(--err);margin-top:6px;display:none}
+.q-card.has-error{border-color:rgba(224,85,85,0.5)}
+.q-card.has-error .field-error{display:block}
+
+/* FOOTER */
+footer{border-top:1px solid rgba(255,255,255,0.06);padding:30px 48px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+footer .copy{font-size:11px;color:var(--muted)}
+footer .footer-links{display:flex;gap:20px}
+footer a{font-size:11px;color:var(--muted);text-decoration:none;letter-spacing:0.04em;transition:color 0.2s}
+footer a:hover{color:var(--gold)}
+
+/* MOBILE */
+@media(max-width:640px){
+  nav{padding:15px 20px}
+  .hero{padding:110px 20px 50px}
+  .trust{gap:20px;padding:24px 20px}
+  .form-outer{padding:40px 20px 60px}
+  .options-grid{grid-template-columns:1fr}
+  footer{padding:24px 20px;flex-direction:column;align-items:flex-start}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="https://honeybadgerconsult.com" class="logo">
+    <svg class="logo-icon" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M21 2L4 9V22C4 31.5 11.5 39.2 21 41C30.5 39.2 38 31.5 38 22V9L21 2Z" fill="#0B1525" stroke="#C9A84C" stroke-width="1.2"/>
+      <ellipse cx="21" cy="25" rx="9" ry="6" fill="#C9A84C" opacity="0.95"/>
+      <ellipse cx="21" cy="17" rx="6.5" ry="5.5" fill="#C9A84C" opacity="0.95"/>
+      <rect x="18.5" y="13" width="5" height="3.5" rx="1.5" fill="#F5F0E8" opacity="0.9"/>
+      <circle cx="18.8" cy="16.5" r="1" fill="#0B1525"/>
+      <circle cx="23.2" cy="16.5" r="1" fill="#0B1525"/>
+      <ellipse cx="15.5" cy="13.5" rx="2" ry="2.5" fill="#C9A84C" opacity="0.9"/>
+      <ellipse cx="26.5" cy="13.5" rx="2" ry="2.5" fill="#C9A84C" opacity="0.9"/>
+      <rect x="14" y="29" width="3" height="5" rx="1.5" fill="#C9A84C" opacity="0.85"/>
+      <rect x="25" y="29" width="3" height="5" rx="1.5" fill="#C9A84C" opacity="0.85"/>
+    </svg>
+    <span class="logo-text">
+      <span class="top">Honey Badger</span>
+      <span class="sub">Consulting Ltd.</span>
+    </span>
+  </a>
+  <div class="nav-right">
+    <span class="nav-tag">E-2 Visa Specialists</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">Free Eligibility Assessment</div>
+  <h1>E-2 Visa Business Plan<br><em>Questionnaire</em></h1>
+  <p class="hero-sub">Complete this confidential questionnaire and our team will prepare a personalised E-2 visa strategy for your business within one business day.</p>
+</section>
+
+<!-- TRUST STRIP -->
+<div class="trust">
+  <div class="trust-item"><span class="val">E-2</span><span class="lbl">Specialist Focus</span></div>
+  <div class="trust-item"><span class="val">50+</span><span class="lbl">Treaty Countries</span></div>
+  <div class="trust-item"><span class="val">100%</span><span class="lbl">Confidential</span></div>
+  <div class="trust-item"><span class="val">Free</span><span class="lbl">Assessment</span></div>
+</div>
+
+<!-- FORM -->
+<div class="form-outer">
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap" id="progress-wrap" style="display:none">
+    <div class="progress-meta">
+      <span class="progress-label">Your Progress</span>
+      <span class="progress-count" id="progress-count">Step 1 of 5</span>
+    </div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-bar" style="width:20%"></div></div>
+  </div>
+
+  <!-- SECTION 0: Locate client file -->
+  <div class="form-section active" id="section-0">
+    <div class="section-header">
+      <div class="section-eyebrow">Before We Begin</div>
+      <div class="section-title">Locate Your File</div>
+    </div>
+
+    <div class="q-card" id="card-gate-email">
+      <label class="q-label" for="gate-email">Please enter the email address associated with your file so we can link your answers to your case.</label>
+      <input type="email" id="gate-email" placeholder="your@email.com"/>
+      <div class="field-error" id="gate-error">Please enter a valid email address.</div>
+    </div>
+
+    <div class="form-nav">
+      <span></span>
+      <button class="btn btn-primary" id="gate-btn" onclick="findClient()">Continue →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Personal Info -->
+  <div class="form-section" id="section-1">
+    <div class="section-header">
+      <div class="section-eyebrow">Section 1 of 5</div>
+      <div class="section-title">Personal Information</div>
+    </div>
+
+    <div class="q-card" id="card-name">
+      <label class="q-label" for="q-name"><span class="q-num">1.</span>Your full legal name</label>
+      <input type="text" id="q-name" placeholder="e.g. John Michael Smith"/>
+      <div class="field-error">Please enter your full legal name.</div>
+    </div>
+
+    <div class="q-card" id="card-email">
+      <label class="q-label" for="q-email"><span class="q-num">2.</span>Email address</label>
+      <input type="email" id="q-email" placeholder="e.g. john@example.com"/>
+      <div class="field-error">Please enter a valid email address.</div>
+    </div>
+
+    <div class="q-card" id="card-nationality">
+      <label class="q-label" for="q-nationality"><span class="q-num">3.</span>Your nationality</label>
+      <input type="text" id="q-nationality" placeholder="e.g. British, Canadian, Japanese…"/>
+      <div class="field-error">Please enter your nationality.</div>
+    </div>
+
+    <div class="q-card" id="card-main-owner">
+      <label class="q-label"><span class="q-num">4.</span>Will you be the main owner of the U.S. business?</label>
+      <div class="options-grid single-col">
+        <label class="opt-label"><input type="radio" name="main-owner" value="Yes"/><span class="opt-custom"></span>Yes</label>
+        <label class="opt-label"><input type="radio" name="main-owner" value="No"/><span class="opt-custom"></span>No</label>
+        <label class="opt-label"><input type="radio" name="main-owner" value="Shared ownership"/><span class="opt-custom"></span>Shared ownership</label>
+      </div>
+      <div class="field-error">Please select an option.</div>
+    </div>
+
+    <div class="q-card" id="card-ownership-pct">
+      <label class="q-label" for="q-ownership-pct"><span class="q-num">5.</span>What percentage of the business will you own?</label>
+      <input type="number" id="q-ownership-pct" placeholder="e.g. 100" min="1" max="100"/>
+      <div class="field-error">Please enter a percentage between 1 and 100.</div>
+    </div>
+
+    <div class="form-nav">
+      <span></span>
+      <button class="btn btn-primary" onclick="nextSection(1)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Business Basics -->
+  <div class="form-section" id="section-2">
+    <div class="section-header">
+      <div class="section-eyebrow">Section 2 of 5</div>
+      <div class="section-title">Business Basics</div>
+    </div>
+
+    <div class="q-card" id="card-biz-name">
+      <label class="q-label" for="q-biz-name"><span class="q-num">6.</span>U.S. business name <span class="q-optional">(if already chosen)</span></label>
+      <input type="text" id="q-biz-name" placeholder="e.g. Apex Solutions LLC"/>
+    </div>
+
+    <div class="q-card" id="card-biz-address">
+      <label class="q-label" for="q-biz-address"><span class="q-num">7.</span>Business address or planned location</label>
+      <input type="text" id="q-biz-address" placeholder="e.g. 123 Main St, Phoenix, AZ 85001"/>
+      <div class="field-error">Please enter a business address or planned location.</div>
+    </div>
+
+    <div class="q-card">
+      <label class="q-label"><span class="q-num">8.</span>Do you have a logo? <span class="q-optional">(optional — upload if yes)</span></label>
+      <div class="file-upload-area" onclick="document.getElementById('logo-input').click()">
+        <div class="upload-icon">📎</div>
+        <p>Click to upload your logo</p>
+        <p class="file-hint">PNG, JPG, SVG or PDF · Max 5MB</p>
+      </div>
+      <input type="file" id="logo-input" accept=".png,.jpg,.jpeg,.svg,.pdf" onchange="showFileName(this)"/>
+      <div id="file-name"></div>
+    </div>
+
+    <div class="q-card" id="card-biz-type">
+      <label class="q-label"><span class="q-num">9.</span>Type of business</label>
+      <div class="options-grid single-col">
+        <label class="opt-label"><input type="radio" name="biz-type" value="Retail"/><span class="opt-custom"></span>Retail</label>
+        <label class="opt-label"><input type="radio" name="biz-type" value="Restaurant / Food & Beverage"/><span class="opt-custom"></span>Restaurant / Food &amp; Beverage</label>
+        <label class="opt-label"><input type="radio" name="biz-type" value="Professional Services"/><span class="opt-custom"></span>Professional Services</label>
+        <label class="opt-label"><input type="radio" name="biz-type" value="Technology / SaaS"/><span class="opt-custom"></span>Technology / SaaS</label>
+        <label class="opt-label"><input type="radio" name="biz-type" value="Franchise"/><span class="opt-custom"></span>Franchise</label>
+        <label class="opt-label"><input type="radio" name="biz-type" value="Manufacturing"/><span class="opt-custom"></span>Manufacturing</label>
+        <label class="opt-label"><input type="radio" name="biz-type" value="Import / Export"/><span class="opt-custom"></span>Import / Export</label>
+        <label class="opt-label"><input type="radio" name="biz-type" value="Other"/><span class="opt-custom"></span>Other</label>
+      </div>
+      <div class="field-error">Please select a business type.</div>
+    </div>
+
+    <div class="q-card" id="card-biz-structure">
+      <label class="q-label" for="q-biz-structure"><span class="q-num">10.</span>Business structure <span class="q-optional">(if known)</span></label>
+      <select id="q-biz-structure">
+        <option value="" disabled selected>Select structure…</option>
+        <option>LLC (Limited Liability Company)</option>
+        <option>Corporation (C-Corp)</option>
+        <option>S-Corporation</option>
+        <option>Sole Proprietorship</option>
+        <option>Partnership</option>
+        <option>Not yet decided</option>
+      </select>
+    </div>
+
+    <div class="q-card" id="card-start-date">
+      <label class="q-label" for="q-start-date"><span class="q-num">11.</span>Planned start date or purchase date</label>
+      <input type="date" id="q-start-date"/>
+      <div class="field-error">Please select a date.</div>
+    </div>
+
+    <div class="q-card" id="card-biz-desc">
+      <label class="q-label" for="q-biz-desc"><span class="q-num">12.</span>Please describe your business in three sentences — its purpose, main products or services, and unique qualities.</label>
+      <textarea id="q-biz-desc" rows="5" placeholder="e.g. Our company provides premium digital marketing services to small and medium-sized U.S. businesses. We specialise in SEO, paid advertising, and brand strategy. Our unique strength lies in combining data analytics with creative storytelling to deliver measurable growth."></textarea>
+      <div class="field-error">Please describe your business.</div>
+    </div>
+
+    <div class="form-nav">
+      <button class="btn btn-secondary" onclick="prevSection(2)">← Back</button>
+      <button class="btn btn-primary" onclick="nextSection(2)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Market & Operations -->
+  <div class="form-section" id="section-3">
+    <div class="section-header">
+      <div class="section-eyebrow">Section 3 of 5</div>
+      <div class="section-title">Services, Market &amp; Operations</div>
+    </div>
+
+    <div class="q-card" id="card-services">
+      <label class="q-label" for="q-services"><span class="q-num">13.</span>What services or products does your business offer, and what are your prices?</label>
+      <textarea id="q-services" rows="5" placeholder="List each service/product and its price. e.g.&#10;• Brand Strategy Consultation — $2,500&#10;• Monthly SEO Package — $1,200/month&#10;• Logo Design — $800"></textarea>
+      <div class="field-error">Please describe your services and pricing.</div>
+    </div>
+
+    <div class="q-card" id="card-target-market">
+      <label class="q-label" for="q-target-market"><span class="q-num">14.</span>Target market — who are your customers?</label>
+      <textarea id="q-target-market" rows="4" placeholder="e.g. Small business owners aged 30–55 in the Phoenix metropolitan area seeking affordable digital marketing solutions."></textarea>
+      <div class="field-error">Please describe your target market.</div>
+    </div>
+
+    <div class="q-card" id="card-expected-revenue">
+      <label class="q-label" for="q-expected-revenue"><span class="q-num">15.</span>What is your business's expected annual revenue?</label>
+      <input type="text" id="q-expected-revenue" placeholder="e.g. $250,000 in Year 1, growing to $500,000 by Year 3"/>
+      <div class="field-error">Please provide an expected revenue figure.</div>
+    </div>
+
+    <div class="q-card" id="card-hours">
+      <label class="q-label" for="q-hours"><span class="q-num">16.</span>What are your business's hours of operation?</label>
+      <input type="text" id="q-hours" placeholder="e.g. Monday–Friday, 9am–6pm EST"/>
+      <div class="field-error">Please enter your hours of operation.</div>
+    </div>
+
+    <div class="q-card" id="card-location-type">
+      <label class="q-label"><span class="q-num">17.</span>Business location type</label>
+      <div class="options-grid single-col">
+        <label class="opt-label"><input type="radio" name="location-type" value="Physical storefront / office"/><span class="opt-custom"></span>Physical storefront / office</label>
+        <label class="opt-label"><input type="radio" name="location-type" value="Home-based"/><span class="opt-custom"></span>Home-based</label>
+        <label class="opt-label"><input type="radio" name="location-type" value="Online / remote"/><span class="opt-custom"></span>Online / remote</label>
+        <label class="opt-label"><input type="radio" name="location-type" value="Commercial lease (signed)"/><span class="opt-custom"></span>Commercial lease (signed)</label>
+        <label class="opt-label"><input type="radio" name="location-type" value="Still searching for a location"/><span class="opt-custom"></span>Still searching for a location</label>
+      </div>
+      <div class="field-error">Please select a location type.</div>
+    </div>
+
+    <div class="q-card" id="card-lease">
+      <label class="q-label"><span class="q-num">18.</span>Is there a signed lease?</label>
+      <div class="options-grid single-col">
+        <label class="opt-label"><input type="radio" name="signed-lease" value="Yes"/><span class="opt-custom"></span>Yes</label>
+        <label class="opt-label"><input type="radio" name="signed-lease" value="No — still negotiating"/><span class="opt-custom"></span>No — still negotiating</label>
+        <label class="opt-label"><input type="radio" name="signed-lease" value="Not applicable"/><span class="opt-custom"></span>Not applicable</label>
+      </div>
+      <div class="field-error">Please select an option.</div>
+    </div>
+
+    <div class="q-card" id="card-city-state">
+      <label class="q-label" for="q-city-state"><span class="q-num">19.</span>Which city/state will your business serve?</label>
+      <input type="text" id="q-city-state" placeholder="e.g. Phoenix, Arizona"/>
+      <div class="field-error">Please enter a city and state.</div>
+    </div>
+
+    <div class="q-card">
+      <label class="q-label"><span class="q-num">20.</span>Do you already have suppliers or partners? <span class="q-optional">(optional)</span></label>
+      <div class="options-grid single-col">
+        <label class="opt-label"><input type="radio" name="suppliers" value="Yes — established relationships"/><span class="opt-custom"></span>Yes — established relationships</label>
+        <label class="opt-label"><input type="radio" name="suppliers" value="In discussions"/><span class="opt-custom"></span>In discussions</label>
+        <label class="opt-label"><input type="radio" name="suppliers" value="No — will source after visa approval"/><span class="opt-custom"></span>No — will source after visa approval</label>
+      </div>
+    </div>
+
+    <div class="form-nav">
+      <button class="btn btn-secondary" onclick="prevSection(3)">← Back</button>
+      <button class="btn btn-primary" onclick="nextSection(3)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Investment & Finance -->
+  <div class="form-section" id="section-4">
+    <div class="section-header">
+      <div class="section-eyebrow">Section 4 of 5</div>
+      <div class="section-title">Investment &amp; Financial Details</div>
+    </div>
+
+    <div class="q-card" id="card-investment-overview">
+      <label class="q-label" for="q-investment-overview"><span class="q-num">21.</span>Can you provide an overview of your financial investments? How much have you spent so far and how much do you plan to invest going forward?</label>
+      <textarea id="q-investment-overview" rows="5" placeholder="e.g. I have already invested $75,000 in equipment and initial setup. I plan to invest a further $100,000 over the next 12 months for staffing, marketing, and working capital."></textarea>
+      <div class="field-error">Please describe your investment.</div>
+    </div>
+
+    <div class="q-card" id="card-investment-source">
+      <label class="q-label"><span class="q-num">22.</span>Where did the investment money come from? <span class="q-optional">(select all that apply)</span></label>
+      <div class="options-grid single-col">
+        <label class="opt-label checkbox"><input type="checkbox" name="inv-source" value="Personal savings"/><span class="opt-custom"></span>Personal savings</label>
+        <label class="opt-label checkbox"><input type="checkbox" name="inv-source" value="Sale of property"/><span class="opt-custom"></span>Sale of property</label>
+        <label class="opt-label checkbox"><input type="checkbox" name="inv-source" value="Business profits / dividends"/><span class="opt-custom"></span>Business profits / dividends</label>
+        <label class="opt-label checkbox"><input type="checkbox" name="inv-source" value="Inheritance or gift"/><span class="opt-custom"></span>Inheritance or gift</label>
+        <label class="opt-label checkbox"><input type="checkbox" name="inv-source" value="Bank loan"/><span class="opt-custom"></span>Bank loan</label>
+        <label class="opt-label checkbox"><input type="checkbox" name="inv-source" value="Investment from partners"/><span class="opt-custom"></span>Investment from partners</label>
+        <label class="opt-label checkbox"><input type="checkbox" name="inv-source" value="Other"/><span class="opt-custom"></span>Other</label>
+      </div>
+      <div class="field-error">Please select at least one source of investment.</div>
+    </div>
+
+    <div class="q-card" id="card-investment-use">
+      <label class="q-label" for="q-investment-use"><span class="q-num">23.</span>How has your investment been used, or how will it be used?</label>
+      <textarea id="q-investment-use" rows="5" placeholder="e.g.&#10;• Equipment purchase: $40,000&#10;• Office lease deposit and fit-out: $25,000&#10;• Initial inventory: $20,000&#10;• Marketing and website: $10,000&#10;• Working capital reserve: $30,000"></textarea>
+      <div class="field-error">Please describe how the investment is or will be used.</div>
+    </div>
+
+    <div class="q-card" id="card-monthly-sales">
+      <label class="q-label" for="q-monthly-sales"><span class="q-num">24.</span>How many sales do you expect per month in the first year?</label>
+      <input type="text" id="q-monthly-sales" placeholder="e.g. Approximately 30 client engagements per month"/>
+      <div class="field-error">Please provide an estimated monthly sales figure.</div>
+    </div>
+
+    <div class="form-nav">
+      <button class="btn btn-secondary" onclick="prevSection(4)">← Back</button>
+      <button class="btn btn-primary" onclick="nextSection(4)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Strategy & Growth -->
+  <div class="form-section" id="section-5">
+    <div class="section-header">
+      <div class="section-eyebrow">Section 5 of 5</div>
+      <div class="section-title">Strategy, Hiring &amp; Growth</div>
+    </div>
+
+    <div class="q-card" id="card-revenue-strategy">
+      <label class="q-label" for="q-revenue-strategy"><span class="q-num">25.</span>What is your strategy for generating revenue and succeeding in your market? Describe your approach to reaching customers, pricing, or standing out from competitors.</label>
+      <textarea id="q-revenue-strategy" rows="5" placeholder="e.g. We will differentiate through premium pricing and a boutique service model targeting high-net-worth clients. Our marketing will focus on LinkedIn outreach, referral partnerships, and local networking events."></textarea>
+      <div class="field-error">Please describe your revenue strategy.</div>
+    </div>
+
+    <div class="q-card" id="card-customer-discovery">
+      <label class="q-label"><span class="q-num">26.</span>How will customers find your business? <span class="q-optional">(select all that apply)</span></label>
+      <div class="options-grid">
+        <label class="opt-label checkbox"><input type="checkbox" name="customer-find" value="Google / SEO"/><span class="opt-custom"></span>Google / SEO</label>
+        <label class="opt-label checkbox"><input type="checkbox" name="customer-find" value="Social media"/><span class="opt-custom"></span>Social media</label>
+        <label class="opt-label checkbox"><input type="checkbox" name="customer-find" value="Referrals / word of mouth"/><span class="opt-custom"></span>Referrals / word of mouth</label>
+        <label class="opt-label checkbox"><input type="checkbox" name="customer-find" value="Paid advertising"/><span class="opt-custom"></span>Paid advertising</label>
+        <label class="opt-label checkbox"><input type="checkbox" name="customer-find" value="Networking / events"/><span class="opt-custom"></span>Networking / events</label>
+        <label class="opt-label checkbox"><input type="checkbox" name="customer-find" value="Physical storefront / signage"/><span class="opt-custom"></span>Physical storefront</label>
+        <label class="opt-label checkbox"><input type="checkbox" name="customer-find" value="Other"/><span class="opt-custom"></span>Other</label>
+      </div>
+    </div>
+
+    <div class="q-card" id="card-hiring">
+      <label class="q-label" for="q-hiring"><span class="q-num">27.</span>Outline your hiring plans. How many employees have you already hired, and how many more do you intend to hire?</label>
+      <textarea id="q-hiring" rows="4" placeholder="e.g. I have hired 2 part-time employees. I plan to hire 3 full-time staff in Year 1 and an additional 5 by Year 3, including a marketing manager and two sales representatives."></textarea>
+      <div class="field-error">Please describe your hiring plans.</div>
+    </div>
+
+    <div class="q-card">
+      <label class="q-label" for="q-additional-services"><span class="q-num">28.</span>Are you planning to offer any additional products or services? <span class="q-optional">(optional)</span></label>
+      <textarea id="q-additional-services" rows="4" placeholder="e.g. In Year 2, we plan to introduce an e-commerce arm selling branded merchandise alongside our service offering."></textarea>
+    </div>
+
+    <div class="q-card" id="card-challenges">
+      <label class="q-label" for="q-challenges"><span class="q-num">29.</span>What challenges or risks do you expect, and how will you handle them?</label>
+      <textarea id="q-challenges" rows="5" placeholder="e.g. Our main risks are slow initial customer acquisition and competitive pricing pressure. We will mitigate these through a pre-launch waitlist campaign, a 90-day introductory pricing offer, and strategic alliances with complementary service providers."></textarea>
+      <div class="field-error">Please describe anticipated challenges and your mitigation plan.</div>
+    </div>
+
+    <div class="q-card" id="card-growth-plan">
+      <label class="q-label" for="q-growth-plan"><span class="q-num">30.</span>How do you see your business growing over the next 5 years — including plans to expand services, open new locations, hire additional staff, and contribute to the U.S. economy?</label>
+      <textarea id="q-growth-plan" rows="6" placeholder="e.g. Year 1: Establish brand presence and reach profitability. Year 2–3: Open a second location and double headcount to 10 employees. Year 4–5: Expand nationally, serving clients in 5 states, with annual revenues exceeding $1M and contributing approximately $200,000 in federal taxes and 20 U.S. jobs."></textarea>
+      <div class="field-error">Please describe your 5-year growth plan.</div>
+    </div>
+
+    <div class="form-nav" style="flex-direction:column;gap:12px;margin-top:40px">
+      <button class="btn btn-submit" onclick="submitForm()">Submit My Assessment →</button>
+      <button class="btn btn-secondary" style="align-self:flex-start" onclick="prevSection(5)">← Back</button>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="success-screen" id="success-screen">
+    <div class="success-icon">✓</div>
+    <h2>Assessment Received</h2>
+    <div class="success-divider"></div>
+    <p>Thank you for completing the E-2 Visa Business Plan Questionnaire. A member of the Honey Badger team will review your submission and be in touch within one business day.</p>
+    <p style="margin-top:16px;font-size:13px;color:var(--muted)">In the meantime, feel free to explore our services or book a consultation call.</p>
+    <div style="display:flex;gap:14px;justify-content:center;margin-top:32px;flex-wrap:wrap">
+      <a href="https://honeybadgerconsult.com" class="btn btn-primary" style="text-decoration:none">← Back to Site</a>
+    </div>
+  </div>
+
+</div><!-- /form-outer -->
+
+<footer>
+  <span class="copy">© 2026 Honey Badger Consulting Ltd. All rights reserved.</span>
+  <div class="footer-links">
+    <a href="https://honeybadgerconsult.com/privacy">Privacy Policy</a>
+    <a href="https://honeybadgerconsult.com/terms">Terms of Use</a>
+    <a href="https://honeybadgerconsult.com">honeybadgerconsult.com</a>
+  </div>
+</footer>
+
+<script>
+let currentSection = 1;
+const totalSections = 5;
+
+function showFileName(input) {
+  const el = document.getElementById('file-name');
+  if (input.files && input.files[0]) {
+    el.textContent = '📎 ' + input.files[0].name;
+  }
+}
+
+function updateProgress(section) {
+  const pct = (section / totalSections) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-count').textContent = 'Step ' + section + ' of ' + totalSections;
+}
+
+function validate(section) {
+  let ok = true;
+
+  // Clear all errors in this section
+  document.querySelectorAll('#section-' + section + ' .q-card').forEach(c => c.classList.remove('has-error'));
+
+  if (section === 1) {
+    const name = document.getElementById('q-name').value.trim();
+    if (!name) { markError('card-name'); ok = false; }
+
+    const email = document.getElementById('q-email').value.trim();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { markError('card-email'); ok = false; }
+
+    const nat = document.getElementById('q-nationality').value.trim();
+    if (!nat) { markError('card-nationality'); ok = false; }
+
+    if (!document.querySelector('input[name="main-owner"]:checked')) { markError('card-main-owner'); ok = false; }
+
+    const pct = document.getElementById('q-ownership-pct').value;
+    if (!pct || pct < 1 || pct > 100) { markError('card-ownership-pct'); ok = false; }
+  }
+
+  if (section === 2) {
+    if (!document.getElementById('q-biz-address').value.trim()) { markError('card-biz-address'); ok = false; }
+    if (!document.querySelector('input[name="biz-type"]:checked')) { markError('card-biz-type'); ok = false; }
+    if (!document.getElementById('q-start-date').value) { markError('card-start-date'); ok = false; }
+    if (!document.getElementById('q-biz-desc').value.trim()) { markError('card-biz-desc'); ok = false; }
+  }
+
+  if (section === 3) {
+    if (!document.getElementById('q-services').value.trim()) { markError('card-services'); ok = false; }
+    if (!document.getElementById('q-target-market').value.trim()) { markError('card-target-market'); ok = false; }
+    if (!document.getElementById('q-expected-revenue').value.trim()) { markError('card-expected-revenue'); ok = false; }
+    if (!document.getElementById('q-hours').value.trim()) { markError('card-hours'); ok = false; }
+    if (!document.querySelector('input[name="location-type"]:checked')) { markError('card-location-type'); ok = false; }
+    if (!document.querySelector('input[name="signed-lease"]:checked')) { markError('card-lease'); ok = false; }
+    if (!document.getElementById('q-city-state').value.trim()) { markError('card-city-state'); ok = false; }
+  }
+
+  if (section === 4) {
+    if (!document.getElementById('q-investment-overview').value.trim()) { markError('card-investment-overview'); ok = false; }
+    if (!document.querySelectorAll('input[name="inv-source"]:checked').length) { markError('card-investment-source'); ok = false; }
+    if (!document.getElementById('q-investment-use').value.trim()) { markError('card-investment-use'); ok = false; }
+    if (!document.getElementById('q-monthly-sales').value.trim()) { markError('card-monthly-sales'); ok = false; }
+  }
+
+  if (section === 5) {
+    if (!document.getElementById('q-revenue-strategy').value.trim()) { markError('card-revenue-strategy'); ok = false; }
+    if (!document.getElementById('q-hiring').value.trim()) { markError('card-hiring'); ok = false; }
+    if (!document.getElementById('q-challenges').value.trim()) { markError('card-challenges'); ok = false; }
+    if (!document.getElementById('q-growth-plan').value.trim()) { markError('card-growth-plan'); ok = false; }
+  }
+
+  return ok;
+}
+
+function markError(cardId) {
+  const card = document.getElementById(cardId);
+  if (card) card.classList.add('has-error');
+}
+
+function nextSection(from) {
+  if (!validate(from)) {
+    // Scroll to first error
+    const firstError = document.querySelector('#section-' + from + ' .q-card.has-error');
+    if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  document.getElementById('section-' + from).classList.remove('active');
+  currentSection = from + 1;
+  document.getElementById('section-' + currentSection).classList.add('active');
+  updateProgress(currentSection);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function prevSection(from) {
+  document.getElementById('section-' + from).classList.remove('active');
+  currentSection = from - 1;
+  document.getElementById('section-' + currentSection).classList.add('active');
+  updateProgress(currentSection);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// === BITRIX24 — same pattern as the verification page ===
+const WEBHOOK = "https://immiworld.org/rest/147/47yrflms2cje1cbe/";
+// Optional: custom field to mark the assessment as completed (e.g. "UF_CRM_XXXXXXXX").
+// Leave empty ("") to skip.
+const COMPLETED_FIELD = "";
+const COMPLETED_VALUE = "Completed";
+
+let recordId = null;   // Bitrix24 lead/contact ID
+let recordType = null; // "lead" or "contact"
+
+function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+async function findClient() {
+  const card  = document.getElementById('card-gate-email');
+  const errEl = document.getElementById('gate-error');
+  const btn   = document.getElementById('gate-btn');
+  const email = document.getElementById('gate-email').value.trim();
+
+  card.classList.remove('has-error');
+  if (!isValidEmail(email)) {
+    errEl.textContent = "Please enter a valid email address.";
+    card.classList.add('has-error');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "Locating your file...";
+
+  try {
+    // 1. Look for a LEAD with this email
+    let res = await fetch(WEBHOOK + "crm.lead.list?filter[EMAIL]=" + encodeURIComponent(email) +
+      "&select[]=ID&select[]=NAME&select[]=LAST_NAME&order[DATE_CREATE]=DESC");
+    let data = await res.json();
+    let records = data.result || [];
+    recordType = "lead";
+
+    // 2. Fall back to a CONTACT if no lead was found
+    if (!records.length) {
+      res = await fetch(WEBHOOK + "crm.contact.list?filter[EMAIL]=" + encodeURIComponent(email) +
+        "&select[]=ID&select[]=NAME&select[]=LAST_NAME&order[DATE_CREATE]=DESC");
+      data = await res.json();
+      records = data.result || [];
+      recordType = "contact";
+    }
+
+    if (!records.length) {
+      errEl.textContent = "We couldn't find your file. Please try the email address you registered with, or contact support@honeybadgerconsult.com.";
+      card.classList.add('has-error');
+      btn.disabled = false;
+      btn.textContent = "Continue →";
+      return;
+    }
+
+    const rec = records[0];
+    recordId = rec.ID;
+
+    // Prefill name + email in the form
+    const fullName = [rec.NAME, rec.LAST_NAME].filter(Boolean).join(" ");
+    if (fullName) document.getElementById('q-name').value = fullName;
+    document.getElementById('q-email').value = email;
+
+    // Move into the questionnaire
+    document.getElementById('section-0').classList.remove('active');
+    document.getElementById('section-1').classList.add('active');
+    document.getElementById('progress-wrap').style.display = '';
+    updateProgress(1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  } catch (e) {
+    console.error(e);
+    errEl.textContent = "Something went wrong. Please try again, or contact support@honeybadgerconsult.com.";
+    card.classList.add('has-error');
+    btn.disabled = false;
+    btn.textContent = "Continue →";
+  }
+}
+
+function getVal(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : "";
+}
+function getRadio(name) {
+  const el = document.querySelector('input[name="' + name + '"]:checked');
+  return el ? el.value : "";
+}
+function getChecks(name) {
+  return Array.from(document.querySelectorAll('input[name="' + name + '"]:checked'))
+    .map(el => el.value).join(", ");
+}
+
+function collectData() {
+  const logoInput = document.getElementById('logo-input');
+  return {
+    fullName:        getVal('q-name'),
+    email:           getVal('q-email'),
+    nationality:     getVal('q-nationality'),
+    mainOwner:       getRadio('main-owner'),
+    ownershipPct:    getVal('q-ownership-pct'),
+    bizName:         getVal('q-biz-name'),
+    bizAddress:      getVal('q-biz-address'),
+    logoUploaded:    (logoInput && logoInput.files.length) ? ("Yes — " + logoInput.files[0].name) : "No",
+    bizType:         getRadio('biz-type'),
+    bizStructure:    getVal('q-biz-structure'),
+    startDate:       getVal('q-start-date'),
+    bizDesc:         getVal('q-biz-desc'),
+    services:        getVal('q-services'),
+    targetMarket:    getVal('q-target-market'),
+    expectedRevenue: getVal('q-expected-revenue'),
+    hours:           getVal('q-hours'),
+    locationType:    getRadio('location-type'),
+    signedLease:     getRadio('signed-lease'),
+    cityState:       getVal('q-city-state'),
+    suppliers:       getRadio('suppliers'),
+    investmentOverview: getVal('q-investment-overview'),
+    investmentSources:  getChecks('inv-source'),
+    investmentUse:      getVal('q-investment-use'),
+    monthlySales:       getVal('q-monthly-sales'),
+    revenueStrategy:    getVal('q-revenue-strategy'),
+    customerDiscovery:  getChecks('customer-find'),
+    hiring:             getVal('q-hiring'),
+    additionalServices: getVal('q-additional-services'),
+    challenges:         getVal('q-challenges'),
+    growthPlan:         getVal('q-growth-plan')
+  };
+}
+
+function buildAssessmentText(d) {
+  return [
+    "E-2 VISA SELF-ASSESSMENT — SUBMITTED BY CLIENT",
+    "",
+    "=== SECTION 1 — PERSONAL INFORMATION ===",
+    "Full Name: " + (d.fullName || "—"),
+    "Email: " + (d.email || "—"),
+    "Nationality: " + (d.nationality || "—"),
+    "Main Owner: " + (d.mainOwner || "—"),
+    "Ownership %: " + (d.ownershipPct || "—"),
+    "",
+    "=== SECTION 2 — BUSINESS BASICS ===",
+    "Business Name: " + (d.bizName || "—"),
+    "Address: " + (d.bizAddress || "—"),
+    "Logo: " + (d.logoUploaded || "No"),
+    "Business Type: " + (d.bizType || "—"),
+    "Structure: " + (d.bizStructure || "—"),
+    "Start Date: " + (d.startDate || "—"),
+    "Description: " + (d.bizDesc || "—"),
+    "",
+    "=== SECTION 3 — SERVICES & OPERATIONS ===",
+    "Services & Pricing: " + (d.services || "—"),
+    "Target Market: " + (d.targetMarket || "—"),
+    "Expected Revenue: " + (d.expectedRevenue || "—"),
+    "Hours: " + (d.hours || "—"),
+    "Location Type: " + (d.locationType || "—"),
+    "Signed Lease: " + (d.signedLease || "—"),
+    "City / State: " + (d.cityState || "—"),
+    "Suppliers: " + (d.suppliers || "—"),
+    "",
+    "=== SECTION 4 — INVESTMENT & FINANCE ===",
+    "Investment Overview: " + (d.investmentOverview || "—"),
+    "Investment Sources: " + (d.investmentSources || "—"),
+    "How Funds Will Be Used: " + (d.investmentUse || "—"),
+    "Monthly Sales (Yr 1): " + (d.monthlySales || "—"),
+    "",
+    "=== SECTION 5 — STRATEGY & GROWTH ===",
+    "Revenue Strategy: " + (d.revenueStrategy || "—"),
+    "How Customers Find Business: " + (d.customerDiscovery || "—"),
+    "Hiring Plans: " + (d.hiring || "—"),
+    "Additional Services: " + (d.additionalServices || "—"),
+    "Challenges & Risks: " + (d.challenges || "—"),
+    "5-Year Growth Plan: " + (d.growthPlan || "—")
+  ].join("\n");
+}
+
+async function submitForm() {
+  if (!validate(5)) {
+    const firstError = document.querySelector('#section-5 .q-card.has-error');
+    if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  const btn = document.querySelector('.btn-submit');
+  btn.disabled = true;
+  btn.textContent = "Submitting...";
+
+  const data = collectData();
+  const text = buildAssessmentText(data);
+  const updateEndpoint = recordType === "contact" ? "crm.contact.update" : "crm.lead.update";
+
+  // Left side: card fields (COMMENTS + optional completed flag)
+  const fields = { COMMENTS: text.replace(/\n/g, "<br>") };
+  if (COMPLETED_FIELD) fields[COMPLETED_FIELD] = COMPLETED_VALUE;
+
+  try {
+    await fetch(WEBHOOK + updateEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ID: recordId, FIELDS: fields })
+    });
+
+    // Right side: timeline comment
+    await fetch(WEBHOOK + "crm.timeline.comment.add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fields: { ENTITY_TYPE: recordType, ENTITY_ID: recordId, COMMENT: text } })
+    });
+
+    // Hide all sections and show success
+    document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+    document.getElementById('progress-wrap').style.display = 'none';
+    document.getElementById('success-screen').classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  } catch (e) {
+    console.error(e);
+    btn.disabled = false;
+    btn.textContent = "Submit My Assessment →";
+    alert("Something went wrong submitting your assessment. Please try again or contact support@honeybadgerconsult.com.");
+  }
+}
+</script>
+</body>
+</html>
