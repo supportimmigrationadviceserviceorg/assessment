@@ -646,6 +646,10 @@ const WEBHOOK = "https://immiworld.org/rest/147/47yrflms2cje1cbe/";
 const COMPLETED_FIELD = "";
 const COMPLETED_VALUE = "Completed";
 
+// "Interested in Visa" field (defined on Contact) — updated on every submission
+const INTERESTED_FIELD = "UF_CRM_5C5843FC11F1D";
+const INTERESTED_VALUE = "E-2 Visa Business Plan";
+
 let recordId = null;   // Bitrix24 lead/contact ID
 let recordType = null; // "lead" or "contact"
 
@@ -668,21 +672,12 @@ async function findClient() {
   btn.textContent = "Locating your file...";
 
   try {
-    // 1. Look for a LEAD with this email
-    let res = await fetch(WEBHOOK + "crm.lead.list?filter[EMAIL]=" + encodeURIComponent(email) +
+    // E-2 assessment is for CONTACTS — search contacts directly
+    const res = await fetch(WEBHOOK + "crm.contact.list?filter[EMAIL]=" + encodeURIComponent(email) +
       "&select[]=ID&select[]=NAME&select[]=LAST_NAME&order[DATE_CREATE]=DESC");
-    let data = await res.json();
-    let records = data.result || [];
-    recordType = "lead";
-
-    // 2. Fall back to a CONTACT if no lead was found
-    if (!records.length) {
-      res = await fetch(WEBHOOK + "crm.contact.list?filter[EMAIL]=" + encodeURIComponent(email) +
-        "&select[]=ID&select[]=NAME&select[]=LAST_NAME&order[DATE_CREATE]=DESC");
-      data = await res.json();
-      records = data.result || [];
-      recordType = "contact";
-    }
+    const data = await res.json();
+    const records = data.result || [];
+    recordType = "contact";
 
     if (!records.length) {
       errEl.textContent = "We couldn't find your file. Please try the email address you registered with, or contact support@honeybadgerconsult.com.";
@@ -826,8 +821,9 @@ async function submitForm() {
   const text = buildAssessmentText(data);
   const updateEndpoint = recordType === "contact" ? "crm.contact.update" : "crm.lead.update";
 
-  // Left side: card fields (COMMENTS + optional completed flag)
+  // Left side: card fields (COMMENTS + Interested in Visa + optional completed flag)
   const fields = { COMMENTS: text.replace(/\n/g, "<br>") };
+  fields[INTERESTED_FIELD] = INTERESTED_VALUE;
   if (COMPLETED_FIELD) fields[COMPLETED_FIELD] = COMPLETED_VALUE;
 
   try {
