@@ -155,22 +155,27 @@
     background:var(--ink);color:#fff;font-family:Arial,sans-serif;font-size:13px;font-weight:bold;
     display:flex;align-items:center;justify-content:center;border:2px solid var(--parchment);
   }
+  /* ===== שלוש פעולות, שלושה צבעים — הפרדה ברורה במובייל =====
+     זהב = השכונה שלך | ירוק = ללכת ברחוב | מתאר לבן = מפה */
   .explore-btn{
-    margin-top:16px;width:100%;cursor:pointer;
-    font-family:Georgia,serif;font-size:14px;color:var(--ink);
-    background:transparent;border:1px solid var(--line);border-radius:2px;padding:10px 14px;
+    margin-top:10px;width:100%;cursor:pointer;
+    font-family:Georgia,serif;font-size:15px;color:var(--ink);
+    background:#fff;border:1.5px solid var(--ink);border-radius:2px;padding:13px 14px;
     transition:all .15s;
   }
-  .explore-btn:hover{border-color:var(--brass);background:#FDFBF3;color:var(--brass);}
+  .explore-btn:hover{background:#F2F5F9;}
   .explore-btn:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
   .walk-btn{
-    margin-top:8px;width:100%;cursor:pointer;
-    font-family:Georgia,serif;font-size:14px;color:#FCFAF4;
-    background:var(--ink);border:1px solid var(--ink);border-radius:2px;padding:10px 14px;
+    margin-top:10px;width:100%;cursor:pointer;
+    font-family:Georgia,serif;font-size:15px;color:#fff;
+    background:var(--green);border:1.5px solid var(--green);border-radius:2px;padding:13px 14px;
     transition:background .15s;
   }
-  .walk-btn:hover{background:var(--ink-soft);}
+  .walk-btn:hover{background:#256A42;}
   .walk-btn:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
+  @media(max-width:520px){
+    .explore-btn,.walk-btn,.nb-btn{font-size:16px;padding:15px 14px;}
+  }
 
   /* ===== מקטע "השכונה שלך" בכרטיס העיר ===== */
   .nb-box{
@@ -207,12 +212,17 @@
   .poi-chip{
     display:inline-block;margin:3px 4px;cursor:pointer;
     font-family:Arial,sans-serif;font-size:12.5px;color:var(--ink);
-    background:#fff;border:1px solid var(--line);border-radius:14px;padding:7px 14px;
+    background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:8px 14px;
     transition:all .15s;
   }
-  .poi-chip:hover{border-color:var(--brass);}
-  .poi-chip.on{background:var(--ink);border-color:var(--ink);color:#FCFAF4;}
+  .chip-work-style{border-color:var(--ink);color:var(--ink);}
+  .chip-work-style.on{background:var(--ink);color:#FCFAF4;}
+  .chip-school-style{border-color:var(--green);color:var(--green);}
+  .chip-school-style.on{background:var(--green);color:#fff;}
   .poi-chip:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
+  @media(max-width:520px){
+    .poi-chip{display:block;width:100%;margin:6px 0;font-size:14px;padding:12px 14px;}
+  }
 
   /* ===== התיק האישי — Relocation File ===== */
   .dossier{
@@ -311,6 +321,18 @@
     <label for="lk-email">Email address</label>
     <input type="email" id="lk-email" placeholder="name@example.com" autocomplete="email">
     <div class="err" id="lk-err"></div>
+
+    <!-- שדות לליד חדש — מוצגים רק אם האימייל לא נמצא במערכת -->
+    <div id="guest-fields" class="hidden" style="margin-top:16px;">
+      <p class="hint" style="margin-bottom:12px;background:#F8F1DE;border:1px solid var(--brass-light);border-radius:2px;padding:10px 12px;">We couldn't find an existing profile — tell us who you are and we'll prepare your personal map.</p>
+      <label for="g-first">First name</label>
+      <input type="text" id="g-first" autocomplete="given-name" style="margin-bottom:12px;">
+      <label for="g-last">Last name (optional)</label>
+      <input type="text" id="g-last" autocomplete="family-name" style="margin-bottom:12px;">
+      <label for="g-phone">Phone (optional)</label>
+      <input type="text" id="g-phone" autocomplete="tel">
+    </div>
+
     <div style="margin-top:18px;">
       <button class="btn" id="lk-btn" onclick="doLookup()">Continue</button>
     </div>
@@ -506,6 +528,20 @@ function showErr(id,msg){var e=document.getElementById(id);e.textContent=msg;e.s
 function hideErr(id){document.getElementById(id).style.display='none';}
 
 function doLookup(){
+  /* אם שדות האורח כבר גלויים — זהו השלב השני: שמירת הפרטים והמשך */
+  var guestFields=document.getElementById('guest-fields');
+  if(!guestFields.classList.contains('hidden')){
+    var gf=document.getElementById('g-first').value.trim();
+    if(!gf){showErr('lk-err','Please enter your first name.');return;}
+    hideErr('lk-err');
+    state.leadName=gf;
+    state.guestFirst=gf;
+    state.guestLast=document.getElementById('g-last').value.trim();
+    state.guestPhone=document.getElementById('g-phone').value.trim();
+    showWelcome();
+    return;
+  }
+
   var email=document.getElementById('lk-email').value.trim();
   hideErr('lk-err');
   if(!email||email.indexOf('@')<1){showErr('lk-err','Please enter a valid email address.');return;}
@@ -535,16 +571,17 @@ function doLookup(){
           state.existingComments=C.COMMENTS||'';
           showWelcome();
         }else{
-          /* לא נמצא — ממשיכים כאורח, ללא שמירה ל-CRM */
+          /* לא נמצא — מציגים שדות פרטים כדי שניצור ליד חדש בסיום */
           state.leadId=null;state.leadType=null;state.leadName='';
-          showWelcome();
+          document.getElementById('guest-fields').classList.remove('hidden');
         }
       });
     }
   })
   .catch(function(){
-    /* גם במקרה תקלה — לא חוסמים את הלקוח */
-    state.leadId=null;showWelcome();
+    /* גם במקרה תקלה — לא חוסמים את הלקוח, מבקשים פרטים ידנית */
+    state.leadId=null;
+    document.getElementById('guest-fields').classList.remove('hidden');
   })
   .finally(function(){btn.disabled=false;btn.textContent='Continue';});
 }
@@ -732,7 +769,7 @@ var NEIGHBORHOODS={
 'Orlando':{u:{n:'Thornton Park',lat:28.5423,lng:-81.3660,b:'Brick streets and sidewalk cafés beside Lake Eola.'},f:{n:'Winter Park',lat:28.5960,lng:-81.3470,b:'Oak canopies, lakes and some of Florida\'s best schools.'}},
 'Tampa':{u:{n:'Hyde Park',lat:27.9330,lng:-82.4700,b:'Historic bungalows and boutique streets near the bay.'},f:{n:'Westchase',lat:28.0560,lng:-82.6060,b:'Planned family community with parks, pools and strong schools.'}},
 'Jacksonville':{u:{n:'Riverside',lat:30.3140,lng:-81.6880,b:'Historic riverfront district of cafés, markets and murals.'},f:{n:'Mandarin',lat:30.1560,lng:-81.6480,b:'Quiet riverside living under centuries-old oaks, with good schools.'}},
-'Atlanta':{u:{n:'Midtown',lat:33.7815,lng:-84.3800,b:'Piedmont Park, the BeltLine and Atlanta\'s arts scene at your door.'},f:{n:'Decatur',lat:33.7720,lng:-84.2900,b:'A walkable small town inside the city, famous for its schools.'}},
+'Atlanta':{u:{n:'Midtown',lat:33.7838,lng:-84.3806,b:'Piedmont Park, the BeltLine and Atlanta\'s arts scene at your door.'},f:{n:'Decatur',lat:33.7720,lng:-84.2900,b:'A walkable small town inside the city, famous for its schools.'}},
 'Charlotte':{u:{n:'South End',lat:35.2085,lng:-80.8560,b:'Breweries, rail trail and new apartments minutes from Uptown.'},f:{n:'Ballantyne',lat:35.0510,lng:-80.8450,b:'Newer family homes, golf greens and highly rated schools.'}},
 'Raleigh–Durham':{u:{n:'Glenwood South',lat:35.7885,lng:-78.6475,b:'Raleigh\'s liveliest strip of restaurants and nightlife.'},f:{n:'Cary',lat:35.7880,lng:-78.7830,b:'Consistently ranked among America\'s best towns for families.'}},
 'Nashville':{u:{n:'The Gulch',lat:36.1525,lng:-86.7855,b:'Modern lofts and rooftop bars steps from Music Row.'},f:{n:'Franklin',lat:35.9220,lng:-86.8700,b:'A storybook Main Street with top Tennessee schools.'}},
@@ -904,10 +941,13 @@ function showNeighborhood(idx){
     var mapEl=document.getElementById('map');
     mapEl.parentNode.insertBefore(hint,mapEl.nextSibling);
   }
-  hint.innerHTML='<b>&#127968; '+nb.n+'</b> — your street. Tap the marker, then &ldquo;Walk this street&rdquo; to stand there.'
-    +'<div style="margin-top:8px;">'
-    +'<button class="poi-chip" id="chip-work" onclick="togglePOI(\'work\')">&#128188; Show places to work</button>'
-    +'<button class="poi-chip" id="chip-school" onclick="togglePOI(\'school\')">&#127979; Show schools nearby</button>'
+  hint.innerHTML='<b>&#127968; '+nb.n+'</b> — this is where you could live.'
+    +'<div style="margin-top:10px;">'
+    +'<button class="walk-btn" style="margin-top:0;" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\')">&#128694;&nbsp; Walk in '+nb.n+' right now</button>'
+    +'</div>'
+    +'<div style="margin-top:10px;">'
+    +'<button class="poi-chip chip-work-style" id="chip-work" onclick="togglePOI(\'work\')">&#128188; Show places to work</button>'
+    +'<button class="poi-chip chip-school-style" id="chip-school" onclick="togglePOI(\'school\')">&#127979; Show schools nearby</button>'
     +'</div>';
 
   /* עדכון התיק האישי — הצ'קים מתמלאים כשחוקרים את השכונה של העיר המובילה */
@@ -940,7 +980,7 @@ function setChip(kind,text,cls){
   var chip=document.getElementById('chip-'+kind);
   if(!chip)return;
   chip.innerHTML=text;
-  chip.className='poi-chip'+(cls?' '+cls:'');
+  chip.className='poi-chip chip-'+kind+'-style'+(cls?' '+cls:'');
 }
 
 function togglePOI(kind){
@@ -1153,38 +1193,91 @@ function buildMap(){
 }
 
 /* ---------- שמירה ל-Bitrix24 ----------
-   רק אם הלקוח זוהה. ללא שינוי סטטוס — הערת Timeline + הוספה ל-COMMENTS.
+   בתקן של שאלון ה-assessment הקיים:
+   - COMMENTS (צד שמאל של הליד) — סיכום מובנה, בתוספת לתוכן קיים
+   - Timeline comment (צד ימין) — אותו סיכום
+   - עדכון שדות: מקצוע (UF_CRM_1709560603), SOURCE_ID='4'
+   - ליד לא נמצא -> יצירת ליד חדש עם הפרטים שנאספו
+   - ללא שינוי סטטוסים בלידים קיימים
 */
-function saveToCRM(){
-  if(!state.leadId)return;
+function buildCRMSummary(){
   var a=state.answers;
-  var top=state.results[0].city;
-  var others=state.results.slice(1).map(function(t){return t.city.n;}).join(', ');
   var pris=(a.priorities||[]).map(function(p){return PRI_LABEL[p];}).join(', ');
+  var lines=['=== AMERICAN LIFE MAP — DREAM DESTINATION ===',
+    'Name: '+(state.leadName||[state.guestFirst,state.guestLast].filter(Boolean).join(' ')||''),
+    'Email: '+(state.email||''),
+    state.guestPhone?('Phone: '+state.guestPhone):'',
+    '',
+    '=== MATCHED CITIES ==='];
+  state.results.forEach(function(t,i){
+    var nb=pickNeighborhood(t.city.n);
+    lines.push('#'+(i+1)+': '+t.city.n+', '+t.city.s+' — '+t.match+'% match'
+      +(nb?(' | Neighborhood: '+nb.n):'')
+      +' | Salary in field: '+fmtMoney(t.city.sal[a.profession])+'/yr'
+      +' | Avg rent: $'+t.city.rent);
+  });
+  lines.push('',
+    '=== CLIENT PROFILE ===',
+    'Profession: '+PROF_LABEL[a.profession],
+    'Family: '+FAM_LABEL[a.family],
+    'Lifestyle preference: '+LIFE_LABEL[a.lifestyle],
+    'Housing budget: '+BUDGET_LABEL[a.budget],
+    'Priorities: '+(pris||'—'),
+    '',
+    'Completed: '+new Date().toLocaleString('en-US'),
+    'Source: American Life Map (dream_map)');
+  return lines.filter(function(l){return l!=='';}).join('\n');
+}
 
-  var summary='=== American Life Map — Dream Destination ===\n'
-    +'Top match: '+top.n+', '+top.s+' ('+state.results[0].match+'%)\n'
-    +'Suggested neighborhood: '+((pickNeighborhood(top.n)||{}).n||'—')+'\n'
-    +'Other matches: '+others+'\n'
-    +'Profession: '+PROF_LABEL[a.profession]+'\n'
-    +'Family: '+FAM_LABEL[a.family]+'\n'
-    +'Lifestyle: '+LIFE_LABEL[a.lifestyle]+'\n'
-    +'Housing budget: '+BUDGET_LABEL[a.budget]+'\n'
-    +'Priorities: '+(pris||'—')+'\n'
-    +'Completed: '+new Date().toLocaleString('en-US');
+function saveToCRM(){
+  var a=state.answers;
+  var summary=buildCRMSummary();
+  var profession=PROF_LABEL[a.profession]||'';
 
-  /* הערת Timeline — ENTITY_TYPE באותיות קטנות (לפי הכלל שלמדנו) */
-  var params='fields[ENTITY_ID]='+encodeURIComponent(state.leadId)
-    +'&fields[ENTITY_TYPE]='+encodeURIComponent(state.leadType)
-    +'&fields[COMMENT]='+encodeURIComponent(summary);
-  fetch(WEBHOOK+'crm.timeline.comment.add?'+params).catch(function(){});
+  if(state.leadId){
+    /* ── ליד/איש קשר קיים: עדכון שדות + COMMENTS + Timeline ── */
+    var updMethod=state.leadType==='contact'?'crm.contact.update':'crm.lead.update';
+    var newComments=(state.existingComments?state.existingComments+'<br><br>':'')
+      +summary.replace(/\n/g,'<br>');
+    var params='id='+encodeURIComponent(state.leadId)
+      +'&fields[COMMENTS]='+encodeURIComponent(newComments)
+      +'&fields[UF_CRM_1709560603]='+encodeURIComponent(profession);
+    if(state.leadType==='lead'){params+='&fields[SOURCE_ID]=4';}
+    fetch(WEBHOOK+updMethod+'?'+params).catch(function(){});
 
-  /* הוספה ל-COMMENTS של הרשומה — בלי למחוק תוכן קיים */
-  var updMethod=state.leadType==='contact'?'crm.contact.update':'crm.lead.update';
-  var newComments=(state.existingComments?state.existingComments+'<br><br>':'')
-    +summary.replace(/\n/g,'<br>');
-  fetch(WEBHOOK+updMethod+'?id='+encodeURIComponent(state.leadId)
-    +'&fields[COMMENTS]='+encodeURIComponent(newComments)).catch(function(){});
+    /* הערת Timeline — ENTITY_TYPE באותיות קטנות */
+    fetch(WEBHOOK+'crm.timeline.comment.add?fields[ENTITY_ID]='+encodeURIComponent(state.leadId)
+      +'&fields[ENTITY_TYPE]='+encodeURIComponent(state.leadType)
+      +'&fields[COMMENT]='+encodeURIComponent(summary)).catch(function(){});
+
+  }else if(state.email&&state.guestFirst){
+    /* ── לא נמצא במערכת: יצירת ליד חדש ── */
+    var name=[state.guestFirst,state.guestLast].filter(Boolean).join(' ');
+    var url=WEBHOOK+'crm.lead.add?fields[TITLE]='+encodeURIComponent('American Life Map: '+name)
+      +'&fields[NAME]='+encodeURIComponent(state.guestFirst)
+      +'&fields[LAST_NAME]='+encodeURIComponent(state.guestLast||'')
+      +'&fields[SOURCE_ID]=4'
+      +'&fields[UF_CRM_1709560603]='+encodeURIComponent(profession)
+      +'&fields[COMMENTS]='+encodeURIComponent(summary.replace(/\n/g,'<br>'))
+      +'&fields[EMAIL][0][VALUE]='+encodeURIComponent(state.email)
+      +'&fields[EMAIL][0][VALUE_TYPE]=WORK';
+    if(state.guestPhone){
+      url+='&fields[PHONE][0][VALUE]='+encodeURIComponent(state.guestPhone)
+        +'&fields[PHONE][0][VALUE_TYPE]=WORK';
+    }
+    fetch(url)
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.result){
+        state.leadId=d.result;state.leadType='lead';
+        /* הערת Timeline גם על הליד החדש */
+        fetch(WEBHOOK+'crm.timeline.comment.add?fields[ENTITY_ID]='+encodeURIComponent(state.leadId)
+          +'&fields[ENTITY_TYPE]=lead'
+          +'&fields[COMMENT]='+encodeURIComponent(summary)).catch(function(){});
+      }
+    })
+    .catch(function(){});
+  }
 }
 
 /* ---------- מעבר לתשלום ---------- */
