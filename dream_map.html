@@ -917,37 +917,37 @@ function cityCardHTML(t,idx){
    הבחירה נעשית לפי תשובות הלקוח: ילדים/פרברים -> f, עירוני/חוף -> u.
 */
 var NEIGHBORHOODS={
-'Austin':{u:{n:'South Congress',lat:30.2465,lng:-97.7497,b:'Live music, coffee shops and food trucks — the heartbeat of Austin, all walkable.'},f:{n:'Hyde Park',lat:30.3040,lng:-97.7270,b:'Victorian homes on tree-lined avenues — a national historic district minutes from downtown.'}},
-'Dallas–Fort Worth':{u:{n:'Uptown',lat:32.8005,lng:-96.8022,b:'Restaurants, trails and the trolley — Dallas at its most walkable.'},f:{n:'Plano (Haggard Park)',lat:33.0225,lng:-96.6965,b:'Victorian homes in a historic district, with nationally ranked schools all around.'}},
-'Houston':{u:{n:'Montrose',lat:29.7448,lng:-95.3952,b:'Galleries, cafés and character homes in Houston\'s most eclectic quarter.'},f:{n:'The Woodlands',lat:30.1655,lng:-95.4505,b:'A master-planned forest community with excellent schools and waterways.'}},
-'San Antonio':{u:{n:'The Pearl',lat:29.4425,lng:-98.4790,b:'A riverside district of markets, restaurants and restored architecture.'},f:{n:'Alamo Heights',lat:29.4800,lng:-98.4660,b:'Tree-lined streets, historic homes and one of Texas\' most acclaimed school districts.'}},
-'Miami':{u:{n:'Brickell',lat:25.7620,lng:-80.1935,b:'Skyline living by the bay — Miami\'s financial and dining hub.'},f:{n:'Coral Gables',lat:25.7485,lng:-80.2650,b:'Tree-lined boulevards, top schools and Mediterranean charm.'}},
-'Orlando':{u:{n:'Thornton Park',lat:28.5423,lng:-81.3660,b:'Brick streets and sidewalk cafés beside Lake Eola.'},f:{n:'Winter Park',lat:28.5960,lng:-81.3470,b:'Oak canopies, lakes and some of Florida\'s best schools.'}},
-'Tampa':{u:{n:'Hyde Park',lat:27.9330,lng:-82.4700,b:'Historic bungalows and boutique streets near the bay.'},f:{n:'Beach Park',lat:27.9280,lng:-82.5170,b:'Oak-canopied streets between downtown and the bay.'}},
-'Jacksonville':{u:{n:'Riverside',lat:30.3140,lng:-81.6880,b:'Historic riverfront district of cafés, markets and murals.'},f:{n:'Avondale',lat:30.3030,lng:-81.7060,b:'A historic riverfront district of oak canopies and storybook homes.'}},
-'Atlanta':{u:{n:'Midtown',lat:33.7838,lng:-84.3806,b:'Piedmont Park, the BeltLine and Atlanta\'s arts scene at your door.'},f:{n:'Decatur',lat:33.7720,lng:-84.2900,b:'A walkable small town inside the city, famous for its schools.'}},
-'Charlotte':{u:{n:'South End',lat:35.2085,lng:-80.8560,b:'Breweries, rail trail and new apartments minutes from Uptown.'},f:{n:'Myers Park',lat:35.1920,lng:-80.8340,b:'A century-old oak canopy over grand historic homes — with top city schools.'}},
-'Raleigh–Durham':{u:{n:'Glenwood South',lat:35.7885,lng:-78.6475,b:'Raleigh\'s liveliest strip of restaurants and nightlife.'},f:{n:'Cary',lat:35.7880,lng:-78.7830,b:'Consistently ranked among America\'s best towns for families.'}},
-'Nashville':{u:{n:'The Gulch',lat:36.1525,lng:-86.7855,b:'Modern lofts and rooftop bars steps from Music Row.'},f:{n:'Franklin',lat:35.9220,lng:-86.8700,b:'A storybook Main Street with top Tennessee schools.'}},
-'Phoenix':{u:{n:'Roosevelt Row',lat:33.4585,lng:-112.0710,b:'Murals, galleries and coffee culture in downtown Phoenix.'},f:{n:'Arcadia',lat:33.5040,lng:-111.9720,b:'Citrus-lined streets and lush lawns beneath Camelback Mountain.'}},
-'Las Vegas':{u:{n:'Arts District',lat:36.1590,lng:-115.1530,b:'Galleries, vintage shops and cafés beyond the Strip.'},f:{n:'Summerlin',lat:36.1670,lng:-115.3190,b:'Red-rock views, parks and the valley\'s best schools.'}},
-'Denver':{u:{n:'LoDo',lat:39.7477,lng:-104.9989,b:'Historic lofts, Union Station and craft breweries downtown.'},f:{n:'Washington Park',lat:39.7010,lng:-104.9690,b:'Classic homes around one of America\'s prettiest city parks.'}},
-'Salt Lake City':{u:{n:'Sugar House',lat:40.7250,lng:-111.8560,b:'Indie shops and cafés with mountain views in every direction.'},f:{n:'Harvard-Yale',lat:40.7420,lng:-111.8470,b:'Storybook Tudor cottages in a historic district with mountain views.'}},
-'Seattle':{u:{n:'Capitol Hill',lat:47.6270,lng:-122.3145,b:'Seattle\'s cultural heart — cafés, music and city views.'},f:{n:'Bellevue',lat:47.6140,lng:-122.2110,b:'Top-ranked schools and tech offices across the lake.'}},
-'Portland':{u:{n:'Pearl District',lat:45.5290,lng:-122.6830,b:'Converted warehouses, galleries and famous bookstores.'},f:{n:'Lake Oswego',lat:45.4160,lng:-122.6720,b:'A lakeside town with excellent schools, minutes from the city.'}},
-'San Francisco Bay Area':{u:{n:'Marina District',lat:37.8007,lng:-122.4368,b:'Bay views, the Palace of Fine Arts and waterfront running paths.'},f:{n:'Palo Alto',lat:37.4440,lng:-122.1560,b:'The heart of Silicon Valley — legendary schools and tech careers.'}},
-'San Diego':{u:{n:'Little Italy',lat:32.7235,lng:-117.1685,b:'Piazzas, farmers markets and harbor sunsets.'},f:{n:'Coronado',lat:32.6920,lng:-117.1750,b:'Storybook island streets steps from the beach, minutes across the bay.'}},
-'Los Angeles':{u:{n:'Santa Monica',lat:34.0270,lng:-118.4930,b:'Beach mornings, the pier and a walkable downtown by the ocean.'},f:{n:'Pasadena',lat:34.1330,lng:-118.1440,b:'Craftsman homes, tree-lined streets and strong schools.'}},
-'Sacramento':{u:{n:'Midtown',lat:38.5725,lng:-121.4745,b:'Victorian homes, murals and farm-to-fork dining.'},f:{n:'East Sacramento',lat:38.5715,lng:-121.4565,b:'The celebrated \'Fabulous Forties\' blocks — stately homes under towering elms.'}},
-'New York City':{u:{n:'Williamsburg, Brooklyn',lat:40.7170,lng:-73.9570,b:'Skyline views, indie culture and the L train to Manhattan.'},f:{n:'Forest Hills, Queens',lat:40.7150,lng:-73.8440,b:'Tudor houses and top schools, thirty minutes to Midtown.'}},
-'North New Jersey':{u:{n:'Hoboken',lat:40.7420,lng:-74.0292,b:'Brownstones and waterfront parks facing the Manhattan skyline.'},f:{n:'Ridgewood',lat:40.9830,lng:-74.1100,b:'A classic commuter town with a beloved main street and schools.'}},
-'Boston':{u:{n:'Back Bay',lat:42.3520,lng:-71.0780,b:'Brownstone streets, the Charles River and Newbury Street shopping.'},f:{n:'Newton',lat:42.3290,lng:-71.1920,b:'Village greens and some of the finest public schools in America.'}},
-'Philadelphia':{u:{n:'Rittenhouse Square',lat:39.9470,lng:-75.1720,b:'Elegant square living amid cafés, bookshops and greenery.'},f:{n:'Chestnut Hill',lat:40.0760,lng:-75.2090,b:'Cobblestone charm, garden district and excellent schools.'}},
-'Washington DC Metro':{u:{n:'Dupont Circle',lat:38.9110,lng:-77.0450,b:'Embassies, bookstores and café life in the heart of DC.'},f:{n:'Bethesda',lat:38.9840,lng:-77.1010,b:'Top Maryland schools and a thriving downtown on the Metro.'}},
-'Chicago':{u:{n:'Lincoln Park',lat:41.9270,lng:-87.6440,b:'Lakefront paths, the zoo and brownstone streets.'},f:{n:'Naperville',lat:41.7690,lng:-88.1520,b:'Riverwalk charm and schools ranked among the nation\'s best.'}},
-'Minneapolis':{u:{n:'North Loop',lat:44.9880,lng:-93.2770,b:'Warehouse lofts, riverside trails and award-winning restaurants.'},f:{n:'Edina',lat:44.9110,lng:-93.3400,b:'Lakes, parks and Minnesota\'s most sought-after schools.'}},
-'Columbus':{u:{n:'German Village',lat:39.9490,lng:-82.9930,b:'Brick streets, flower boxes and beer gardens in a storybook historic district.'},f:{n:'Dublin',lat:40.1010,lng:-83.1120,b:'Green suburbs and consistently top-rated Ohio schools.'}},
-'Kansas City':{u:{n:'Crossroads',lat:39.0915,lng:-94.5850,b:'First Fridays art walks, coffee roasters and lofts.'},f:{n:'Brookside',lat:39.0210,lng:-94.5970,b:'Grand boulevards, storybook homes and a beloved shops district.'}}
+'Austin':{u:{n:'South Congress',lat:30.2467,lng:-97.7495,b:'Live music, coffee shops and food trucks — the heartbeat of Austin, all walkable.'},f:{n:'Hyde Park',lat:30.3058,lng:-97.7272,b:'Victorian homes on tree-lined avenues — a national historic district minutes from downtown.'}},
+'Dallas–Fort Worth':{u:{n:'Uptown',lat:32.8058,lng:-96.7978,b:'Restaurants, trails and the trolley — Dallas at its most walkable.'},f:{n:'Plano (Haggard Park)',lat:33.0247,lng:-96.698,b:'Victorian homes in a historic district, with nationally ranked schools all around.'}},
+'Houston':{u:{n:'Montrose',lat:29.7428,lng:-95.4,b:'Galleries, cafés and character homes in Houston\'s most eclectic quarter.'},f:{n:'The Woodlands',lat:30.165,lng:-95.4625,b:'A master-planned forest community with excellent schools and waterways.'}},
+'San Antonio':{u:{n:'The Pearl',lat:29.4425,lng:-98.4794,b:'A riverside district of markets, restaurants and restored architecture.'},f:{n:'Alamo Heights',lat:29.4768,lng:-98.4713,b:'Tree-lined streets, historic homes and one of Texas\' most acclaimed school districts.'}},
+'Miami':{u:{n:'Brickell',lat:25.7638,lng:-80.1932,b:'Skyline living by the bay — Miami\'s financial and dining hub.'},f:{n:'Coral Gables',lat:25.7448,lng:-80.272,b:'Tree-lined boulevards, top schools and Mediterranean charm.'}},
+'Orlando':{u:{n:'Thornton Park',lat:28.543,lng:-81.363,b:'Brick streets and sidewalk cafés beside Lake Eola.'},f:{n:'Winter Park',lat:28.5972,lng:-81.3509,b:'Oak canopies, lakes and some of Florida\'s best schools.'}},
+'Tampa':{u:{n:'Hyde Park',lat:27.9368,lng:-82.4678,b:'Historic bungalows and boutique streets near the bay.'},f:{n:'Hyde Park North',lat:27.934,lng:-82.4735,b:'Oak-canopied historic streets between downtown and the bay.'}},
+'Jacksonville':{u:{n:'Riverside',lat:30.318,lng:-81.689,b:'Historic riverfront district of cafés, markets and murals.'},f:{n:'Avondale',lat:30.2985,lng:-81.7135,b:'A historic riverfront district of oak canopies and storybook homes.'}},
+'Atlanta':{u:{n:'Midtown',lat:33.7813,lng:-84.3692,b:'Piedmont Park, the BeltLine and Atlanta\'s arts scene at your door.'},f:{n:'Decatur',lat:33.7748,lng:-84.2972,b:'A walkable small town inside the city, famous for its schools.'}},
+'Charlotte':{u:{n:'South End',lat:35.2133,lng:-80.8557,b:'Breweries, rail trail and new apartments minutes from Uptown.'},f:{n:'Myers Park',lat:35.1988,lng:-80.829,b:'A century-old oak canopy over grand historic homes — with top city schools.'}},
+'Raleigh–Durham':{u:{n:'Glenwood South',lat:35.7852,lng:-78.6478,b:'Raleigh\'s liveliest strip of restaurants and nightlife.'},f:{n:'Cary',lat:35.7878,lng:-78.7812,b:'Consistently ranked among America\'s best towns for families.'}},
+'Nashville':{u:{n:'Edgehill Village',lat:36.1422,lng:-86.7888,b:'Boutiques and cafés in converted brick buildings, minutes from Music Row.'},f:{n:'Franklin',lat:35.9251,lng:-86.869,b:'A storybook Main Street with top Tennessee schools.'}},
+'Phoenix':{u:{n:'Arcadia Lite',lat:33.4936,lng:-111.988,b:'Cafés, patios and desert-modern homes beneath Camelback Mountain.'},f:{n:'Arcadia',lat:33.503,lng:-111.9635,b:'Citrus-lined streets and lush lawns beneath Camelback Mountain.'}},
+'Las Vegas':{u:{n:'Arts District',lat:36.1582,lng:-115.148,b:'Galleries, vintage shops and cafés beyond the Strip.'},f:{n:'Summerlin',lat:36.1875,lng:-115.305,b:'Red-rock views, parks and the valley\'s best schools.'}},
+'Denver':{u:{n:'LoDo',lat:39.7508,lng:-104.999,b:'Historic lofts, Union Station and craft breweries downtown.'},f:{n:'Washington Park',lat:39.6963,lng:-104.9662,b:'Classic homes around one of America\'s prettiest city parks.'}},
+'Salt Lake City':{u:{n:'Sugar House',lat:40.7258,lng:-111.862,b:'Indie shops and cafés with mountain views in every direction.'},f:{n:'Harvard-Yale',lat:40.7414,lng:-111.849,b:'Storybook Tudor cottages in a historic district with mountain views.'}},
+'Seattle':{u:{n:'Capitol Hill',lat:47.6153,lng:-122.3142,b:'Seattle\'s cultural heart — cafés, music and city views.'},f:{n:'Bellevue',lat:47.6103,lng:-122.2013,b:'Top-ranked schools and tech offices across the lake.'}},
+'Portland':{u:{n:'Pearl District',lat:45.5298,lng:-122.6813,b:'Converted warehouses, galleries and famous bookstores.'},f:{n:'Lake Oswego',lat:45.4203,lng:-122.6673,b:'A lakeside town with excellent schools, minutes from the city.'}},
+'San Francisco Bay Area':{u:{n:'Marina District',lat:37.8009,lng:-122.4368,b:'Bay views, the Palace of Fine Arts and waterfront running paths.'},f:{n:'Palo Alto',lat:37.448,lng:-122.1577,b:'The heart of Silicon Valley — legendary schools and tech careers.'}},
+'San Diego':{u:{n:'Little Italy',lat:32.7228,lng:-117.1687,b:'Piazzas, farmers markets and harbor sunsets.'},f:{n:'Coronado',lat:32.6902,lng:-117.1795,b:'Storybook island streets steps from the beach, minutes across the bay.'}},
+'Los Angeles':{u:{n:'Santa Monica',lat:34.0296,lng:-118.4882,b:'Beach mornings, the pier and a walkable downtown by the ocean.'},f:{n:'Pasadena',lat:34.1305,lng:-118.1315,b:'Craftsman homes, tree-lined streets and strong schools.'}},
+'Sacramento':{u:{n:'Midtown',lat:38.5738,lng:-121.4835,b:'Victorian homes, murals and farm-to-fork dining.'},f:{n:'East Sacramento',lat:38.556,lng:-121.4585,b:'The celebrated \'Fabulous Forties\' blocks — stately homes under towering elms.'}},
+'New York City':{u:{n:'Williamsburg, Brooklyn',lat:40.7176,lng:-73.9565,b:'Skyline views, indie culture and the L train to Manhattan.'},f:{n:'Forest Hills, Queens',lat:40.7205,lng:-73.8455,b:'Tudor houses and top schools, thirty minutes to Midtown.'}},
+'North New Jersey':{u:{n:'Hoboken',lat:40.7398,lng:-74.0297,b:'Brownstones and waterfront parks facing the Manhattan skyline.'},f:{n:'Ridgewood',lat:40.979,lng:-74.116,b:'A classic commuter town with a beloved main street and schools.'}},
+'Boston':{u:{n:'Back Bay',lat:42.3475,lng:-71.082,b:'Brownstone streets, the Charles River and Newbury Street shopping.'},f:{n:'Newton',lat:42.3308,lng:-71.1922,b:'Village greens and some of the finest public schools in America.'}},
+'Philadelphia':{u:{n:'Rittenhouse Square',lat:39.9495,lng:-75.1695,b:'Elegant square living amid cafés, bookshops and greenery.'},f:{n:'Chestnut Hill',lat:40.0782,lng:-75.2065,b:'Cobblestone charm, garden district and excellent schools.'}},
+'Washington DC Metro':{u:{n:'Dupont Circle',lat:38.911,lng:-77.0452,b:'Embassies, bookstores and café life in the heart of DC.'},f:{n:'Bethesda',lat:38.9807,lng:-77.097,b:'Top Maryland schools and a thriving downtown on the Metro.'}},
+'Chicago':{u:{n:'Lincoln Park',lat:41.9182,lng:-87.6537,b:'Lakefront paths, the zoo and brownstone streets.'},f:{n:'Naperville',lat:41.772,lng:-88.149,b:'Riverwalk charm and schools ranked among the nation\'s best.'}},
+'Minneapolis':{u:{n:'North Loop',lat:44.9838,lng:-93.2723,b:'Warehouse lofts, riverside trails and award-winning restaurants.'},f:{n:'Edina',lat:44.9122,lng:-93.329,b:'Lakes, parks and Minnesota\'s most sought-after schools.'}},
+'Columbus':{u:{n:'German Village',lat:39.9493,lng:-82.9998,b:'Brick streets, flower boxes and beer gardens in a storybook historic district.'},f:{n:'Dublin',lat:40.1035,lng:-83.1108,b:'Green suburbs and consistently top-rated Ohio schools.'}},
+'Kansas City':{u:{n:'Crossroads',lat:39.0898,lng:-94.5876,b:'First Fridays art walks, coffee roasters and lofts.'},f:{n:'Brookside',lat:39.0138,lng:-94.5923,b:'Grand boulevards, storybook homes and a beloved shops district.'}}
 };
 /* בחירת השכונה האישית לפי תשובות הלקוח */
 function pickNeighborhood(cityName){
@@ -964,37 +964,37 @@ function pickNeighborhood(cityName){
    כדי שה-embed של גוגל ימצא פנורמה ויציב את הלקוח ממש ברחוב.
 */
 var SV_POINTS={
-'Austin':[30.2680,-97.7431],               /* Congress Avenue */
-'Dallas–Fort Worth':[32.7809,-96.7995],    /* Main Street downtown */
-'Houston':[29.7589,-95.3626],              /* Main Street */
-'San Antonio':[29.4241,-98.4861],          /* Alamo Plaza */
-'Miami':[25.7804,-80.1300],                /* Ocean Drive, South Beach */
-'Orlando':[28.5421,-81.3790],              /* Orange Avenue */
-'Tampa':[27.9477,-82.4584],                /* Franklin Street */
-'Jacksonville':[30.3255,-81.6590],         /* Laura Street */
-'Atlanta':[33.7590,-84.3880],              /* Peachtree Street */
-'Charlotte':[35.2271,-80.8431],            /* Tryon Street */
-'Raleigh–Durham':[35.7773,-78.6390],       /* Fayetteville Street */
-'Nashville':[36.1610,-86.7785],            /* Broadway */
-'Phoenix':[33.4489,-112.0740],             /* Central Avenue */
-'Las Vegas':[36.1147,-115.1728],           /* Las Vegas Boulevard */
-'Denver':[39.7477,-104.9989],              /* Larimer Square */
-'Salt Lake City':[40.7660,-111.8910],      /* Main Street */
-'Seattle':[47.6094,-122.3417],             /* Pike Place Market */
-'Portland':[45.5190,-122.6793],            /* SW Broadway */
-'San Francisco Bay Area':[37.8021,-122.4194], /* Lombard Street */
-'San Diego':[32.7115,-117.1600],           /* Gaslamp Quarter, 5th Ave */
-'Los Angeles':[34.1017,-118.3406],         /* Hollywood Boulevard */
-'Sacramento':[38.5767,-121.4934],          /* Capitol, 10th Street */
-'New York City':[40.7580,-73.9855],        /* Times Square */
-'North New Jersey':[40.7440,-74.0290],     /* Washington St, Hoboken */
-'Boston':[42.3505,-71.0763],               /* Newbury Street */
-'Philadelphia':[39.9489,-75.1500],         /* Chestnut St, Independence Hall */
-'Washington DC Metro':[38.8938,-77.0263],  /* Pennsylvania Avenue */
-'Chicago':[41.8972,-87.6240],              /* Michigan Ave at the Water Tower */
-'Minneapolis':[44.9762,-93.2759],          /* Nicollet Mall */
-'Columbus':[39.9640,-83.0007],             /* High Street, Short North */
-'Kansas City':[39.0420,-94.5910]           /* Country Club Plaza */
+'Austin':[30.2478,-97.7494],
+'Dallas–Fort Worth':[32.806,-96.7978],
+'Houston':[29.7428,-95.4],
+'San Antonio':[29.4425,-98.4794],
+'Miami':[25.7652,-80.193],
+'Orlando':[28.596,-81.3508],
+'Tampa':[27.9368,-82.4678],
+'Jacksonville':[30.318,-81.689],
+'Atlanta':[33.7815,-84.3846],
+'Charlotte':[35.2085,-80.858],
+'Raleigh–Durham':[35.7852,-78.6478],
+'Nashville':[36.1422,-86.7888],
+'Phoenix':[33.5019,-111.999],
+'Las Vegas':[36.1582,-115.148],
+'Denver':[39.7527,-105.0003],
+'Salt Lake City':[40.7258,-111.862],
+'Seattle':[47.6153,-122.3142],
+'Portland':[45.5298,-122.6813],
+'San Francisco Bay Area':[37.8009,-122.4368],
+'San Diego':[32.7228,-117.1687],
+'Los Angeles':[34.0296,-118.4882],
+'Sacramento':[38.5738,-121.4835],
+'New York City':[40.7176,-73.9565],
+'North New Jersey':[40.7385,-74.03],
+'Boston':[42.3506,-71.0788],
+'Philadelphia':[39.9495,-75.1695],
+'Washington DC Metro':[38.911,-77.0452],
+'Chicago':[41.9182,-87.6537],
+'Minneapolis':[44.9838,-93.2723],
+'Columbus':[39.9493,-82.9998],
+'Kansas City':[39.0898,-94.5876]
 };
 
 function walkCity(idx){
