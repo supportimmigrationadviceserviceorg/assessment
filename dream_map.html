@@ -149,6 +149,14 @@
   .city-card.top .explore-btn{background:transparent;border-color:#FCFAF4;color:#FCFAF4;}
   .city-card.top .explore-btn:hover{background:rgba(255,255,255,.1);}
 
+  /* ===== פאנל מעסיקים מובילים ===== */
+  .emp-box{margin-top:12px;padding-top:10px;border-top:1px dotted var(--line);text-align:center;}
+  .emp-lbl{font-family:Arial,sans-serif;font-size:11.5px;color:var(--text-muted);margin-bottom:7px;}
+  .emp-chip{
+    display:inline-block;margin:3px;padding:5px 12px;border-radius:13px;
+    background:var(--ink);color:#FCFAF4;font-family:Arial,sans-serif;font-size:12px;
+  }
+
   /* ===== אווטאר הלקוח — ראשי תיבות בזהב, או תמונת Gravatar אם קיימת ===== */
   .avatar{
     width:64px;height:64px;border-radius:50%;margin:0 auto 12px;
@@ -638,6 +646,53 @@ var LIFE_LABEL={urban:'Big city energy',suburban:'Quiet suburbs',nature:'Close t
 var FAM_LABEL={single:'Just me',couple:'Partner and me',kids:'Family with children',kids_teen:'Family with teenagers'};
 var PRI_LABEL={salary:'Higher salary',afford:'Affordable living',schools:'Excellent schools',warm:'Warm weather',ocean:'Near the ocean',community:'Strong community'};
 var BUDGET_LABEL={1000:'Up to $1,200',1600:'$1,200–$2,000',2500:'$2,000–$3,000',3600:'Over $3,000'};
+/* מעסיקים מובילים — כללי (ארצי) לפי תחום */
+var EMPLOYERS_GENERAL={
+tech:['Microsoft','Google','Amazon','Apple','Meta','Oracle','IBM','Dell','Intel','Cisco'],
+health:['Mayo Clinic','Cleveland Clinic','HCA Healthcare','Kaiser Permanente','AdventHealth','Providence','Ascension'],
+business:['JPMorgan Chase','Bank of America','Goldman Sachs','Morgan Stanley','Deloitte','EY','PwC','KPMG','Citi','Wells Fargo'],
+engineering:['Boeing','Lockheed Martin','SpaceX','Tesla','Northrop Grumman','Raytheon','Bechtel','Jacobs','Siemens','Honeywell'],
+education:['Stanford University','Harvard University','UCLA','University of Washington','Georgia Tech','Duke University','Johns Hopkins'],
+trades:['Turner Construction','Bechtel','Kiewit','Fluor','Skanska USA','DPR Construction','Gilbane','AECOM','EMCOR'],
+creative:['Disney','NBCUniversal','Warner Bros. Discovery','Netflix','Sony Pictures','Adobe','Electronic Arts','Spotify'],
+hospitality:['Marriott','Hilton','Hyatt','Four Seasons','Ritz-Carlton','Disney Parks','Starbucks']
+};
+
+/* מעסיקים לפי עיר + תחום — כשקיים, מוצג במקום הרשימה הארצית */
+var EMPLOYERS_CITY={
+'Austin':{tech:['Dell Technologies','Apple','Oracle','IBM','Tesla'],health:["St. David's HealthCare",'Ascension Seton','Baylor Scott & White'],business:['Visa','Charles Schwab','Indeed','Deloitte','EY']},
+'Miami':{tech:['Microsoft Latin America','Kaseya','Oracle','Ryder Technology'],health:['Baptist Health South Florida','Jackson Health',"Mount Sinai Medical Center","Nicklaus Children's Hospital"],business:['Citadel','Blackstone','JPMorgan Chase','Bank of America','Citi']},
+'Seattle':{tech:['Microsoft','Amazon','Google','Meta','Adobe'],health:['UW Medicine','Swedish Medical Center','Providence']},
+'San Francisco Bay Area':{tech:['Apple','Google','Meta','NVIDIA','Salesforce','Adobe']},
+'Los Angeles':{creative:['Disney','Warner Bros.','Netflix','Sony Pictures','Universal Studios'],tech:['Google','Snap','SpaceX','Amazon Studios'],health:['Cedars-Sinai','UCLA Health','Kaiser Permanente']},
+'Orlando':{hospitality:['Walt Disney World','Universal Orlando','Marriott Vacations','Hilton','SeaWorld'],health:['AdventHealth','Orlando Health','Nemours Children\'s']},
+'New York City':{business:['JPMorgan Chase','Goldman Sachs','Morgan Stanley','Citi','BlackRock'],tech:['Google','Meta','Amazon','IBM'],creative:['NBCUniversal','Warner Bros. Discovery','Spotify'],health:['NewYork-Presbyterian','Mount Sinai','NYU Langone']},
+'Boston':{health:['Mass General Brigham','Beth Israel Lahey',"Boston Children's"],education:['Harvard University','MIT','Boston University'],business:['Fidelity','State Street','Bain & Company'],tech:['Google','Amazon','HubSpot','Wayfair']},
+'Chicago':{business:['JPMorgan Chase','Northern Trust','Deloitte','BMO'],health:['Northwestern Medicine','Rush','UChicago Medicine'],tech:['Google','Salesforce','Motorola Solutions']},
+'Washington DC Metro':{business:['Deloitte','EY','PwC','KPMG'],engineering:['Lockheed Martin','Northrop Grumman','Boeing','RTX'],tech:['Amazon','Microsoft','Google'],education:['Georgetown University','George Washington University','Johns Hopkins']},
+'Dallas\u2013Fort Worth':{business:['JPMorgan Chase','Goldman Sachs','Charles Schwab','Fidelity'],tech:['Texas Instruments','AT&T','Amazon'],health:['Baylor Scott & White','UT Southwestern','Texas Health'],engineering:['Lockheed Martin','RTX','Jacobs']},
+'Houston':{engineering:['Bechtel','Fluor','KBR','Jacobs'],health:['Houston Methodist','MD Anderson','Memorial Hermann',"Texas Children's"],business:['JPMorgan Chase','Deloitte','EY']},
+'Denver':{tech:['Google','Amazon','Palantir'],health:['UCHealth','HealthONE','Denver Health'],engineering:['Lockheed Martin','Jacobs','AECOM']},
+'Atlanta':{business:['Deloitte','EY','Truist','Bank of America'],tech:['Microsoft','Google','Salesforce','NCR Voyix'],health:['Emory Healthcare','Piedmont','Northside Hospital'],creative:['Warner Bros. Discovery / CNN','Tyler Perry Studios']},
+'Charlotte':{business:['Bank of America','Wells Fargo','Truist','Ally'],health:['Atrium Health','Novant Health']},
+'Phoenix':{tech:['Intel','Amazon','GoDaddy'],health:['Banner Health','Mayo Clinic','HonorHealth'],engineering:['Honeywell','RTX']},
+'San Diego':{tech:['Qualcomm','Apple','Amazon'],health:['Scripps Health','Sharp HealthCare','UC San Diego Health'],engineering:['General Atomics','Northrop Grumman']},
+'Nashville':{health:['HCA Healthcare','Vanderbilt University Medical Center','Ascension Saint Thomas'],creative:['Universal Music Group','Sony Music','Warner Music'],business:['AllianceBernstein','Deloitte']},
+'Raleigh\u2013Durham':{tech:['IBM','Cisco','SAS','Apple','Lenovo'],health:['Duke Health','UNC Health','WakeMed'],education:['Duke University','UNC Chapel Hill','NC State']},
+'Philadelphia':{health:['Penn Medicine','Jefferson Health','CHOP'],business:['Vanguard','JPMorgan Chase'],creative:['Comcast NBCUniversal'],education:['University of Pennsylvania','Drexel','Temple']},
+'Minneapolis':{business:['U.S. Bank','Ameriprise','Target (HQ)'],health:['Allina Health','HealthPartners','M Health Fairview']},
+'Salt Lake City':{tech:['Adobe','Oracle','Qualtrics'],health:['Intermountain Health','University of Utah Health']},
+'Portland':{tech:['Intel','Amazon'],creative:['Nike','Adidas America','Wieden+Kennedy'],health:['OHSU','Providence','Legacy Health']},
+'Las Vegas':{hospitality:['MGM Resorts','Caesars Entertainment','Wynn','The Venetian','Hilton']},
+'Tampa':{business:['Citi','JPMorgan Chase','Raymond James'],health:['BayCare','Tampa General','AdventHealth']},
+'Jacksonville':{business:['Bank of America','Fidelity','Deutsche Bank','Citi'],health:['Mayo Clinic Jacksonville','Baptist Health',"Ascension St. Vincent's"]},
+'Sacramento':{health:['UC Davis Health','Sutter Health','Kaiser Permanente','Dignity Health'],education:['UC Davis','Sacramento State']},
+'Kansas City':{engineering:['Burns & McDonnell','Black & Veatch','Kiewit'],health:["Children's Mercy","Saint Luke's",'University of Kansas Health']},
+'Columbus':{business:['JPMorgan Chase','Nationwide','Huntington'],health:['OhioHealth','Ohio State Wexner',"Nationwide Children's"],tech:['Intel','Amazon']},
+'North New Jersey':{business:['Goldman Sachs','JPMorgan Chase','Prudential','Citi'],health:['Hackensack Meridian','RWJBarnabas']},
+'San Antonio':{health:['Methodist Healthcare','Baptist Health System','University Health'],business:['USAA','Frost Bank'],tech:['Rackspace','USAA Tech']}
+};
+
 var WEEKEND_LABEL={outdoors:'Nature & hiking',beach:'Beach & water',golf:'Golf',fitness:'Fitness & sports',arts:'Arts & culture',food:'Food & dining'};
 
 /* ---------- מצב ---------- */
@@ -1112,7 +1167,8 @@ function showNeighborhood(idx){
     +'<button class="jbtn j-home" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\')"><span class="jnum">1</span><span class="walker">&#128694;</span> Stand on your street</button>'
     +'<button class="jbtn j-work dim" id="jbtn-work" onclick="goPOI(\'work\')"><span class="jnum">2</span>&#128188; Searching places you\'d work&hellip;</button>'
     +'<button class="jbtn j-school dim" id="jbtn-school" onclick="goPOI(\'school\')"><span class="jnum">3</span>&#127979; Searching '+(hasKids?'the kids\' schools':'schools nearby')+'&hellip;</button>'
-    +'<button class="jbtn j-fun dim" id="jbtn-fun" onclick="goPOI(\'fun\')"><span class="jnum">4</span>&#11088; Finding your weekend spots&hellip;</button>';
+    +'<button class="jbtn j-fun dim" id="jbtn-fun" onclick="goPOI(\'fun\')"><span class="jnum">4</span>&#11088; Finding your weekend spots&hellip;</button>'
+    +employersHTML(t.city.n,a.profession);
 
   /* טעינה אוטומטית של המקומות — והכפתורים נותנים שליטה גלויה */
   currentNb={nb:nb,prof:a.profession,hasKids:hasKids,weekend:a.weekend||[]};
@@ -1185,77 +1241,109 @@ function goPOI(kind){
   setJBtn(kind,label+m.name+' <span style="opacity:.75;font-size:12px;">('+(i+1)+'/'+list.length+' — tap for next)</span>',false);
 }
 
+/* פאנל מעסיקים מובילים לעיר+תחום; אם אין רשימה עירונית — מציגים מובילים ארציים */
+function employersHTML(cityName,prof){
+  var cityList=(EMPLOYERS_CITY[cityName]&&EMPLOYERS_CITY[cityName][prof])||null;
+  var list=cityList||EMPLOYERS_GENERAL[prof]||[];
+  if(!list.length)return '';
+  var lbl=cityList?('Top employers in '+cityName+' for your field'):'Leading U.S. employers in your field';
+  var chips=list.slice(0,6).map(function(n){return '<span class="emp-chip">'+n+'</span>';}).join('');
+  return '<div class="emp-box"><div class="emp-lbl">&#128188; '+lbl+':</div>'+chips+'</div>';
+}
+
+/* ---------- שאילתות בשלוש רמות ----------
+   רמה 0: מדויק לפי הפרופיל | רמה 1: הרחבה כללית | רמה 2 (עבודה): מעסיקים גדולים
+   אם רמה לא מחזירה תוצאות — עוברים אוטומטית לרמה הבאה, כדי שהכפתור תמיד יעבוד.
+*/
+var POI_MAX_LEVEL={work:2,school:1,fun:1};
+function poiQuery(kind,level,nb){
+  if(kind==='school'){
+    var r=(level===0)?3000:7000;
+    return '[out:json][timeout:15];(node["amenity"="school"](around:'+r+','+nb.lat+','+nb.lng+');way["amenity"="school"](around:'+r+','+nb.lat+','+nb.lng+'););out center 30;';
+  }
+  if(kind==='fun'){
+    if(level===0){
+      var prefs=(currentNb.weekend&&currentNb.weekend.length?currentNb.weekend:['outdoors']);
+      var parts='';
+      prefs.forEach(function(p){
+        var fq=FUN_QUERIES[p];if(!fq)return;
+        parts+='node'+fq[0]+'(around:'+fq[1]+','+nb.lat+','+nb.lng+');way'+fq[0]+'(around:'+fq[1]+','+nb.lat+','+nb.lng+');';
+      });
+      return '[out:json][timeout:15];('+parts+');out center 40;';
+    }
+    return '[out:json][timeout:15];(node["leisure"~"park|golf_course"](around:8000,'+nb.lat+','+nb.lng+');way["leisure"~"park|golf_course"](around:8000,'+nb.lat+','+nb.lng+'););out center 30;';
+  }
+  /* עבודה */
+  var wq,r2;
+  if(level===0){wq=WORK_QUERY[currentNb.prof]||'["office"]';r2=5000;}
+  else if(level===1){wq='["office"]';r2=8000;}
+  else{wq='["amenity"~"hospital|clinic|university|college|bank|townhall"]';r2=9000;}
+  return '[out:json][timeout:15];(node'+wq+'(around:'+r2+','+nb.lat+','+nb.lng+');way'+wq+'(around:'+r2+','+nb.lat+','+nb.lng+'););out center 30;';
+}
+
 function loadPOI(kind,goAfter){
   if(!currentNb||poiState[kind]==='loading')return;
   poiState[kind]='loading';
   setJBtn(kind,(kind==='work'?'&#128188; Searching places you\'d work&hellip;':(kind==='fun'?'&#11088; Finding your weekend spots&hellip;':'&#127979; Searching '+(currentNb.hasKids?'the kids\' schools':'schools nearby')+'&hellip;')),true);
 
   var nb=currentNb.nb;
-  var q;
-  if(kind==='school'){
-    q='[out:json][timeout:15];(node["amenity"="school"](around:3000,'+nb.lat+','+nb.lng+');way["amenity"="school"](around:3000,'+nb.lat+','+nb.lng+'););out center 30;';
-  }else if(kind==='fun'){
-    /* איחוד שאילתות לפי העדפות הסופ"ש שנבחרו */
-    var prefs=(currentNb.weekend&&currentNb.weekend.length?currentNb.weekend:['outdoors']);
-    var parts='';
-    prefs.forEach(function(p){
-      var fq=FUN_QUERIES[p];if(!fq)return;
-      parts+='node'+fq[0]+'(around:'+fq[1]+','+nb.lat+','+nb.lng+');way'+fq[0]+'(around:'+fq[1]+','+nb.lat+','+nb.lng+');';
+
+  function attempt(level){
+    tryOverpass(poiQuery(kind,level,nb),0,function(elements){
+      /* איסוף תוצאות עם שם */
+      var items=[];
+      (elements||[]).forEach(function(el){
+        var name=el.tags&&el.tags.name;if(!name)return;
+        var lat=el.lat||(el.center&&el.center.lat);
+        var lng=el.lon||(el.center&&el.center.lon);
+        if(!lat||!lng)return;
+        var d=Math.pow(lat-nb.lat,2)+Math.pow(lng-nb.lng,2);
+        items.push({name:name,lat:lat,lng:lng,d:d,tags:el.tags});
+      });
+
+      /* אין תוצאות ברמה הזו — מרחיבים אוטומטית */
+      if(items.length===0&&level<POI_MAX_LEVEL[kind]){attempt(level+1);return;}
+
+      if(poiLayers[kind]&&mapObj.hasLayer(poiLayers[kind])){mapObj.removeLayer(poiLayers[kind]);}
+      poiLayers[kind]=L.layerGroup();
+      poiData[kind]=[];poiCycle[kind]=0;
+
+      items.sort(function(a,b){return a.d-b.d;});
+      items=items.slice(0,6);
+
+      var colors={work:'#1F3A5F',school:'#2E7D4F',fun:'#B08D3E'};
+      var popTexts={work:'A place you could work',school:'A school near your neighborhood',fun:'Your kind of weekend spot'};
+      items.forEach(function(it){
+        var emoji=(kind==='school')?'&#127979;':(kind==='work'?'&#128188;':funEmoji(it.tags));
+        var icon=L.divIcon({className:'',html:'<div style="width:34px;height:34px;border-radius:50%;background:'+colors[kind]+';border:2.5px solid #FCFAF4;box-shadow:0 2px 7px rgba(31,58,95,.4);display:flex;align-items:center;justify-content:center;font-size:16px;">'+emoji+'</div>',iconSize:[34,34],iconAnchor:[17,17]});
+        var shortName=it.name.length>24?it.name.slice(0,22)+'&hellip;':it.name;
+        var mk=L.marker([it.lat,it.lng],{icon:icon}).addTo(poiLayers[kind])
+          .bindTooltip(shortName,{permanent:true,direction:'bottom',offset:[0,16],className:'poi-label'+(kind==='school'?' school-label':(kind==='fun'?' home-label':''))})
+          .bindPopup('<b>'+it.name+'</b><br>'+popTexts[kind]+'<br><a href="#" onclick="walkAt('+it.lat+','+it.lng+',\''+it.name.replace(/'/g,"\\'")+'\');return false;" style="color:#B08D3E;font-weight:bold;">&#128694; See it from the street &raquo;</a>');
+        it.marker=mk;
+        poiData[kind].push(it);
+      });
+
+      poiLayers[kind].addTo(mapObj);
+      poiState[kind]='loaded';
+
+      if(poiData[kind].length>0){
+        var doneTxt=(kind==='work')?'&#128188; See where you\'d work'
+          :(kind==='fun'?'&#11088; Explore your weekend'
+          :'&#127979; '+(currentNb.hasKids?'Visit the kids\' schools':'See the schools nearby'));
+        setJBtn(kind,doneTxt+' <span style="opacity:.75;font-size:12px;">('+poiData[kind].length+' found)</span>',false);
+        fitAllPOIs();
+        if(goAfter)goPOI(kind);
+      }else{
+        setJBtn(kind,(kind==='work'?'&#128188; No workplaces mapped in this area':(kind==='fun'?'&#11088; No weekend spots mapped here':'&#127979; No schools mapped in this area')),true);
+      }
+    },function(){
+      poiState[kind]='error';
+      setJBtn(kind,'&#9888;&#65039; Couldn\'t load — tap to retry',true);
     });
-    q='[out:json][timeout:15];('+parts+');out center 40;';
-  }else{
-    var wq=WORK_QUERY[currentNb.prof]||'["office"]';
-    q='[out:json][timeout:15];(node'+wq+'(around:5000,'+nb.lat+','+nb.lng+');way'+wq+'(around:5000,'+nb.lat+','+nb.lng+'););out center 30;';
   }
 
-  tryOverpass(q,0,function(elements){
-    if(poiLayers[kind]&&mapObj.hasLayer(poiLayers[kind])){mapObj.removeLayer(poiLayers[kind]);}
-    poiLayers[kind]=L.layerGroup();
-    poiData[kind]=[];poiCycle[kind]=0;
-
-    /* מיון לפי מרחק מהבית — הקרובים קודם */
-    var items=[];
-    (elements||[]).forEach(function(el){
-      var name=el.tags&&el.tags.name;if(!name)return;
-      var lat=el.lat||(el.center&&el.center.lat);
-      var lng=el.lon||(el.center&&el.center.lon);
-      if(!lat||!lng)return;
-      var d=Math.pow(lat-nb.lat,2)+Math.pow(lng-nb.lng,2);
-      items.push({name:name,lat:lat,lng:lng,d:d,tags:el.tags});
-    });
-    items.sort(function(a,b){return a.d-b.d;});
-    items=items.slice(0,6);
-
-    var colors={work:'#1F3A5F',school:'#2E7D4F',fun:'#B08D3E'};
-    var popTexts={work:'A place you could work',school:'A school near your neighborhood',fun:'Your kind of weekend spot'};
-    items.forEach(function(it){
-      var emoji=(kind==='school')?'&#127979;':(kind==='work'?'&#128188;':funEmoji(it.tags));
-      var icon=L.divIcon({className:'',html:'<div style="width:34px;height:34px;border-radius:50%;background:'+colors[kind]+';border:2.5px solid #FCFAF4;box-shadow:0 2px 7px rgba(31,58,95,.4);display:flex;align-items:center;justify-content:center;font-size:16px;">'+emoji+'</div>',iconSize:[34,34],iconAnchor:[17,17]});
-      var shortName=it.name.length>24?it.name.slice(0,22)+'&hellip;':it.name;
-      var mk=L.marker([it.lat,it.lng],{icon:icon}).addTo(poiLayers[kind])
-        .bindTooltip(shortName,{permanent:true,direction:'bottom',offset:[0,16],className:'poi-label'+(kind==='school'?' school-label':(kind==='fun'?' home-label':''))})
-        .bindPopup('<b>'+it.name+'</b><br>'+popTexts[kind]+'<br><a href="#" onclick="walkAt('+it.lat+','+it.lng+',\''+it.name.replace(/'/g,"\\'")+'\');return false;" style="color:#B08D3E;font-weight:bold;">&#128694; See it from the street &raquo;</a>');
-      it.marker=mk;
-      poiData[kind].push(it);
-    });
-
-    poiLayers[kind].addTo(mapObj);
-    poiState[kind]='loaded';
-
-    if(poiData[kind].length>0){
-      var doneTxt=(kind==='work')?'&#128188; See where you\'d work'
-        :(kind==='fun'?'&#11088; Explore your weekend'
-        :'&#127979; '+(currentNb.hasKids?'Visit the kids\' schools':'See the schools nearby'));
-      setJBtn(kind,doneTxt+' <span style="opacity:.75;font-size:12px;">('+poiData[kind].length+' found)</span>',false);
-      fitAllPOIs();
-      if(goAfter)goPOI(kind);
-    }else{
-      setJBtn(kind,(kind==='work'?'&#128188; No workplaces mapped in this area':(kind==='fun'?'&#11088; No weekend spots mapped here':'&#127979; No schools mapped in this area')),true);
-    }
-  },function(){
-    poiState[kind]='error';
-    setJBtn(kind,'&#9888;&#65039; Couldn\'t load — tap to retry',true);
-  });
+  attempt(0);
 }
 
 /* כיוון המפה כך שהבית וכל המקומות שנטענו ייכנסו לפריים */
@@ -1318,8 +1406,14 @@ function buildChatWidget(){
   l.innerHTML='&#128172;<span class="dot" id="chat-dot"></span>';
   l.onclick=toggleChat;
   document.body.appendChild(l);
-  /* אחרי דקה — בועית טיזר קטנה בלבד, שלא חוסמת שום דבר במפה */
-  setTimeout(function(){if(!chatOpened)showTeaser();},60000);
+  /* אחרי דקה — בועית טיזר; אם לא נלחצה היא נעלמת וחוזרת שוב, עד שהצ'אט נפתח */
+  scheduleTeaser(60000);
+}
+
+var teaserTimer=null;
+function scheduleTeaser(delay){
+  if(teaserTimer)clearTimeout(teaserTimer);
+  teaserTimer=setTimeout(function(){if(!chatOpened)showTeaser();},delay);
 }
 
 /* בועית טיזר — הודעה קצרה ליד הכפתור; לחיצה פותחת את החלון המלא */
@@ -1330,8 +1424,11 @@ function showTeaser(){
   t.innerHTML=(state.leadName?state.leadName+', r':'R')+'eady to make it real? &#128172;';
   t.onclick=function(){t.remove();openChat();};
   document.body.appendChild(t);
-  /* הבועית נעלמת מעצמה אחרי חצי דקה אם לא נלחצה */
-  setTimeout(function(){var x=document.getElementById('chat-teaser');if(x)x.remove();},30000);
+  /* נעלמת אחרי 25 שניות — וחוזרת שוב אחרי דקה, עד שהצ'אט נפתח */
+  setTimeout(function(){
+    var x=document.getElementById('chat-teaser');if(x)x.remove();
+    if(!chatOpened)scheduleTeaser(60000);
+  },25000);
 }
 
 function toggleChat(){
