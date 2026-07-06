@@ -163,6 +163,34 @@
   }
   .explore-btn:hover{border-color:var(--brass);background:#FDFBF3;color:var(--brass);}
   .explore-btn:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
+  .walk-btn{
+    margin-top:8px;width:100%;cursor:pointer;
+    font-family:Georgia,serif;font-size:14px;color:#FCFAF4;
+    background:var(--ink);border:1px solid var(--ink);border-radius:2px;padding:10px 14px;
+    transition:background .15s;
+  }
+  .walk-btn:hover{background:var(--ink-soft);}
+  .walk-btn:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
+
+  /* ===== חלון שיטוט ברחוב (Street View) ===== */
+  .sv-overlay{
+    position:fixed;inset:0;background:rgba(31,58,95,.55);z-index:2000;
+    display:flex;align-items:center;justify-content:center;padding:16px;
+  }
+  .sv-box{
+    background:var(--parchment);border:1px solid var(--ink);outline:3px double var(--ink);outline-offset:4px;
+    width:100%;max-width:900px;height:82vh;max-height:640px;display:flex;flex-direction:column;
+  }
+  .sv-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);}
+  .sv-head h3{font-size:18px;font-weight:normal;}
+  .sv-head .hint2{font-family:Arial,sans-serif;font-size:11px;color:var(--text-muted);}
+  .sv-close{
+    cursor:pointer;background:transparent;border:1px solid var(--line);border-radius:2px;
+    font-family:Georgia,serif;font-size:14px;color:var(--ink);padding:6px 14px;
+  }
+  .sv-close:hover{border-color:var(--brass);color:var(--brass);}
+  .sv-box iframe{flex:1;width:100%;border:0;background:#DCE8EE;}
+  @media(max-width:520px){.sv-box{height:88vh;}}
 
   .disclaimer{font-family:Arial,sans-serif;font-size:11px;color:var(--text-muted);text-align:center;margin-top:26px;line-height:1.5;}
   .err{color:#8A2C2C;font-family:Arial,sans-serif;font-size:13px;margin-top:10px;display:none;}
@@ -594,7 +622,39 @@ function cityCardHTML(t,idx){
     +'<div class="fact">School quality<b>'+c.schools+' / 10</b></div>'
     +'</div><div class="tags">'+tags+'</div>'
     +'<button class="explore-btn" onclick="exploreCity('+idx+')">&#128269;&nbsp; Explore '+c.n+' on the map</button>'
+    +'<button class="walk-btn" onclick="walkCity('+idx+')">&#128694;&nbsp; Walk the streets of '+c.n+'</button>'
     +'</div>';
+}
+
+/* ---------- שיטוט ברחוב — Street View בתוך הדף ----------
+   נקודת ה-embed הישנה של גוגל עובדת ללא מפתח API ונצמדת לפנורמה
+   הקרובה ביותר לנקודת מרכז העיר. הלקוח מסתובב 360 והולך ברחובות.
+*/
+function walkCity(idx){
+  var t=state.results[idx];if(!t)return;
+  var c=t.city;
+  var src='https://maps.google.com/maps?layer=c&cbll='+c.lat+','+c.lng+'&output=svembed';
+  var ov=document.createElement('div');
+  ov.className='sv-overlay';
+  ov.id='sv-overlay';
+  ov.innerHTML='<div class="sv-box" role="dialog" aria-label="Street view of '+c.n+'">'
+    +'<div class="sv-head"><div><h3>Walking in '+c.n+', '+c.s+'</h3>'
+    +'<div class="hint2">Drag to look around &middot; Click the arrows on the street to walk</div></div>'
+    +'<button class="sv-close" onclick="closeWalk()">Close &times;</button></div>'
+    +'<iframe src="'+src+'" allow="accelerometer; gyroscope" loading="lazy" title="Street view of '+c.n+'"></iframe>'
+    +'</div>';
+  /* סגירה בלחיצה על הרקע */
+  ov.addEventListener('click',function(e){if(e.target===ov)closeWalk();});
+  document.body.appendChild(ov);
+  document.body.style.overflow='hidden';
+  document.addEventListener('keydown',escWalk);
+}
+function escWalk(e){if(e.key==='Escape')closeWalk();}
+function closeWalk(){
+  var ov=document.getElementById('sv-overlay');
+  if(ov)ov.remove();
+  document.body.style.overflow='';
+  document.removeEventListener('keydown',escWalk);
 }
 
 /* הטסת המפה אל העיר — זום מדורג: לחיצה ראשונה לרמת העיר,
@@ -666,7 +726,7 @@ function buildMap(){
         iconSize:isTop?[34,34]:[28,28],iconAnchor:isTop?[17,17]:[14,14]
       });
       var mk=L.marker([c.lat,c.lng],{icon:icon}).addTo(mapObj);
-      mk.bindPopup('<b>'+c.n+', '+c.s+'</b><br>'+t.match+'% match'+(isTop?' &mdash; your No. 1 city':'')+'<br><a href="#" onclick="exploreCity('+i+');return false;" style="color:#B08D3E;">Zoom in closer &raquo;</a>');
+      mk.bindPopup('<b>'+c.n+', '+c.s+'</b><br>'+t.match+'% match'+(isTop?' &mdash; your No. 1 city':'')+'<br><a href="#" onclick="exploreCity('+i+');return false;" style="color:#B08D3E;">Zoom in closer &raquo;</a><br><a href="#" onclick="walkCity('+i+');return false;" style="color:#1F3A5F;">&#128694; Walk the streets &raquo;</a>');
       mk.on('click',function(){/* לחיצה על הסימון עצמו רק פותחת פופ-אפ; הזום דרך הקישור */});
       t._marker=mk;
       if(isTop){mk.openPopup();}
