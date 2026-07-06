@@ -149,19 +149,20 @@
   .tags{margin-top:14px;display:flex;flex-wrap:wrap;gap:6px;}
   .tag{font-family:Arial,sans-serif;font-size:11px;background:#EFE9D9;border:1px solid var(--line);color:var(--ink-soft);padding:3px 10px;border-radius:12px;}
 
-  /* ערים נעולות */
-  .locked-zone{position:relative;margin-top:6px;}
-  .locked-cards{filter:blur(5px);pointer-events:none;user-select:none;}
-  .lock-overlay{
-    position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    background:linear-gradient(180deg,rgba(247,243,234,.55),rgba(247,243,234,.92));
-    text-align:center;padding:24px;
+  /* מספר דירוג לערים 2-5 + כפתור Explore */
+  .rank-num{
+    position:absolute;top:-13px;right:18px;width:26px;height:26px;border-radius:50%;
+    background:var(--ink);color:#fff;font-family:Arial,sans-serif;font-size:13px;font-weight:bold;
+    display:flex;align-items:center;justify-content:center;border:2px solid var(--parchment);
   }
-  .lock-overlay .lock-ico{font-size:34px;margin-bottom:10px;}
-  .lock-overlay h3{font-size:22px;font-weight:normal;margin-bottom:6px;}
-  .lock-overlay p{font-size:14px;color:var(--text-muted);max-width:420px;margin-bottom:18px;font-family:Arial,sans-serif;}
-  .lock-overlay .btn-gold{max-width:380px;}
-  .lock-overlay .fine{font-family:Arial,sans-serif;font-size:11px;color:var(--text-muted);margin-top:10px;}
+  .explore-btn{
+    margin-top:16px;width:100%;cursor:pointer;
+    font-family:Georgia,serif;font-size:14px;color:var(--ink);
+    background:transparent;border:1px solid var(--line);border-radius:2px;padding:10px 14px;
+    transition:all .15s;
+  }
+  .explore-btn:hover{border-color:var(--brass);background:#FDFBF3;color:var(--brass);}
+  .explore-btn:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
 
   .disclaimer{font-family:Arial,sans-serif;font-size:11px;color:var(--text-muted);text-align:center;margin-top:26px;line-height:1.5;}
   .err{color:#8A2C2C;font-family:Arial,sans-serif;font-size:13px;margin-top:10px;display:none;}
@@ -317,16 +318,14 @@
     <div id="map" role="img" aria-label="Map of the United States showing your matched cities"></div>
 
     <div id="top-city"></div>
+    <div id="other-cities"></div>
 
-    <div class="locked-zone">
-      <div class="locked-cards" id="locked-cards" aria-hidden="true"></div>
-      <div class="lock-overlay">
-        <div class="lock-ico">&#128274;</div>
-        <h3><span id="lock-count">4</span> more matched cities are waiting</h3>
-        <p>Unlock your complete relocation report — every matched city with salary data for your profession, plus your full immigration pathway assessment reviewed by our team.</p>
-        <button class="btn btn-gold" onclick="goToPayment()">Unlock my full report &mdash; $29</button>
-        <div class="fine">One-time payment &middot; Includes your professional immigration assessment</div>
-      </div>
+    <!-- ===== CTA סיום — הזמנה לתכנן את הדרך (ללא נעילת תוכן) ===== -->
+    <div class="card" style="text-align:center;border:1px solid var(--brass);outline:3px double var(--brass);outline-offset:3px;margin:26px 4px 0;">
+      <h3 style="font-size:23px;font-weight:normal;margin-bottom:8px;">You've seen where. Now let's plan how.</h3>
+      <p style="font-family:Arial,sans-serif;font-size:14px;color:var(--text-muted);max-width:460px;margin:0 auto 20px;">Your map shows the destination &mdash; your immigration assessment shows the way there. Our team will review your profile and match you with the visa pathway that makes this real.</p>
+      <button class="btn btn-gold" style="max-width:400px;" onclick="goToPayment()">Start my assessment &mdash; $29</button>
+      <div style="font-family:Arial,sans-serif;font-size:11px;color:var(--text-muted);margin-top:10px;">One-time payment &middot; Reviewed personally by our team</div>
     </div>
 
     <p class="disclaimer">Salary, rent and cost-of-living figures are estimates based on publicly available data and are provided for general guidance only. They do not constitute financial or legal advice. Immigration Advice Service &middot; All rights reserved.</p>
@@ -581,11 +580,11 @@ function cityTags(c){
   return tags.slice(0,4);
 }
 
-function cityCardHTML(t,isTop){
-  var c=t.city,a=state.answers;
+function cityCardHTML(t,idx){
+  var c=t.city,a=state.answers,isTop=(idx===0);
   var tags=cityTags(c).map(function(x){return '<span class="tag">'+x+'</span>';}).join('');
-  return '<div class="city-card'+(isTop?' top':'')+'">'
-    +(isTop?'<div class="rank-seal">Your No. 1 Match</div>':'')
+  return '<div class="city-card'+(isTop?' top':'')+'" id="card-'+idx+'">'
+    +(isTop?'<div class="rank-seal">Your No. 1 Match</div>':'<div class="rank-num">'+(idx+1)+'</div>')
     +'<div class="city-head"><div><h3>'+c.n+'</h3><span class="state">'+c.s+'</span></div>'
     +'<div class="match '+matchClass(t.match)+'">'+t.match+'%<small>match</small></div></div>'
     +'<div class="facts">'
@@ -593,7 +592,17 @@ function cityCardHTML(t,isTop){
     +'<div class="fact">Average monthly rent<b>$'+c.rent.toLocaleString('en-US')+'</b></div>'
     +'<div class="fact">Cost of living<b>'+(c.col<=97?'Below':(c.col<=106?'Near':'Above'))+' US average</b></div>'
     +'<div class="fact">School quality<b>'+c.schools+' / 10</b></div>'
-    +'</div><div class="tags">'+tags+'</div></div>';
+    +'</div><div class="tags">'+tags+'</div>'
+    +'<button class="explore-btn" onclick="exploreCity('+idx+')">&#128269;&nbsp; Explore '+c.n+' on the map</button>'
+    +'</div>';
+}
+
+/* הטסת המפה אל העיר — עד רמת השכונות, כדי שהלקוח ממש יראה את המקום */
+function exploreCity(idx){
+  var t=state.results[idx];if(!t||!mapObj)return;
+  document.getElementById('map').scrollIntoView({behavior:'smooth',block:'center'});
+  mapObj.flyTo([t.city.lat,t.city.lng],11,{duration:1.6});
+  if(t._marker){setTimeout(function(){t._marker.openPopup();},1700);}
 }
 
 function showResults(){
@@ -601,12 +610,11 @@ function showResults(){
   res.classList.remove('hidden');
   document.getElementById('cert-name').textContent=state.leadName?('Prepared for '+state.leadName):'Prepared personally for you';
 
-  /* כרטיס עיר מובילה + כרטיסים נעולים */
-  document.getElementById('top-city').innerHTML=cityCardHTML(state.results[0],true);
-  var lockedHTML='';
-  for(var i=1;i<state.results.length;i++){lockedHTML+=cityCardHTML(state.results[i],false);}
-  document.getElementById('locked-cards').innerHTML=lockedHTML;
-  document.getElementById('lock-count').textContent=String(state.results.length-1);
+  /* כרטיס עיר מובילה + כל שאר הערים גלויות במלואן */
+  document.getElementById('top-city').innerHTML=cityCardHTML(state.results[0],0);
+  var othersHTML='';
+  for(var i=1;i<state.results.length;i++){othersHTML+=cityCardHTML(state.results[i],i);}
+  document.getElementById('other-cities').innerHTML=othersHTML;
 
   buildMap();
   saveToCRM();
@@ -614,7 +622,7 @@ function showResults(){
 }
 
 /* ---------- מפה ----------
-   סימון העיר המובילה בפליז; שאר הערים בסימון "נעול" מעומעם.
+   כל הערים גלויות: מסומנות 1-5, לחיצה מטיסה פנימה עד רמת השכונות.
    הסימונים נוחתים בהדרגה — רגע ה"וואו".
 */
 var mapObj=null;
@@ -622,8 +630,18 @@ function buildMap(){
   if(mapObj){mapObj.remove();}
   mapObj=L.map('map',{scrollWheelZoom:false}).setView([38.5,-96.5],4);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
-    attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:10,minZoom:3
+    attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:18,minZoom:3
   }).addTo(mapObj);
+
+  /* כפתור חזרה לתצוגה כללית של ארה"ב */
+  var backCtl=L.control({position:'topright'});
+  backCtl.onAdd=function(){
+    var d=L.DomUtil.create('div');
+    d.innerHTML='<button style="background:#FCFAF4;border:1px solid #1F3A5F;color:#1F3A5F;font:13px Georgia,serif;padding:7px 14px;cursor:pointer;border-radius:2px;box-shadow:0 1px 4px rgba(31,58,95,.25);">&#8634; Back to full map</button>';
+    d.onclick=function(){mapObj.flyTo([38.5,-96.5],4,{duration:1.2});};
+    return d;
+  };
+  backCtl.addTo(mapObj);
 
   var reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -636,15 +654,14 @@ function buildMap(){
         className:'',
         html:isTop
           ?'<div style="width:34px;height:34px;border-radius:50%;background:#B08D3E;border:3px solid #FCFAF4;box-shadow:0 2px 8px rgba(31,58,95,.45);display:flex;align-items:center;justify-content:center;color:#fff;font:bold 13px Arial;">1</div>'
-          :'<div style="width:26px;height:26px;border-radius:50%;background:#8B92A0;border:2px solid #FCFAF4;box-shadow:0 1px 5px rgba(31,58,95,.35);display:flex;align-items:center;justify-content:center;color:#fff;font:11px Arial;">&#128274;</div>',
-        iconSize:isTop?[34,34]:[26,26],iconAnchor:isTop?[17,17]:[13,13]
+          :'<div style="width:28px;height:28px;border-radius:50%;background:#1F3A5F;border:2px solid #FCFAF4;box-shadow:0 1px 5px rgba(31,58,95,.35);display:flex;align-items:center;justify-content:center;color:#fff;font:bold 12px Arial;">'+(i+1)+'</div>',
+        iconSize:isTop?[34,34]:[28,28],iconAnchor:isTop?[17,17]:[14,14]
       });
       var mk=L.marker([c.lat,c.lng],{icon:icon}).addTo(mapObj);
-      if(isTop){
-        mk.bindPopup('<b>'+c.n+', '+c.s+'</b><br>'+t.match+'% match &mdash; your No. 1 city').openPopup();
-      }else{
-        mk.bindPopup('<b>A matched city awaits</b><br>Unlock your full report to reveal it');
-      }
+      mk.bindPopup('<b>'+c.n+', '+c.s+'</b><br>'+t.match+'% match'+(isTop?' &mdash; your No. 1 city':'')+'<br><a href="#" onclick="exploreCity('+i+');return false;" style="color:#B08D3E;">Zoom into the neighborhoods &raquo;</a>');
+      mk.on('click',function(){/* לחיצה על הסימון עצמו רק פותחת פופ-אפ; הזום דרך הקישור */});
+      t._marker=mk;
+      if(isTop){mk.openPopup();}
     },delay);
   });
 }
