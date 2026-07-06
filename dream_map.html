@@ -310,6 +310,7 @@
     padding:2px 7px;box-shadow:0 1px 3px rgba(31,58,95,.25);white-space:nowrap;
   }
   .poi-label.school-label{border-color:var(--green);color:var(--green);}
+  .poi-label.home-label{border-color:var(--brass);color:var(--brass);font-size:12.5px;}
   .poi-label::before{display:none;}
 
   /* ===== מסע מודרך — "היום שלך בשכונה" ===== */
@@ -338,6 +339,7 @@
     padding:2px 7px;box-shadow:0 1px 3px rgba(31,58,95,.25);white-space:nowrap;
   }
   .poi-label.school-label{border-color:var(--green);color:var(--green);}
+  .poi-label.home-label{border-color:var(--brass);color:var(--brass);font-size:12.5px;}
   .poi-label::before{display:none;}
 
   /* ===== חלון שיטוט ברחוב (Street View) ===== */
@@ -790,6 +792,12 @@ function revealMap(){
 
 /* ---------- תוצאות ---------- */
 function matchClass(m){return m>=88?'g':(m>=79?'y':'b');}
+/* ציון בתי ספר לתצוגה — סקאלה 8-10 (הציון הפנימי משמש רק לחישוב ההתאמה) */
+function schoolDisp(c){
+  var d=8+(c.schools-5)*0.5;
+  d=Math.max(8,Math.min(10,Math.round(d*2)/2));
+  return (d%1===0)?String(d):d.toFixed(1);
+}
 function fmtMoney(k){return '$'+(k*1000).toLocaleString('en-US');}
 
 function cityTags(c){
@@ -827,7 +835,7 @@ function cityCardHTML(t,idx){
     +'<div class="fact">Typical salary in '+PROF_LABEL[a.profession]+'<b>'+fmtMoney(c.sal[a.profession])+' / year</b></div>'
     +'<div class="fact">Average monthly rent<b>$'+c.rent.toLocaleString('en-US')+'</b></div>'
     +'<div class="fact">Cost of living<b>'+(c.col<=97?'Below':(c.col<=106?'Near':'Above'))+' US average</b></div>'
-    +'<div class="fact">School quality<b>'+c.schools+' / 10</b></div>'
+    +'<div class="fact">School quality<b>'+schoolDisp(c)+' / 10</b></div>'
     +'</div><div class="tags">'+tags+'</div>'
     +nbHTML
     +'<button class="explore-btn" onclick="exploreCity('+idx+')">&#128269;&nbsp; Explore '+c.n+' on the map</button>'
@@ -1006,8 +1014,9 @@ function showNeighborhood(idx){
   });
 
   /* סימון הבית — "כאן אתה יכול לגור" */
-  var homeIcon=L.divIcon({className:'',html:'<div style="width:40px;height:40px;border-radius:50%;background:#B08D3E;border:3px solid #FCFAF4;box-shadow:0 2px 10px rgba(31,58,95,.5);display:flex;align-items:center;justify-content:center;font-size:20px;">&#127968;</div>',iconSize:[40,40],iconAnchor:[20,20]});
-  var homeMk=L.marker([nb.lat,nb.lng],{icon:homeIcon}).addTo(nbLayer);
+  var homeIcon=L.divIcon({className:'',html:'<div style="width:54px;height:54px;border-radius:50%;background:#B08D3E;border:3.5px solid #FCFAF4;box-shadow:0 3px 14px rgba(31,58,95,.55);display:flex;align-items:center;justify-content:center;font-size:28px;">&#127968;</div>',iconSize:[54,54],iconAnchor:[27,27]});
+  var homeMk=L.marker([nb.lat,nb.lng],{icon:homeIcon,zIndexOffset:1000}).addTo(nbLayer);
+  homeMk.bindTooltip('Your home',{permanent:true,direction:'bottom',offset:[0,26],className:'poi-label home-label'});
   homeMk.bindPopup('<b>'+nb.n+'</b><br>You could live right here.<br><a href="#" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\');return false;" style="color:#B08D3E;">&#128694; Walk this street &raquo;</a>');
 
   mapObj.flyTo([nb.lat,nb.lng],14,{duration:1.6});
@@ -1023,12 +1032,12 @@ function showNeighborhood(idx){
   hint.innerHTML='<b style="font-size:14px;">Your life in '+nb.n+'</b><span style="color:var(--text-muted);"> — take the tour:</span>'
     +'<button class="jbtn j-home" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\')"><span class="jnum">1</span><span class="walker">&#128694;</span> Stand on your street</button>'
     +'<button class="jbtn j-work dim" id="jbtn-work" onclick="goPOI(\'work\')"><span class="jnum">2</span>&#128188; Searching places you\'d work&hellip;</button>'
-    +(hasKids?'<button class="jbtn j-school dim" id="jbtn-school" onclick="goPOI(\'school\')"><span class="jnum">3</span>&#127979; Searching the kids\' schools&hellip;</button>':'');
+    +'<button class="jbtn j-school dim" id="jbtn-school" onclick="goPOI(\'school\')"><span class="jnum">3</span>&#127979; Searching '+(hasKids?'the kids\' schools':'schools nearby')+'&hellip;</button>';
 
   /* טעינה אוטומטית של המקומות — והכפתורים נותנים שליטה גלויה */
-  currentNb={nb:nb,prof:a.profession};
+  currentNb={nb:nb,prof:a.profession,hasKids:hasKids};
   loadPOI('work');
-  if(hasKids)loadPOI('school');
+  loadPOI('school');
 }
 
 /* ---------- שליפת מקומות אמיתיים מ-OpenStreetMap ----------
@@ -1070,14 +1079,14 @@ function goPOI(kind){
   document.getElementById('map').scrollIntoView({behavior:'smooth',block:'center'});
   mapObj.flyTo([m.lat,m.lng],15,{duration:1.1});
   setTimeout(function(){m.marker.openPopup();},1200);
-  var label=(kind==='work'?'&#128188; Your work: ':'&#127979; The kids\' schools: ');
+  var label=(kind==='work'?'&#128188; Your work: ':(currentNb.hasKids?'&#127979; The kids\' schools: ':'&#127979; Schools nearby: '));
   setJBtn(kind,label+m.name+' <span style="opacity:.75;font-size:12px;">('+(i+1)+'/'+list.length+' — tap for next)</span>',false);
 }
 
 function loadPOI(kind,goAfter){
   if(!currentNb||poiState[kind]==='loading')return;
   poiState[kind]='loading';
-  setJBtn(kind,(kind==='work'?'&#128188; Searching places you\'d work&hellip;':'&#127979; Searching the kids\' schools&hellip;'),true);
+  setJBtn(kind,(kind==='work'?'&#128188; Searching places you\'d work&hellip;':'&#127979; Searching '+(currentNb.hasKids?'the kids\' schools':'schools nearby')+'&hellip;'),true);
 
   var nb=currentNb.nb;
   var q;
@@ -1122,7 +1131,7 @@ function loadPOI(kind,goAfter){
     poiState[kind]='loaded';
 
     if(poiData[kind].length>0){
-      setJBtn(kind,(kind==='work'?'&#128188; See where you\'d work <span style="opacity:.75;font-size:12px;">('+poiData[kind].length+' found)</span>':'&#127979; Visit the kids\' schools <span style="opacity:.75;font-size:12px;">('+poiData[kind].length+' found)</span>'),false);
+      setJBtn(kind,(kind==='work'?'&#128188; See where you\'d work <span style="opacity:.75;font-size:12px;">('+poiData[kind].length+' found)</span>':'&#127979; '+(currentNb.hasKids?'Visit the kids\' schools':'See the schools nearby')+' <span style="opacity:.75;font-size:12px;">('+poiData[kind].length+' found)</span>'),false);
       fitAllPOIs();
       if(goAfter)goPOI(kind);
     }else{
@@ -1194,7 +1203,7 @@ function buildChatWidget(){
   l.onclick=toggleChat;
   document.body.appendChild(l);
   /* פתיחה אוטומטית — אחרי שהלקוח הספיק לראות את התוצאות */
-  setTimeout(function(){if(!chatOpened)openChat();},6000);
+  setTimeout(function(){if(!chatOpened)openChat();},60000);
 }
 
 function toggleChat(){
@@ -1253,10 +1262,12 @@ function buildMap(){
   backCtl.addTo(mapObj);
 
   var reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var lastDelay=0;
 
   state.results.forEach(function(t,i){
     var c=t.city;
     var delay=reduced?0:400+i*550;
+    lastDelay=delay;
     setTimeout(function(){
       var isTop=(i===0);
       var icon=L.divIcon({
@@ -1268,11 +1279,15 @@ function buildMap(){
       });
       var mk=L.marker([c.lat,c.lng],{icon:icon}).addTo(mapObj);
       mk.bindPopup('<b>'+c.n+', '+c.s+'</b><br>'+t.match+'% match'+(isTop?' &mdash; your No. 1 city':'')+'<br><a href="#" onclick="exploreCity('+i+');return false;" style="color:#B08D3E;">Zoom in closer &raquo;</a><br><a href="#" onclick="walkCity('+i+');return false;" style="color:#1F3A5F;">&#128694; Walk the streets &raquo;</a>');
-      mk.on('click',function(){/* לחיצה על הסימון עצמו רק פותחת פופ-אפ; הזום דרך הקישור */});
+      mk.on('click',function(){/* לחיצה על הסימון עצמה רק פותחת פופ-אפ; הזום דרך הקישור */});
       t._marker=mk;
       if(isTop){mk.openPopup();}
     },delay);
   });
+
+  /* אחרי ששלושת הסימונים נחתו — נכנסים אוטומטית לשכונה של העיר המובילה:
+     הבית (הכי גדול), מקומות העבודה ובתי הספר מופיעים בלי שום לחיצה */
+  setTimeout(function(){showNeighborhood(0);},reduced?600:lastDelay+1400);
 }
 
 /* ---------- שמירה ל-Bitrix24 ----------
