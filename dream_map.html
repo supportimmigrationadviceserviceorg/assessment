@@ -1212,9 +1212,9 @@ function goPOI(kind){
   if(!currentNb)return;
   var st=poiState[kind];
   if(st==='loading')return;
-  if(st!=='loaded'){loadPOI(kind,true);return;} /* טרם נטען / שגיאה — טוענים ואז קופצים */
+  /* טרם נטען / שגיאה / נטען אך ריק — מנסים לטעון (מחדש) ואז קופצים */
+  if(st!=='loaded'||!poiData[kind]||!poiData[kind].length){loadPOI(kind,true);return;}
   var list=poiData[kind];
-  if(!list.length)return;
   /* דפדוף: כל לחיצה עוברת למקום הבא ופותחת את החלונית שלו */
   var i=poiCycle[kind]%list.length;
   var m=list[i];
@@ -1320,7 +1320,9 @@ function loadPOI(kind,goAfter){
         fitAllPOIs();
         if(goAfter)goPOI(kind);
       }else{
-        setJBtn(kind,(kind==='work'?'&#128188; No workplaces mapped in this area':(kind==='fun'?'&#11088; No weekend spots mapped here':'&#127979; No schools mapped in this area')),true);
+        /* אין תוצאות — משאירים את הכפתור לחיץ לניסיון חוזר */
+        poiState[kind]='idle';
+        setJBtn(kind,(kind==='work'?'&#128188; Find where you\'d work &mdash; tap to search':(kind==='fun'?'&#11088; Find your weekend spots &mdash; tap to search':'&#127979; '+(currentNb.hasKids?'Find the kids\' schools':'Find schools')+' &mdash; tap to search')),true);
       }
     },function(){
       poiState[kind]='error';
