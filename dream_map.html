@@ -173,8 +173,18 @@
     position:absolute;top:-2px;right:-2px;width:16px;height:16px;border-radius:50%;
     background:#C0392B;border:2px solid #FCFAF4;
   }
+  .chat-teaser{
+    position:fixed;bottom:90px;right:20px;z-index:1499;max-width:230px;
+    background:#FCFAF4;border:1px solid var(--brass);border-radius:12px 12px 2px 12px;
+    padding:10px 14px;font-family:Georgia,serif;font-size:13.5px;color:var(--ink);
+    box-shadow:0 3px 12px rgba(31,58,95,.25);cursor:pointer;line-height:1.45;
+    animation:chatIn .3s ease;
+  }
+  .chat-teaser:hover{border-color:var(--ink);}
+  @media(max-width:520px){.chat-teaser{right:14px;bottom:84px;max-width:200px;font-size:13px;}}
   .chatw{
-    position:fixed;bottom:92px;right:20px;z-index:1500;width:330px;max-width:calc(100vw - 32px);
+    position:fixed;bottom:92px;right:20px;z-index:1500;width:330px;max-width:min(330px,calc(100vw - 32px));
+    max-height:calc(100vh - 130px);overflow-y:auto;
     background:#FCFAF4;border:1px solid var(--ink);outline:3px double var(--ink);outline-offset:3px;
     box-shadow:0 8px 30px rgba(31,58,95,.35);
     animation:chatIn .3s ease;
@@ -197,7 +207,7 @@
   .chatw .btn-gold{width:100%;font-size:15.5px;padding:13px 14px;}
   .chatw .cw-fine{font-family:Arial,sans-serif;font-size:10.5px;color:var(--text-muted);text-align:center;margin-top:8px;}
   @media(max-width:520px){
-    .chatw{right:12px;bottom:86px;}
+    .chatw{right:12px;bottom:86px;width:300px;}
     .chat-launcher{right:14px;bottom:16px;}
   }
   .rank-seal{
@@ -1085,7 +1095,7 @@ function showNeighborhood(idx){
   /* סימון הבית — "כאן אתה יכול לגור" */
   var homeIcon=L.divIcon({className:'',html:'<div style="width:54px;height:54px;border-radius:50%;background:#B08D3E;border:3.5px solid #FCFAF4;box-shadow:0 3px 14px rgba(31,58,95,.55);display:flex;align-items:center;justify-content:center;font-size:28px;">&#127968;</div>',iconSize:[54,54],iconAnchor:[27,27]});
   var homeMk=L.marker([nb.lat,nb.lng],{icon:homeIcon,zIndexOffset:1000}).addTo(nbLayer);
-  homeMk.bindTooltip('Your home',{permanent:true,direction:'bottom',offset:[0,26],className:'poi-label home-label'});
+  homeMk.bindTooltip('Your next home',{permanent:true,direction:'bottom',offset:[0,26],className:'poi-label home-label'});
   homeMk.bindPopup('<b>'+nb.n+'</b><br>You could live right here.<br><a href="#" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\');return false;" style="color:#B08D3E;">&#128694; Walk this street &raquo;</a>');
 
   mapObj.flyTo([nb.lat,nb.lng],14,{duration:1.6});
@@ -1308,8 +1318,20 @@ function buildChatWidget(){
   l.innerHTML='&#128172;<span class="dot" id="chat-dot"></span>';
   l.onclick=toggleChat;
   document.body.appendChild(l);
-  /* פתיחה אוטומטית — אחרי שהלקוח הספיק לראות את התוצאות */
-  setTimeout(function(){if(!chatOpened)openChat();},60000);
+  /* אחרי דקה — בועית טיזר קטנה בלבד, שלא חוסמת שום דבר במפה */
+  setTimeout(function(){if(!chatOpened)showTeaser();},60000);
+}
+
+/* בועית טיזר — הודעה קצרה ליד הכפתור; לחיצה פותחת את החלון המלא */
+function showTeaser(){
+  if(document.getElementById('chat-teaser')||document.getElementById('chatw'))return;
+  var t=document.createElement('div');
+  t.id='chat-teaser';t.className='chat-teaser';
+  t.innerHTML=(state.leadName?state.leadName+', r':'R')+'eady to make it real? &#128172;';
+  t.onclick=function(){t.remove();openChat();};
+  document.body.appendChild(t);
+  /* הבועית נעלמת מעצמה אחרי חצי דקה אם לא נלחצה */
+  setTimeout(function(){var x=document.getElementById('chat-teaser');if(x)x.remove();},30000);
 }
 
 function toggleChat(){
@@ -1338,11 +1360,23 @@ function openChat(){
     +'<div class="cw-fine">One-time $29 &middot; Reviewed personally by our team</div>'
     +'</div>';
   document.body.appendChild(w);
+  /* הסרת הטיזר אם קיים + האזנה ללחיצה בחוץ */
+  var t=document.getElementById('chat-teaser');if(t)t.remove();
+  setTimeout(function(){document.addEventListener('click',outsideChat,true);},100);
 }
 
 function closeChat(){
   var w=document.getElementById('chatw');
   if(w)w.remove();
+  document.removeEventListener('click',outsideChat,true);
+}
+
+/* סגירת הצ'אט בלחיצה בכל מקום מחוץ לחלון — המפה תמיד נשארת נגישה */
+function outsideChat(e){
+  var w=document.getElementById('chatw');
+  var l=document.getElementById('chat-launcher');
+  if(!w)return;
+  if(!w.contains(e.target)&&!(l&&l.contains(e.target))){closeChat();}
 }
 
 /* ---------- מפה ----------
