@@ -205,6 +205,41 @@
     padding:10px 14px;margin:-22px 4px 26px;text-align:center;line-height:1.6;
   }
 
+  /* ===== התיק האישי — Relocation File ===== */
+  .dossier{
+    background:#FCFAF4;border:1px solid var(--ink);outline:3px double var(--ink);outline-offset:3px;
+    padding:18px 18px 16px;margin:6px 4px 30px;
+  }
+  .dossier .d-eyebrow{font-family:Arial,sans-serif;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--brass);text-align:center;}
+  .dossier .d-name{font-size:20px;text-align:center;margin:4px 0 2px;}
+  .dossier .d-sub{font-family:Arial,sans-serif;font-size:11px;color:var(--text-muted);text-align:center;margin-bottom:14px;font-style:italic;}
+  .drow{
+    display:flex;align-items:center;gap:10px;padding:8px 2px;border-top:1px dotted var(--line);
+    font-family:Arial,sans-serif;font-size:13px;color:var(--ink-soft);
+  }
+  .drow .dbox{
+    width:20px;height:20px;flex:0 0 20px;border:1.5px solid var(--line);border-radius:2px;
+    display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;background:#fff;
+    transition:all .25s;
+  }
+  .drow.done{color:var(--ink);}
+  .drow.done .dbox{background:var(--green);border-color:var(--green);animation:pop .35s ease;}
+  @keyframes pop{0%{transform:scale(.4);}70%{transform:scale(1.25);}100%{transform:scale(1);}}
+  @media (prefers-reduced-motion:reduce){.drow.done .dbox{animation:none;}}
+  .drow .dval{margin-left:auto;font-family:Georgia,serif;font-size:13px;color:var(--ink);text-align:right;max-width:55%;}
+  .drow.pending .dval{color:var(--text-muted);font-style:italic;}
+
+  .d-final{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);text-align:center;}
+  .d-final .d-msg{font-family:Georgia,serif;font-style:italic;font-size:13.5px;color:var(--text-muted);margin-bottom:10px;}
+  .d-final .btn-gold{font-size:16px;padding:12px 18px;}
+  .d-final .btn-gold:disabled{background:#CBB98A;border-color:#CBB98A;cursor:not-allowed;opacity:.7;}
+  .d-final.ready .d-msg{color:var(--green);font-style:normal;font-weight:bold;font-family:Arial,sans-serif;font-size:13px;}
+
+  /* בדסקטופ רחב — התיק צף בצד ימין וצמוד למסך בזמן גלילה */
+  @media(min-width:1220px){
+    .dossier{position:fixed;top:90px;right:24px;width:250px;margin:0;z-index:500;max-height:calc(100vh - 130px);overflow-y:auto;}
+  }
+
   /* ===== חלון שיטוט ברחוב (Street View) ===== */
   .sv-overlay{
     position:fixed;inset:0;background:rgba(31,58,95,.55);z-index:2000;
@@ -376,6 +411,9 @@
       <div class="name-line" id="cert-name"></div>
     </div>
 
+    <!-- ===== התיק האישי — נבנה מול העיניים ===== -->
+    <div class="dossier" id="dossier"></div>
+
     <div id="map" role="img" aria-label="Map of the United States showing your matched cities"></div>
 
     <div id="top-city"></div>
@@ -383,9 +421,9 @@
 
     <!-- ===== CTA סיום — הזמנה לתכנן את הדרך (ללא נעילת תוכן) ===== -->
     <div class="card" style="text-align:center;border:1px solid var(--brass);outline:3px double var(--brass);outline-offset:3px;margin:26px 4px 0;">
-      <h3 style="font-size:23px;font-weight:normal;margin-bottom:8px;">You've seen where. Now let's plan how.</h3>
-      <p style="font-family:Arial,sans-serif;font-size:14px;color:var(--text-muted);max-width:460px;margin:0 auto 20px;">Your map shows the destination &mdash; your immigration assessment shows the way there. Our team will review your profile and match you with the visa pathway that makes this real.</p>
-      <button class="btn btn-gold" style="max-width:400px;" onclick="goToPayment()">Start my assessment &mdash; $29</button>
+      <h3 style="font-size:23px;font-weight:normal;margin-bottom:8px;">You've seen where. Now let's make it real.</h3>
+      <p style="font-family:Arial,sans-serif;font-size:14px;color:var(--text-muted);max-width:460px;margin:0 auto 20px;">Your map shows the destination &mdash; your immigration file opens the way there. Our team will review your profile and match you with the visa pathway that fits your direction.</p>
+      <button class="btn btn-gold" style="max-width:400px;" onclick="goToPayment()">Open my immigration file &mdash; $29</button>
       <div style="font-family:Arial,sans-serif;font-size:11px;color:var(--text-muted);margin-top:10px;">One-time payment &middot; Reviewed personally by our team</div>
     </div>
 
@@ -856,6 +894,13 @@ function showNeighborhood(idx){
   }
   hint.innerHTML='<b>&#127968; '+nb.n+'</b> — your street &nbsp;&middot;&nbsp; <b>&#128188;</b> places you could work'+(hasKids?' &nbsp;&middot;&nbsp; <b>&#127979;</b> schools for the kids':'')+'<br><span style="color:#B08D3E;font-style:italic;">Tap the &#127968; marker, then &ldquo;Walk this street&rdquo; to stand there &#128071;</span>';
 
+  /* עדכון התיק האישי — הצ'קים מתמלאים כשחוקרים את השכונה של העיר המובילה */
+  if(idx===0){
+    markDossier('neighborhood',nb.n);
+    markDossier('work','Near '+nb.n);
+    if(hasKids)markDossier('schools','Near '+nb.n);
+  }
+
   /* שליפת מקומות אמיתיים מ-OpenStreetMap */
   fetchPOIs(nb,a.profession,hasKids);
 }
@@ -902,9 +947,74 @@ function showResults(){
   for(var i=1;i<state.results.length;i++){othersHTML+=cityCardHTML(state.results[i],i);}
   document.getElementById('other-cities').innerHTML=othersHTML;
 
+  buildDossier();
   buildMap();
   saveToCRM();
   window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---------- התיק האישי ----------
+   נבנה מהתשובות: מה שכבר ידוע מקבל צ'ק מיד; שכונה, עבודה ובתי ספר
+   מקבלים צ'ק כשהלקוח חוקר אותם על המפה. תיק מלא -> נפתח שלב פתיחת התיק.
+*/
+var dossierState={};
+function buildDossier(){
+  var a=state.answers;
+  var hasKids=(a.family==='kids'||a.family==='kids_teen');
+  var top=state.results[0];
+  var nb=pickNeighborhood(top.city.n);
+
+  /* סעיפי התיק: key, תווית, ערך, האם מסומן כבר עכשיו */
+  var rows=[
+    {k:'status',label:'Family status',val:FAM_LABEL[a.family],done:true},
+    {k:'prof',label:'Profession',val:PROF_LABEL[a.profession],done:true},
+    {k:'budget',label:'Housing budget',val:BUDGET_LABEL[a.budget],done:true},
+    {k:'dest',label:'Destination city',val:top.city.n+' ('+top.match+'%)',done:true},
+    {k:'neighborhood',label:'Your neighborhood',val:nb?nb.n:'—',done:false,pendingText:'tap &#127968; to confirm'},
+    {k:'work',label:'Workplace nearby',val:'',done:false,pendingText:'explore to confirm'}
+  ];
+  if(hasKids){rows.push({k:'schools',label:'Schools for the children',val:'',done:false,pendingText:'explore to confirm'});}
+
+  dossierState={rows:rows,hasKids:hasKids};
+
+  var html='<div class="d-eyebrow">Relocation File</div>'
+    +'<div class="d-name">'+(state.leadName||'Your Journey')+'</div>'
+    +'<div class="d-sub">Case in preparation</div>';
+  rows.forEach(function(r){
+    html+='<div class="drow'+(r.done?' done':' pending')+'" id="drow-'+r.k+'">'
+      +'<div class="dbox">'+(r.done?'&#10003;':'')+'</div>'
+      +'<div>'+r.label+'</div>'
+      +'<div class="dval">'+(r.done?r.val:(r.pendingText||''))+'</div></div>';
+  });
+  html+='<div class="d-final" id="d-final">'
+    +'<div class="d-msg" id="d-msg">Explore your neighborhood on the map to complete your file &#128071;</div>'
+    +'<button class="btn btn-gold" id="d-btn" disabled onclick="goToPayment()">Open my immigration file &mdash; $29</button>'
+    +'</div>';
+  document.getElementById('dossier').innerHTML=html;
+}
+
+function markDossier(key,val){
+  var rows=dossierState.rows||[];
+  var r=null;
+  for(var i=0;i<rows.length;i++){if(rows[i].k===key){r=rows[i];break;}}
+  if(!r||r.done)return;
+  r.done=true;if(val)r.val=val;
+  var el=document.getElementById('drow-'+key);
+  if(el){
+    el.classList.remove('pending');el.classList.add('done');
+    el.querySelector('.dbox').innerHTML='&#10003;';
+    el.querySelector('.dval').innerHTML=r.val||'&#10003;';
+  }
+  /* בדיקה: כל הסעיפים מולאו? */
+  var allDone=rows.every(function(x){return x.done;});
+  if(allDone){
+    var fin=document.getElementById('d-final');
+    if(fin){
+      fin.classList.add('ready');
+      document.getElementById('d-msg').innerHTML='&#10003; Your direction is clear. The next step is yours.';
+      document.getElementById('d-btn').disabled=false;
+    }
+  }
 }
 
 /* ---------- מפה ----------
