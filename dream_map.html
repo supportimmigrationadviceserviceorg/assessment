@@ -597,12 +597,20 @@ function cityCardHTML(t,idx){
     +'</div>';
 }
 
-/* הטסת המפה אל העיר — עד רמת השכונות, כדי שהלקוח ממש יראה את המקום */
+/* הטסת המפה אל העיר — זום מדורג: לחיצה ראשונה לרמת העיר,
+   כל לחיצה נוספת מתקרבת יותר עד רמת הרחוב */
 function exploreCity(idx){
   var t=state.results[idx];if(!t||!mapObj)return;
   document.getElementById('map').scrollIntoView({behavior:'smooth',block:'center'});
-  mapObj.flyTo([t.city.lat,t.city.lng],11,{duration:1.6});
-  if(t._marker){setTimeout(function(){t._marker.openPopup();},1700);}
+  var cur=mapObj.getZoom();
+  var center=mapObj.getCenter();
+  var dist=center.distanceTo(L.latLng(t.city.lat,t.city.lng));
+  /* אם אנחנו רחוקים מהעיר או בתצוגה כללית — קודם טסים אליה ברמת עיר */
+  var target;
+  if(cur<10||dist>30000){target=11;}
+  else{target=Math.min(cur+3,16);} /* כבר בעיר — מתקרבים לשכונות ולרחובות */
+  mapObj.flyTo([t.city.lat,t.city.lng],target,{duration:1.4});
+  if(t._marker){setTimeout(function(){t._marker.openPopup();},1500);}
 }
 
 function showResults(){
@@ -658,7 +666,7 @@ function buildMap(){
         iconSize:isTop?[34,34]:[28,28],iconAnchor:isTop?[17,17]:[14,14]
       });
       var mk=L.marker([c.lat,c.lng],{icon:icon}).addTo(mapObj);
-      mk.bindPopup('<b>'+c.n+', '+c.s+'</b><br>'+t.match+'% match'+(isTop?' &mdash; your No. 1 city':'')+'<br><a href="#" onclick="exploreCity('+i+');return false;" style="color:#B08D3E;">Zoom into the neighborhoods &raquo;</a>');
+      mk.bindPopup('<b>'+c.n+', '+c.s+'</b><br>'+t.match+'% match'+(isTop?' &mdash; your No. 1 city':'')+'<br><a href="#" onclick="exploreCity('+i+');return false;" style="color:#B08D3E;">Zoom in closer &raquo;</a>');
       mk.on('click',function(){/* לחיצה על הסימון עצמו רק פותחת פופ-אפ; הזום דרך הקישור */});
       t._marker=mk;
       if(isTop){mk.openPopup();}
