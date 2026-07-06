@@ -431,8 +431,8 @@
     <!-- ===== CTA סיום — הזמנה לתכנן את הדרך (ללא נעילת תוכן) ===== -->
     <div class="card" style="text-align:center;border:1px solid var(--brass);outline:3px double var(--brass);outline-offset:3px;margin:26px 4px 0;">
       <h3 style="font-size:23px;font-weight:normal;margin-bottom:8px;">You've seen where. Now let's make it real.</h3>
-      <p style="font-family:Arial,sans-serif;font-size:14px;color:var(--text-muted);max-width:460px;margin:0 auto 20px;">Your map shows the destination &mdash; your immigration file opens the way there. Our team will review your profile and match you with the visa pathway that fits your direction.</p>
-      <button class="btn btn-gold" style="max-width:400px;" onclick="goToPayment()">Open my immigration file &mdash; $29</button>
+      <p style="font-family:Arial,sans-serif;font-size:14px;color:var(--text-muted);max-width:460px;margin:0 auto 20px;">Your map shows the destination &mdash; your Green Card file opens the way there. Our team will review your profile and match you with the pathway that fits your direction.</p>
+      <button class="btn btn-gold" style="max-width:400px;" id="final-btn" onclick="goToPayment()">Open my Green Card file &mdash; $29</button>
       <div style="font-family:Arial,sans-serif;font-size:11px;color:var(--text-muted);margin-top:10px;">One-time payment &middot; Reviewed personally by our team</div>
     </div>
 
@@ -449,7 +449,7 @@
 
 /* ---------- הגדרות ---------- */
 var WEBHOOK = 'https://immiworld.org/rest/147/47yrflms2cje1cbe/';
-var PAYMENT_URL = 'https://immiworld.org/new-va-payment-29/?utm_source=dream_map&utm_medium=landing&utm_campaign=attorneypayment';
+var PAYMENT_URL = 'https://immigrationadviceservice.org/complete-reg-greencard/?utm_source=dream_map';
 
 /* ---------- מאגר ערים: 30 מטרופולינים ----------
    col = מדד יוקר מחיה (100 = ממוצע ארצי)
@@ -643,7 +643,7 @@ function computeMatches(){
   });
 
   scored.sort(function(x,y){return y.raw-x.raw;});
-  var top=scored.slice(0,5);
+  var top=scored.slice(0,3);
 
   /* נרמול לסקאלה 70–97 (המוסכמה הקיימת של הכלים שלכם) */
   var rMax=top[0].raw,rMin=top[top.length-1].raw;
@@ -1017,10 +1017,19 @@ function tryOverpass(q,mirrorIdx,onOk,onFail){
   .catch(function(){tryOverpass(q,mirrorIdx+1,onOk,onFail);});
 }
 
+/* טקסט כפתור גרין קארד — אישי עם שם הלקוח אם זוהה */
+function gcBtnText(){
+  return state.leadName
+    ?(state.leadName+', open your Green Card file &mdash; $29')
+    :'Open my Green Card file &mdash; $29';
+}
+
 function showResults(){
   var res=document.getElementById('screen-results');
   res.classList.remove('hidden');
   document.getElementById('cert-name').textContent=state.leadName?('Prepared for '+state.leadName):'Prepared personally for you';
+  var fb=document.getElementById('final-btn');
+  if(fb)fb.innerHTML=gcBtnText();
 
   /* כרטיס עיר מובילה + כל שאר הערים גלויות במלואן */
   document.getElementById('top-city').innerHTML=cityCardHTML(state.results[0],0);
@@ -1069,7 +1078,7 @@ function buildDossier(){
   });
   html+='<div class="d-final" id="d-final">'
     +'<div class="d-msg" id="d-msg">Explore your neighborhood on the map to complete your file &#128071;</div>'
-    +'<button class="btn btn-gold" id="d-btn" disabled onclick="goToPayment()">Open my immigration file &mdash; $29</button>'
+    +'<button class="btn btn-gold" id="d-btn" disabled onclick="goToPayment()">'+gcBtnText()+'</button>'
     +'</div>';
   document.getElementById('dossier').innerHTML=html;
 }
