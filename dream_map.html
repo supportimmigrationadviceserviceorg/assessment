@@ -1,156 +1,1621 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Your American Life Map Is Ready</title>
-<!--
-  אימייל השקה — American Life Map (נוסח סופי לפי הטקסט של Sup)
-  מבנה טבלאות + inline styles | שדה מיזוג: #NAME#
--->
+<title>Your American Life Map — Immigration Advice Service</title>
+<!-- Leaflet — ספריית מפות חינמית, ללא צורך במפתח API -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  /* ===== פלטת צבעים — אטלס וינטג': קלף, דיו כחול, פליז ===== */
+  :root{
+    --parchment:#F7F3EA;
+    --parchment-deep:#EFE8D8;
+    --ink:#1F3A5F;
+    --ink-soft:#3D5578;
+    --brass:#B08D3E;
+    --brass-light:#D9C288;
+    --text-muted:#6B6353;
+    --green:#2E7D4F;
+    --amber:#B07A2A;
+    --blue-badge:#2C5F8A;
+    --line:#C9BFA8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:Georgia,'Times New Roman',serif;
+    background:var(--parchment);
+    color:var(--ink);
+    line-height:1.6;
+    min-height:100vh;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 60px;}
+
+  /* ===== כותרת בסגנון מכתב רשמי — מסגרת כפולה ===== */
+  .letterhead{
+    border:1px solid var(--ink);
+    outline:3px double var(--ink);
+    outline-offset:4px;
+    background:#FCFAF4;
+    text-align:center;
+    padding:28px 20px 22px;
+    margin:10px 4px 30px;
+  }
+  .letterhead .eyebrow{
+    font-family:Arial,Helvetica,sans-serif;
+    font-size:11px;letter-spacing:3px;text-transform:uppercase;
+    color:var(--brass);margin-bottom:10px;
+  }
+  .letterhead h1{font-size:30px;font-weight:normal;letter-spacing:.5px;}
+  .letterhead .sub{font-size:15px;color:var(--text-muted);margin-top:8px;font-style:italic;}
+  .compass{width:44px;height:44px;margin:0 auto 12px;display:block;}
+
+  /* ===== כרטיסים ===== */
+  .card{
+    background:#FCFAF4;
+    border:1px solid var(--line);
+    border-radius:2px;
+    padding:28px 26px;
+    margin-bottom:22px;
+    box-shadow:0 1px 3px rgba(31,58,95,.06);
+  }
+  .card h2{font-size:21px;font-weight:normal;margin-bottom:6px;}
+  .card .hint{font-family:Arial,Helvetica,sans-serif;font-size:13px;color:var(--text-muted);margin-bottom:18px;}
+
+  /* ===== שדות ===== */
+  label{font-family:Arial,Helvetica,sans-serif;font-size:13px;color:var(--ink-soft);display:block;margin-bottom:6px;}
+  input[type=email],input[type=text]{
+    width:100%;padding:12px 14px;font-size:16px;font-family:Georgia,serif;
+    border:1px solid var(--line);border-radius:2px;background:#fff;color:var(--ink);
+  }
+  input:focus{outline:2px solid var(--brass);outline-offset:1px;border-color:var(--brass);}
+
+  /* ===== כפתורים ===== */
+  .btn{
+    display:inline-block;width:100%;text-align:center;cursor:pointer;
+    font-family:Georgia,serif;font-size:17px;letter-spacing:.5px;
+    padding:14px 24px;border-radius:2px;border:1px solid var(--ink);
+    background:var(--ink);color:#FCFAF4;transition:background .2s;
+  }
+  .btn:hover{background:var(--ink-soft);}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .btn-gold{background:var(--brass);border-color:var(--brass);color:#fff;font-size:18px;}
+  .btn-gold:hover{background:#9A7A32;}
+  .btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line);font-size:14px;width:auto;padding:9px 18px;}
+  .btn-ghost:hover{background:var(--parchment-deep);}
+  .btn:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
+
+  /* ===== התקדמות ===== */
+  .progress{display:flex;align-items:center;gap:10px;margin:0 4px 16px;font-family:Arial,sans-serif;font-size:12px;color:var(--text-muted);}
+  .progress .bar{flex:1;height:3px;background:var(--parchment-deep);border-radius:2px;overflow:hidden;}
+  .progress .fill{height:100%;background:var(--brass);width:0%;transition:width .4s ease;}
+
+  /* ===== רשת אפשרויות ===== */
+  .opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .opt{
+    border:1px solid var(--line);border-radius:2px;background:#fff;
+    padding:14px 12px;text-align:center;cursor:pointer;transition:all .15s;
+    font-size:15px;user-select:none;
+  }
+  .opt .ico{font-size:22px;display:block;margin-bottom:6px;}
+  .opt:hover{border-color:var(--brass);background:#FDFBF3;}
+  .opt.sel{border-color:var(--brass);background:#F8F1DE;box-shadow:inset 0 0 0 1px var(--brass);}
+  .opt.sel .ico{transform:scale(1.1);}
+  .opt small{display:block;font-family:Arial,sans-serif;font-size:11px;color:var(--text-muted);margin-top:3px;}
+
+  .step-nav{display:flex;justify-content:space-between;align-items:center;margin-top:22px;gap:12px;}
+  .step-nav .btn{width:auto;padding:12px 34px;}
+
+  /* ===== מסך טעינה — מצפן מסתובב ===== */
+  .loading-screen{text-align:center;padding:70px 20px;}
+  .loading-screen .spin{width:70px;height:70px;margin:0 auto 24px;animation:spin 2.6s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loading-screen p{font-style:italic;color:var(--text-muted);font-size:16px;min-height:26px;}
+  @media (prefers-reduced-motion:reduce){
+    .loading-screen .spin{animation:none;}
+    .fill{transition:none;}
+  }
+
+  /* ===== תוצאות ===== */
+  .cert-head{text-align:center;margin-bottom:20px;}
+  .cert-head .eyebrow{font-family:Arial,sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--brass);}
+  .cert-head h2{font-size:26px;font-weight:normal;margin-top:6px;}
+  .cert-head .name-line{font-style:italic;color:var(--text-muted);margin-top:4px;}
+
+  #map{
+    height:420px;border:1px solid var(--ink);outline:3px double var(--ink);outline-offset:4px;
+    margin:8px 4px 30px;background:#DCE8EE;z-index:1;
+  }
+
+  /* כרטיס עיר */
+  .city-card{position:relative;border:1px solid var(--line);background:#FCFAF4;border-radius:2px;padding:24px 22px;margin-bottom:16px;}
+
+  /* ===== התוצאה המובילה — בצבע שונה מכל השאר: כחול-דיו עמוק ===== */
+  .city-card.top{
+    background:var(--ink);border:1px solid var(--brass);
+    outline:3px double var(--brass);outline-offset:3px;margin:6px 4px 24px;
+    color:#FCFAF4;
+  }
+  .city-card.top h3{color:#fff;}
+  .city-card.top .state{color:var(--brass-light);}
+  .city-card.top .fact{color:#C7D2E2;}
+  .city-card.top .fact b{color:#fff;}
+  .city-card.top .tag{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25);color:#E8DFC8;}
+  .city-card.top .match.g{color:#8FDCAC;}
+  .city-card.top .match.y{color:#F0C868;}
+  .city-card.top .match.b{color:#9CC4E8;}
+  .city-card.top .match small{color:#C7D2E2;}
+  .city-card.top .explore-btn{background:transparent;border-color:#FCFAF4;color:#FCFAF4;}
+  .city-card.top .explore-btn:hover{background:rgba(255,255,255,.1);}
+
+  /* ===== פאנל מעסיקים מובילים ===== */
+  .emp-box{margin-top:12px;padding-top:10px;border-top:1px dotted var(--line);text-align:center;}
+  .emp-lbl{font-family:Arial,sans-serif;font-size:11.5px;color:var(--text-muted);margin-bottom:7px;}
+  .emp-chip{
+    display:inline-block;margin:3px;padding:5px 12px;border-radius:13px;
+    background:var(--ink);color:#FCFAF4;font-family:Arial,sans-serif;font-size:12px;
+  }
+
+  /* ===== אווטאר הלקוח — ראשי תיבות בזהב, או תמונת Gravatar אם קיימת ===== */
+  .avatar{
+    width:64px;height:64px;border-radius:50%;margin:0 auto 12px;
+    background:var(--brass);color:#fff;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+    font-family:Georgia,serif;font-size:24px;letter-spacing:1px;
+    border:2.5px solid #FCFAF4;box-shadow:0 2px 8px rgba(31,58,95,.3);
+  }
+  .avatar img{width:100%;height:100%;object-fit:cover;}
+
+  /* ===== חלונית תשלום בסגנון צ'אט ===== */
+  .chat-launcher{
+    position:fixed;bottom:20px;right:20px;z-index:1500;
+    width:60px;height:60px;border-radius:50%;cursor:pointer;
+    background:var(--brass);border:2.5px solid #FCFAF4;
+    box-shadow:0 4px 16px rgba(31,58,95,.4);
+    display:flex;align-items:center;justify-content:center;font-size:26px;
+    transition:transform .2s;
+  }
+  .chat-launcher:hover{transform:scale(1.08);}
+  .chat-launcher .dot{
+    position:absolute;top:-2px;right:-2px;width:16px;height:16px;border-radius:50%;
+    background:#C0392B;border:2px solid #FCFAF4;
+  }
+  .chat-teaser{
+    position:fixed;bottom:90px;right:20px;z-index:1499;max-width:230px;
+    background:#FCFAF4;border:1px solid var(--brass);border-radius:12px 12px 2px 12px;
+    padding:10px 14px;font-family:Georgia,serif;font-size:13.5px;color:var(--ink);
+    box-shadow:0 3px 12px rgba(31,58,95,.25);cursor:pointer;line-height:1.45;
+    animation:chatIn .3s ease;
+  }
+  .chat-teaser:hover{border-color:var(--ink);}
+  @media(max-width:520px){.chat-teaser{right:14px;bottom:84px;max-width:200px;font-size:13px;}}
+  .chatw{
+    position:fixed;bottom:92px;right:20px;z-index:1500;width:330px;max-width:min(330px,calc(100vw - 32px));
+    max-height:calc(100vh - 130px);overflow-y:auto;
+    background:#FCFAF4;border:1px solid var(--ink);outline:3px double var(--ink);outline-offset:3px;
+    box-shadow:0 8px 30px rgba(31,58,95,.35);
+    animation:chatIn .3s ease;
+  }
+  @keyframes chatIn{0%{opacity:0;transform:translateY(14px);}100%{opacity:1;transform:translateY(0);}}
+  @media (prefers-reduced-motion:reduce){.chatw{animation:none;}}
+  .chatw .cw-head{
+    background:var(--ink);color:#FCFAF4;padding:12px 14px;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .chatw .cw-head .cw-title{font-family:Georgia,serif;font-size:15px;}
+  .chatw .cw-head .cw-sub{font-family:Arial,sans-serif;font-size:10.5px;color:#C7D2E2;}
+  .chatw .cw-close{cursor:pointer;background:transparent;border:0;color:#FCFAF4;font-size:20px;line-height:1;padding:2px 6px;}
+  .chatw .cw-body{padding:14px;}
+  .chatw .cw-msg{
+    background:#fff;border:1px solid var(--line);border-radius:2px 12px 12px 12px;
+    padding:12px 14px;font-family:Georgia,serif;font-size:14px;color:var(--ink);line-height:1.55;
+    margin-bottom:12px;
+  }
+  .chatw .btn-gold{width:100%;font-size:15.5px;padding:13px 14px;}
+  .chatw .cw-fine{font-family:Arial,sans-serif;font-size:10.5px;color:var(--text-muted);text-align:center;margin-top:8px;}
+  @media(max-width:520px){
+    .chatw{right:12px;bottom:86px;width:300px;}
+    .chat-launcher{right:14px;bottom:16px;}
+  }
+  .rank-seal{
+    position:absolute;top:-14px;right:18px;background:var(--brass);color:#fff;
+    font-family:Arial,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;
+    padding:5px 14px;border-radius:2px;
+  }
+  .city-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;}
+  .city-head h3{font-size:22px;font-weight:normal;}
+  .city-head .state{color:var(--text-muted);font-size:15px;font-style:italic;}
+  .match{font-family:Arial,sans-serif;font-weight:bold;font-size:20px;}
+  .match.g{color:var(--green);} .match.y{color:var(--amber);} .match.b{color:var(--blue-badge);}
+  .match small{font-weight:normal;font-size:11px;display:block;text-align:right;color:var(--text-muted);}
+
+  .facts{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin-top:16px;}
+  .fact{font-family:Arial,sans-serif;font-size:13px;color:var(--ink-soft);}
+  .fact b{display:block;font-size:16px;color:var(--ink);font-family:Georgia,serif;}
+  .tags{margin-top:14px;display:flex;flex-wrap:wrap;gap:6px;}
+  .tag{font-family:Arial,sans-serif;font-size:11px;background:#EFE9D9;border:1px solid var(--line);color:var(--ink-soft);padding:3px 10px;border-radius:12px;}
+
+  /* מספר דירוג לערים 2-5 + כפתור Explore */
+  .rank-num{
+    position:absolute;top:-13px;right:18px;width:26px;height:26px;border-radius:50%;
+    background:var(--ink);color:#fff;font-family:Arial,sans-serif;font-size:13px;font-weight:bold;
+    display:flex;align-items:center;justify-content:center;border:2px solid var(--parchment);
+  }
+  /* ===== שלוש פעולות, שלושה צבעים — הפרדה ברורה במובייל =====
+     זהב = השכונה שלך | ירוק = ללכת ברחוב | מתאר לבן = מפה */
+  .explore-btn{
+    margin-top:10px;width:100%;cursor:pointer;
+    font-family:Georgia,serif;font-size:15px;color:var(--ink);
+    background:#fff;border:1.5px solid var(--ink);border-radius:2px;padding:13px 14px;
+    transition:all .15s;
+  }
+  .explore-btn:hover{background:#F2F5F9;}
+  .explore-btn:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
+  .walk-btn{
+    margin-top:10px;width:100%;cursor:pointer;
+    font-family:Georgia,serif;font-size:15px;color:#fff;
+    background:var(--green);border:1.5px solid var(--green);border-radius:2px;padding:13px 14px;
+    transition:background .15s;
+  }
+  .walk-btn:hover{background:#256A42;}
+  .walk-btn:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
+  @media(max-width:520px){
+    .explore-btn,.walk-btn,.nb-btn{font-size:16px;padding:15px 14px;}
+  }
+
+  /* ===== מקטע "השכונה שלך" בכרטיס העיר ===== */
+  .nb-box{
+    margin-top:16px;background:#F8F1DE;border:1px solid var(--brass-light);border-radius:2px;padding:14px 16px;
+  }
+  .nb-box .nb-label{font-family:Arial,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--brass);}
+  .nb-box .nb-name{font-size:18px;color:var(--ink);margin:3px 0 2px;}
+  .nb-box .nb-blurb{font-family:Arial,sans-serif;font-size:12.5px;color:var(--text-muted);line-height:1.5;}
+  .nb-btn{
+    margin-top:12px;width:100%;cursor:pointer;
+    font-family:Georgia,serif;font-size:15px;color:#fff;
+    background:var(--brass);border:1px solid var(--brass);border-radius:2px;padding:11px 14px;
+    transition:background .15s;
+  }
+  .nb-btn:hover{background:#9A7A32;}
+  .nb-btn:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
+
+  /* ===== חץ מנחה — "לחץ כאן" — גדול ובולט ===== */
+  .coach{
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    font-family:Georgia,serif;font-style:italic;font-size:16.5px;font-weight:bold;color:var(--brass);
+    margin:12px 0 2px;text-align:center;
+  }
+  .coach .c-arrow{display:inline-block;animation:bounce .9s ease-in-out infinite;font-size:40px;font-style:normal;line-height:1;}
+  @keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(12px);}}
+  @media (prefers-reduced-motion:reduce){.coach .c-arrow{animation:none;}}
+
+  @keyframes payPulse{0%,100%{box-shadow:0 4px 14px rgba(31,58,95,.4);}50%{box-shadow:0 4px 22px rgba(31,58,95,.7);}}
+  @media (prefers-reduced-motion:reduce){#top-pay-btn{animation:none !important;}}
+  /* הילה פועמת סביב כפתור השכונה בכרטיס המוביל — אי אפשר לפספס */
+  .city-card.top .nb-btn{animation:glowPulse 1.7s ease-in-out infinite;}
+  @keyframes glowPulse{0%,100%{box-shadow:0 0 0 0 rgba(176,141,62,.55);}50%{box-shadow:0 0 0 10px rgba(176,141,62,0);}}
+  @media (prefers-reduced-motion:reduce){.city-card.top .nb-btn{animation:none;}}
+
+  /* ===== דמות הולכת — צועדת בתוך כפתורי ההליכה ===== */
+  .walker{display:inline-block;animation:walkMarch 2s ease-in-out infinite;}
+  @keyframes walkMarch{
+    0%{transform:translateX(0) translateY(0);}
+    25%{transform:translateX(7px) translateY(-2px);}
+    50%{transform:translateX(14px) translateY(0);}
+    75%{transform:translateX(7px) translateY(-2px);}
+    100%{transform:translateX(0) translateY(0);}
+  }
+  @media (prefers-reduced-motion:reduce){.walker{animation:none;}}
+
+  /* ===== באנר הסבר מעל המפה ===== */
+  .map-hint{
+    font-family:Arial,sans-serif;font-size:12.5px;color:var(--ink);
+    background:#F8F1DE;border:1px solid var(--brass-light);border-radius:2px;
+    padding:10px 14px;margin:-22px 4px 26px;text-align:center;line-height:1.6;
+  }
+  /* ===== מסע מודרך — "היום שלך בשכונה" ===== */
+  .jbtn{
+    display:block;width:100%;margin:8px 0 0;cursor:pointer;text-align:left;
+    font-family:Georgia,serif;font-size:15.5px;border-radius:2px;padding:14px 16px;
+    border:1.5px solid;transition:filter .15s;
+  }
+  .jbtn:hover{filter:brightness(1.08);}
+  .jbtn:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
+  .j-home{background:var(--green);border-color:var(--green);color:#fff;}
+  .j-work{background:var(--ink);border-color:var(--ink);color:#FCFAF4;}
+  .j-school{background:#fff;border-color:var(--green);color:var(--green);font-weight:bold;}
+  .jbtn .jnum{
+    display:inline-block;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.25);
+    text-align:center;line-height:22px;font-family:Arial,sans-serif;font-size:12px;font-weight:bold;margin-right:8px;
+  }
+  .j-school .jnum{background:var(--green);color:#fff;}
+  .j-fun{background:var(--brass);border-color:var(--brass);color:#fff;}
+  .jbtn.dim{opacity:.75;font-style:italic;}
+  @media(max-width:520px){.jbtn{font-size:16px;padding:16px;}}
+
+  /* תוויות שם קבועות על סימוני המפה */
+  .poi-label{
+    background:#FCFAF4;border:1px solid var(--line);border-radius:2px;
+    color:var(--ink);font-family:Arial,sans-serif;font-size:11px;font-weight:bold;
+    padding:2px 7px;box-shadow:0 1px 3px rgba(31,58,95,.25);white-space:nowrap;
+  }
+  .poi-label.school-label{border-color:var(--green);color:var(--green);}
+  .poi-label.home-label{border-color:var(--brass);color:var(--brass);font-size:12.5px;}
+  .poi-label::before{display:none;}
+
+  /* ===== מסע מודרך — "היום שלך בשכונה" ===== */
+  .jbtn{
+    display:block;width:100%;margin:8px 0 0;cursor:pointer;text-align:left;
+    font-family:Georgia,serif;font-size:15.5px;border-radius:2px;padding:14px 16px;
+    border:1.5px solid;transition:filter .15s;
+  }
+  .jbtn:hover{filter:brightness(1.08);}
+  .jbtn:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
+  .j-home{background:var(--green);border-color:var(--green);color:#fff;}
+  .j-work{background:var(--ink);border-color:var(--ink);color:#FCFAF4;}
+  .j-school{background:#fff;border-color:var(--green);color:var(--green);font-weight:bold;}
+  .jbtn .jnum{
+    display:inline-block;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.25);
+    text-align:center;line-height:22px;font-family:Arial,sans-serif;font-size:12px;font-weight:bold;margin-right:8px;
+  }
+  .j-school .jnum{background:var(--green);color:#fff;}
+  .jbtn.dim{opacity:.75;font-style:italic;}
+  @media(max-width:520px){.jbtn{font-size:16px;padding:16px;}}
+
+  /* תוויות שם קבועות על סימוני המפה */
+  .poi-label{
+    background:#FCFAF4;border:1px solid var(--line);border-radius:2px;
+    color:var(--ink);font-family:Arial,sans-serif;font-size:11px;font-weight:bold;
+    padding:2px 7px;box-shadow:0 1px 3px rgba(31,58,95,.25);white-space:nowrap;
+  }
+  .poi-label.school-label{border-color:var(--green);color:var(--green);}
+  .poi-label.home-label{border-color:var(--brass);color:var(--brass);font-size:12.5px;}
+  .poi-label::before{display:none;}
+
+  /* ===== חלון שיטוט ברחוב (Street View) ===== */
+  .sv-overlay{
+    position:fixed;inset:0;background:rgba(31,58,95,.55);z-index:2000;
+    display:flex;align-items:center;justify-content:center;padding:16px;
+  }
+  .sv-box{
+    background:var(--parchment);border:1px solid var(--ink);outline:3px double var(--ink);outline-offset:4px;
+    width:100%;max-width:900px;height:82vh;max-height:640px;display:flex;flex-direction:column;
+  }
+  .sv-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);}
+  .sv-head h3{font-size:18px;font-weight:normal;}
+  .sv-head .hint2{font-family:Arial,sans-serif;font-size:11px;color:var(--text-muted);}
+  .sv-close{
+    cursor:pointer;background:transparent;border:1px solid var(--line);border-radius:2px;
+    font-family:Georgia,serif;font-size:14px;color:var(--ink);padding:6px 14px;
+  }
+  .sv-close:hover{border-color:var(--brass);color:var(--brass);}
+  .sv-box iframe{flex:1;width:100%;border:0;background:#DCE8EE;}
+  @media(max-width:520px){.sv-box{height:88vh;}}
+
+  .disclaimer{font-family:Arial,sans-serif;font-size:11px;color:var(--text-muted);text-align:center;margin-top:26px;line-height:1.5;}
+  .err{color:#8A2C2C;font-family:Arial,sans-serif;font-size:13px;margin-top:10px;display:none;}
+
+  .hidden{display:none;}
+
+  @media(max-width:520px){
+    .opt-grid{grid-template-columns:1fr 1fr;}
+    .letterhead h1{font-size:24px;}
+    #map{height:320px;}
+    .facts{grid-template-columns:1fr 1fr;}
+    .step-nav .btn{padding:12px 22px;}
+  }
+
+  /* Leaflet popup בהתאמה לעיצוב */
+  .leaflet-popup-content-wrapper{border-radius:2px;font-family:Georgia,serif;color:var(--ink);}
+  .leaflet-popup-content{margin:12px 16px;font-size:14px;}
+</style>
 </head>
-<body style="margin:0;padding:0;background-color:#F6E9CD;">
+<body>
+<div class="wrap">
 
-<!-- Preheader מוסתר -->
-<div style="display:none;font-size:1px;color:#F6E9CD;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">
-  A realistic preview of the life you could build in the U.S. — your neighborhood, your salary, your streets. One minute, free.
+  <!-- ===== כותרת ===== -->
+  <div class="letterhead">
+    <svg class="compass" viewBox="0 0 48 48" aria-hidden="true">
+      <circle cx="24" cy="24" r="21" fill="none" stroke="#B08D3E" stroke-width="1.5"/>
+      <circle cx="24" cy="24" r="16" fill="none" stroke="#B08D3E" stroke-width=".7" opacity=".6"/>
+      <polygon points="24,6 27,24 24,42 21,24" fill="#1F3A5F"/>
+      <polygon points="6,24 24,21 42,24 24,27" fill="#B08D3E"/>
+      <circle cx="24" cy="24" r="2.5" fill="#1F3A5F"/>
+    </svg>
+    <div class="eyebrow">Immigration Advice Service</div>
+    <h1>Your American Life Map</h1>
+    <div class="sub">Discover where your new life in the United States could begin</div>
+  </div>
+
+  <!-- ===== שלב 0: זיהוי לפי אימייל ===== -->
+  <div id="screen-lookup" class="card">
+    <h2>Let's begin with your details</h2>
+    <p class="hint">Enter the email address you registered with, and we will prepare your personal map.</p>
+    <label for="lk-email">Email address</label>
+    <input type="email" id="lk-email" placeholder="name@example.com" autocomplete="email">
+    <div class="err" id="lk-err"></div>
+
+    <!-- שדות לליד חדש — מוצגים רק אם האימייל לא נמצא במערכת -->
+    <div id="guest-fields" class="hidden" style="margin-top:16px;">
+      <p class="hint" style="margin-bottom:12px;background:#F8F1DE;border:1px solid var(--brass-light);border-radius:2px;padding:10px 12px;">We couldn't find an existing profile — tell us who you are and we'll prepare your personal map.</p>
+      <label for="g-first">First name</label>
+      <input type="text" id="g-first" autocomplete="given-name" style="margin-bottom:12px;">
+      <label for="g-last">Last name (optional)</label>
+      <input type="text" id="g-last" autocomplete="family-name" style="margin-bottom:12px;">
+      <label for="g-phone">Phone (optional)</label>
+      <input type="text" id="g-phone" autocomplete="tel">
+    </div>
+
+    <div style="margin-top:18px;">
+      <button class="btn" id="lk-btn" onclick="doLookup()">Continue</button>
+    </div>
+  </div>
+
+  <!-- ===== אישור שם ===== -->
+  <div id="screen-welcome" class="card hidden" style="text-align:center;">
+    <div id="welcome-avatar"></div>
+    <h2 id="welcome-title">Welcome back</h2>
+    <p class="hint">We found your file. Let's map out where your American life could begin — it takes about one minute.</p>
+    <div style="margin-top:10px;">
+      <button class="btn" onclick="startQuiz()">Start my map</button>
+    </div>
+  </div>
+
+  <!-- ===== שאלון ===== -->
+  <div id="screen-quiz" class="hidden">
+    <div class="progress"><span id="p-label">Step 1 of 5</span><div class="bar"><div class="fill" id="p-fill"></div></div></div>
+
+    <!-- שלב 1: מקצוע -->
+    <div class="card q-step" id="q1">
+      <h2>What do you do for a living?</h2>
+      <p class="hint">We match salaries in your field across the United States.</p>
+      <div class="opt-grid" data-q="profession">
+        <div class="opt" data-v="tech"><span class="ico">&#128187;</span>Technology &amp; IT</div>
+        <div class="opt" data-v="health"><span class="ico">&#9877;&#65039;</span>Healthcare &amp; Medicine</div>
+        <div class="opt" data-v="business"><span class="ico">&#128188;</span>Business &amp; Finance</div>
+        <div class="opt" data-v="engineering"><span class="ico">&#9881;&#65039;</span>Engineering</div>
+        <div class="opt" data-v="education"><span class="ico">&#127891;</span>Education &amp; Research</div>
+        <div class="opt" data-v="trades"><span class="ico">&#128736;&#65039;</span>Skilled Trades &amp; Construction</div>
+        <div class="opt" data-v="creative"><span class="ico">&#127912;</span>Creative &amp; Media</div>
+        <div class="opt" data-v="hospitality"><span class="ico">&#127869;&#65039;</span>Hospitality &amp; Service</div>
+      </div>
+      <div class="step-nav"><span></span><button class="btn" id="n1" disabled onclick="nextStep(2)">Next</button></div>
+    </div>
+
+    <!-- שלב 2: משפחה -->
+    <div class="card q-step hidden" id="q2">
+      <h2>Who is making the journey with you?</h2>
+      <p class="hint">This helps us weigh schools and family neighborhoods.</p>
+      <div class="opt-grid" data-q="family">
+        <div class="opt" data-v="single"><span class="ico">&#129489;</span>Just me</div>
+        <div class="opt" data-v="couple"><span class="ico">&#128107;</span>My partner and me</div>
+        <div class="opt" data-v="kids"><span class="ico">&#128106;</span>Family with children</div>
+        <div class="opt" data-v="kids_teen"><span class="ico">&#127890;</span>Family with teenagers</div>
+      </div>
+      <div class="step-nav"><button class="btn btn-ghost" onclick="prevStep(1)">Back</button><button class="btn" id="n2" disabled onclick="nextStep(3)">Next</button></div>
+    </div>
+
+    <!-- שלב 3: סגנון חיים -->
+    <div class="card q-step hidden" id="q3">
+      <h2>Where do you see yourself living?</h2>
+      <p class="hint">Picture your everyday life — the street outside your window.</p>
+      <div class="opt-grid" data-q="lifestyle">
+        <div class="opt" data-v="urban"><span class="ico">&#127961;&#65039;</span>Big city energy<small>Downtown, transit, everything nearby</small></div>
+        <div class="opt" data-v="suburban"><span class="ico">&#127968;</span>Quiet suburbs<small>A house, a yard, good schools</small></div>
+        <div class="opt" data-v="nature"><span class="ico">&#127956;&#65039;</span>Close to nature<small>Mountains, trails, open space</small></div>
+        <div class="opt" data-v="coastal"><span class="ico">&#127958;&#65039;</span>Near the water<small>Ocean air, beach weekends</small></div>
+      </div>
+      <div class="step-nav"><button class="btn btn-ghost" onclick="prevStep(2)">Back</button><button class="btn" id="n3" disabled onclick="nextStep(4)">Next</button></div>
+    </div>
+
+    <!-- שלב 4: תקציב -->
+    <div class="card q-step hidden" id="q4">
+      <h2>Your monthly housing budget</h2>
+      <p class="hint">An estimate is fine — rent or mortgage, in US dollars.</p>
+      <div class="opt-grid" data-q="budget">
+        <div class="opt" data-v="1000">Up to $1,200</div>
+        <div class="opt" data-v="1600">$1,200 &ndash; $2,000</div>
+        <div class="opt" data-v="2500">$2,000 &ndash; $3,000</div>
+        <div class="opt" data-v="3600">Over $3,000</div>
+      </div>
+      <div class="step-nav"><button class="btn btn-ghost" onclick="prevStep(3)">Back</button><button class="btn" id="n4" disabled onclick="nextStep(5)">Next</button></div>
+    </div>
+
+    <!-- שלב 5: עדיפויות -->
+    <div class="card q-step hidden" id="q5">
+      <h2>What matters most to you?</h2>
+      <p class="hint">Choose up to three.</p>
+      <div class="opt-grid" data-q="priorities" data-multi="3">
+        <div class="opt" data-v="salary"><span class="ico">&#128176;</span>Higher salary</div>
+        <div class="opt" data-v="afford"><span class="ico">&#127974;</span>Affordable living</div>
+        <div class="opt" data-v="schools"><span class="ico">&#127979;</span>Excellent schools</div>
+        <div class="opt" data-v="warm"><span class="ico">&#9728;&#65039;</span>Warm, sunny weather</div>
+        <div class="opt" data-v="ocean"><span class="ico">&#127754;</span>Near the ocean</div>
+        <div class="opt" data-v="community"><span class="ico">&#129309;</span>Strong local community</div>
+      </div>
+      <div class="step-nav"><button class="btn btn-ghost" onclick="prevStep(4)">Back</button><button class="btn" id="n5" disabled onclick="nextStep(6)">Next</button></div>
+    </div>
+
+    <!-- שלב 6: סופי שבוע ותחביבים -->
+    <div class="card q-step hidden" id="q6">
+      <h2>How do you love spending weekends?</h2>
+      <p class="hint">Choose up to two — we'll show these near your new home.</p>
+      <div class="opt-grid" data-q="weekend" data-multi="2">
+        <div class="opt" data-v="outdoors"><span class="ico">&#129406;</span>Nature &amp; hiking</div>
+        <div class="opt" data-v="beach"><span class="ico">&#127958;&#65039;</span>Beach &amp; water</div>
+        <div class="opt" data-v="golf"><span class="ico">&#9971;</span>Golf</div>
+        <div class="opt" data-v="fitness"><span class="ico">&#127947;&#65039;</span>Fitness &amp; sports</div>
+        <div class="opt" data-v="arts"><span class="ico">&#127917;</span>Arts &amp; culture</div>
+        <div class="opt" data-v="food"><span class="ico">&#127869;&#65039;</span>Food &amp; dining</div>
+      </div>
+      <div class="step-nav"><button class="btn btn-ghost" onclick="prevStep(5)">Back</button><button class="btn" id="n6" disabled onclick="revealMap()">Reveal my map</button></div>
+    </div>
+  </div>
+
+  <!-- ===== מסך טעינה ===== -->
+  <div id="screen-loading" class="card loading-screen hidden">
+    <svg class="spin" viewBox="0 0 48 48" aria-hidden="true">
+      <circle cx="24" cy="24" r="21" fill="none" stroke="#B08D3E" stroke-width="1.5"/>
+      <polygon points="24,6 27,24 24,42 21,24" fill="#1F3A5F"/>
+      <polygon points="6,24 24,21 42,24 24,27" fill="#B08D3E"/>
+      <circle cx="24" cy="24" r="2.5" fill="#1F3A5F"/>
+    </svg>
+    <p id="loading-text">Reviewing 30 metropolitan areas...</p>
+  </div>
+
+  <!-- ===== תוצאות ===== -->
+  <div id="screen-results" class="hidden">
+    <div class="cert-head">
+      <div id="cert-avatar"></div>
+      <div class="eyebrow">Personal Relocation Map</div>
+      <h2>Where your American life begins</h2>
+      <div class="name-line" id="cert-name"></div>
+    </div>
+
+    <!-- ===== כפתור תשלום עליון — גלוי מיד עם התוצאות ===== -->
+    <div id="top-cta" style="text-align:center;margin:0 0 22px;">
+      <button id="top-pay-btn" onclick="goToPayment()"
+        style="font-family:Georgia,serif;font-size:19px;font-weight:bold;color:#fff;cursor:pointer;
+        background:#1F3A5F;border:3px solid #14273F;border-radius:8px;padding:18px 40px;width:100%;max-width:440px;
+        box-shadow:0 4px 14px rgba(31,58,95,.4);animation:payPulse 1.6s ease-in-out infinite;">
+        Open Your Green Card File
+      </button>
+      <div style="font-family:Arial,sans-serif;font-size:12px;color:var(--text-muted);margin-top:8px;">
+        Reviewed personally by our team
+      </div>
+    </div>
+
+
+    <div id="map" role="img" aria-label="Map of the United States showing your matched cities"></div>
+
+    <div id="top-city"></div>
+    <div id="other-cities"></div>
+
+    <!-- ===== CTA סיום — הזמנה לתכנן את הדרך (ללא נעילת תוכן) ===== -->
+    <div class="card" style="text-align:center;border:1px solid var(--brass);outline:3px double var(--brass);outline-offset:3px;margin:26px 4px 0;">
+      <h3 style="font-size:23px;font-weight:normal;margin-bottom:8px;">You've seen where. Now let's make it real.</h3>
+      <p style="font-family:Arial,sans-serif;font-size:14px;color:var(--text-muted);max-width:460px;margin:0 auto 20px;">Your map shows the destination &mdash; your Green Card file opens the way there. Our team will review your profile and match you with the pathway that fits your direction.</p>
+      <button class="btn btn-gold" style="max-width:400px;" id="final-btn" onclick="goToPayment()">Open my Green Card file &mdash; $29</button>
+      <div style="font-family:Arial,sans-serif;font-size:11px;color:var(--text-muted);margin-top:10px;">One-time payment &middot; Reviewed personally by our team</div>
+    </div>
+
+    <p class="disclaimer">Salary, rent and cost-of-living figures are estimates based on publicly available data and are provided for general guidance only. They do not constitute financial or legal advice. Immigration Advice Service &middot; All rights reserved.</p>
+  </div>
+
 </div>
+<script>
+/* =====================================================================
+   Your American Life Map — Immigration Advice Service
+   כלי עצמאי: זיהוי לפי אימייל -> שאלון -> מפת התאמה -> CTA לתשלום $29
+   שמירה ל-Bitrix24: הערת Timeline + עדכון COMMENTS (ללא שינוי סטטוס)
+   ===================================================================== */
 
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F6E9CD;">
-<tr><td align="center" style="padding:30px 12px;">
+/* ---------- הגדרות ---------- */
+var WEBHOOK = 'https://immiworld.org/rest/147/47yrflms2cje1cbe/';
+var PAYMENT_URL = 'https://immigrationadviceservice.org/new-va-payment-29/?utm_campaign=dream_map';
 
-  <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#FFFDF7;border:1px solid #E3C27A;">
+/* ---------- מאגר ערים: 30 מטרופולינים ----------
+   col = מדד יוקר מחיה (100 = ממוצע ארצי)
+   rent = שכ"ד חודשי ממוצע לדירת 2 חדרים ($)
+   schools/comm = ציון 1-10 | climate: warm/mild/cold | sun/coast: 0/1
+   vibes: עירוני/פרברי/טבע 0-10 | sal: שכר שנתי חציוני לפי תחום ($K)
+*/
+var CITIES=[
+{n:'Austin',s:'Texas',lat:30.27,lng:-97.74,col:103,rent:1650,schools:7,comm:7,climate:'warm',sun:1,coast:0,vibes:{urban:7,suburban:8,nature:6},sal:{tech:128,health:82,business:86,engineering:98,education:58,trades:56,creative:64,hospitality:38}},
+{n:'Dallas–Fort Worth',s:'Texas',lat:32.78,lng:-96.80,col:101,rent:1550,schools:7,comm:6,climate:'warm',sun:1,coast:0,vibes:{urban:7,suburban:9,nature:4},sal:{tech:115,health:80,business:88,engineering:96,education:57,trades:55,creative:60,hospitality:37}},
+{n:'Houston',s:'Texas',lat:29.76,lng:-95.37,col:96,rent:1400,schools:6,comm:6,climate:'warm',sun:1,coast:1,vibes:{urban:7,suburban:8,nature:4},sal:{tech:108,health:84,business:87,engineering:105,education:57,trades:58,creative:57,hospitality:36}},
+{n:'San Antonio',s:'Texas',lat:29.42,lng:-98.49,col:92,rent:1250,schools:6,comm:7,climate:'warm',sun:1,coast:0,vibes:{urban:5,suburban:8,nature:5},sal:{tech:98,health:76,business:74,engineering:88,education:54,trades:52,creative:52,hospitality:34}},
+{n:'Miami',s:'Florida',lat:25.76,lng:-80.19,col:114,rent:2350,schools:6,comm:7,climate:'warm',sun:1,coast:1,vibes:{urban:8,suburban:6,nature:4},sal:{tech:100,health:78,business:84,engineering:86,education:53,trades:52,creative:60,hospitality:40}},
+{n:'Orlando',s:'Florida',lat:28.54,lng:-81.38,col:99,rent:1650,schools:6,comm:6,climate:'warm',sun:1,coast:0,vibes:{urban:6,suburban:8,nature:5},sal:{tech:96,health:74,business:73,engineering:85,education:52,trades:50,creative:55,hospitality:38}},
+{n:'Tampa',s:'Florida',lat:27.95,lng:-82.46,col:100,rent:1700,schools:6,comm:7,climate:'warm',sun:1,coast:1,vibes:{urban:6,suburban:8,nature:5},sal:{tech:100,health:76,business:78,engineering:87,education:53,trades:51,creative:55,hospitality:37}},
+{n:'Jacksonville',s:'Florida',lat:30.33,lng:-81.66,col:93,rent:1350,schools:6,comm:6,climate:'warm',sun:1,coast:1,vibes:{urban:5,suburban:8,nature:6},sal:{tech:95,health:74,business:74,engineering:84,education:52,trades:51,creative:51,hospitality:35}},
+{n:'Atlanta',s:'Georgia',lat:33.75,lng:-84.39,col:98,rent:1600,schools:7,comm:7,climate:'warm',sun:1,coast:0,vibes:{urban:8,suburban:8,nature:5},sal:{tech:112,health:79,business:85,engineering:92,education:57,trades:53,creative:62,hospitality:37}},
+{n:'Charlotte',s:'North Carolina',lat:35.23,lng:-80.84,col:97,rent:1500,schools:7,comm:7,climate:'mild',sun:1,coast:0,vibes:{urban:6,suburban:8,nature:6},sal:{tech:108,health:77,business:90,engineering:90,education:55,trades:53,creative:57,hospitality:36}},
+{n:'Raleigh–Durham',s:'North Carolina',lat:35.78,lng:-78.64,col:98,rent:1450,schools:8,comm:8,climate:'mild',sun:1,coast:0,vibes:{urban:5,suburban:9,nature:7},sal:{tech:118,health:80,business:82,engineering:95,education:60,trades:53,creative:58,hospitality:36}},
+{n:'Nashville',s:'Tennessee',lat:36.16,lng:-86.78,col:99,rent:1550,schools:6,comm:7,climate:'mild',sun:1,coast:0,vibes:{urban:7,suburban:7,nature:6},sal:{tech:104,health:80,business:80,engineering:88,education:55,trades:53,creative:65,hospitality:38}},
+{n:'Phoenix',s:'Arizona',lat:33.45,lng:-112.07,col:103,rent:1500,schools:6,comm:6,climate:'warm',sun:1,coast:0,vibes:{urban:6,suburban:9,nature:7},sal:{tech:106,health:80,business:78,engineering:92,education:54,trades:55,creative:56,hospitality:37}},
+{n:'Las Vegas',s:'Nevada',lat:36.17,lng:-115.14,col:101,rent:1450,schools:5,comm:5,climate:'warm',sun:1,coast:0,vibes:{urban:7,suburban:8,nature:6},sal:{tech:96,health:82,business:72,engineering:88,education:55,trades:58,creative:54,hospitality:44}},
+{n:'Denver',s:'Colorado',lat:39.74,lng:-104.99,col:110,rent:1800,schools:7,comm:7,climate:'cold',sun:1,coast:0,vibes:{urban:7,suburban:7,nature:10},sal:{tech:118,health:83,business:84,engineering:98,education:58,trades:58,creative:62,hospitality:39}},
+{n:'Salt Lake City',s:'Utah',lat:40.76,lng:-111.89,col:104,rent:1550,schools:7,comm:8,climate:'cold',sun:1,coast:0,vibes:{urban:5,suburban:8,nature:10},sal:{tech:112,health:78,business:80,engineering:92,education:56,trades:56,creative:56,hospitality:36}},
+{n:'Seattle',s:'Washington',lat:47.61,lng:-122.33,col:128,rent:2200,schools:8,comm:6,climate:'mild',sun:0,coast:1,vibes:{urban:8,suburban:7,nature:9},sal:{tech:145,health:92,business:96,engineering:110,education:66,trades:66,creative:70,hospitality:45}},
+{n:'Portland',s:'Oregon',lat:45.52,lng:-122.68,col:115,rent:1750,schools:7,comm:7,climate:'mild',sun:0,coast:1,vibes:{urban:7,suburban:7,nature:9},sal:{tech:112,health:85,business:80,engineering:95,education:60,trades:60,creative:62,hospitality:40}},
+{n:'San Francisco Bay Area',s:'California',lat:37.77,lng:-122.42,col:170,rent:3100,schools:8,comm:6,climate:'mild',sun:1,coast:1,vibes:{urban:9,suburban:7,nature:8},sal:{tech:175,health:105,business:115,engineering:130,education:75,trades:75,creative:85,hospitality:50}},
+{n:'San Diego',s:'California',lat:32.72,lng:-117.16,col:140,rent:2600,schools:7,comm:7,climate:'warm',sun:1,coast:1,vibes:{urban:7,suburban:8,nature:8},sal:{tech:125,health:92,business:88,engineering:105,education:64,trades:62,creative:66,hospitality:42}},
+{n:'Los Angeles',s:'California',lat:34.05,lng:-118.24,col:145,rent:2500,schools:6,comm:6,climate:'warm',sun:1,coast:1,vibes:{urban:9,suburban:7,nature:7},sal:{tech:130,health:90,business:92,engineering:105,education:65,trades:62,creative:80,hospitality:42}},
+{n:'Sacramento',s:'California',lat:38.58,lng:-121.49,col:112,rent:1750,schools:6,comm:6,climate:'warm',sun:1,coast:0,vibes:{urban:5,suburban:8,nature:7},sal:{tech:110,health:90,business:80,engineering:95,education:62,trades:60,creative:58,hospitality:38}},
+{n:'New York City',s:'New York',lat:40.71,lng:-74.01,col:168,rent:3300,schools:7,comm:7,climate:'cold',sun:0,coast:1,vibes:{urban:10,suburban:5,nature:3},sal:{tech:145,health:98,business:120,engineering:105,education:72,trades:70,creative:85,hospitality:48}},
+{n:'North New Jersey',s:'New Jersey',lat:40.85,lng:-74.10,col:130,rent:2300,schools:8,comm:8,climate:'cold',sun:0,coast:1,vibes:{urban:6,suburban:9,nature:5},sal:{tech:130,health:95,business:105,engineering:100,education:70,trades:66,creative:70,hospitality:42}},
+{n:'Boston',s:'Massachusetts',lat:42.36,lng:-71.06,col:145,rent:2800,schools:9,comm:7,climate:'cold',sun:0,coast:1,vibes:{urban:8,suburban:7,nature:5},sal:{tech:140,health:100,business:105,engineering:108,education:75,trades:68,creative:72,hospitality:44}},
+{n:'Philadelphia',s:'Pennsylvania',lat:39.95,lng:-75.17,col:105,rent:1700,schools:6,comm:7,climate:'cold',sun:0,coast:0,vibes:{urban:8,suburban:7,nature:4},sal:{tech:110,health:88,business:88,engineering:92,education:62,trades:60,creative:60,hospitality:38}},
+{n:'Washington DC Metro',s:'DC / Virginia / Maryland',lat:38.90,lng:-77.04,col:140,rent:2400,schools:8,comm:7,climate:'mild',sun:0,coast:0,vibes:{urban:8,suburban:8,nature:5},sal:{tech:135,health:95,business:105,engineering:108,education:72,trades:65,creative:70,hospitality:42}},
+{n:'Chicago',s:'Illinois',lat:41.88,lng:-87.63,col:107,rent:1900,schools:7,comm:7,climate:'cold',sun:0,coast:0,vibes:{urban:9,suburban:7,nature:3},sal:{tech:115,health:86,business:95,engineering:95,education:63,trades:64,creative:64,hospitality:40}},
+{n:'Minneapolis',s:'Minnesota',lat:44.98,lng:-93.27,col:103,rent:1500,schools:8,comm:8,climate:'cold',sun:0,coast:0,vibes:{urban:6,suburban:8,nature:7},sal:{tech:110,health:88,business:88,engineering:94,education:62,trades:62,creative:60,hospitality:39}},
+{n:'Columbus',s:'Ohio',lat:39.96,lng:-83.00,col:92,rent:1300,schools:7,comm:7,climate:'cold',sun:0,coast:0,vibes:{urban:5,suburban:8,nature:4},sal:{tech:100,health:78,business:78,engineering:88,education:56,trades:55,creative:54,hospitality:35}},
+{n:'Kansas City',s:'Missouri',lat:39.10,lng:-94.58,col:90,rent:1250,schools:6,comm:7,climate:'cold',sun:1,coast:0,vibes:{urban:5,suburban:8,nature:5},sal:{tech:98,health:76,business:76,engineering:87,education:55,trades:55,creative:53,hospitality:34}}
+];
 
-    <!-- פס שמש עליון -->
-    <tr>
-      <td style="padding:0;line-height:0;font-size:0;">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-          <td width="33%" style="height:6px;background-color:#1F3A5F;font-size:0;line-height:0;">&nbsp;</td>
-          <td width="34%" style="height:6px;background-color:#D4941E;font-size:0;line-height:0;">&nbsp;</td>
-          <td width="33%" style="height:6px;background-color:#E0862B;font-size:0;line-height:0;">&nbsp;</td>
-        </tr></table>
-      </td>
-    </tr>
+/* תוויות תצוגה */
+var PROF_LABEL={tech:'Technology & IT',health:'Healthcare & Medicine',business:'Business & Finance',engineering:'Engineering',education:'Education & Research',trades:'Skilled Trades & Construction',creative:'Creative & Media',hospitality:'Hospitality & Service'};
+var LIFE_LABEL={urban:'Big city energy',suburban:'Quiet suburbs',nature:'Close to nature',coastal:'Near the water'};
+var FAM_LABEL={single:'Just me',couple:'Partner and me',kids:'Family with children',kids_teen:'Family with teenagers'};
+var PRI_LABEL={salary:'Higher salary',afford:'Affordable living',schools:'Excellent schools',warm:'Warm weather',ocean:'Near the ocean',community:'Strong community'};
+var BUDGET_LABEL={1000:'Up to $1,200',1600:'$1,200–$2,000',2500:'$2,000–$3,000',3600:'Over $3,000'};
+/* מעסיקים מובילים — כללי (ארצי) לפי תחום */
+var EMPLOYERS_GENERAL={
+tech:['Microsoft','Google','Amazon','Apple','Meta','Oracle','IBM','Dell','Intel','Cisco'],
+health:['Mayo Clinic','Cleveland Clinic','HCA Healthcare','Kaiser Permanente','AdventHealth','Providence','Ascension'],
+business:['JPMorgan Chase','Bank of America','Goldman Sachs','Morgan Stanley','Deloitte','EY','PwC','KPMG','Citi','Wells Fargo'],
+engineering:['Boeing','Lockheed Martin','SpaceX','Tesla','Northrop Grumman','Raytheon','Bechtel','Jacobs','Siemens','Honeywell'],
+education:['Stanford University','Harvard University','UCLA','University of Washington','Georgia Tech','Duke University','Johns Hopkins'],
+trades:['Turner Construction','Bechtel','Kiewit','Fluor','Skanska USA','DPR Construction','Gilbane','AECOM','EMCOR'],
+creative:['Disney','NBCUniversal','Warner Bros. Discovery','Netflix','Sony Pictures','Adobe','Electronic Arts','Spotify'],
+hospitality:['Marriott','Hilton','Hyatt','Four Seasons','Ritz-Carlton','Disney Parks','Starbucks']
+};
 
-    <!-- ===== כותרת: מסגרת כפולה ===== -->
-    <tr><td style="padding:24px 24px 0;">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:3px double #1F3A5F;">
-      <tr><td style="border:1px solid #1F3A5F;background-color:#FFF6E0;">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-        <tr><td align="center" style="padding:26px 20px 22px;">
-          <div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#D4941E;padding-bottom:10px;">Immigration Advice Service</div>
-          <a href="https://supportimmigrationadviceserviceorg.github.io/assessment/dream_map.html?utm_source=email&utm_medium=campaign&utm_campaign=dream_map_launch" style="text-decoration:none;"><div style="font-family:Georgia,'Times New Roman',serif;font-size:28px;color:#1F3A5F;line-height:1.3;">Your American Life Map &#127482;&#127480;<br>Is Ready</div></a>
-          <div style="font-family:Georgia,'Times New Roman',serif;font-size:14px;font-style:italic;color:#6B6353;padding-top:8px;">A realistic preview of the life you could build in the U.S.</div>
-        </td></tr>
-        </table>
-      </td></tr>
-      </table>
-    </td></tr>
+/* מעסיקים לפי עיר + תחום — כשקיים, מוצג במקום הרשימה הארצית */
+var EMPLOYERS_CITY={"Austin": {"tech": ["Dell Technologies", "Apple", "Oracle", "IBM", "Tesla", "Indeed", "Amazon", "Google", "Cisco", "AMD"], "health": ["St. David's HealthCare", "Ascension Seton", "Baylor Scott & White Health", "Texas Children's Hospital", "Austin Regional Clinic", "UT Health Austin", "HCA Healthcare", "Cedar Park Regional", "CommUnityCare", "Central Health"], "business": ["Charles Schwab", "Visa", "Deloitte", "EY", "KPMG", "PwC", "JPMorgan Chase", "Bank of America", "Frost Bank", "Dimensional Fund Advisors"], "engineering": ["Tesla", "Samsung Austin Semiconductor", "Applied Materials", "NXP Semiconductors", "National Instruments", "Emerson", "Fluor", "Jacobs", "AECOM", "Honeywell"], "education": ["University of Texas at Austin", "Austin Community College", "Texas State University", "UT Dell Medical School", "Austin ISD", "Round Rock ISD", "Eanes ISD", "Pflugerville ISD", "Leander ISD", "Harmony Public Schools"], "trades": ["DPR Construction", "Turner Construction", "Kiewit", "Bechtel", "JE Dunn Construction", "Austin Commercial", "Gilbane", "Skanska", "Fluor", "Hensel Phelps"], "creative": ["Rooster Teeth", "Electronic Arts", "Meta Reality Labs", "Adobe", "GSD&M", "WP Engine", "Amazon Studios Austin", "IBM Design"], "hospitality": ["Marriott", "Hilton", "Hyatt", "Four Seasons Austin", "Omni Hotels", "Fairmont Austin", "Whole Foods Market HQ", "Starbucks", "Chick-fil-A"]}, "Dallas–Fort Worth": {"tech": ["AT&T", "Texas Instruments", "IBM", "Oracle", "Salesforce", "Amazon", "Microsoft", "Cisco", "Dell Technologies", "Capital One Tech"], "health": ["Baylor Scott & White Health", "Texas Health Resources", "UT Southwestern Medical Center", "Medical City Healthcare", "Children's Health", "Methodist Health System", "Cook Children's", "HCA Healthcare", "Parkland Health"], "business": ["JPMorgan Chase", "Bank of America", "Wells Fargo", "Goldman Sachs", "Deloitte", "EY", "PwC", "KPMG", "Charles Schwab", "Capital One"], "engineering": ["Lockheed Martin", "Raytheon", "Texas Instruments", "Jacobs", "AECOM", "Fluor", "Toyota North America", "Boeing", "Siemens", "Honeywell"], "education": ["Southern Methodist University", "University of Texas at Dallas", "University of North Texas", "Texas Christian University", "Dallas College", "UT Southwestern", "Dallas ISD", "Plano ISD", "Frisco ISD", "Fort Worth ISD"], "trades": ["Turner Construction", "Kiewit", "Fluor", "DPR Construction", "Hensel Phelps", "Austin Commercial", "Skanska", "AECOM", "Gilbane", "McCarthy Building Companies"], "creative": ["The Richards Group", "AT&T Media", "Nexstar Media Group", "Dallas Morning News", "Univision Dallas", "WFAA", "Freeman", "Match Group", "Topgolf Media", "Bottle Rocket"], "hospitality": ["Marriott", "Hilton", "Hyatt", "Omni Hotels", "Four Seasons Dallas", "American Airlines", "Southwest Airlines", "DFW Airport", "Chick-fil-A", "Starbucks"]}, "Houston": {"tech": ["Hewlett Packard Enterprise", "Microsoft", "Amazon", "IBM", "Oracle", "Accenture", "Cognizant", "Infosys", "BMC Software", "Chevron Technology"], "health": ["Texas Medical Center", "Houston Methodist", "MD Anderson Cancer Center", "Memorial Hermann", "Baylor College of Medicine", "Texas Children's Hospital", "HCA Houston Healthcare", "Harris Health", "Kelsey-Seybold Clinic", "UTHealth Houston"], "business": ["JPMorgan Chase", "Bank of America", "Wells Fargo", "Deloitte", "EY", "PwC", "KPMG", "Citi", "Morgan Stanley", "Goldman Sachs"], "engineering": ["NASA Johnson Space Center", "ExxonMobil", "Chevron", "Shell", "BP", "Halliburton", "Schlumberger", "Bechtel", "Fluor", "Jacobs"], "education": ["Rice University", "University of Houston", "Texas Southern University", "Baylor College of Medicine", "UTHealth Houston", "Houston ISD", "Katy ISD", "Spring Branch ISD", "Clear Creek ISD", "Lone Star College"], "trades": ["Bechtel", "Fluor", "Kiewit", "Turner Construction", "McCarthy", "DPR Construction", "AECOM", "Jacobs", "Zachry Group", "EMCOR"], "creative": ["Houston Chronicle", "KHOU", "ABC13 Houston", "Univision Houston", "Lopez Negrete Communications", "MMI Agency", "Houston First", "iHeartMedia Houston", "CultureMap Houston"], "hospitality": ["Marriott", "Hilton", "Hyatt", "Four Seasons Houston", "The Post Oak Hotel", "Landry's", "United Airlines", "George Bush Airport", "Starbucks", "Chick-fil-A"]}, "San Antonio": {"tech": ["USAA", "Rackspace Technology", "Accenture", "Booz Allen Hamilton", "Oracle", "Microsoft", "Amazon", "H-E-B Digital", "Frost Bank Tech", "Southwest Research Institute"], "health": ["University Health", "Methodist Healthcare", "Baptist Health System", "CHRISTUS Santa Rosa", "UT Health San Antonio", "Brooke Army Medical Center", "HCA Healthcare", "CommuniCare", "WellMed", "Gonzaba Medical Group"], "business": ["USAA", "Frost Bank", "Wells Fargo", "JPMorgan Chase", "Bank of America", "Deloitte", "EY", "PwC", "Citi", "Security Service FCU"], "engineering": ["Southwest Research Institute", "Boeing", "Lockheed Martin", "Raytheon", "General Dynamics", "Booz Allen Hamilton", "AECOM", "Jacobs", "CPS Energy"], "education": ["UT San Antonio", "UT Health San Antonio", "Trinity University", "St. Mary's University", "Alamo Colleges", "San Antonio ISD", "Northside ISD", "NEISD", "Texas Biomedical Research Institute"], "trades": ["Zachry Group", "Turner Construction", "Joeris General Contractors", "Bartlett Cocke", "DPR Construction", "Kiewit", "AECOM", "Skanska", "Hensel Phelps", "EMCOR"], "creative": ["San Antonio Express-News", "KSAT", "KENS 5", "Univision San Antonio", "H-E-B Marketing", "The PM Group", "Creative Civilization", "iHeartMedia", "Spurs Sports & Entertainment"], "hospitality": ["Marriott", "Hilton", "Hyatt", "Omni La Mansión", "Hotel Emma", "H-E-B", "SeaWorld San Antonio", "Six Flags Fiesta Texas", "Starbucks", "Chick-fil-A"]}, "Miami": {"tech": ["Microsoft Latin America", "Kaseya", "Oracle", "Amazon", "Google", "Meta", "IBM", "Visa", "Ryder Technology", "Magic Leap"], "health": ["Baptist Health South Florida", "Jackson Health System", "Mount Sinai Medical Center", "Nicklaus Children's Hospital", "University of Miami Health", "Cleveland Clinic Florida", "HCA Florida Healthcare", "Memorial Healthcare System", "Leon Medical Centers", "Cano Health"], "business": ["JPMorgan Chase", "Bank of America", "Citi", "Wells Fargo", "Blackstone", "Citadel", "Goldman Sachs", "Morgan Stanley", "Deloitte", "PwC"], "engineering": ["Florida Power & Light", "Boeing", "Airbus Americas", "Jacobs", "AECOM", "WSP", "Kimley-Horn", "Moss Construction", "Suffolk Construction", "Royal Caribbean Engineering"], "education": ["University of Miami", "Florida International University", "Miami Dade College", "Barry University", "Miami-Dade County Public Schools", "Gulliver Prep", "Ransom Everglades", "Palmer Trinity", "Nova Southeastern University", "St. Thomas University"], "trades": ["Moss Construction", "Suffolk Construction", "Coastal Construction", "Turner Construction", "Kiewit", "AECOM", "Skanska", "DPR Construction", "Related Group Construction"], "creative": ["Univision", "Telemundo", "NBCUniversal Miami", "Miami Herald", "WSVN", "WPLG", "Royal Caribbean Creative", "Carnival Marketing", "Zimmerman Advertising", "The Community Agency"], "hospitality": ["Marriott", "Hilton", "Hyatt", "Four Seasons Miami", "Ritz-Carlton", "Fontainebleau Miami Beach", "Royal Caribbean", "Carnival Cruise Line", "Norwegian Cruise Line", "Starbucks"]}, "Orlando": {"tech": ["Electronic Arts (EA Tiburon)", "Lockheed Martin", "Oracle", "Deloitte Digital", "Amazon Web Services", "Siemens Energy", "Verizon", "AT&T", "IBM", "Cognizant"], "health": ["AdventHealth", "Orlando Health", "Nemours Children's Hospital", "HCA Florida Healthcare", "UF Health Central Florida", "VA Medical Center Orlando", "Aspire Health Partners", "BayCare", "Select Medical"], "business": ["Deloitte", "EY", "KPMG", "PwC", "JPMorgan Chase", "Bank of America", "Wells Fargo", "Truist", "Charles Schwab", "Raymond James"], "engineering": ["Lockheed Martin", "Siemens Energy", "Mitsubishi Power", "Jacobs", "AECOM", "HDR", "Kimley-Horn", "Burns & McDonnell", "Universal Creative", "Walt Disney Imagineering"], "education": ["University of Central Florida", "Valencia College", "Rollins College", "Seminole State College", "Orange County Public Schools", "Lake Nona Medical City", "Full Sail University", "AdventHealth University", "Seminole County Public Schools"], "trades": ["DPR Construction", "Turner Construction", "Skanska", "Gilbane", "Wharton-Smith", "Brasfield & Gorrie", "Kiewit", "AECOM", "Hensel Phelps", "PCL Construction"], "creative": ["Disney Imagineering", "Universal Creative", "EA Tiburon", "NBCUniversal", "Spectrum News 13", "FOX 35 Orlando", "WESH 2", "Telemundo Orlando", "Full Sail Studios", "Darden Creative"], "hospitality": ["Walt Disney World", "Universal Orlando Resort", "Marriott Vacations Worldwide", "Hilton Grand Vacations", "Hyatt Regency Orlando", "SeaWorld Orlando", "Rosen Hotels", "Loews Hotels", "Starbucks"]}, "Tampa": {"tech": ["ConnectWise", "Jabil", "Tech Data", "IBM", "Microsoft", "Amazon", "Oracle", "Accenture", "Citi Technology", "KnowBe4"], "health": ["Tampa General Hospital", "BayCare Health System", "AdventHealth West Florida", "HCA Florida Healthcare", "Moffitt Cancer Center", "Johns Hopkins All Children's", "Florida Orthopaedic Institute", "USF Health", "Kindred Hospital"], "business": ["Citi", "JPMorgan Chase", "Bank of America", "Wells Fargo", "Deloitte", "EY", "PwC", "KPMG", "Raymond James", "Truist"], "engineering": ["Jabil", "Honeywell", "Jacobs", "AECOM", "Kimley-Horn", "WSP", "TECO Energy", "Siemens", "Parsons"], "education": ["University of South Florida", "University of Tampa", "Hillsborough Community College", "St. Petersburg College", "Hillsborough County Public Schools", "Pinellas County Schools", "Berkeley Preparatory School", "USF Health", "Moffitt Research Center"], "trades": ["DPR Construction", "Gilbane", "Turner Construction", "Skanska", "Suffolk Construction", "AECOM", "Kiewit", "Moss Construction", "Brasfield & Gorrie", "Hensel Phelps"], "creative": ["Nielsen", "Raymond James Marketing", "Fox 13 Tampa", "Bay News 9", "Tampa Bay Times", "Visit Tampa Bay", "22Squared", "Outback Marketing", "HSN/QVC Studios"], "hospitality": ["Marriott", "Hilton", "Hyatt", "Seminole Hard Rock Tampa", "Busch Gardens Tampa Bay", "Tampa International Airport", "Starbucks", "Chick-fil-A", "Darden Restaurants", "Bloomin' Brands"]}, "Jacksonville": {"tech": ["FIS", "Black Knight", "IBM", "Microsoft", "Amazon", "Citi Technology", "CSX Technology", "Deloitte", "Cognizant", "Fanatics"], "health": ["Mayo Clinic Florida", "Baptist Health", "UF Health Jacksonville", "Ascension St. Vincent's", "HCA Florida Memorial", "Brooks Rehabilitation", "Wolfson Children's Hospital", "Nemours Children's Health", "Baptist MD Anderson"], "business": ["FIS", "Citi", "JPMorgan Chase", "Bank of America", "Wells Fargo", "Deutsche Bank", "Fidelity National Financial", "Deloitte", "EY", "PwC"], "engineering": ["CSX", "JEA", "Boeing", "Crowley Maritime", "Jacobs", "AECOM", "RS&H", "Haskell", "Honeywell", "Siemens"], "education": ["University of North Florida", "Jacksonville University", "Florida State College at Jacksonville", "Duval County Public Schools", "Bolles School", "Episcopal School", "Mayo Clinic Research", "Edward Waters University"], "trades": ["Haskell", "Gilbane", "DPR Construction", "Turner Construction", "Kiewit", "AECOM", "Skanska", "Brasfield & Gorrie", "Ajax Building", "Stellar"], "creative": ["Fanatics", "WJXT", "First Coast News", "News4JAX", "PGA Tour Creative", "Wingard", "Brunet-García", "Jacksonville Jaguars Media", "Visit Jacksonville"], "hospitality": ["Marriott", "Hilton", "Hyatt", "Jacksonville Jaguars", "Starbucks", "Chick-fil-A", "Amelia Island Resorts", "Ponte Vedra Inn & Club"]}, "Atlanta": {"tech": ["Microsoft", "Google", "Amazon", "NCR Voyix", "Salesforce", "Oracle", "IBM", "Cisco", "Mailchimp", "Equifax"], "health": ["Emory Healthcare", "Piedmont Healthcare", "Children's Healthcare of Atlanta", "Grady Health", "Northside Hospital", "Wellstar Health System", "Kaiser Permanente", "Shepherd Center", "HCA Healthcare"], "business": ["Delta Air Lines", "The Home Depot", "UPS", "Coca-Cola", "JPMorgan Chase", "Bank of America", "Truist", "Deloitte", "EY", "PwC"], "engineering": ["Delta TechOps", "Norfolk Southern", "Georgia Power", "Honeywell", "Siemens", "Jacobs", "AECOM", "Kimley-Horn", "Lockheed Martin"], "education": ["Georgia Tech", "Emory University", "Georgia State University", "Kennesaw State University", "Atlanta Public Schools", "Fulton County Schools", "Agnes Scott College", "Morehouse College", "Spelman College"], "trades": ["Brasfield & Gorrie", "Turner Construction", "DPR Construction", "Holder Construction", "Skanska", "AECOM", "Kiewit", "Gilbane", "Hensel Phelps", "Balfour Beatty"], "creative": ["CNN", "Warner Bros. Discovery", "Tyler Perry Studios", "Cox Media", "Turner Studios", "Mailchimp Creative", "The Weather Channel", "11Alive", "WSB-TV", "Cartoon Network Studios"], "hospitality": ["Delta Air Lines", "Marriott", "Hilton", "Hyatt", "Chick-fil-A", "Porsche Experience Center", "Atlanta Airport", "Four Seasons Atlanta", "Starbucks", "Omni Hotels"]}, "Charlotte": {"tech": ["Microsoft", "Amazon", "Red Ventures", "LendingTree", "IBM", "Cisco", "Oracle", "Honeywell", "Lowe's Technology", "AvidXchange"], "health": ["Atrium Health", "Novant Health", "Carolinas Medical Center", "Levine Children's Hospital", "HCA Healthcare", "OrthoCarolina", "Wake Forest Health", "Tryon Medical Partners"], "business": ["Bank of America", "Wells Fargo", "Truist", "Ally Financial", "LendingTree", "Deloitte", "EY", "PwC", "KPMG", "JPMorgan Chase"], "engineering": ["Honeywell", "Duke Energy", "Siemens", "Jacobs", "AECOM", "Kimley-Horn", "Fluor", "Carrier", "Bosch", "Corning"], "education": ["UNC Charlotte", "Queens University", "Davidson College", "Central Piedmont Community College", "Charlotte-Mecklenburg Schools", "Charlotte Latin School", "Providence Day School", "Johnson C. Smith University"], "trades": ["Turner Construction", "DPR Construction", "Brasfield & Gorrie", "Skanska", "Gilbane", "Kiewit", "AECOM", "Holder Construction", "Balfour Beatty", "Rodgers Builders"], "creative": ["NASCAR Productions", "ESPN Charlotte", "Red Ventures", "WCNC", "WSOC-TV", "Charlotte Observer", "Lowe's Creative", "Discovery Education", "Accenture Song"], "hospitality": ["Marriott", "Hilton", "Hyatt", "NASCAR", "Charlotte Douglas Airport", "Starbucks", "Chick-fil-A", "Omni Charlotte", "Ritz-Carlton Charlotte"]}, "Seattle": {"tech": ["Microsoft", "Amazon", "Google", "Meta", "Apple", "Adobe", "Salesforce / Tableau", "Expedia", "Zillow", "T-Mobile"], "health": ["UW Medicine", "Swedish Medical Center", "Providence", "Virginia Mason Franciscan", "Seattle Children's", "Fred Hutchinson Cancer Center", "Kaiser Permanente WA", "MultiCare"], "business": ["Amazon", "Starbucks (HQ)", "Costco (HQ)", "Nordstrom (HQ)", "Russell Investments", "Deloitte", "EY", "PwC", "KPMG"], "engineering": ["Boeing", "Blue Origin", "SpaceX (Redmond)", "PACCAR", "Fluke", "Jacobs", "AECOM"], "education": ["University of Washington", "Seattle University", "Seattle Pacific University", "Bellevue College", "Seattle Public Schools", "Lake Washington School District"], "trades": ["Sellen Construction", "GLY Construction", "Lease Crutcher Lewis", "Turner Construction", "Skanska", "Mortenson", "Clark Construction", "Hoffman Construction"], "creative": ["Nintendo of America", "Valve", "Bungie", "Wizards of the Coast", "Amazon Studios", "KING 5", "The Seattle Times", "Starbucks Creative Studio"], "hospitality": ["Starbucks", "Marriott", "Hilton", "Hyatt", "Four Seasons Seattle", "Alaska Airlines (HQ)", "Holland America Line", "Sea-Tac Airport", "The Edgewater", "Space Needle"]}, "San Francisco Bay Area": {"tech": ["Apple", "Google", "Meta", "NVIDIA", "Salesforce", "Adobe", "Cisco", "Intel", "Uber", "Airbnb"], "health": ["Kaiser Permanente (HQ)", "UCSF Health", "Stanford Health Care", "Sutter Health", "John Muir Health", "El Camino Health"], "business": ["Wells Fargo (HQ)", "Visa (HQ)", "Charles Schwab", "Franklin Templeton", "BlackRock", "JPMorgan Chase", "Goldman Sachs", "Deloitte", "EY", "PwC"], "engineering": ["Tesla (Fremont)", "Lockheed Martin (Sunnyvale)", "Applied Materials", "Lam Research", "Bechtel (HQ)", "PG&E", "Jacobs", "AECOM"], "education": ["Stanford University", "UC Berkeley", "UCSF", "San José State", "Santa Clara University", "University of San Francisco", "SFUSD", "Palo Alto Unified"], "trades": ["Swinerton", "DPR Construction (HQ)", "Webcor", "Turner Construction", "Clark Construction", "Skanska", "Nibbi Brothers"], "creative": ["Pixar", "Lucasfilm / ILM", "Netflix (Los Gatos)", "Electronic Arts (HQ)", "YouTube", "Twitch", "Adobe Creative"], "hospitality": ["Marriott", "Hilton", "Hyatt", "Four Seasons SF", "Fairmont San Francisco", "The St. Regis", "United (SFO hub)", "SFO Airport", "Ritz-Carlton Half Moon Bay", "Starbucks"]}, "Los Angeles": {"tech": ["Google", "Snap (HQ)", "SpaceX (HQ)", "Apple (Culver City)", "TikTok US", "Riot Games (HQ)", "Activision Blizzard (HQ)", "Amazon", "Netflix Tech", "Hulu / Disney Streaming"], "health": ["Cedars-Sinai", "UCLA Health", "Keck Medicine of USC", "Kaiser Permanente", "Providence", "Children's Hospital LA", "City of Hope", "Dignity Health"], "business": ["Capital Group (HQ)", "City National Bank (HQ)", "Oaktree Capital (HQ)", "TCW (HQ)", "JPMorgan Chase", "Bank of America", "Wells Fargo", "Deloitte", "EY", "PwC"], "engineering": ["SpaceX", "NASA JPL (Pasadena)", "Northrop Grumman", "Boeing (El Segundo)", "RTX (El Segundo)", "The Aerospace Corporation", "AECOM (HQ)", "Honda R&D (Torrance)", "Parsons"], "education": ["UCLA", "USC", "Caltech", "Cal State Long Beach / Northridge / LA", "LMU", "Pepperdine", "LAUSD", "Pasadena City College"], "trades": ["Turner Construction", "Swinerton", "Clark Construction", "Hathaway Dinwiddie", "Morley Builders", "PCL", "McCarthy", "Hensel Phelps"], "creative": ["Disney (HQ Burbank)", "Warner Bros.", "Netflix (Hollywood)", "NBCUniversal", "Sony Pictures", "Paramount", "Amazon MGM Studios", "Riot Games", "Snap", "TikTok"], "hospitality": ["Disneyland Resort", "Universal Studios Hollywood", "Marriott", "Hilton", "Hyatt", "The Beverly Hills Hotel", "Beverly Wilshire (Four Seasons)", "LAX", "Delta / United hubs", "Wolfgang Puck / SBE"]}, "New York City": {"tech": ["Google", "Meta", "Amazon", "Bloomberg LP (HQ)", "Microsoft", "IBM", "Apple", "Datadog (HQ)", "MongoDB (HQ)", "Spotify US"], "health": ["Northwell Health", "NewYork-Presbyterian", "Mount Sinai", "NYU Langone", "Montefiore", "Memorial Sloan Kettering", "NYC Health + Hospitals", "Hospital for Special Surgery"], "business": ["JPMorgan Chase (HQ)", "Goldman Sachs (HQ)", "Morgan Stanley (HQ)", "Citi (HQ)", "BlackRock (HQ)", "Blackstone (HQ)", "Bank of America", "KKR", "Deloitte", "EY"], "engineering": ["Con Edison", "MTA", "WSP (US HQ)", "AECOM", "Jacobs", "Thornton Tomasetti (HQ)", "Skanska USA (HQ)", "Arup", "HDR"], "education": ["Columbia University", "NYU", "Cornell Tech", "CUNY", "Fordham", "The New School", "NYC Department of Education", "Rockefeller University"], "trades": ["Turner Construction (HQ)", "AECOM Tishman (HQ)", "Skanska USA", "Structure Tone (HQ)", "Lendlease", "Gilbane", "Suffolk", "Hunter Roberts"], "creative": ["NBCUniversal (HQ)", "Warner Bros. Discovery (HQ)", "Paramount (HQ)", "Disney / ABC", "The New York Times", "Condé Nast", "Spotify", "Ogilvy (HQ)", "HBO"], "hospitality": ["Marriott", "Hilton", "Hyatt", "The Plaza", "Four Seasons New York", "The St. Regis", "Union Square Hospitality Group", "JetBlue (HQ)", "Delta (JFK/LGA hubs)", "Shake Shack (HQ)"]}, "Boston": {"tech": ["Google (Cambridge)", "Amazon", "Microsoft (Cambridge)", "HubSpot (HQ)", "Wayfair (HQ)", "Akamai (HQ)", "DraftKings (HQ)", "Toast (HQ)", "Klaviyo (HQ)"], "health": ["Mass General Brigham", "Beth Israel Lahey Health", "Boston Children's", "Dana-Farber Cancer Institute", "Tufts Medicine", "Boston Medical Center", "Moderna (HQ)", "Vertex (HQ)", "Biogen (HQ)"], "business": ["Fidelity (HQ)", "State Street (HQ)", "Bain & Company (HQ)", "BCG (HQ)", "Wellington Management (HQ)", "John Hancock (HQ)", "Liberty Mutual (HQ)", "Santander US (HQ)", "Deloitte", "EY"], "engineering": ["RTX (HQ Waltham)", "MITRE", "Draper", "MathWorks (HQ)", "Bose (HQ)", "iRobot (HQ)", "Analog Devices (HQ)", "GE Vernova (HQ)", "Jacobs"], "education": ["Harvard University", "MIT", "Boston University", "Northeastern", "Tufts", "Boston College", "UMass Boston", "Berklee College of Music", "Boston Public Schools"], "trades": ["Suffolk Construction (HQ)", "Turner Construction", "Gilbane", "Skanska", "Consigli (HQ MA)", "Shawmut (HQ)", "Lee Kennedy", "John Moriarty & Associates"], "creative": ["WGBH", "The Boston Globe", "Arnold Worldwide (HQ)", "Hill Holliday (HQ)", "MullenLowe", "Converse (HQ)", "New Balance (HQ)", "Digitas"], "hospitality": ["Dunkin' (HQ)", "Marriott", "Hilton", "Four Seasons Boston", "Encore Boston Harbor", "Omni Boston Seaport", "Fairmont Copley Plaza", "Legal Sea Foods", "Logan Airport / JetBlue", "Fenway Park / Red Sox"]}, "Chicago": {"tech": ["Google", "Salesforce", "Motorola Solutions (HQ)", "CDW (HQ)", "Grubhub (HQ)", "Sprout Social (HQ)", "Relativity (HQ)", "Microsoft", "IBM"], "health": ["Northwestern Medicine", "Rush", "UChicago Medicine", "Advocate Health", "Lurie Children's", "Loyola Medicine", "Cook County Health", "Abbott (HQ)", "AbbVie (HQ)"], "business": ["JPMorgan Chase", "Northern Trust (HQ)", "BMO (US HQ)", "CME Group (HQ)", "Morningstar (HQ)", "Allstate (HQ)", "Discover (HQ)", "Deloitte", "EY", "PwC"], "engineering": ["ComEd / Exelon (HQ)", "Sargent & Lundy (HQ)", "Argonne National Laboratory", "Fermilab", "Navistar International (HQ)", "Motorola Solutions", "Jacobs", "AECOM"], "education": ["University of Chicago", "Northwestern University", "UIC", "DePaul", "Loyola Chicago", "Illinois Tech", "Columbia College Chicago", "Chicago Public Schools"], "trades": ["Walsh Group (HQ)", "Clayco (HQ)", "Pepper Construction (HQ)", "Power Construction (HQ)", "Turner Construction", "Skanska", "Gilbane", "James McHugh (HQ)"], "creative": ["Leo Burnett (HQ)", "FCB Chicago", "Ogilvy Chicago", "The Second City", "Cinespace Chicago Studios", "Chicago Tribune", "WGN", "NBC 5 / Telemundo Chicago", "McDonald's Marketing (HQ)"], "hospitality": ["Hyatt (HQ)", "United Airlines (HQ)", "McDonald's (HQ)", "Marriott", "Hilton", "Four Seasons Chicago", "The Langham", "Lettuce Entertain You (HQ)", "Portillo's (HQ)", "O'Hare Airport"]}, "Washington DC Metro": {"tech": ["Amazon HQ2 (Arlington)", "Capital One Tech (HQ)", "Booz Allen Hamilton (HQ)", "Leidos (HQ)", "CACI (HQ)", "Microsoft", "Google", "Appian (HQ)", "MicroStrategy (HQ)"], "health": ["MedStar Health (HQ)", "Inova (HQ)", "NIH (Bethesda)", "Children's National", "Kaiser Permanente Mid-Atlantic", "Johns Hopkins Medicine", "GW Hospital", "Adventist HealthCare"], "business": ["Capital One (HQ)", "Fannie Mae (HQ)", "Freddie Mac (HQ)", "The Carlyle Group (HQ)", "World Bank", "IMF", "Deloitte", "EY", "PwC", "KPMG"], "engineering": ["Lockheed Martin (HQ Bethesda)", "Boeing (HQ Arlington)", "RTX (HQ Arlington)", "Northrop Grumman (HQ Falls Church)", "General Dynamics (HQ Reston)", "Bechtel (HQ Reston)", "BAE Systems Inc. (US HQ)", "SAIC (HQ)", "Leidos", "AECOM"], "education": ["Georgetown University", "George Washington University", "Howard University", "University of Maryland", "George Mason University", "American University", "Fairfax County Public Schools", "Montgomery County Public Schools"], "trades": ["Clark Construction (HQ Bethesda)", "HITT Contracting (HQ)", "Whiting-Turner", "Turner Construction", "Gilbane", "Skanska", "DPR Construction", "Davis Construction (HQ)"], "creative": ["The Washington Post", "NPR (HQ)", "PBS (HQ)", "National Geographic (HQ)", "POLITICO (HQ)", "Axios (HQ)", "USA Today (McLean)", "BET"], "hospitality": ["Marriott International (HQ Bethesda)", "Hilton (HQ McLean)", "Hyatt", "Four Seasons Georgetown", "MGM National Harbor", "Salamander DC", "United (Dulles hub)", "Reagan & Dulles Airports", "CAVA (HQ)", "Ritz-Carlton"]}, "Denver": {"tech": ["Google (Boulder)", "Amazon", "Palantir", "Oracle", "IBM (Boulder)", "Salesforce", "Ibotta", "Comcast Technology"], "health": ["UCHealth", "HealthONE (HCA)", "Denver Health", "Children's Hospital Colorado", "Kaiser Permanente Colorado", "Intermountain Health", "National Jewish Health"], "business": ["Charles Schwab", "Empower", "Janus Henderson", "FirstBank", "JPMorgan Chase", "Wells Fargo", "Deloitte", "EY", "PwC", "KPMG"], "engineering": ["Lockheed Martin Space", "BAE Systems (Boulder)", "Jacobs", "AECOM", "Kiewit", "Xcel Energy", "Stantec", "Merrick & Company"], "education": ["CU Boulder", "CU Denver / Anschutz", "University of Denver", "Colorado School of Mines", "MSU Denver", "Denver Public Schools", "Cherry Creek Schools"], "trades": ["Mortenson", "PCL Construction", "Kiewit", "Hensel Phelps", "Turner Construction", "Saunders Construction", "GE Johnson", "Adolfson & Peterson"], "creative": ["9NEWS", "The Denver Post", "Crispin (Boulder)", "Karsh Hagan", "Cactus", "Denver Broncos Media"], "hospitality": ["Marriott", "Hilton", "Hyatt", "Gaylord Rockies", "Four Seasons Denver", "The Brown Palace", "Vail Resorts", "DEN Airport", "Frontier Airlines", "Starbucks"]}, "Phoenix": {"tech": ["Intel", "TSMC Arizona", "Amazon", "GoDaddy", "Microchip Technology", "onsemi", "PayPal", "American Express Tech", "Avnet", "Amkor"], "health": ["Banner Health", "Mayo Clinic", "HonorHealth", "Dignity Health / St. Joseph's", "Phoenix Children's", "Abrazo Health", "Valleywise Health"], "business": ["American Express", "Charles Schwab", "State Farm", "Wells Fargo", "JPMorgan Chase", "Bank of America", "USAA", "Vanguard", "Discover", "Deloitte"], "engineering": ["Honeywell Aerospace", "Boeing (Mesa)", "Northrop Grumman", "General Dynamics", "Lucid Motors", "Salt River Project", "APS", "Intel Engineering"], "education": ["Arizona State University", "Grand Canyon University", "University of Arizona (Phoenix)", "Maricopa Community Colleges", "Mesa Public Schools", "BASIS Schools", "Great Hearts Academies"], "trades": ["Sundt Construction", "Kitchell", "McCarthy", "DPR Construction", "Mortenson", "Okland Construction", "Hensel Phelps", "Turner Construction"], "creative": ["Arizona Republic", "12News", "ABC15", "FOX 10", "R&R Partners", "LaneTerralever", "OH Partners"], "hospitality": ["Marriott", "Hilton", "Hyatt", "Fairmont Scottsdale Princess", "The Phoenician", "JW Marriott Desert Ridge", "Four Seasons Scottsdale", "Sky Harbor Airport", "Starbucks"]}, "San Diego": {"tech": ["Qualcomm (HQ)", "Apple", "Amazon", "Google", "ServiceNow (HQ)", "Teradata", "Sony Electronics (US HQ)", "Intuit", "Illumina (HQ)", "ResMed (HQ)"], "health": ["Scripps Health", "Sharp HealthCare", "UC San Diego Health", "Rady Children's Hospital", "Kaiser Permanente", "Palomar Health", "VA San Diego"], "business": ["LPL Financial (HQ)", "Sempra (HQ)", "JPMorgan Chase", "Bank of America", "Wells Fargo", "Deloitte", "EY", "PwC"], "engineering": ["General Atomics (HQ)", "Northrop Grumman", "General Dynamics NASSCO", "Solar Turbines (HQ)", "BAE Systems", "NAVWAR", "Jacobs"], "education": ["UC San Diego", "San Diego State University", "University of San Diego", "Point Loma Nazarene", "San Diego Community Colleges", "San Diego Unified", "Poway Unified"], "trades": ["Turner Construction", "Swinerton", "DPR Construction", "Clark Construction", "Hensel Phelps", "Balfour Beatty", "Level 10", "McCarthy"], "creative": ["Comic-Con International", "NBC 7", "KPBS", "The San Diego Union-Tribune", "Callaway Brand Studio", "Taylor Guitars"], "hospitality": ["Hotel del Coronado", "Marriott", "Hilton", "Manchester Grand Hyatt", "Evans Hotels", "SeaWorld San Diego", "LEGOLAND California", "Four Seasons Aviara", "San Diego Airport", "Starbucks"]}, "Nashville": {"tech": ["Amazon", "Oracle", "Microsoft", "Asurion", "Dell Technologies", "Deloitte Digital"], "health": ["HCA Healthcare", "Vanderbilt University Medical Center", "Ascension Saint Thomas", "Community Health Systems", "LifePoint Health", "TriStar Health", "Brookdale Senior Living"], "business": ["AllianceBernstein", "Pinnacle Financial Partners", "First Horizon", "UBS", "Deloitte", "EY", "PwC", "KPMG", "Bank of America", "Truist"], "engineering": ["Nissan North America", "Bridgestone Americas", "Schneider Electric", "Gresham Smith", "Jacobs", "AECOM", "Barge Design Solutions"], "education": ["Vanderbilt University", "Belmont University", "Lipscomb University", "Tennessee State University", "MTSU", "Metro Nashville Public Schools", "Williamson County Schools", "Fisk University"], "trades": ["Turner Construction", "Skanska", "DPR Construction", "Brasfield & Gorrie", "Messer Construction", "Clark Construction", "Hensel Phelps"], "creative": ["Universal Music Group Nashville", "Sony Music Nashville", "Warner Music Nashville", "Big Machine Label Group", "CMT / Paramount", "Gibson Brands", "Ryman Hospitality"], "hospitality": ["Gaylord Opryland", "Marriott", "Hilton", "Hyatt", "Omni Nashville", "Four Seasons Nashville", "Cracker Barrel", "BNA Airport", "Starbucks"]}, "Raleigh–Durham": {"tech": ["IBM", "Cisco", "SAS", "Apple", "Lenovo", "Red Hat", "Epic Games", "Microsoft", "Amazon", "Oracle"], "health": ["Duke Health", "UNC Health", "WakeMed", "UNC REX Healthcare", "Duke University Hospital", "IQVIA", "Labcorp", "GSK"], "business": ["First Citizens Bank", "Truist", "Fidelity Investments", "Deloitte", "EY", "PwC", "KPMG", "Bank of America", "Wells Fargo", "Coastal Credit Union"], "engineering": ["Cisco", "ABB", "Siemens", "Duke Energy", "Jacobs", "AECOM", "Kimley-Horn", "Corning"], "education": ["Duke University", "UNC Chapel Hill", "NC State University", "Wake Tech", "Wake County Public Schools", "Durham Public Schools", "Meredith College"], "trades": ["Turner Construction", "Skanska", "DPR Construction", "Brasfield & Gorrie", "Kiewit", "Balfour Beatty", "Clancy & Theys", "Barnhill"], "creative": ["Epic Games", "Ubisoft Red Storm", "WRAL", "ABC11", "The News & Observer", "McKinney", "Spectrum News 1"], "hospitality": ["Marriott", "Hilton", "Hyatt", "The Umstead Hotel", "RDU Airport", "Starbucks", "Chick-fil-A"]}, "Philadelphia": {"tech": ["Comcast (HQ)", "SAP America (HQ)", "GoPuff (HQ)", "dbt Labs (HQ)", "QVC / Qurate (HQ)", "Susquehanna (SIG) Tech", "Amazon", "Microsoft", "IBM"], "health": ["Penn Medicine", "Jefferson Health", "CHOP", "Temple Health", "Main Line Health", "Independence Blue Cross (HQ)", "Rothman Orthopaedics", "Cooper University Health"], "business": ["Vanguard (HQ Malvern)", "Comcast (HQ)", "Lincoln Financial (HQ)", "SIG Susquehanna (HQ)", "PNC", "JPMorgan Chase", "Bank of America", "Chubb", "Deloitte", "EY"], "engineering": ["Boeing (Ridley Park)", "Day & Zimmermann (HQ)", "Bentley Systems (HQ Exton)", "PECO / Exelon", "Lockheed Martin (Moorestown)", "L3Harris", "Jacobs", "AECOM", "Burns Engineering (HQ)"], "education": ["University of Pennsylvania", "Drexel", "Temple", "Villanova", "St. Joseph's University", "La Salle", "Community College of Philadelphia", "School District of Philadelphia"], "trades": ["LF Driscoll (HQ)", "Turner Construction", "INTECH Construction", "Gilbane", "Skanska", "Clemens Construction (HQ)", "IMC Construction (HQ PA)", "Hunter Roberts"], "creative": ["Comcast NBCUniversal", "QVC (West Chester)", "NFL Films (Mount Laurel)", "The Philadelphia Inquirer", "6abc / WPVI", "160over90 (HQ)", "URBN / Urban Outfitters (HQ)"], "hospitality": ["Aramark (HQ)", "Marriott", "Hilton", "Four Seasons Philadelphia (Comcast Center)", "Loews Philadelphia", "Live! Casino", "PHL Airport / American hub", "Starbucks"]}, "Minneapolis": {"tech": ["Target Tech (HQ)", "Best Buy (HQ)", "Optum / UnitedHealth Tech", "Thomson Reuters (Eagan)", "Jamf (HQ)", "SPS Commerce (HQ)"], "health": ["UnitedHealth Group (HQ)", "Mayo Clinic (Rochester)", "Allina Health", "HealthPartners", "M Health Fairview", "Medtronic (HQ)", "Children's Minnesota", "Boston Scientific"], "business": ["U.S. Bancorp (HQ)", "Ameriprise (HQ)", "Target (HQ)", "General Mills (HQ)", "Cargill (HQ)", "Land O'Lakes (HQ)", "Securian", "RBC Wealth (US HQ)", "Deloitte", "EY"], "engineering": ["3M (HQ)", "Medtronic", "Polaris (HQ)", "Toro (HQ)", "Graco (HQ)", "Donaldson (HQ)", "Xcel Energy (HQ)"], "education": ["University of Minnesota", "University of St. Thomas", "Macalester College", "Augsburg University", "Minneapolis Public Schools", "Minnesota State system"], "trades": ["Mortenson (HQ)", "Ryan Companies (HQ)", "Kraus-Anderson (HQ)", "McGough (HQ)", "PCL", "JE Dunn", "Adolfson & Peterson (HQ)"], "creative": ["Fallon (HQ)", "Carmichael Lynch (HQ)", "Colle McVoy (HQ)", "Target Creative", "Star Tribune", "KARE 11", "General Mills Brand Studio"], "hospitality": ["Delta (MSP hub)", "Mall of America", "Marriott", "Hilton", "Hyatt", "Four Seasons Minneapolis", "Radisson", "Life Time (HQ)", "MSP Airport", "Starbucks"]}, "Salt Lake City": {"tech": ["Adobe", "Oracle", "Qualtrics", "Ancestry", "Microsoft (Lehi)", "Lucid Software", "Pluralsight", "Domo", "Vivint"], "health": ["Intermountain Health", "University of Utah Health", "Huntsman Cancer Institute", "Primary Children's Hospital", "MountainStar Healthcare", "Select Health"], "business": ["Goldman Sachs", "Zions Bank", "American Express", "Fidelity Investments", "Morgan Stanley", "Wells Fargo", "JPMorgan Chase", "Deloitte", "EY", "KPMG"], "engineering": ["Northrop Grumman", "L3Harris", "Boeing", "Hexcel", "Rio Tinto Kennecott", "Stadler Rail", "Jacobs", "AECOM"], "education": ["University of Utah", "BYU", "Utah State University", "Westminster University", "Salt Lake Community College", "Granite School District", "Canyons School District"], "trades": ["Big-D Construction", "Layton Construction", "Jacobsen Construction", "Okland Construction", "Kiewit", "Mortenson", "Wadman Corporation"], "creative": ["KSL", "Deseret News", "The Salt Lake Tribune", "Struck", "Love Communications", "Angel Studios", "BYUtv"], "hospitality": ["Marriott", "Hilton", "Hyatt", "Grand America Hotel", "Little America", "Snowbird", "Park City Mountain (Vail Resorts)", "Delta (SLC hub)", "SLC Airport", "Starbucks"]}, "Portland": {"tech": ["Intel (Hillsboro)", "Amazon", "Google", "Lam Research", "Tektronix", "New Relic"], "health": ["OHSU", "Providence", "Legacy Health", "Kaiser Permanente NW", "PeaceHealth", "Moda Health"], "business": ["The Standard", "Umpqua Bank", "U.S. Bank", "KeyBank", "Deloitte", "Moss Adams"], "engineering": ["Daimler Truck North America", "Precision Castparts", "Boeing (Gresham)", "Portland General Electric", "Vigor", "Jacobs"], "education": ["Portland State University", "University of Portland", "OHSU", "Reed College", "Lewis & Clark College", "Portland Public Schools", "Beaverton School District", "PCC"], "trades": ["Hoffman Construction", "Skanska", "Turner Construction", "Andersen Construction", "Fortis Construction", "Walsh Construction"], "creative": ["Nike", "Adidas America", "Wieden+Kennedy", "Columbia Sportswear", "LAIKA Studios", "Instrument", "KGW", "The Oregonian"], "hospitality": ["Marriott", "Hilton", "Hyatt", "The Nines", "McMenamins", "Timberline Lodge", "PDX Airport", "Starbucks", "Salt & Straw"]}, "Las Vegas": {"tech": ["Switch", "Zappos (Amazon)", "IGT", "Aristocrat Technologies", "Konami Gaming", "Light & Wonder", "Everi"], "health": ["Valley Health System", "Dignity Health – St. Rose", "Sunrise Hospital (HCA)", "University Medical Center", "Optum / Southwest Medical", "Intermountain Health Nevada", "Cleveland Clinic Lou Ruvo Center"], "business": ["Credit One Bank", "Wells Fargo", "JPMorgan Chase", "Bank of America", "Deloitte", "EY", "Bank of Nevada"], "engineering": ["NV Energy", "Bechtel", "AECOM", "Jacobs", "Kiewit", "McCarthy"], "education": ["UNLV", "Nevada State University", "College of Southern Nevada", "Clark County School District", "Touro University Nevada"], "trades": ["PENTA Building Group", "Martin-Harris Construction", "McCarthy", "Kiewit", "Turner Construction", "W.A. Richardson Builders"], "creative": ["Cirque du Soleil", "Sphere Studios", "MGM Resorts Entertainment", "R&R Partners", "Las Vegas Review-Journal", "KLAS 8", "FOX5"], "hospitality": ["MGM Resorts", "Caesars Entertainment", "Wynn Resorts", "The Venetian", "Resorts World", "Station Casinos", "Boyd Gaming", "Hilton", "Four Seasons", "Harry Reid Airport"]}, "Sacramento": {"tech": ["Intel (Folsom)", "Apple (Elk Grove)", "Micron (Folsom)", "Oracle (Rocklin)", "VSP Global (HQ)", "Golden 1 Tech"], "health": ["UC Davis Health", "Sutter Health (HQ)", "Kaiser Permanente", "Dignity Health / Mercy", "Adventist Health (HQ Roseville)", "Shriners Children's"], "business": ["Golden 1 Credit Union (HQ)", "CalPERS", "CalSTRS", "SAFE Credit Union", "Wells Fargo", "Bank of America", "VSP Global", "State of California", "Deloitte"], "engineering": ["SMUD", "Teichert (HQ)", "L3Harris (Rancho Cordova)", "Kiewit", "HDR", "Jacobs", "AECOM", "PG&E"], "education": ["UC Davis", "Sacramento State", "Los Rios Community College District", "Sierra College", "Elk Grove Unified", "Sacramento City Unified"], "trades": ["Teichert Construction", "McCarthy", "Turner Construction", "DPR Construction", "Otto Construction", "Sundt", "Flint Builders"], "creative": ["KCRA 3", "ABC10", "The Sacramento Bee", "CapRadio", "Honey Agency", "Sacramento Kings Media"], "hospitality": ["Marriott", "Hilton", "Hyatt Regency Sacramento", "Kimpton Sawyer", "Thunder Valley Casino", "Golden 1 Center", "SMF Airport", "Starbucks"]}, "Kansas City": {"tech": ["Oracle Health / Cerner (HQ)", "Garmin (HQ Olathe)", "T-Mobile (Overland Park)", "Netsmart (HQ)", "C2FO (HQ)", "Honeywell (National Security Campus)", "Google Fiber", "Amazon"], "health": ["University of Kansas Health System", "Children's Mercy", "Saint Luke's", "HCA Midwest Health", "AdventHealth Shawnee Mission", "University Health", "North Kansas City Hospital"], "business": ["H&R Block (HQ)", "American Century Investments (HQ)", "Lockton (HQ)", "Commerce Bank (HQ)", "UMB Financial (HQ)", "Mariner Wealth (HQ)", "Deloitte", "EY"], "engineering": ["Burns & McDonnell (HQ)", "Black & Veatch (HQ)", "HNTB (HQ)", "Kiewit", "Garmin Engineering", "Terracon (HQ)", "Olsson", "Honeywell FM&T"], "education": ["University of Kansas / KU Med", "UMKC", "Rockhurst University", "Johnson County Community College", "Park University", "Blue Valley Schools", "Shawnee Mission Schools"], "trades": ["JE Dunn (HQ)", "McCownGordon (HQ)", "Turner Construction", "Kiewit", "A.L. Huber", "Centric (HQ)", "MMC Corp"], "creative": ["Hallmark (HQ)", "VML (HQ)", "Barkley (HQ)", "Andrews McMeel (HQ)", "The Kansas City Star", "KSHB", "KMBC", "Chiefs / Royals Media"], "hospitality": ["Marriott", "Hilton", "Loews Kansas City", "Hyatt", "Crown Center Hotels (Hallmark)", "Kansas City Chiefs", "Worlds of Fun", "Ameristar Casino", "KCI Airport", "Starbucks"]}, "Columbus": {"tech": ["Intel (New Albany)", "JPMorgan Chase Tech", "Amazon (data centers)", "Google (data centers)", "Microsoft (data centers)", "Meta (data centers)", "CoverMyMeds (HQ)"], "health": ["OhioHealth (HQ)", "Ohio State Wexner Medical Center", "Nationwide Children's", "Mount Carmel Health", "Cardinal Health (HQ Dublin)"], "business": ["JPMorgan Chase", "Nationwide (HQ)", "Huntington (HQ)", "Cardinal Health (HQ)", "Bath & Body Works (HQ)", "Victoria's Secret (HQ)", "Grange Insurance (HQ)", "Deloitte", "EY"], "engineering": ["Honda (Marysville)", "Battelle (HQ)", "AEP (HQ)", "Worthington Enterprises (HQ)", "Burgess & Niple (HQ)", "Jacobs", "AECOM", "DLZ"], "education": ["Ohio State University", "Columbus State", "Otterbein University", "Capital University", "Denison University", "Columbus City Schools", "Franklin University"], "trades": ["Kokosing (HQ)", "Elford (HQ)", "Corna Kokosing (HQ)", "Ruscilli (HQ)", "Turner Construction", "Messer Construction", "Gilbane"], "creative": ["Victoria's Secret Creative", "Bath & Body Works Brand", "Ologie (HQ)", "The Columbus Dispatch", "WBNS 10TV", "NBC4"], "hospitality": ["Wendy's (HQ Dublin)", "White Castle (HQ)", "Cameron Mitchell Restaurants (HQ)", "Bob Evans (HQ)", "Marriott", "Hilton Columbus", "Hyatt Regency", "Easton Hotels", "John Glenn Airport"]}, "North New Jersey": {"tech": ["Audible (Amazon, Newark HQ)", "Verizon (HQ)", "ADP (HQ)", "Cognizant (HQ)", "Panasonic North America (HQ)", "Samsung North America", "LG North America (HQ)", "Prudential Tech"], "health": ["Hackensack Meridian (HQ)", "RWJBarnabas (HQ)", "Atlantic Health (HQ)", "Valley Health System (Ridgewood)", "Holy Name", "St. Joseph’s Health", "Englewood Health"], "business": ["Prudential (HQ Newark)", "Goldman Sachs (Jersey City)", "JPMorgan Chase (Jersey City)", "KPMG (US HQ Montvale)", "Citi", "Bank of America", "Deloitte", "EY"], "engineering": ["PSEG (HQ)", "BASF North America (HQ)", "Honeywell", "Siemens", "Mott MacDonald (US HQ)", "Jacobs", "AECOM", "Port Authority Engineering"], "education": ["Rutgers University", "Princeton University", "Seton Hall", "NJIT", "Montclair State", "Stevens Institute (Hoboken)", "FDU", "Bergen Community College"], "trades": ["Turner Construction", "Skanska", "Structure Tone", "Torcon (HQ NJ)", "Gilbane", "AECOM Tishman", "Joseph Jingoli & Son (HQ NJ)"], "creative": ["Audible Studios", "NBC / Telemundo Studios", "WWOR / FOX (Secaucus)", "NJ.com / The Star-Ledger", "Panasonic Design"], "hospitality": ["Wyndham (HQ Parsippany)", "Marriott", "Hilton", "Hyatt Regency Jersey City", "United (Newark hub)", "American Dream", "MetLife Stadium", "Starbucks"]}};
 
-    <!-- ===== כפתור ראשי — טבלה פשוטה, עמיד בכל תוכנת מייל (ללא VML) ===== -->
-    <tr><td align="center" style="padding:24px 40px 4px;">
-      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:460px;">
-      <tr>
-        <td align="center" bgcolor="#0E9F6E" style="background-color:#0E9F6E;border-radius:8px;">
-          <a href="https://supportimmigrationadviceserviceorg.github.io/assessment/dream_map.html?utm_source=email&utm_medium=campaign&utm_campaign=dream_map_launch" target="_blank"
-             style="display:block;font-family:Georgia,'Times New Roman',serif;font-size:21px;font-weight:bold;color:#ffffff;text-decoration:none;padding:20px 24px;line-height:1.3;border-radius:8px;">
-            &#128205; #NAME#, View Your New Home &raquo;
-          </a>
-        </td>
-      </tr>
-      </table>
-      <p style="font-family:Arial,Helvetica,sans-serif;font-size:12.5px;color:#6B6353;margin:11px 0 0;">&#128506;&#65039; Interactive map &middot; Walk your streets in 360&deg; &middot; Takes one minute &middot; Free</p>
-    </td></tr>
+var WEEKEND_LABEL={outdoors:'Nature & hiking',beach:'Beach & water',golf:'Golf',fitness:'Fitness & sports',arts:'Arts & culture',food:'Food & dining'};
 
-    <!-- ===== גוף המכתב ===== -->
-    <tr><td style="padding:26px 40px 6px;">
-      <p style="font-family:Georgia,'Times New Roman',serif;font-size:16px;color:#1F3A5F;line-height:1.7;margin:0 0 18px;">Dear #NAME#,</p>
+/* ---------- מצב ---------- */
+var state={leadId:null,leadType:null,leadName:'',email:'',existingComments:'',answers:{profession:null,family:null,lifestyle:null,budget:null,priorities:[],weekend:[]},results:[]};
 
-      <p style="font-family:Georgia,'Times New Roman',serif;font-size:16px;color:#1F3A5F;line-height:1.7;margin:0 0 18px;">
-        You didn't come across us by chance.
-      </p>
+/* ---------- זיהוי לפי אימייל (כמו בכלים הקיימים) ---------- */
+function showErr(id,msg){var e=document.getElementById(id);e.textContent=msg;e.style.display='block';}
+function hideErr(id){document.getElementById(id).style.display='none';}
 
-      <p style="font-family:Georgia,'Times New Roman',serif;font-size:16px;color:#1F3A5F;line-height:1.7;margin:0 0 18px;">
-        Every day, we help people explore what their future in the United States could really look like. Based on your profile, <strong>we believe yours is worth exploring.</strong>
-      </p>
+function doLookup(){
+  /* אם שדות האורח כבר גלויים — זהו השלב השני: שמירת הפרטים והמשך */
+  var guestFields=document.getElementById('guest-fields');
+  if(!guestFields.classList.contains('hidden')){
+    var gf=document.getElementById('g-first').value.trim();
+    if(!gf){showErr('lk-err','Please enter your first name.');return;}
+    hideErr('lk-err');
+    state.leadName=gf;
+    state.guestFirst=gf;
+    state.guestLast=document.getElementById('g-last').value.trim();
+    state.guestPhone=document.getElementById('g-phone').value.trim();
+    showWelcome();
+    return;
+  }
 
-      <p style="font-family:Georgia,'Times New Roman',serif;font-size:16px;color:#1F3A5F;line-height:1.7;margin:0 0 8px;">
-        But instead of asking you to imagine it, we decided to show it. We created your personal <strong>American Life Map</strong> &mdash; a realistic preview of the life you could build in the U.S. Inside, you'll discover:
-      </p>
-    </td></tr>
+  var email=document.getElementById('lk-email').value.trim();
+  hideErr('lk-err');
+  if(!email||email.indexOf('@')<1){showErr('lk-err','Please enter a valid email address.');return;}
+  var btn=document.getElementById('lk-btn');
+  btn.disabled=true;btn.textContent='Checking...';
+  state.email=email;
 
-    <!-- ===== מה מגלים בפנים ===== -->
-    <tr><td style="padding:6px 40px 6px;">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:2px solid #E3C27A;border-bottom:2px solid #E3C27A;">
-      <tr><td style="padding:16px 4px;">
-        <p style="font-family:Georgia,'Times New Roman',serif;font-size:15px;color:#3D5578;line-height:2.05;margin:0;">
-          &#127969;&nbsp; <strong style="color:#B8860B;">A neighborhood</strong> where someone with your lifestyle could truly feel at home<br>
-          &#128694;&nbsp; <strong style="color:#2E7D4F;">Beautiful streets</strong>, parks, caf&eacute;s and places you could enjoy every day<br>
-          &#128188;&nbsp; <strong style="color:#2C5F8A;">Employers in your field</strong>, typical salaries, and where your skills are in demand<br>
-          &#128106;&nbsp; <strong style="color:#2E7D4F;">Schools and family-friendly communities</strong> if you're relocating with children<br>
-          &#128176;&nbsp; <strong style="color:#E0862B;">Your earning potential</strong>, living costs, and what your monthly budget could look like
-        </p>
-      </td></tr>
-      </table>
-    </td></tr>
+  /* חיפוש ליד לפי אימייל */
+  fetch(WEBHOOK+'crm.lead.list?filter[EMAIL]='+encodeURIComponent(email)+'&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=COMMENTS&select[]=STATUS_ID')
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d.result&&d.result.length>0){
+      var L=d.result[0];
+      state.leadId=L.ID;state.leadType='lead';
+      state.leadName=(L.NAME||'').trim();
+      state.existingComments=L.COMMENTS||'';
+      showWelcome();
+    }else{
+      /* אם אין ליד — חיפוש איש קשר */
+      return fetch(WEBHOOK+'crm.contact.list?filter[EMAIL]='+encodeURIComponent(email)+'&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=COMMENTS')
+      .then(function(r2){return r2.json();})
+      .then(function(d2){
+        if(d2.result&&d2.result.length>0){
+          var C=d2.result[0];
+          state.leadId=C.ID;state.leadType='contact';
+          state.leadName=(C.NAME||'').trim();
+          state.existingComments=C.COMMENTS||'';
+          showWelcome();
+        }else{
+          /* לא נמצא — מציגים שדות פרטים כדי שניצור ליד חדש בסיום */
+          state.leadId=null;state.leadType=null;state.leadName='';
+          document.getElementById('guest-fields').classList.remove('hidden');
+        }
+      });
+    }
+  })
+  .catch(function(){
+    /* גם במקרה תקלה — לא חוסמים את הלקוח, מבקשים פרטים ידנית */
+    state.leadId=null;
+    document.getElementById('guest-fields').classList.remove('hidden');
+  })
+  .finally(function(){btn.disabled=false;btn.textContent='Continue';});
+}
 
-    <!-- ===== משפט הבידול — בקופסה משלו ===== -->
-    <tr><td style="padding:20px 40px 4px;">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFF6E0;border-right:4px solid #D4941E;border-left:4px solid #D4941E;">
-      <tr><td style="padding:16px 20px;">
-        <p style="font-family:Georgia,'Times New Roman',serif;font-size:16px;color:#1F3A5F;line-height:1.7;margin:0;text-align:center;">
-          Most immigration companies tell you whether you <em>may qualify</em>.<br>
-          <strong>We show you what your future in America could actually look like.</strong>
-        </p>
-      </td></tr>
-      </table>
-    </td></tr>
+/* ---------- אווטאר הלקוח ----------
+   ראשי תיבות בעיגול זהב מיד; ברקע בדיקת Gravatar (SHA-256 של האימייל) —
+   אם ללקוח יש תמונת פרופיל מקושרת, היא מחליפה את ראשי התיבות.
+*/
+function avatarHTML(){
+  if(state.avatarUrl){return '<div class="avatar"><img src="'+state.avatarUrl+'" alt=""></div>';}
+  var initials=(state.leadName||'')
+    .split(/\s+/).map(function(w){return w.charAt(0);}).join('').slice(0,2).toUpperCase();
+  return '<div class="avatar">'+(initials||'&#127968;')+'</div>';
+}
+function renderAvatars(){
+  var w=document.getElementById('welcome-avatar');if(w)w.innerHTML=avatarHTML();
+  var c=document.getElementById('cert-avatar');if(c)c.innerHTML=avatarHTML();
+}
+function checkGravatar(){
+  if(!state.email||!window.crypto||!crypto.subtle||!window.TextEncoder)return;
+  try{
+    var enc=new TextEncoder().encode(state.email.trim().toLowerCase());
+    crypto.subtle.digest('SHA-256',enc).then(function(buf){
+      var hex=Array.prototype.map.call(new Uint8Array(buf),function(b){return ('0'+b.toString(16)).slice(-2);}).join('');
+      var url='https://www.gravatar.com/avatar/'+hex+'?d=404&s=128';
+      var img=new Image();
+      img.onload=function(){state.avatarUrl=url;renderAvatars();};
+      img.onerror=function(){/* אין Gravatar — נשארים עם ראשי תיבות */};
+      img.src=url;
+    }).catch(function(){});
+  }catch(e){}
+}
 
-    <tr><td style="padding:18px 40px 4px;">
-      <p style="font-family:Georgia,'Times New Roman',serif;font-size:16px;color:#1F3A5F;line-height:1.7;margin:0;">
-        This isn't just about getting a Green Card. It's about seeing the life that could be waiting for you on the other side.
-      </p>
-      <p style="font-family:Georgia,'Times New Roman',serif;font-size:16px;color:#1F3A5F;line-height:1.7;margin:14px 0 0;">
-        <strong>Your American Life Map is ready.</strong>
-      </p>
-    </td></tr>
+function showWelcome(){
+  document.getElementById('screen-lookup').classList.add('hidden');
+  var t=document.getElementById('welcome-title');
+  t.textContent=state.leadName?('Welcome back, '+state.leadName):'Welcome';
+  renderAvatars();
+  checkGravatar();
+  document.getElementById('screen-welcome').classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 
-    <!-- ===== כפתור תחתון — זהה, פשוט ועמיד ===== -->
-    <tr><td align="center" style="padding:24px 40px 10px;">
-      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:460px;">
-      <tr>
-        <td align="center" bgcolor="#0E9F6E" style="background-color:#0E9F6E;border-radius:8px;">
-          <a href="https://supportimmigrationadviceserviceorg.github.io/assessment/dream_map.html?utm_source=email&utm_medium=campaign&utm_campaign=dream_map_launch" target="_blank"
-             style="display:block;font-family:Georgia,'Times New Roman',serif;font-size:20px;font-weight:bold;color:#ffffff;text-decoration:none;padding:19px 24px;line-height:1.3;border-radius:8px;">
-            &#128205; #NAME#, View Your New Home &raquo;
-          </a>
-        </td>
-      </tr>
-      </table>
-      <p style="font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#6B6353;margin:12px 0 0;">Six questions &middot; One minute &middot; Free to see</p>
-      <p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#6B6353;margin:14px 0 0;">or open it here: <a href="https://supportimmigrationadviceserviceorg.github.io/assessment/dream_map.html?utm_source=email&utm_medium=campaign&utm_campaign=dream_map_launch" style="color:#0B7D57;text-decoration:underline;font-weight:bold;">immigrationadviceservice.org/your-map</a></p>
-    </td></tr>
+/* ---------- שאלון ---------- */
+function startQuiz(){
+  document.getElementById('screen-welcome').classList.add('hidden');
+  document.getElementById('screen-quiz').classList.remove('hidden');
+  setProgress(1);
+}
+function setProgress(step){
+  document.getElementById('p-label').textContent='Step '+step+' of 6';
+  document.getElementById('p-fill').style.width=Math.round(step*100/6)+'%';
+}
+function nextStep(step){
+  for(var i=1;i<=6;i++){document.getElementById('q'+i).classList.add('hidden');}
+  document.getElementById('q'+step).classList.remove('hidden');
+  setProgress(step);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function prevStep(step){nextStep(step);}
 
-    <!-- ===== חתימה ===== -->
-    <tr><td style="padding:20px 40px 32px;">
-      <p style="font-family:Georgia,'Times New Roman',serif;font-size:16px;color:#1F3A5F;line-height:1.7;margin:0;">
-        With best regards,<br>
-        <strong>The Immigration Advice Service Team</strong>
-      </p>
-    </td></tr>
+/* בחירת אפשרויות — כולל תמיכה בבחירה מרובה */
+document.addEventListener('click',function(ev){
+  var opt=ev.target.closest('.opt');
+  if(!opt)return;
+  var grid=opt.parentElement;
+  var q=grid.getAttribute('data-q');
+  var multi=parseInt(grid.getAttribute('data-multi')||'0',10);
+  if(multi>0){
+    if(opt.classList.contains('sel')){opt.classList.remove('sel');}
+    else{
+      var selCount=grid.querySelectorAll('.opt.sel').length;
+      if(selCount>=multi)return; /* מקסימום 3 */
+      opt.classList.add('sel');
+    }
+    state.answers[q]=Array.prototype.map.call(grid.querySelectorAll('.opt.sel'),function(o){return o.getAttribute('data-v');});
+    var btnId={priorities:'n5',weekend:'n6'}[q];
+    if(btnId){document.getElementById(btnId).disabled=state.answers[q].length===0;}
+  }else{
+    Array.prototype.forEach.call(grid.querySelectorAll('.opt'),function(o){o.classList.remove('sel');});
+    opt.classList.add('sel');
+    state.answers[q]=opt.getAttribute('data-v');
+    var stepNum={profession:1,family:2,lifestyle:3,budget:4}[q];
+    if(stepNum){document.getElementById('n'+stepNum).disabled=false;}
+  }
+});
 
-    <!-- ===== תחתית ===== -->
-    <tr><td style="background-color:#F6E9CD;border-top:1px solid #E3C27A;padding:18px 40px;">
-      <p style="font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#6B6353;line-height:1.6;margin:0;text-align:center;">
-        Salary, housing and cost-of-living figures shown in the map are estimates based on publicly available data, for general guidance only.<br>
-        Immigration Advice Service &middot; All rights reserved.<br><br>
-        <span style="font-size:12px;">Questions? We're here: <a href="mailto:support@immigrationadviceservice.org" style="color:#B8763A;text-decoration:underline;font-weight:bold;">support@immigrationadviceservice.org</a></span>
-      </p>
-    </td></tr>
+/* ---------- אלגוריתם התאמה ---------- */
+function computeMatches(){
+  var a=state.answers;
+  var budget=parseInt(a.budget,10);
+  var pri=a.priorities||[];
+  var hasKids=(a.family==='kids'||a.family==='kids_teen');
 
-  </table>
+  /* טווח שכר בתחום — לנרמול */
+  var sals=CITIES.map(function(c){return c.sal[a.profession];});
+  var sMin=Math.min.apply(null,sals),sMax=Math.max.apply(null,sals);
 
-</td></tr>
-</table>
+  var scored=CITIES.map(function(c){
+    var score=0;
+
+    /* התאמת שכ"ד לתקציב — הפרמטר הכבד ביותר */
+    if(c.rent<=budget)score+=30;
+    else if(c.rent<=budget*1.15)score+=18;
+    else if(c.rent<=budget*1.35)score+=6;
+    else score-=20;
+
+    /* סגנון חיים */
+    if(a.lifestyle==='coastal'){score+=(c.coast?22:0)+c.vibes.urban;}
+    else{score+=c.vibes[a.lifestyle]*2.6;}
+
+    /* שכר יחסי בתחום */
+    var salNorm=(c.sal[a.profession]-sMin)/(sMax-sMin||1);
+    score+=salNorm*14;
+
+    /* משפחה עם ילדים — בתי ספר ופרברים */
+    if(hasKids){score+=c.schools*1.8+c.vibes.suburban*0.8;}
+
+    /* עדיפויות שנבחרו */
+    if(pri.indexOf('salary')>-1)score+=salNorm*16;
+    if(pri.indexOf('afford')>-1)score+=(120-c.col)*0.45;
+    if(pri.indexOf('schools')>-1)score+=c.schools*2.2;
+    if(pri.indexOf('warm')>-1)score+=(c.climate==='warm'?14:(c.climate==='mild'?7:0))+(c.sun?4:0);
+    if(pri.indexOf('ocean')>-1)score+=(c.coast?16:0);
+    if(pri.indexOf('community')>-1)score+=c.comm*2.2;
+
+    /* העדפות סופ"ש — משקל קל */
+    var wk=a.weekend||[];
+    if(wk.indexOf('outdoors')>-1)score+=c.vibes.nature*0.8;
+    if(wk.indexOf('beach')>-1)score+=(c.coast?7:0)+(c.climate==='warm'?2:0);
+    if(wk.indexOf('golf')>-1)score+=(c.climate==='warm'?4:1)+c.vibes.suburban*0.3;
+    if(wk.indexOf('arts')>-1)score+=c.vibes.urban*0.6;
+    if(wk.indexOf('food')>-1)score+=c.vibes.urban*0.5;
+
+    return {city:c,raw:score};
+  });
+
+  scored.sort(function(x,y){return y.raw-x.raw;});
+  var top=scored.slice(0,3);
+
+  /* נרמול לסקאלה 70–97 (המוסכמה הקיימת של הכלים שלכם) */
+  var rMax=top[0].raw,rMin=top[top.length-1].raw;
+  top.forEach(function(t,i){
+    var pct=rMax===rMin?90:70+((t.raw-rMin)/(rMax-rMin))*27;
+    t.match=Math.min(97,Math.max(70,Math.round(pct)));
+  });
+  /* מניעת אחוזים זהים ברצף */
+  for(var i=1;i<top.length;i++){if(top[i].match>=top[i-1].match)top[i].match=top[i-1].match-1;}
+  state.results=top;
+}
+
+/* ---------- מסך טעינה ---------- */
+var LOADING_MSGS=['Reviewing 30 metropolitan areas...','Comparing salaries in your profession...','Checking housing costs against your budget...','Weighing schools and communities...','Drawing your map...'];
+function revealMap(){
+  document.getElementById('screen-quiz').classList.add('hidden');
+  var ls=document.getElementById('screen-loading');
+  ls.classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+  computeMatches();
+  var i=0;
+  var iv=setInterval(function(){
+    i++;
+    if(i<LOADING_MSGS.length){document.getElementById('loading-text').textContent=LOADING_MSGS[i];}
+    else{clearInterval(iv);ls.classList.add('hidden');showResults();}
+  },900);
+}
+
+/* ---------- תוצאות ---------- */
+function matchClass(m){return m>=88?'g':(m>=79?'y':'b');}
+/* ציון בתי ספר לתצוגה — סקאלה 8-10 (הציון הפנימי משמש רק לחישוב ההתאמה) */
+function schoolDisp(c){
+  var d=8+(c.schools-5)*0.5;
+  d=Math.max(8,Math.min(10,Math.round(d*2)/2));
+  return (d%1===0)?String(d):d.toFixed(1);
+}
+function fmtMoney(k){return '$'+(k*1000).toLocaleString('en-US');}
+
+function cityTags(c){
+  var a=state.answers,tags=[];
+  if(c.rent<=parseInt(a.budget,10))tags.push('Within your budget');
+  if(c.climate==='warm')tags.push('Warm climate');
+  if(c.coast)tags.push('Coastal');
+  if(c.schools>=7)tags.push('Strong schools');
+  if(c.comm>=7)tags.push('Welcoming community');
+  if(c.col<=100)tags.push('Affordable living');
+  if(c.vibes.nature>=8)tags.push('Outdoor lifestyle');
+  return tags.slice(0,4);
+}
+
+function cityCardHTML(t,idx){
+  var c=t.city,a=state.answers,isTop=(idx===0);
+  var tags=cityTags(c).map(function(x){return '<span class="tag">'+x+'</span>';}).join('');
+  var nb=pickNeighborhood(c.n);
+  var hasKids=(a.family==='kids'||a.family==='kids_teen');
+  var nbHTML='';
+  if(nb){
+    nbHTML='<div class="nb-box">'
+      +'<div class="nb-label">The neighborhood for you</div>'
+      +'<div class="nb-name">'+nb.n+'</div>'
+      +'<div class="nb-blurb">'+nb.b+'</div>'
+      +(isTop?'<div class="coach">See your street, your work'+(hasKids?', your kids\' schools':'')+' <span class="c-arrow">&#128071;</span></div>':'')
+      +'<button class="nb-btn" onclick="showNeighborhood('+idx+')">&#127968;&nbsp; Show me living in '+nb.n+'</button>'
+      +'</div>';
+  }
+  return '<div class="city-card'+(isTop?' top':'')+'" id="card-'+idx+'">'
+    +(isTop?'<div class="rank-seal">Your No. 1 Match</div>':'<div class="rank-num">'+(idx+1)+'</div>')
+    +'<div class="city-head"><div><h3>'+c.n+'</h3><span class="state">'+c.s+'</span></div>'
+    +'<div class="match '+matchClass(t.match)+'">'+t.match+'%<small>match</small></div></div>'
+    +'<div class="facts">'
+    +'<div class="fact">Typical salary in '+PROF_LABEL[a.profession]+'<b>'+fmtMoney(c.sal[a.profession])+' / year</b></div>'
+    +'<div class="fact">Average monthly rent<b>$'+c.rent.toLocaleString('en-US')+'</b></div>'
+    +'<div class="fact">Cost of living<b>'+(c.col<=97?'Below':(c.col<=106?'Near':'Above'))+' US average</b></div>'
+    +'<div class="fact">School quality<b>'+schoolDisp(c)+' / 10</b></div>'
+    +'</div><div class="tags">'+tags+'</div>'
+    +nbHTML
+    +'<button class="explore-btn" onclick="exploreCity('+idx+')">&#128269;&nbsp; Explore '+c.n+' on the map</button>'
+    +'<button class="walk-btn" onclick="walkCity('+idx+')"><span class="walker">&#128694;</span>&nbsp; Walk the streets of '+c.n+'</button>'
+    +'</div>';
+}
+
+/* ---------- מאגר שכונות ----------
+   לכל עיר: שכונה עירונית (u) ושכונה משפחתית/פרברית (f) — שם, קואורדינטות, תיאור.
+   הבחירה נעשית לפי תשובות הלקוח: ילדים/פרברים -> f, עירוני/חוף -> u.
+*/
+var NEIGHBORHOODS={
+'Austin':{u:{n:'South Congress',lat:30.2467,lng:-97.7495,b:'Live music, coffee shops and food trucks — the heartbeat of Austin, all walkable.'},f:{n:'Hyde Park',lat:30.3058,lng:-97.7272,b:'Victorian homes on tree-lined avenues — a national historic district minutes from downtown.'}},
+'Dallas–Fort Worth':{u:{n:'Uptown',lat:32.8058,lng:-96.7978,b:'Restaurants, trails and the trolley — Dallas at its most walkable.'},f:{n:'Plano (Haggard Park)',lat:33.0247,lng:-96.698,b:'Victorian homes in a historic district, with nationally ranked schools all around.'}},
+'Houston':{u:{n:'Montrose',lat:29.7428,lng:-95.4,b:'Galleries, cafés and character homes in Houston\'s most eclectic quarter.'},f:{n:'The Woodlands',lat:30.165,lng:-95.4625,b:'A master-planned forest community with excellent schools and waterways.'}},
+'San Antonio':{u:{n:'The Pearl',lat:29.4425,lng:-98.4794,b:'A riverside district of markets, restaurants and restored architecture.'},f:{n:'Alamo Heights',lat:29.4768,lng:-98.4713,b:'Tree-lined streets, historic homes and one of Texas\' most acclaimed school districts.'}},
+'Miami':{u:{n:'Brickell',lat:25.7638,lng:-80.1932,b:'Skyline living by the bay — Miami\'s financial and dining hub.'},f:{n:'Coral Gables',lat:25.7448,lng:-80.272,b:'Tree-lined boulevards, top schools and Mediterranean charm.'}},
+'Orlando':{u:{n:'Thornton Park',lat:28.543,lng:-81.363,b:'Brick streets and sidewalk cafés beside Lake Eola.'},f:{n:'Winter Park',lat:28.5972,lng:-81.3509,b:'Oak canopies, lakes and some of Florida\'s best schools.'}},
+'Tampa':{u:{n:'Hyde Park',lat:27.9368,lng:-82.4678,b:'Historic bungalows and boutique streets near the bay.'},f:{n:'Hyde Park North',lat:27.934,lng:-82.4735,b:'Oak-canopied historic streets between downtown and the bay.'}},
+'Jacksonville':{u:{n:'Riverside',lat:30.318,lng:-81.689,b:'Historic riverfront district of cafés, markets and murals.'},f:{n:'Avondale',lat:30.2985,lng:-81.7135,b:'A historic riverfront district of oak canopies and storybook homes.'}},
+'Atlanta':{u:{n:'Midtown',lat:33.7813,lng:-84.3692,b:'Piedmont Park, the BeltLine and Atlanta\'s arts scene at your door.'},f:{n:'Decatur',lat:33.7748,lng:-84.2972,b:'A walkable small town inside the city, famous for its schools.'}},
+'Charlotte':{u:{n:'South End',lat:35.2133,lng:-80.8557,b:'Breweries, rail trail and new apartments minutes from Uptown.'},f:{n:'Myers Park',lat:35.1988,lng:-80.829,b:'A century-old oak canopy over grand historic homes — with top city schools.'}},
+'Raleigh–Durham':{u:{n:'Glenwood South',lat:35.7852,lng:-78.6478,b:'Raleigh\'s liveliest strip of restaurants and nightlife.'},f:{n:'Cary',lat:35.7878,lng:-78.7812,b:'Consistently ranked among America\'s best towns for families.'}},
+'Nashville':{u:{n:'Edgehill Village',lat:36.1422,lng:-86.7888,b:'Boutiques and cafés in converted brick buildings, minutes from Music Row.'},f:{n:'Franklin',lat:35.9251,lng:-86.869,b:'A storybook Main Street with top Tennessee schools.'}},
+'Phoenix':{u:{n:'Arcadia Lite',lat:33.4936,lng:-111.988,b:'Cafés, patios and desert-modern homes beneath Camelback Mountain.'},f:{n:'Arcadia',lat:33.503,lng:-111.9635,b:'Citrus-lined streets and lush lawns beneath Camelback Mountain.'}},
+'Las Vegas':{u:{n:'Arts District',lat:36.1582,lng:-115.148,b:'Galleries, vintage shops and cafés beyond the Strip.'},f:{n:'Summerlin',lat:36.1875,lng:-115.305,b:'Red-rock views, parks and the valley\'s best schools.'}},
+'Denver':{u:{n:'LoDo',lat:39.7508,lng:-104.999,b:'Historic lofts, Union Station and craft breweries downtown.'},f:{n:'Washington Park',lat:39.6963,lng:-104.9662,b:'Classic homes around one of America\'s prettiest city parks.'}},
+'Salt Lake City':{u:{n:'Sugar House',lat:40.7258,lng:-111.862,b:'Indie shops and cafés with mountain views in every direction.'},f:{n:'Harvard-Yale',lat:40.7414,lng:-111.849,b:'Storybook Tudor cottages in a historic district with mountain views.'}},
+'Seattle':{u:{n:'Capitol Hill',lat:47.6153,lng:-122.3142,b:'Seattle\'s cultural heart — cafés, music and city views.'},f:{n:'Bellevue',lat:47.6103,lng:-122.2013,b:'Top-ranked schools and tech offices across the lake.'}},
+'Portland':{u:{n:'Pearl District',lat:45.5298,lng:-122.6813,b:'Converted warehouses, galleries and famous bookstores.'},f:{n:'Lake Oswego',lat:45.4203,lng:-122.6673,b:'A lakeside town with excellent schools, minutes from the city.'}},
+'San Francisco Bay Area':{u:{n:'Marina District',lat:37.8009,lng:-122.4368,b:'Bay views, the Palace of Fine Arts and waterfront running paths.'},f:{n:'Palo Alto',lat:37.448,lng:-122.1577,b:'The heart of Silicon Valley — legendary schools and tech careers.'}},
+'San Diego':{u:{n:'Little Italy',lat:32.7228,lng:-117.1687,b:'Piazzas, farmers markets and harbor sunsets.'},f:{n:'Coronado',lat:32.6902,lng:-117.1795,b:'Storybook island streets steps from the beach, minutes across the bay.'}},
+'Los Angeles':{u:{n:'Santa Monica',lat:34.0296,lng:-118.4882,b:'Beach mornings, the pier and a walkable downtown by the ocean.'},f:{n:'Pasadena',lat:34.1305,lng:-118.1315,b:'Craftsman homes, tree-lined streets and strong schools.'}},
+'Sacramento':{u:{n:'Midtown',lat:38.5738,lng:-121.4835,b:'Victorian homes, murals and farm-to-fork dining.'},f:{n:'East Sacramento',lat:38.556,lng:-121.4585,b:'The celebrated \'Fabulous Forties\' blocks — stately homes under towering elms.'}},
+'New York City':{u:{n:'Williamsburg, Brooklyn',lat:40.7176,lng:-73.9565,b:'Skyline views, indie culture and the L train to Manhattan.'},f:{n:'Forest Hills, Queens',lat:40.7205,lng:-73.8455,b:'Tudor houses and top schools, thirty minutes to Midtown.'}},
+'North New Jersey':{u:{n:'Hoboken',lat:40.7398,lng:-74.0297,b:'Brownstones and waterfront parks facing the Manhattan skyline.'},f:{n:'Ridgewood',lat:40.979,lng:-74.116,b:'A classic commuter town with a beloved main street and schools.'}},
+'Boston':{u:{n:'Back Bay',lat:42.3475,lng:-71.082,b:'Brownstone streets, the Charles River and Newbury Street shopping.'},f:{n:'Newton',lat:42.3308,lng:-71.1922,b:'Village greens and some of the finest public schools in America.'}},
+'Philadelphia':{u:{n:'Rittenhouse Square',lat:39.9495,lng:-75.1695,b:'Elegant square living amid cafés, bookshops and greenery.'},f:{n:'Chestnut Hill',lat:40.0782,lng:-75.2065,b:'Cobblestone charm, garden district and excellent schools.'}},
+'Washington DC Metro':{u:{n:'Dupont Circle',lat:38.911,lng:-77.0452,b:'Embassies, bookstores and café life in the heart of DC.'},f:{n:'Bethesda',lat:38.9807,lng:-77.097,b:'Top Maryland schools and a thriving downtown on the Metro.'}},
+'Chicago':{u:{n:'Lincoln Park',lat:41.9182,lng:-87.6537,b:'Lakefront paths, the zoo and brownstone streets.'},f:{n:'Naperville',lat:41.772,lng:-88.149,b:'Riverwalk charm and schools ranked among the nation\'s best.'}},
+'Minneapolis':{u:{n:'North Loop',lat:44.9838,lng:-93.2723,b:'Warehouse lofts, riverside trails and award-winning restaurants.'},f:{n:'Edina',lat:44.9122,lng:-93.329,b:'Lakes, parks and Minnesota\'s most sought-after schools.'}},
+'Columbus':{u:{n:'German Village',lat:39.9493,lng:-82.9998,b:'Brick streets, flower boxes and beer gardens in a storybook historic district.'},f:{n:'Dublin',lat:40.1035,lng:-83.1108,b:'Green suburbs and consistently top-rated Ohio schools.'}},
+'Kansas City':{u:{n:'Crossroads',lat:39.0898,lng:-94.5876,b:'First Fridays art walks, coffee roasters and lofts.'},f:{n:'Brookside',lat:39.0138,lng:-94.5923,b:'Grand boulevards, storybook homes and a beloved shops district.'}}
+};
+/* בחירת השכונה האישית לפי תשובות הלקוח */
+function pickNeighborhood(cityName){
+  var nb=NEIGHBORHOODS[cityName];if(!nb)return null;
+  var a=state.answers;
+  var hasKids=(a.family==='kids'||a.family==='kids_teen');
+  if(hasKids)return nb.f;
+  if(a.lifestyle==='urban'||a.lifestyle==='coastal')return nb.u;
+  return nb.f;
+}
+
+/* ---------- שיטוט ברחוב — Street View בתוך הדף ----------
+   נקודות מדויקות על הרחובות האיקוניים של כל עיר (על הכביש עצמו),
+   כדי שה-embed של גוגל ימצא פנורמה ויציב את הלקוח ממש ברחוב.
+*/
+var SV_POINTS={
+'Austin':[30.2478,-97.7494],
+'Dallas–Fort Worth':[32.806,-96.7978],
+'Houston':[29.7428,-95.4],
+'San Antonio':[29.4425,-98.4794],
+'Miami':[25.7652,-80.193],
+'Orlando':[28.596,-81.3508],
+'Tampa':[27.9368,-82.4678],
+'Jacksonville':[30.318,-81.689],
+'Atlanta':[33.7815,-84.3846],
+'Charlotte':[35.2085,-80.858],
+'Raleigh–Durham':[35.7852,-78.6478],
+'Nashville':[36.1422,-86.7888],
+'Phoenix':[33.5019,-111.999],
+'Las Vegas':[36.1582,-115.148],
+'Denver':[39.7527,-105.0003],
+'Salt Lake City':[40.7258,-111.862],
+'Seattle':[47.6153,-122.3142],
+'Portland':[45.5298,-122.6813],
+'San Francisco Bay Area':[37.8009,-122.4368],
+'San Diego':[32.7228,-117.1687],
+'Los Angeles':[34.0296,-118.4882],
+'Sacramento':[38.5738,-121.4835],
+'New York City':[40.7176,-73.9565],
+'North New Jersey':[40.7385,-74.03],
+'Boston':[42.3506,-71.0788],
+'Philadelphia':[39.9495,-75.1695],
+'Washington DC Metro':[38.911,-77.0452],
+'Chicago':[41.9182,-87.6537],
+'Minneapolis':[44.9838,-93.2723],
+'Columbus':[39.9493,-82.9998],
+'Kansas City':[39.0898,-94.5876]
+};
+
+function walkCity(idx){
+  var t=state.results[idx];if(!t)return;
+  var c=t.city;
+  var pt=SV_POINTS[c.n]||[c.lat,c.lng];
+  walkAt(pt[0],pt[1],c.n+', '+c.s);
+}
+
+/* פתיחת חלון שיטוט ברחוב בכל נקודה — עיר, שכונה, מקום עבודה או בית ספר */
+function walkAt(lat,lng,label){
+  var src='https://maps.google.com/maps?layer=c&cbll='+lat+','+lng+'&cbp=12,0,0,0,0&hl=en&output=svembed';
+  var fallback='https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='+lat+','+lng+'&hl=en';
+  var ov=document.createElement('div');
+  ov.className='sv-overlay';
+  ov.id='sv-overlay';
+  ov.innerHTML='<div class="sv-box" role="dialog" aria-label="Street view of '+label+'">'
+    +'<div class="sv-head"><div><h3>Walking in '+label+'</h3>'
+    +'<div class="hint2">Drag to look around &middot; Click the arrows on the street to walk &middot; <a href="'+fallback+'" target="_blank" rel="noopener" style="color:#B08D3E;">Open full view</a></div></div>'
+    +'<button class="sv-close" onclick="closeWalk()">Close &times;</button></div>'
+    +'<iframe src="'+src+'" allow="accelerometer; gyroscope" loading="lazy" title="Street view of '+label+'"></iframe>'
+    +'</div>';
+  /* סגירה בלחיצה על הרקע */
+  ov.addEventListener('click',function(e){if(e.target===ov)closeWalk();});
+  document.body.appendChild(ov);
+  document.body.style.overflow='hidden';
+  document.addEventListener('keydown',escWalk);
+}
+function escWalk(e){if(e.key==='Escape')closeWalk();}
+function closeWalk(){
+  var ov=document.getElementById('sv-overlay');
+  if(ov)ov.remove();
+  document.body.style.overflow='';
+  document.removeEventListener('keydown',escWalk);
+}
+
+/* הטסת המפה אל העיר — זום מדורג: לחיצה ראשונה לרמת העיר,
+   כל לחיצה נוספת מתקרבת יותר עד רמת הרחוב */
+function exploreCity(idx){
+  var t=state.results[idx];if(!t||!mapObj)return;
+  document.getElementById('map').scrollIntoView({behavior:'smooth',block:'center'});
+  var cur=mapObj.getZoom();
+  var center=mapObj.getCenter();
+  var dist=center.distanceTo(L.latLng(t.city.lat,t.city.lng));
+  /* אם אנחנו רחוקים מהעיר או בתצוגה כללית — קודם טסים אליה ברמת עיר */
+  var target;
+  if(cur<10||dist>30000){target=11;}
+  else{target=Math.min(cur+3,16);} /* כבר בעיר — מתקרבים לשכונות ולרחובות */
+  mapObj.flyTo([t.city.lat,t.city.lng],target,{duration:1.4});
+  if(t._marker){setTimeout(function(){t._marker.openPopup();},1500);}
+}
+
+/* ---------- "החיים שלך בשכונה" ----------
+   מטיס לשכונה האישית, מציב סימון בית, ושולף מ-OpenStreetMap (Overpass, חינם,
+   ללא מפתח) מקומות עבודה במקצוע של הלקוח + בתי ספר אם יש ילדים.
+*/
+var nbLayer=null;
+
+/* מיפוי מקצוע -> שאילתת Overpass למקומות עבודה רלוונטיים */
+var WORK_QUERY={
+tech:'["office"~"it|software|company|engineering|telecommunication"]',
+health:'["amenity"~"hospital|clinic|doctors"]',
+business:'["office"~"company|financial|insurance|accountant|lawyer|consulting"]',
+engineering:'["office"~"engineering|company|construction"]',
+education:'["amenity"~"university|college|school"]',
+trades:'["craft"]',
+creative:'["office"~"advertising_agency|design|media|newspaper|company"]',
+hospitality:'["tourism"="hotel"]'
+};
+var WORK_ICON_LABEL={tech:'Tech offices nearby',health:'Hospitals & clinics nearby',business:'Company offices nearby',engineering:'Engineering & construction firms nearby',education:'Schools & universities nearby',trades:'Workshops & trade businesses nearby',creative:'Studios & agencies nearby',hospitality:'Hotels & venues nearby'};
+
+function showNeighborhood(idx){
+  var t=state.results[idx];if(!t||!mapObj)return;
+  var nb=pickNeighborhood(t.city.n);if(!nb)return;
+  var a=state.answers;
+  var hasKids=(a.family==='kids'||a.family==='kids_teen');
+
+  document.getElementById('map').scrollIntoView({behavior:'smooth',block:'center'});
+
+  /* ניקוי שכבת שכונה קודמת + שכבות מקומות */
+  if(nbLayer){mapObj.removeLayer(nbLayer);}
+  nbLayer=L.layerGroup().addTo(mapObj);
+  ['work','school','fun'].forEach(function(k){
+    if(poiLayers[k]&&mapObj.hasLayer(poiLayers[k])){mapObj.removeLayer(poiLayers[k]);}
+    poiLayers[k]=null;poiState[k]='idle';
+  });
+
+  /* סימון הבית — "כאן אתה יכול לגור" */
+  var homeIcon=L.divIcon({className:'',html:'<div style="width:54px;height:54px;border-radius:50%;background:#B08D3E;border:3.5px solid #FCFAF4;box-shadow:0 3px 14px rgba(31,58,95,.55);display:flex;align-items:center;justify-content:center;font-size:28px;">&#127968;</div>',iconSize:[54,54],iconAnchor:[27,27]});
+  var homeMk=L.marker([nb.lat,nb.lng],{icon:homeIcon,zIndexOffset:1000}).addTo(nbLayer);
+  homeMk.bindTooltip('Your next home',{permanent:true,direction:'bottom',offset:[0,26],className:'poi-label home-label'});
+  homeMk.bindPopup('<b>'+nb.n+'</b><br>You could live right here.<br><a href="#" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\');return false;" style="color:#B08D3E;">&#128694; Walk this street &raquo;</a>');
+
+  mapObj.flyTo([nb.lat,nb.lng],14,{duration:1.6});
+  setTimeout(function(){homeMk.openPopup();},1700);
+
+  /* באנר הסבר מעל המפה — מה כל סימון אומר */
+  var hint=document.getElementById('map-hint');
+  if(!hint){
+    hint=document.createElement('div');hint.id='map-hint';hint.className='map-hint';
+    var mapEl=document.getElementById('map');
+    mapEl.parentNode.insertBefore(hint,mapEl.nextSibling);
+  }
+  hint.innerHTML='<b style="font-size:14px;">Your life in '+nb.n+'</b><span style="color:var(--text-muted);"> — take the tour:</span>'
+    +'<button class="jbtn j-home" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\')"><span class="jnum">1</span><span class="walker">&#128694;</span> Stand on your street</button>'
+    +'<button class="jbtn j-work dim" id="jbtn-work" onclick="goPOI(\'work\')"><span class="jnum">2</span>&#128188; Searching places you\'d work&hellip;</button>'
+    +(hasKids?'<button class="jbtn j-school dim" id="jbtn-school" onclick="goPOI(\'school\')"><span class="jnum">3</span>&#127979; Searching the kids\' schools&hellip;</button>':'')
+    +'<button class="jbtn j-fun dim" id="jbtn-fun" onclick="goPOI(\'fun\')"><span class="jnum">'+(hasKids?'4':'3')+'</span>&#11088; Finding your weekend spots&hellip;</button>'
+    +employersHTML(t.city.n,a.profession);
+
+  /* טעינה אוטומטית של המקומות — והכפתורים נותנים שליטה גלויה */
+  currentNb={nb:nb,prof:a.profession,hasKids:hasKids,weekend:a.weekend||[]};
+  loadPOI('work');
+  if(hasKids)loadPOI('school');
+  loadPOI('fun');
+}
+
+/* ---------- שליפת מקומות אמיתיים מ-OpenStreetMap ----------
+   שלושה שרתי Overpass חלופיים; אם אחד לא זמין עוברים לבא.
+   לכל סוג (עבודה/בתי ספר) שכבה נפרדת וכפתור בחירה עם חיווי מצב.
+*/
+var currentNb=null;
+var poiLayers={work:null,school:null,fun:null};
+var poiState={work:'idle',school:'idle',fun:'idle'};
+var OVERPASS_MIRRORS=[
+'https://overpass-api.de/api/interpreter',
+'https://overpass.kumi.systems/api/interpreter',
+'https://overpass.private.coffee/api/interpreter'
+];
+
+var POI_NUM={work:'2',school:'3',fun:'4'};
+var POI_CLS={work:'j-work',school:'j-school',fun:'j-fun'};
+function setJBtn(kind,html,dim){
+  var b=document.getElementById('jbtn-'+kind);
+  if(!b)return;
+  var num=POI_NUM[kind];
+  if(kind==='fun'&&currentNb&&!currentNb.hasKids){num='3';}
+  b.innerHTML='<span class="jnum">'+num+'</span>'+html;
+  b.className='jbtn '+POI_CLS[kind]+(dim?' dim':'');
+}
+
+/* שאילתות סופ"ש לפי ההעדפות שנבחרו + אימוג'י לפי סוג המקום */
+var FUN_QUERIES={
+outdoors:['["leisure"~"park|nature_reserve"]',6000],
+beach:['["natural"="beach"]',12000],
+golf:['["leisure"="golf_course"]',9000],
+fitness:['["leisure"~"fitness_centre|sports_centre"]',4000],
+arts:['["tourism"~"museum|gallery"]',6000],
+food:['["amenity"="restaurant"]',1800]
+};
+function funEmoji(tags){
+  tags=tags||{};
+  if(tags.leisure==='golf_course')return '&#9971;';
+  if(tags.natural==='beach')return '&#127958;&#65039;';
+  if(tags.leisure==='park'||tags.leisure==='nature_reserve')return '&#127794;';
+  if(tags.leisure==='fitness_centre'||tags.leisure==='sports_centre')return '&#127947;&#65039;';
+  if(tags.tourism==='museum'||tags.tourism==='gallery')return '&#127917;';
+  if(tags.amenity==='restaurant')return '&#127869;&#65039;';
+  return '&#11088;';
+}
+
+/* נתוני המקומות שנטענו + אינדקס דפדוף (כל לחיצה מקפיצה למקום הבא) */
+var poiData={work:[],school:[],fun:[]};
+var poiCycle={work:0,school:0,fun:0};
+
+function goPOI(kind){
+  if(!currentNb)return;
+  var st=poiState[kind];
+  if(st==='loading')return;
+  if(st!=='loaded'){loadPOI(kind,true);return;} /* טרם נטען / שגיאה — טוענים ואז קופצים */
+  var list=poiData[kind];
+  if(!list.length)return;
+  /* דפדוף: כל לחיצה עוברת למקום הבא ופותחת את החלונית שלו */
+  var i=poiCycle[kind]%list.length;
+  var m=list[i];
+  poiCycle[kind]=i+1;
+  document.getElementById('map').scrollIntoView({behavior:'smooth',block:'center'});
+  mapObj.flyTo([m.lat,m.lng],15,{duration:1.1});
+  setTimeout(function(){m.marker.openPopup();},1200);
+  var label=(kind==='work'?'&#128188; Your work: ':(kind==='fun'?'&#11088; Your weekend: ':(currentNb.hasKids?'&#127979; The kids\' schools: ':'&#127979; Schools nearby: ')));
+  setJBtn(kind,label+m.name+' <span style="opacity:.75;font-size:12px;">('+(i+1)+'/'+list.length+' — tap for next)</span>',false);
+}
+
+/* פאנל מעסיקים מובילים לעיר+תחום; אם אין רשימה עירונית — מציגים מובילים ארציים */
+function employersHTML(cityName,prof){
+  var cityList=(EMPLOYERS_CITY[cityName]&&EMPLOYERS_CITY[cityName][prof])||null;
+  var list=cityList||EMPLOYERS_GENERAL[prof]||[];
+  if(!list.length)return '';
+  var lbl=cityList?('Top employers in '+cityName+' for your field'):'Leading U.S. employers in your field';
+  var chips=list.slice(0,8).map(function(n){return '<span class="emp-chip">'+n+'</span>';}).join('');
+  return '<div class="emp-box"><div class="emp-lbl">&#128188; '+lbl+':</div>'+chips+'</div>';
+}
+
+/* ---------- שאילתות בשלוש רמות ----------
+   רמה 0: מדויק לפי הפרופיל | רמה 1: הרחבה כללית | רמה 2 (עבודה): מעסיקים גדולים
+   אם רמה לא מחזירה תוצאות — עוברים אוטומטית לרמה הבאה, כדי שהכפתור תמיד יעבוד.
+*/
+var POI_MAX_LEVEL={work:2,school:1,fun:1};
+function poiQuery(kind,level,nb){
+  if(kind==='school'){
+    var r=(level===0)?3000:7000;
+    return '[out:json][timeout:15];(node["amenity"="school"](around:'+r+','+nb.lat+','+nb.lng+');way["amenity"="school"](around:'+r+','+nb.lat+','+nb.lng+'););out center 30;';
+  }
+  if(kind==='fun'){
+    if(level===0){
+      var prefs=(currentNb.weekend&&currentNb.weekend.length?currentNb.weekend:['outdoors']);
+      var parts='';
+      prefs.forEach(function(p){
+        var fq=FUN_QUERIES[p];if(!fq)return;
+        parts+='node'+fq[0]+'(around:'+fq[1]+','+nb.lat+','+nb.lng+');way'+fq[0]+'(around:'+fq[1]+','+nb.lat+','+nb.lng+');';
+      });
+      return '[out:json][timeout:15];('+parts+');out center 40;';
+    }
+    return '[out:json][timeout:15];(node["leisure"~"park|golf_course"](around:8000,'+nb.lat+','+nb.lng+');way["leisure"~"park|golf_course"](around:8000,'+nb.lat+','+nb.lng+'););out center 30;';
+  }
+  /* עבודה */
+  var wq,r2;
+  if(level===0){wq=WORK_QUERY[currentNb.prof]||'["office"]';r2=5000;}
+  else if(level===1){wq='["office"]';r2=8000;}
+  else{wq='["amenity"~"hospital|clinic|university|college|bank|townhall"]';r2=9000;}
+  return '[out:json][timeout:15];(node'+wq+'(around:'+r2+','+nb.lat+','+nb.lng+');way'+wq+'(around:'+r2+','+nb.lat+','+nb.lng+'););out center 30;';
+}
+
+function loadPOI(kind,goAfter){
+  if(!currentNb||poiState[kind]==='loading')return;
+  poiState[kind]='loading';
+  setJBtn(kind,(kind==='work'?'&#128188; Searching places you\'d work&hellip;':(kind==='fun'?'&#11088; Finding your weekend spots&hellip;':'&#127979; Searching '+(currentNb.hasKids?'the kids\' schools':'schools nearby')+'&hellip;')),true);
+
+  var nb=currentNb.nb;
+
+  function attempt(level){
+    tryOverpass(poiQuery(kind,level,nb),0,function(elements){
+      /* איסוף תוצאות עם שם */
+      var items=[];
+      (elements||[]).forEach(function(el){
+        var name=el.tags&&el.tags.name;if(!name)return;
+        var lat=el.lat||(el.center&&el.center.lat);
+        var lng=el.lon||(el.center&&el.center.lon);
+        if(!lat||!lng)return;
+        var d=Math.pow(lat-nb.lat,2)+Math.pow(lng-nb.lng,2);
+        items.push({name:name,lat:lat,lng:lng,d:d,tags:el.tags});
+      });
+
+      /* אין תוצאות ברמה הזו — מרחיבים אוטומטית */
+      if(items.length===0&&level<POI_MAX_LEVEL[kind]){attempt(level+1);return;}
+
+      if(poiLayers[kind]&&mapObj.hasLayer(poiLayers[kind])){mapObj.removeLayer(poiLayers[kind]);}
+      poiLayers[kind]=L.layerGroup();
+      poiData[kind]=[];poiCycle[kind]=0;
+
+      items.sort(function(a,b){return a.d-b.d;});
+      items=items.slice(0,6);
+
+      var colors={work:'#1F3A5F',school:'#2E7D4F',fun:'#B08D3E'};
+      var popTexts={work:'A place you could work',school:'A school near your neighborhood',fun:'Your kind of weekend spot'};
+      items.forEach(function(it){
+        var emoji=(kind==='school')?'&#127979;':(kind==='work'?'&#128188;':funEmoji(it.tags));
+        var icon=L.divIcon({className:'',html:'<div style="width:34px;height:34px;border-radius:50%;background:'+colors[kind]+';border:2.5px solid #FCFAF4;box-shadow:0 2px 7px rgba(31,58,95,.4);display:flex;align-items:center;justify-content:center;font-size:16px;">'+emoji+'</div>',iconSize:[34,34],iconAnchor:[17,17]});
+        var shortName=it.name.length>24?it.name.slice(0,22)+'&hellip;':it.name;
+        var mk=L.marker([it.lat,it.lng],{icon:icon}).addTo(poiLayers[kind])
+          .bindTooltip(shortName,{permanent:true,direction:'bottom',offset:[0,16],className:'poi-label'+(kind==='school'?' school-label':(kind==='fun'?' home-label':''))})
+          .bindPopup('<b>'+it.name+'</b><br>'+popTexts[kind]+'<br><a href="#" onclick="walkAt('+it.lat+','+it.lng+',\''+it.name.replace(/'/g,"\\'")+'\');return false;" style="color:#B08D3E;font-weight:bold;">&#128694; See it from the street &raquo;</a>');
+        it.marker=mk;
+        poiData[kind].push(it);
+      });
+
+      poiLayers[kind].addTo(mapObj);
+      poiState[kind]='loaded';
+
+      if(poiData[kind].length>0){
+        var doneTxt=(kind==='work')?'&#128188; See where you\'d work'
+          :(kind==='fun'?'&#11088; Explore your weekend'
+          :'&#127979; '+(currentNb.hasKids?'Visit the kids\' schools':'See the schools nearby'));
+        setJBtn(kind,doneTxt+' <span style="opacity:.75;font-size:12px;">('+poiData[kind].length+' found)</span>',false);
+        fitAllPOIs();
+        if(goAfter)goPOI(kind);
+      }else{
+        setJBtn(kind,(kind==='work'?'&#128188; No workplaces mapped in this area':(kind==='fun'?'&#11088; No weekend spots mapped here':'&#127979; No schools mapped in this area')),true);
+      }
+    },function(){
+      poiState[kind]='error';
+      setJBtn(kind,'&#9888;&#65039; Couldn\'t load — tap to retry',true);
+    });
+  }
+
+  attempt(0);
+}
+
+/* כיוון המפה כך שהבית וכל המקומות שנטענו ייכנסו לפריים */
+function fitAllPOIs(){
+  if(!currentNb)return;
+  var pts=[[currentNb.nb.lat,currentNb.nb.lng]];
+  ['work','school','fun'].forEach(function(k){
+    (poiData[k]||[]).forEach(function(it){pts.push([it.lat,it.lng]);});
+  });
+  if(pts.length>1){mapObj.fitBounds(L.latLngBounds(pts),{padding:[42,42],maxZoom:14});}
+}
+
+/* ניסיון מול שרתי Overpass לפי הסדר */
+function tryOverpass(q,mirrorIdx,onOk,onFail){
+  if(mirrorIdx>=OVERPASS_MIRRORS.length){onFail();return;}
+  fetch(OVERPASS_MIRRORS[mirrorIdx]+'?data='+encodeURIComponent(q))
+  .then(function(r){if(!r.ok)throw new Error('bad status');return r.json();})
+  .then(function(d){onOk(d.elements||[]);})
+  .catch(function(){tryOverpass(q,mirrorIdx+1,onOk,onFail);});
+}
+
+/* טקסט כפתור גרין קארד — אישי עם שם הלקוח אם זוהה */
+function gcBtnText(){
+  return state.leadName
+    ?(state.leadName+', open your Green Card file &mdash; $29')
+    :'Open my Green Card file &mdash; $29';
+}
+
+function showResults(){
+  var res=document.getElementById('screen-results');
+  res.classList.remove('hidden');
+  document.getElementById('cert-name').textContent=state.leadName?('Prepared for '+state.leadName):'Prepared personally for you';
+  var topBtn=document.getElementById('top-pay-btn');
+  if(topBtn){topBtn.innerHTML=(state.leadName?state.leadName+', ':'')+'Open Your Green Card File';}
+  renderAvatars();
+  var fb=document.getElementById('final-btn');
+  if(fb)fb.innerHTML=gcBtnText();
+
+  /* כרטיס עיר מובילה + כל שאר הערים גלויות במלואן */
+  document.getElementById('top-city').innerHTML=cityCardHTML(state.results[0],0);
+  var othersHTML='';
+  for(var i=1;i<state.results.length;i++){othersHTML+=cityCardHTML(state.results[i],i);}
+  document.getElementById('other-cities').innerHTML=othersHTML;
+
+  buildMap();
+  saveToCRM();
+  buildChatWidget();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---------- חלונית תשלום בסגנון צ'אט ----------
+   בועת שיחה צפה בפינה; נפתחת אוטומטית כמה שניות אחרי התוצאות,
+   עם פנייה אישית בשם + כפתור פתיחת תיק גרין קארד.
+*/
+var chatOpened=false;
+function buildChatWidget(){
+  if(document.getElementById('chat-launcher'))return;
+  var l=document.createElement('div');
+  l.id='chat-launcher';l.className='chat-launcher';
+  l.setAttribute('role','button');
+  l.setAttribute('aria-label','Open your Green Card chat');
+  l.innerHTML='&#128172;<span class="dot" id="chat-dot"></span>';
+  l.onclick=toggleChat;
+  document.body.appendChild(l);
+  /* אחרי דקה — חלון הצ'אט המלא קופץ (נסגר בלחיצה מחוץ לו, לא חוסם את המפה) */
+  setTimeout(function(){if(!chatOpened)openChat();},60000);
+}
+
+var teaserTimer=null;
+function scheduleTeaser(delay){
+  if(teaserTimer)clearTimeout(teaserTimer);
+  teaserTimer=setTimeout(function(){if(!chatOpened)showTeaser();},delay);
+}
+
+/* בועית טיזר — הודעה קצרה ליד הכפתור; לחיצה פותחת את החלון המלא */
+function showTeaser(){
+  if(document.getElementById('chat-teaser')||document.getElementById('chatw'))return;
+  var t=document.createElement('div');
+  t.id='chat-teaser';t.className='chat-teaser';
+  t.innerHTML=(state.leadName?state.leadName+', r':'R')+'eady to make it real? &#128172;';
+  t.onclick=function(){t.remove();openChat();};
+  document.body.appendChild(t);
+  /* נעלמת אחרי 25 שניות — וחוזרת שוב אחרי דקה, עד שהצ'אט נפתח */
+  setTimeout(function(){
+    var x=document.getElementById('chat-teaser');if(x)x.remove();
+    if(!chatOpened)scheduleTeaser(60000);
+  },25000);
+}
+
+function toggleChat(){
+  if(document.getElementById('chatw')){closeChat();}else{openChat();}
+}
+
+function openChat(){
+  if(document.getElementById('chatw'))return;
+  chatOpened=true;
+  var dot=document.getElementById('chat-dot');if(dot)dot.style.display='none';
+  var top=state.results[0];
+  var firstName=state.leadName||'';
+  var msg=(firstName?('Hi '+firstName+' &#128075;'):'Hi &#128075;')
+    +'<br>You\'ve just seen your new life in <b>'+top.city.n+'</b> — the street, the neighborhood, everything.'
+    +'<br><br>The only thing missing is the Green Card. Ready to make it real?';
+  var w=document.createElement('div');
+  w.id='chatw';w.className='chatw';
+  w.setAttribute('role','dialog');
+  w.setAttribute('aria-label','Green Card next step');
+  w.innerHTML='<div class="cw-head"><div><div class="cw-title">Immigration Advice Service</div>'
+    +'<div class="cw-sub">Your Green Card team</div></div>'
+    +'<button class="cw-close" onclick="closeChat()" aria-label="Close">&times;</button></div>'
+    +'<div class="cw-body">'
+    +'<div class="cw-msg">'+msg+'</div>'
+    +'<button onclick="goToPayment()" style="width:100%;font-family:Georgia,serif;font-size:15.5px;font-weight:bold;color:#fff;cursor:pointer;background:#0E9F6E;border:2px solid #0B7D57;border-radius:6px;padding:14px;">&#128274; '+gcBtnText()+'</button>'
+    +'<div class="cw-fine">One-time $29 &middot; Reviewed personally by our team</div>'
+    +'</div>';
+  document.body.appendChild(w);
+  /* הסרת הטיזר אם קיים + האזנה ללחיצה בחוץ */
+  var t=document.getElementById('chat-teaser');if(t)t.remove();
+  setTimeout(function(){document.addEventListener('click',outsideChat,true);},100);
+}
+
+function closeChat(){
+  var w=document.getElementById('chatw');
+  if(w)w.remove();
+  document.removeEventListener('click',outsideChat,true);
+}
+
+/* סגירת הצ'אט בלחיצה בכל מקום מחוץ לחלון — המפה תמיד נשארת נגישה */
+function outsideChat(e){
+  var w=document.getElementById('chatw');
+  var l=document.getElementById('chat-launcher');
+  if(!w)return;
+  if(!w.contains(e.target)&&!(l&&l.contains(e.target))){closeChat();}
+}
+
+/* ---------- מפה ----------
+   כל הערים גלויות: מסומנות 1-5, לחיצה מטיסה פנימה עד רמת השכונות.
+   הסימונים נוחתים בהדרגה — רגע ה"וואו".
+*/
+var mapObj=null;
+function buildMap(){
+  if(mapObj){mapObj.remove();}
+  mapObj=L.map('map',{scrollWheelZoom:false}).setView([38.5,-96.5],4);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
+    attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:18,minZoom:3
+  }).addTo(mapObj);
+
+  /* כפתור חזרה לתצוגה כללית של ארה"ב */
+  var backCtl=L.control({position:'topright'});
+  backCtl.onAdd=function(){
+    var d=L.DomUtil.create('div');
+    d.innerHTML='<button style="background:#FCFAF4;border:1px solid #1F3A5F;color:#1F3A5F;font:13px Georgia,serif;padding:7px 14px;cursor:pointer;border-radius:2px;box-shadow:0 1px 4px rgba(31,58,95,.25);">&#8634; Back to full map</button>';
+    d.onclick=function(){mapObj.flyTo([38.5,-96.5],4,{duration:1.2});};
+    return d;
+  };
+  backCtl.addTo(mapObj);
+
+  var reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var lastDelay=0;
+
+  state.results.forEach(function(t,i){
+    var c=t.city;
+    var delay=reduced?0:400+i*550;
+    lastDelay=delay;
+    setTimeout(function(){
+      var isTop=(i===0);
+      var icon=L.divIcon({
+        className:'',
+        html:isTop
+          ?'<div style="width:34px;height:34px;border-radius:50%;background:#B08D3E;border:3px solid #FCFAF4;box-shadow:0 2px 8px rgba(31,58,95,.45);display:flex;align-items:center;justify-content:center;color:#fff;font:bold 13px Arial;">1</div>'
+          :'<div style="width:28px;height:28px;border-radius:50%;background:#1F3A5F;border:2px solid #FCFAF4;box-shadow:0 1px 5px rgba(31,58,95,.35);display:flex;align-items:center;justify-content:center;color:#fff;font:bold 12px Arial;">'+(i+1)+'</div>',
+        iconSize:isTop?[34,34]:[28,28],iconAnchor:isTop?[17,17]:[14,14]
+      });
+      var mk=L.marker([c.lat,c.lng],{icon:icon}).addTo(mapObj);
+      mk.bindPopup('<b>'+c.n+', '+c.s+'</b><br>'+t.match+'% match'+(isTop?' &mdash; your No. 1 city':'')+'<br><a href="#" onclick="exploreCity('+i+');return false;" style="color:#B08D3E;">Zoom in closer &raquo;</a><br><a href="#" onclick="walkCity('+i+');return false;" style="color:#1F3A5F;">&#128694; Walk the streets &raquo;</a>');
+      mk.on('click',function(){/* לחיצה על הסימון עצמה רק פותחת פופ-אפ; הזום דרך הקישור */});
+      t._marker=mk;
+      if(isTop){mk.openPopup();}
+    },delay);
+  });
+
+  /* אחרי ששלושת הסימונים נחתו — נכנסים אוטומטית לשכונה של העיר המובילה:
+     הבית (הכי גדול), מקומות העבודה ובתי הספר מופיעים בלי שום לחיצה */
+  setTimeout(function(){showNeighborhood(0);},reduced?600:lastDelay+1400);
+}
+
+/* ---------- שמירה ל-Bitrix24 ----------
+   בתקן של שאלון ה-assessment הקיים:
+   - COMMENTS (צד שמאל של הליד) — סיכום מובנה, בתוספת לתוכן קיים
+   - Timeline comment (צד ימין) — אותו סיכום
+   - עדכון שדות: מקצוע (UF_CRM_1709560603), SOURCE_ID='4'
+   - ליד לא נמצא -> יצירת ליד חדש עם הפרטים שנאספו
+   - ללא שינוי סטטוסים בלידים קיימים
+*/
+function buildCRMSummary(){
+  var a=state.answers;
+  var pris=(a.priorities||[]).map(function(p){return PRI_LABEL[p];}).join(', ');
+  var lines=['=== AMERICAN LIFE MAP — DREAM DESTINATION ===',
+    'Name: '+(state.leadName||[state.guestFirst,state.guestLast].filter(Boolean).join(' ')||''),
+    'Email: '+(state.email||''),
+    state.guestPhone?('Phone: '+state.guestPhone):'',
+    '',
+    '=== MATCHED CITIES ==='];
+  state.results.forEach(function(t,i){
+    var nb=pickNeighborhood(t.city.n);
+    lines.push('#'+(i+1)+': '+t.city.n+', '+t.city.s+' — '+t.match+'% match'
+      +(nb?(' | Neighborhood: '+nb.n):'')
+      +' | Salary in field: '+fmtMoney(t.city.sal[a.profession])+'/yr'
+      +' | Avg rent: $'+t.city.rent);
+  });
+  lines.push('',
+    '=== CLIENT PROFILE ===',
+    'Profession: '+PROF_LABEL[a.profession],
+    'Family: '+FAM_LABEL[a.family],
+    'Lifestyle preference: '+LIFE_LABEL[a.lifestyle],
+    'Housing budget: '+BUDGET_LABEL[a.budget],
+    'Priorities: '+(pris||'—'),
+    'Weekend interests: '+((a.weekend||[]).map(function(w){return WEEKEND_LABEL[w];}).join(', ')||'—'),
+    '',
+    'Completed: '+new Date().toLocaleString('en-US'),
+    'Source: American Life Map (dream_map)');
+  return lines.filter(function(l){return l!=='';}).join('\n');
+}
+
+function saveToCRM(){
+  var a=state.answers;
+  var summary=buildCRMSummary();
+  var profession=PROF_LABEL[a.profession]||'';
+
+  if(state.leadId){
+    /* ── ליד/איש קשר קיים: עדכון שדות + COMMENTS + Timeline ── */
+    var updMethod=state.leadType==='contact'?'crm.contact.update':'crm.lead.update';
+    var newComments=(state.existingComments?state.existingComments+'<br><br>':'')
+      +summary.replace(/\n/g,'<br>');
+    var params='id='+encodeURIComponent(state.leadId)
+      +'&fields[COMMENTS]='+encodeURIComponent(newComments)
+      +'&fields[UF_CRM_1709560603]='+encodeURIComponent(profession);
+    /* Interested in Visa = DREAM DESTINATION — שדה שונה לליד ולאיש קשר */
+    if(state.leadType==='lead'){
+      params+='&fields[SOURCE_ID]=4';
+      params+='&fields[UF_CRM_1547484113]='+encodeURIComponent('DREAM DESTINATION');
+    }else{
+      params+='&fields[UF_CRM_5C5843FC11F1D]='+encodeURIComponent('DREAM DESTINATION');
+    }
+    fetch(WEBHOOK+updMethod+'?'+params).catch(function(){});
+
+    /* הערת Timeline — ENTITY_TYPE באותיות קטנות */
+    fetch(WEBHOOK+'crm.timeline.comment.add?fields[ENTITY_ID]='+encodeURIComponent(state.leadId)
+      +'&fields[ENTITY_TYPE]='+encodeURIComponent(state.leadType)
+      +'&fields[COMMENT]='+encodeURIComponent(summary)).catch(function(){});
+
+  }else if(state.email&&state.guestFirst){
+    /* ── לא נמצא במערכת: יצירת ליד חדש ── */
+    var name=[state.guestFirst,state.guestLast].filter(Boolean).join(' ');
+    var url=WEBHOOK+'crm.lead.add?fields[TITLE]='+encodeURIComponent('American Life Map: '+name)
+      +'&fields[NAME]='+encodeURIComponent(state.guestFirst)
+      +'&fields[LAST_NAME]='+encodeURIComponent(state.guestLast||'')
+      +'&fields[SOURCE_ID]=4'
+      +'&fields[UF_CRM_1547484113]='+encodeURIComponent('DREAM DESTINATION')
+      +'&fields[UF_CRM_1709560603]='+encodeURIComponent(profession)
+      +'&fields[COMMENTS]='+encodeURIComponent(summary.replace(/\n/g,'<br>'))
+      +'&fields[EMAIL][0][VALUE]='+encodeURIComponent(state.email)
+      +'&fields[EMAIL][0][VALUE_TYPE]=WORK';
+    if(state.guestPhone){
+      url+='&fields[PHONE][0][VALUE]='+encodeURIComponent(state.guestPhone)
+        +'&fields[PHONE][0][VALUE_TYPE]=WORK';
+    }
+    fetch(url)
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.result){
+        state.leadId=d.result;state.leadType='lead';
+        /* הערת Timeline גם על הליד החדש */
+        fetch(WEBHOOK+'crm.timeline.comment.add?fields[ENTITY_ID]='+encodeURIComponent(state.leadId)
+          +'&fields[ENTITY_TYPE]=lead'
+          +'&fields[COMMENT]='+encodeURIComponent(summary)).catch(function(){});
+      }
+    })
+    .catch(function(){});
+  }
+}
+
+/* ---------- מעבר לתשלום ---------- */
+function goToPayment(){
+  var url=PAYMENT_URL;
+  if(state.leadId&&state.leadType==='lead'){url+='&lead_id='+encodeURIComponent(state.leadId);}
+  window.location.href=url;
+}
+</script>
 </body>
 </html>
