@@ -172,6 +172,39 @@
   .walk-btn:hover{background:var(--ink-soft);}
   .walk-btn:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
 
+  /* ===== מקטע "השכונה שלך" בכרטיס העיר ===== */
+  .nb-box{
+    margin-top:16px;background:#F8F1DE;border:1px solid var(--brass-light);border-radius:2px;padding:14px 16px;
+  }
+  .nb-box .nb-label{font-family:Arial,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--brass);}
+  .nb-box .nb-name{font-size:18px;color:var(--ink);margin:3px 0 2px;}
+  .nb-box .nb-blurb{font-family:Arial,sans-serif;font-size:12.5px;color:var(--text-muted);line-height:1.5;}
+  .nb-btn{
+    margin-top:12px;width:100%;cursor:pointer;
+    font-family:Georgia,serif;font-size:15px;color:#fff;
+    background:var(--brass);border:1px solid var(--brass);border-radius:2px;padding:11px 14px;
+    transition:background .15s;
+  }
+  .nb-btn:hover{background:#9A7A32;}
+  .nb-btn:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
+
+  /* ===== חץ מנחה — "לחץ כאן" ===== */
+  .coach{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    font-family:Georgia,serif;font-style:italic;font-size:14px;color:var(--brass);
+    margin:10px 0 -2px;
+  }
+  .coach .c-arrow{display:inline-block;animation:bounce 1.1s ease-in-out infinite;font-size:18px;font-style:normal;}
+  @keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(6px);}}
+  @media (prefers-reduced-motion:reduce){.coach .c-arrow{animation:none;}}
+
+  /* ===== באנר הסבר מעל המפה ===== */
+  .map-hint{
+    font-family:Arial,sans-serif;font-size:12.5px;color:var(--ink);
+    background:#F8F1DE;border:1px solid var(--brass-light);border-radius:2px;
+    padding:10px 14px;margin:-22px 4px 26px;text-align:center;line-height:1.6;
+  }
+
   /* ===== חלון שיטוט ברחוב (Street View) ===== */
   .sv-overlay{
     position:fixed;inset:0;background:rgba(31,58,95,.55);z-index:2000;
@@ -611,6 +644,18 @@ function cityTags(c){
 function cityCardHTML(t,idx){
   var c=t.city,a=state.answers,isTop=(idx===0);
   var tags=cityTags(c).map(function(x){return '<span class="tag">'+x+'</span>';}).join('');
+  var nb=pickNeighborhood(c.n);
+  var hasKids=(a.family==='kids'||a.family==='kids_teen');
+  var nbHTML='';
+  if(nb){
+    nbHTML='<div class="nb-box">'
+      +'<div class="nb-label">The neighborhood for you</div>'
+      +'<div class="nb-name">'+nb.n+'</div>'
+      +'<div class="nb-blurb">'+nb.b+'</div>'
+      +(isTop?'<div class="coach">See your street, your work'+(hasKids?', your kids\' schools':'')+' <span class="c-arrow">&#128071;</span></div>':'')
+      +'<button class="nb-btn" onclick="showNeighborhood('+idx+')">&#127968;&nbsp; Show me living in '+nb.n+'</button>'
+      +'</div>';
+  }
   return '<div class="city-card'+(isTop?' top':'')+'" id="card-'+idx+'">'
     +(isTop?'<div class="rank-seal">Your No. 1 Match</div>':'<div class="rank-num">'+(idx+1)+'</div>')
     +'<div class="city-head"><div><h3>'+c.n+'</h3><span class="state">'+c.s+'</span></div>'
@@ -621,9 +666,58 @@ function cityCardHTML(t,idx){
     +'<div class="fact">Cost of living<b>'+(c.col<=97?'Below':(c.col<=106?'Near':'Above'))+' US average</b></div>'
     +'<div class="fact">School quality<b>'+c.schools+' / 10</b></div>'
     +'</div><div class="tags">'+tags+'</div>'
+    +nbHTML
     +'<button class="explore-btn" onclick="exploreCity('+idx+')">&#128269;&nbsp; Explore '+c.n+' on the map</button>'
     +'<button class="walk-btn" onclick="walkCity('+idx+')">&#128694;&nbsp; Walk the streets of '+c.n+'</button>'
     +'</div>';
+}
+
+/* ---------- מאגר שכונות ----------
+   לכל עיר: שכונה עירונית (u) ושכונה משפחתית/פרברית (f) — שם, קואורדינטות, תיאור.
+   הבחירה נעשית לפי תשובות הלקוח: ילדים/פרברים -> f, עירוני/חוף -> u.
+*/
+var NEIGHBORHOODS={
+'Austin':{u:{n:'South Congress',lat:30.2500,lng:-97.7490,b:'Live music, coffee shops and food trucks — the heartbeat of Austin, all walkable.'},f:{n:'Allandale',lat:30.3370,lng:-97.7430,b:'Leafy streets, strong schools and parks, ten minutes from downtown.'}},
+'Dallas–Fort Worth':{u:{n:'Uptown',lat:32.8020,lng:-96.8010,b:'Restaurants, trails and the trolley — Dallas at its most walkable.'},f:{n:'Plano',lat:33.0198,lng:-96.6989,b:'Nationally ranked schools and quiet family streets, with big-city jobs nearby.'}},
+'Houston':{u:{n:'Montrose',lat:29.7440,lng:-95.3910,b:'Galleries, cafés and character homes in Houston\'s most eclectic quarter.'},f:{n:'The Woodlands',lat:30.1658,lng:-95.4613,b:'A master-planned forest community with excellent schools and waterways.'}},
+'San Antonio':{u:{n:'The Pearl',lat:29.4419,lng:-98.4802,b:'A riverside district of markets, restaurants and restored architecture.'},f:{n:'Stone Oak',lat:29.6180,lng:-98.4770,b:'Family neighborhoods, good schools and hill-country greenery.'}},
+'Miami':{u:{n:'Brickell',lat:25.7601,lng:-80.1951,b:'Skyline living by the bay — Miami\'s financial and dining hub.'},f:{n:'Coral Gables',lat:25.7215,lng:-80.2684,b:'Tree-lined boulevards, top schools and Mediterranean charm.'}},
+'Orlando':{u:{n:'Thornton Park',lat:28.5427,lng:-81.3673,b:'Brick streets and sidewalk cafés beside Lake Eola.'},f:{n:'Winter Park',lat:28.6000,lng:-81.3392,b:'Oak canopies, lakes and some of Florida\'s best schools.'}},
+'Tampa':{u:{n:'Hyde Park',lat:27.9370,lng:-82.4700,b:'Historic bungalows and boutique streets near the bay.'},f:{n:'Westchase',lat:28.0570,lng:-82.6110,b:'Planned family community with parks, pools and strong schools.'}},
+'Jacksonville':{u:{n:'Riverside',lat:30.3160,lng:-81.6810,b:'Historic riverfront district of cafés, markets and murals.'},f:{n:'Mandarin',lat:30.1580,lng:-81.6440,b:'Quiet riverside living under centuries-old oaks, with good schools.'}},
+'Atlanta':{u:{n:'Midtown',lat:33.7840,lng:-84.3830,b:'Piedmont Park, the BeltLine and Atlanta\'s arts scene at your door.'},f:{n:'Decatur',lat:33.7748,lng:-84.2963,b:'A walkable small town inside the city, famous for its schools.'}},
+'Charlotte':{u:{n:'South End',lat:35.2080,lng:-80.8570,b:'Breweries, rail trail and new apartments minutes from Uptown.'},f:{n:'Ballantyne',lat:35.0530,lng:-80.8490,b:'Newer family homes, golf greens and highly rated schools.'}},
+'Raleigh–Durham':{u:{n:'Glenwood South',lat:35.7880,lng:-78.6470,b:'Raleigh\'s liveliest strip of restaurants and nightlife.'},f:{n:'Cary',lat:35.7915,lng:-78.7811,b:'Consistently ranked among America\'s best towns for families.'}},
+'Nashville':{u:{n:'The Gulch',lat:36.1520,lng:-86.7850,b:'Modern lofts and rooftop bars steps from Music Row.'},f:{n:'Franklin',lat:35.9251,lng:-86.8689,b:'A storybook Main Street with top Tennessee schools.'}},
+'Phoenix':{u:{n:'Roosevelt Row',lat:33.4590,lng:-112.0700,b:'Murals, galleries and coffee culture in downtown Phoenix.'},f:{n:'Scottsdale',lat:33.4942,lng:-111.9261,b:'Resort-style living, great schools and desert trails.'}},
+'Las Vegas':{u:{n:'Arts District',lat:36.1620,lng:-115.1520,b:'Galleries, vintage shops and cafés beyond the Strip.'},f:{n:'Summerlin',lat:36.1720,lng:-115.3260,b:'Red-rock views, parks and the valley\'s best schools.'}},
+'Denver':{u:{n:'LoDo',lat:39.7530,lng:-105.0000,b:'Historic lofts, Union Station and craft breweries downtown.'},f:{n:'Washington Park',lat:39.7000,lng:-104.9720,b:'Classic homes around one of America\'s prettiest city parks.'}},
+'Salt Lake City':{u:{n:'Sugar House',lat:40.7250,lng:-111.8600,b:'Indie shops and cafés with mountain views in every direction.'},f:{n:'Holladay',lat:40.6690,lng:-111.8250,b:'Quiet tree-lined streets at the foot of the Wasatch mountains.'}},
+'Seattle':{u:{n:'Capitol Hill',lat:47.6230,lng:-122.3190,b:'Seattle\'s cultural heart — cafés, music and city views.'},f:{n:'Bellevue',lat:47.6101,lng:-122.2015,b:'Top-ranked schools and tech offices across the lake.'}},
+'Portland':{u:{n:'Pearl District',lat:45.5310,lng:-122.6820,b:'Converted warehouses, galleries and famous bookstores.'},f:{n:'Lake Oswego',lat:45.4207,lng:-122.6706,b:'A lakeside town with excellent schools, minutes from the city.'}},
+'San Francisco Bay Area':{u:{n:'Marina District',lat:37.8020,lng:-122.4370,b:'Bay views, the Palace of Fine Arts and waterfront running paths.'},f:{n:'Palo Alto',lat:37.4419,lng:-122.1430,b:'The heart of Silicon Valley — legendary schools and tech careers.'}},
+'San Diego':{u:{n:'Little Italy',lat:32.7230,lng:-117.1680,b:'Piazzas, farmers markets and harbor sunsets.'},f:{n:'Carmel Valley',lat:32.9450,lng:-117.2110,b:'Newer family homes, canyons and standout schools near the coast.'}},
+'Los Angeles':{u:{n:'Santa Monica',lat:34.0195,lng:-118.4912,b:'Beach mornings, the pier and a walkable downtown by the ocean.'},f:{n:'Pasadena',lat:34.1478,lng:-118.1445,b:'Craftsman homes, tree-lined streets and strong schools.'}},
+'Sacramento':{u:{n:'Midtown',lat:38.5720,lng:-121.4790,b:'Victorian homes, murals and farm-to-fork dining.'},f:{n:'Folsom',lat:38.6780,lng:-121.1760,b:'Lakes, trails and some of the region\'s best schools.'}},
+'New York City':{u:{n:'Williamsburg, Brooklyn',lat:40.7081,lng:-73.9571,b:'Skyline views, indie culture and the L train to Manhattan.'},f:{n:'Forest Hills, Queens',lat:40.7196,lng:-73.8448,b:'Tudor houses and top schools, thirty minutes to Midtown.'}},
+'North New Jersey':{u:{n:'Hoboken',lat:40.7440,lng:-74.0290,b:'Brownstones and waterfront parks facing the Manhattan skyline.'},f:{n:'Ridgewood',lat:40.9793,lng:-74.1166,b:'A classic commuter town with a beloved main street and schools.'}},
+'Boston':{u:{n:'Back Bay',lat:42.3510,lng:-71.0810,b:'Brownstone streets, the Charles River and Newbury Street shopping.'},f:{n:'Newton',lat:42.3370,lng:-71.2092,b:'Village greens and some of the finest public schools in America.'}},
+'Philadelphia':{u:{n:'Rittenhouse Square',lat:39.9490,lng:-75.1720,b:'Elegant square living amid cafés, bookshops and greenery.'},f:{n:'Chestnut Hill',lat:40.0770,lng:-75.2080,b:'Cobblestone charm, garden district and excellent schools.'}},
+'Washington DC Metro':{u:{n:'Dupont Circle',lat:38.9090,lng:-77.0430,b:'Embassies, bookstores and café life in the heart of DC.'},f:{n:'Bethesda',lat:38.9847,lng:-77.0947,b:'Top Maryland schools and a thriving downtown on the Metro.'}},
+'Chicago':{u:{n:'Lincoln Park',lat:41.9214,lng:-87.6513,b:'Lakefront paths, the zoo and brownstone streets.'},f:{n:'Naperville',lat:41.7508,lng:-88.1535,b:'Riverwalk charm and schools ranked among the nation\'s best.'}},
+'Minneapolis':{u:{n:'North Loop',lat:44.9860,lng:-93.2760,b:'Warehouse lofts, riverside trails and award-winning restaurants.'},f:{n:'Edina',lat:44.8897,lng:-93.3499,b:'Lakes, parks and Minnesota\'s most sought-after schools.'}},
+'Columbus':{u:{n:'Short North',lat:39.9770,lng:-83.0040,b:'Gallery hops, arches and the city\'s best food street.'},f:{n:'Dublin',lat:40.0992,lng:-83.1141,b:'Green suburbs and consistently top-rated Ohio schools.'}},
+'Kansas City':{u:{n:'Crossroads',lat:39.0920,lng:-94.5830,b:'First Fridays art walks, coffee roasters and lofts.'},f:{n:'Overland Park',lat:38.9822,lng:-94.6708,b:'Repeatedly named one of America\'s best places to raise a family.'}}
+};
+
+/* בחירת השכונה האישית לפי תשובות הלקוח */
+function pickNeighborhood(cityName){
+  var nb=NEIGHBORHOODS[cityName];if(!nb)return null;
+  var a=state.answers;
+  var hasKids=(a.family==='kids'||a.family==='kids_teen');
+  if(hasKids)return nb.f;
+  if(a.lifestyle==='urban'||a.lifestyle==='coastal')return nb.u;
+  return nb.f;
 }
 
 /* ---------- שיטוט ברחוב — Street View בתוך הדף ----------
@@ -668,16 +762,21 @@ function walkCity(idx){
   var t=state.results[idx];if(!t)return;
   var c=t.city;
   var pt=SV_POINTS[c.n]||[c.lat,c.lng];
-  var src='https://maps.google.com/maps?layer=c&cbll='+pt[0]+','+pt[1]+'&cbp=12,0,0,0,0&hl=en&output=svembed';
-  var fallback='https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='+pt[0]+','+pt[1]+'&hl=en';
+  walkAt(pt[0],pt[1],c.n+', '+c.s);
+}
+
+/* פתיחת חלון שיטוט ברחוב בכל נקודה — עיר, שכונה, מקום עבודה או בית ספר */
+function walkAt(lat,lng,label){
+  var src='https://maps.google.com/maps?layer=c&cbll='+lat+','+lng+'&cbp=12,0,0,0,0&hl=en&output=svembed';
+  var fallback='https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='+lat+','+lng+'&hl=en';
   var ov=document.createElement('div');
   ov.className='sv-overlay';
   ov.id='sv-overlay';
-  ov.innerHTML='<div class="sv-box" role="dialog" aria-label="Street view of '+c.n+'">'
-    +'<div class="sv-head"><div><h3>Walking in '+c.n+', '+c.s+'</h3>'
+  ov.innerHTML='<div class="sv-box" role="dialog" aria-label="Street view of '+label+'">'
+    +'<div class="sv-head"><div><h3>Walking in '+label+'</h3>'
     +'<div class="hint2">Drag to look around &middot; Click the arrows on the street to walk &middot; <a href="'+fallback+'" target="_blank" rel="noopener" style="color:#B08D3E;">Open full view</a></div></div>'
     +'<button class="sv-close" onclick="closeWalk()">Close &times;</button></div>'
-    +'<iframe src="'+src+'" allow="accelerometer; gyroscope" loading="lazy" title="Street view of '+c.n+'"></iframe>'
+    +'<iframe src="'+src+'" allow="accelerometer; gyroscope" loading="lazy" title="Street view of '+label+'"></iframe>'
     +'</div>';
   /* סגירה בלחיצה על הרקע */
   ov.addEventListener('click',function(e){if(e.target===ov)closeWalk();});
@@ -707,6 +806,89 @@ function exploreCity(idx){
   else{target=Math.min(cur+3,16);} /* כבר בעיר — מתקרבים לשכונות ולרחובות */
   mapObj.flyTo([t.city.lat,t.city.lng],target,{duration:1.4});
   if(t._marker){setTimeout(function(){t._marker.openPopup();},1500);}
+}
+
+/* ---------- "החיים שלך בשכונה" ----------
+   מטיס לשכונה האישית, מציב סימון בית, ושולף מ-OpenStreetMap (Overpass, חינם,
+   ללא מפתח) מקומות עבודה במקצוע של הלקוח + בתי ספר אם יש ילדים.
+*/
+var nbLayer=null;
+
+/* מיפוי מקצוע -> שאילתת Overpass למקומות עבודה רלוונטיים */
+var WORK_QUERY={
+tech:'["office"~"it|software|company|engineering|telecommunication"]',
+health:'["amenity"~"hospital|clinic|doctors"]',
+business:'["office"~"company|financial|insurance|accountant|lawyer|consulting"]',
+engineering:'["office"~"engineering|company|construction"]',
+education:'["amenity"~"university|college|school"]',
+trades:'["craft"]',
+creative:'["office"~"advertising_agency|design|media|newspaper|company"]',
+hospitality:'["tourism"="hotel"]'
+};
+var WORK_ICON_LABEL={tech:'Tech offices nearby',health:'Hospitals & clinics nearby',business:'Company offices nearby',engineering:'Engineering & construction firms nearby',education:'Schools & universities nearby',trades:'Workshops & trade businesses nearby',creative:'Studios & agencies nearby',hospitality:'Hotels & venues nearby'};
+
+function showNeighborhood(idx){
+  var t=state.results[idx];if(!t||!mapObj)return;
+  var nb=pickNeighborhood(t.city.n);if(!nb)return;
+  var a=state.answers;
+  var hasKids=(a.family==='kids'||a.family==='kids_teen');
+
+  document.getElementById('map').scrollIntoView({behavior:'smooth',block:'center'});
+
+  /* ניקוי שכבת שכונה קודמת */
+  if(nbLayer){mapObj.removeLayer(nbLayer);}
+  nbLayer=L.layerGroup().addTo(mapObj);
+
+  /* סימון הבית — "כאן אתה יכול לגור" */
+  var homeIcon=L.divIcon({className:'',html:'<div style="width:40px;height:40px;border-radius:50%;background:#B08D3E;border:3px solid #FCFAF4;box-shadow:0 2px 10px rgba(31,58,95,.5);display:flex;align-items:center;justify-content:center;font-size:20px;">&#127968;</div>',iconSize:[40,40],iconAnchor:[20,20]});
+  var homeMk=L.marker([nb.lat,nb.lng],{icon:homeIcon}).addTo(nbLayer);
+  homeMk.bindPopup('<b>'+nb.n+'</b><br>You could live right here.<br><a href="#" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\');return false;" style="color:#B08D3E;">&#128694; Walk this street &raquo;</a>');
+
+  mapObj.flyTo([nb.lat,nb.lng],14,{duration:1.6});
+  setTimeout(function(){homeMk.openPopup();},1700);
+
+  /* באנר הסבר מעל המפה — מה כל סימון אומר */
+  var hint=document.getElementById('map-hint');
+  if(!hint){
+    hint=document.createElement('div');hint.id='map-hint';hint.className='map-hint';
+    var mapEl=document.getElementById('map');
+    mapEl.parentNode.insertBefore(hint,mapEl.nextSibling);
+  }
+  hint.innerHTML='<b>&#127968; '+nb.n+'</b> — your street &nbsp;&middot;&nbsp; <b>&#128188;</b> places you could work'+(hasKids?' &nbsp;&middot;&nbsp; <b>&#127979;</b> schools for the kids':'')+'<br><span style="color:#B08D3E;font-style:italic;">Tap the &#127968; marker, then &ldquo;Walk this street&rdquo; to stand there &#128071;</span>';
+
+  /* שליפת מקומות אמיתיים מ-OpenStreetMap */
+  fetchPOIs(nb,a.profession,hasKids);
+}
+
+function fetchPOIs(nb,prof,hasKids){
+  var wq=WORK_QUERY[prof]||'["office"]';
+  var q='[out:json][timeout:12];('
+    +'node'+wq+'(around:5000,'+nb.lat+','+nb.lng+');'
+    +'way'+wq+'(around:5000,'+nb.lat+','+nb.lng+');'
+    +(hasKids?('node["amenity"="school"](around:2500,'+nb.lat+','+nb.lng+');way["amenity"="school"](around:2500,'+nb.lat+','+nb.lng+');'):'')
+    +');out center 40;';
+
+  fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(!d.elements||!nbLayer)return;
+    var work=0,school=0;
+    d.elements.forEach(function(el){
+      var name=el.tags&&el.tags.name;if(!name)return;
+      var lat=el.lat||(el.center&&el.center.lat);
+      var lng=el.lon||(el.center&&el.center.lon);
+      if(!lat||!lng)return;
+      var isSchool=el.tags.amenity==='school';
+      if(isSchool&&school>=6)return;
+      if(!isSchool&&work>=6)return;
+      var emoji=isSchool?'&#127979;':'&#128188;';
+      var icon=L.divIcon({className:'',html:'<div style="width:28px;height:28px;border-radius:50%;background:#FCFAF4;border:2px solid '+(isSchool?'#2E7D4F':'#1F3A5F')+';box-shadow:0 1px 5px rgba(31,58,95,.3);display:flex;align-items:center;justify-content:center;font-size:14px;">'+emoji+'</div>',iconSize:[28,28],iconAnchor:[14,14]});
+      L.marker([lat,lng],{icon:icon}).addTo(nbLayer)
+        .bindPopup('<b>'+name+'</b><br>'+(isSchool?'School near your neighborhood':'A place you could work')+'<br><a href="#" onclick="walkAt('+lat+','+lng+',\''+name.replace(/'/g,"\\'")+'\');return false;" style="color:#B08D3E;">&#128694; See it from the street &raquo;</a>');
+      if(isSchool)school++;else work++;
+    });
+  })
+  .catch(function(){/* אם השירות לא זמין — השכונה והבית עדיין מוצגים */});
 }
 
 function showResults(){
@@ -782,6 +964,7 @@ function saveToCRM(){
 
   var summary='=== American Life Map — Dream Destination ===\n'
     +'Top match: '+top.n+', '+top.s+' ('+state.results[0].match+'%)\n'
+    +'Suggested neighborhood: '+((pickNeighborhood(top.n)||{}).n||'—')+'\n'
     +'Other matches: '+others+'\n'
     +'Profession: '+PROF_LABEL[a.profession]+'\n'
     +'Family: '+FAM_LABEL[a.family]+'\n'
