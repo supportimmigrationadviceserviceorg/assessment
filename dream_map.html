@@ -681,6 +681,30 @@ var WEEKEND_LABEL={outdoors:'Nature & hiking',beach:'Beach & water',golf:'Golf',
 /* ---------- מצב ---------- */
 var state={leadId:null,leadType:null,leadName:'',email:'',existingComments:'',answers:{profession:null,family:null,lifestyle:null,budget:null,priorities:[],weekend:[]},results:[]};
 
+/* ---------- זיהוי מקור התנועה — התאמת מסך הכניסה למי שמגיע מפרסום/רשת חברתית ---------- */
+(function detectSource(){
+  try{
+    var p=new URLSearchParams(window.location.search);
+    var src=(p.get('utm_source')||'').toLowerCase();
+    var social=['facebook','instagram','fb','ig','social','tiktok','twitter','x','youtube','ad','ads'];
+    var isNewcomer=social.indexOf(src)>-1;
+    document.addEventListener('DOMContentLoaded',function(){
+      if(!isNewcomer)return;
+      /* מבקרים חדשים מפרסום — מסך פתיחה מזמין, לא "הזן אימייל שנרשמת איתו" */
+      var h=document.querySelector('#screen-lookup h2');
+      var hint=document.querySelector('#screen-lookup .hint');
+      var btn=document.getElementById('lk-btn');
+      if(h)h.textContent='Welcome — let\'s build your American Life Map';
+      if(hint)hint.textContent='Enter your email to begin. In 60 seconds you\'ll see the American neighborhood that fits your life.';
+      if(btn)btn.textContent='Start my map';
+      /* אין צורך בהודעת "לא מצאנו פרופיל" — לזרים זה טבעי; מרככים אותה */
+      var gh=document.querySelector('#guest-fields .hint');
+      if(gh)gh.textContent='Almost there — just tell us your name and we\'ll draw your personal map.';
+      state._newcomer=true;
+    });
+  }catch(e){}
+})();
+
 /* ---------- זיהוי לפי אימייל (כמו בכלים הקיימים) ---------- */
 function showErr(id,msg){var e=document.getElementById(id);e.textContent=msg;e.style.display='block';}
 function hideErr(id){document.getElementById(id).style.display='none';}
@@ -1584,7 +1608,8 @@ function saveToCRM(){
   }else if(state.email&&state.guestFirst){
     /* ── לא נמצא במערכת: יצירת ליד חדש ── */
     var name=[state.guestFirst,state.guestLast].filter(Boolean).join(' ');
-    var url=WEBHOOK+'crm.lead.add?fields[TITLE]='+encodeURIComponent('American Life Map: '+name)
+    var titlePrefix=state._newcomer?'American Life Map (Facebook): ':'American Life Map: ';
+    var url=WEBHOOK+'crm.lead.add?fields[TITLE]='+encodeURIComponent(titlePrefix+name)
       +'&fields[NAME]='+encodeURIComponent(state.guestFirst)
       +'&fields[LAST_NAME]='+encodeURIComponent(state.guestLast||'')
       +'&fields[SOURCE_ID]=4'
