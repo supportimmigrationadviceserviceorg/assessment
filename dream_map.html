@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your American Life Map — Immigration Advice Service</title>
+<!-- Leaflet — ספריית מפות חינמית, ללא צורך במפתח API -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  /* ===== פלטת צבעים — אטלס וינטג': קלף, דיו כחול, פליז ===== */
+  :root{
+    --parchment:#F7F3EA;
+    --parchment-deep:#EFE8D8;
+    --ink:#1F3A5F;
+    --ink-soft:#3D5578;
+    --brass:#B08D3E;
+    --brass-light:#D9C288;
+    --text-muted:#6B6353;
+    --green:#2E7D4F;
+    --amber:#B07A2A;
+    --blue-badge:#2C5F8A;
+    --line:#C9BFA8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:Georgia,'Times New Roman',serif;
+    background:var(--parchment);
+    color:var(--ink);
+    line-height:1.6;
+    min-height:100vh;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 60px;}
+
+  /* ===== כותרת בסגנון מכתב רשמי — מסגרת כפולה ===== */
+  .letterhead{
+    border:1px solid var(--ink);
+    outline:3px double var(--ink);
+    outline-offset:4px;
+    background:#FCFAF4;
+    text-align:center;
+    padding:28px 20px 22px;
+    margin:10px 4px 30px;
+  }
+  .letterhead .eyebrow{
+    font-family:Arial,Helvetica,sans-serif;
+    font-size:11px;letter-spacing:3px;text-transform:uppercase;
+    color:var(--brass);margin-bottom:10px;
+  }
+  .letterhead h1{font-size:30px;font-weight:normal;letter-spacing:.5px;}
+  .letterhead .sub{font-size:15px;color:var(--text-muted);margin-top:8px;font-style:italic;}
+  .compass{width:44px;height:44px;margin:0 auto 12px;display:block;}
+
+  /* ===== כרטיסים ===== */
+  .card{
+    background:#FCFAF4;
+    border:1px solid var(--line);
+    border-radius:2px;
+    padding:28px 26px;
+    margin-bottom:22px;
+    box-shadow:0 1px 3px rgba(31,58,95,.06);
+  }
+  .card h2{font-size:21px;font-weight:normal;margin-bottom:6px;}
+  .card .hint{font-family:Arial,Helvetica,sans-serif;font-size:13px;color:var(--text-muted);margin-bottom:18px;}
+
+  /* ===== שדות ===== */
+  label{font-family:Arial,Helvetica,sans-serif;font-size:13px;color:var(--ink-soft);display:block;margin-bottom:6px;}
+  input[type=email],input[type=text]{
+    width:100%;padding:12px 14px;font-size:16px;font-family:Georgia,serif;
+    border:1px solid var(--line);border-radius:2px;background:#fff;color:var(--ink);
+  }
+  input:focus{outline:2px solid var(--brass);outline-offset:1px;border-color:var(--brass);}
+
+  /* ===== כפתורים ===== */
+  .btn{
+    display:inline-block;width:100%;text-align:center;cursor:pointer;
+    font-family:Georgia,serif;font-size:17px;letter-spacing:.5px;
+    padding:14px 24px;border-radius:2px;border:1px solid var(--ink);
+    background:var(--ink);color:#FCFAF4;transition:background .2s;
+  }
+  .btn:hover{background:var(--ink-soft);}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .btn-gold{background:var(--brass);border-color:var(--brass);color:#fff;font-size:18px;}
+  .btn-gold:hover{background:#9A7A32;}
+  .btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line);font-size:14px;width:auto;padding:9px 18px;}
+  .btn-ghost:hover{background:var(--parchment-deep);}
+  .btn:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
+
+  /* ===== התקדמות ===== */
+  .progress{display:flex;align-items:center;gap:10px;margin:0 4px 16px;font-family:Arial,sans-serif;font-size:12px;color:var(--text-muted);}
+  .progress .bar{flex:1;height:3px;background:var(--parchment-deep);border-radius:2px;overflow:hidden;}
+  .progress .fill{height:100%;background:var(--brass);width:0%;transition:width .4s ease;}
+
+  /* ===== רשת אפשרויות ===== */
+  .opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .opt{
+    border:1px solid var(--line);border-radius:2px;background:#fff;
+    padding:14px 12px;text-align:center;cursor:pointer;transition:all .15s;
+    font-size:15px;user-select:none;
+  }
+  .opt .ico{font-size:22px;display:block;margin-bottom:6px;}
+  .opt:hover{border-color:var(--brass);background:#FDFBF3;}
+  .opt.sel{border-color:var(--brass);background:#F8F1DE;box-shadow:inset 0 0 0 1px var(--brass);}
+  .opt.sel .ico{transform:scale(1.1);}
+  .opt small{display:block;font-family:Arial,sans-serif;font-size:11px;color:var(--text-muted);margin-top:3px;}
+
+  .step-nav{display:flex;justify-content:space-between;align-items:center;margin-top:22px;gap:12px;}
+  .step-nav .btn{width:auto;padding:12px 34px;}
+
+  /* ===== מסך טעינה — מצפן מסתובב ===== */
+  .loading-screen{text-align:center;padding:70px 20px;}
+  .loading-screen .spin{width:70px;height:70px;margin:0 auto 24px;animation:spin 2.6s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loading-screen p{font-style:italic;color:var(--text-muted);font-size:16px;min-height:26px;}
+  @media (prefers-reduced-motion:reduce){
+    .loading-screen .spin{animation:none;}
+    .fill{transition:none;}
+  }
+
+  /* ===== תוצאות ===== */
+  .cert-head{text-align:center;margin-bottom:20px;}
+  .cert-head .eyebrow{font-family:Arial,sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--brass);}
+  .cert-head h2{font-size:26px;font-weight:normal;margin-top:6px;}
+  .cert-head .name-line{font-style:italic;color:var(--text-muted);margin-top:4px;}
+
+  #map{
+    height:420px;border:1px solid var(--ink);outline:3px double var(--ink);outline-offset:4px;
+    margin:8px 4px 30px;background:#DCE8EE;z-index:1;
+  }
+
+  /* כרטיס עיר */
+  .city-card{position:relative;border:1px solid var(--line);background:#FCFAF4;border-radius:2px;padding:24px 22px;margin-bottom:16px;}
+  .city-card.top{border:1px solid var(--brass);outline:3px double var(--brass);outline-offset:3px;margin:6px 4px 24px;}
+  .rank-seal{
+    position:absolute;top:-14px;right:18px;background:var(--brass);color:#fff;
+    font-family:Arial,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;
+    padding:5px 14px;border-radius:2px;
+  }
+  .city-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;}
+  .city-head h3{font-size:22px;font-weight:normal;}
+  .city-head .state{color:var(--text-muted);font-size:15px;font-style:italic;}
+  .match{font-family:Arial,sans-serif;font-weight:bold;font-size:20px;}
+  .match.g{color:var(--green);} .match.y{color:var(--amber);} .match.b{color:var(--blue-badge);}
+  .match small{font-weight:normal;font-size:11px;display:block;text-align:right;color:var(--text-muted);}
+
+  .facts{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin-top:16px;}
+  .fact{font-family:Arial,sans-serif;font-size:13px;color:var(--ink-soft);}
+  .fact b{display:block;font-size:16px;color:var(--ink);font-family:Georgia,serif;}
+  .tags{margin-top:14px;display:flex;flex-wrap:wrap;gap:6px;}
+  .tag{font-family:Arial,sans-serif;font-size:11px;background:#EFE9D9;border:1px solid var(--line);color:var(--ink-soft);padding:3px 10px;border-radius:12px;}
+
+  /* ערים נעולות */
+  .locked-zone{position:relative;margin-top:6px;}
+  .locked-cards{filter:blur(5px);pointer-events:none;user-select:none;}
+  .lock-overlay{
+    position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:linear-gradient(180deg,rgba(247,243,234,.55),rgba(247,243,234,.92));
+    text-align:center;padding:24px;
+  }
+  .lock-overlay .lock-ico{font-size:34px;margin-bottom:10px;}
+  .lock-overlay h3{font-size:22px;font-weight:normal;margin-bottom:6px;}
+  .lock-overlay p{font-size:14px;color:var(--text-muted);max-width:420px;margin-bottom:18px;font-family:Arial,sans-serif;}
+  .lock-overlay .btn-gold{max-width:380px;}
+  .lock-overlay .fine{font-family:Arial,sans-serif;font-size:11px;color:var(--text-muted);margin-top:10px;}
+
+  .disclaimer{font-family:Arial,sans-serif;font-size:11px;color:var(--text-muted);text-align:center;margin-top:26px;line-height:1.5;}
+  .err{color:#8A2C2C;font-family:Arial,sans-serif;font-size:13px;margin-top:10px;display:none;}
+
+  .hidden{display:none;}
+
+  @media(max-width:520px){
+    .opt-grid{grid-template-columns:1fr 1fr;}
+    .letterhead h1{font-size:24px;}
+    #map{height:320px;}
+    .facts{grid-template-columns:1fr 1fr;}
+    .step-nav .btn{padding:12px 22px;}
+  }
+
+  /* Leaflet popup בהתאמה לעיצוב */
+  .leaflet-popup-content-wrapper{border-radius:2px;font-family:Georgia,serif;color:var(--ink);}
+  .leaflet-popup-content{margin:12px 16px;font-size:14px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===== כותרת ===== -->
+  <div class="letterhead">
+    <svg class="compass" viewBox="0 0 48 48" aria-hidden="true">
+      <circle cx="24" cy="24" r="21" fill="none" stroke="#B08D3E" stroke-width="1.5"/>
+      <circle cx="24" cy="24" r="16" fill="none" stroke="#B08D3E" stroke-width=".7" opacity=".6"/>
+      <polygon points="24,6 27,24 24,42 21,24" fill="#1F3A5F"/>
+      <polygon points="6,24 24,21 42,24 24,27" fill="#B08D3E"/>
+      <circle cx="24" cy="24" r="2.5" fill="#1F3A5F"/>
+    </svg>
+    <div class="eyebrow">Immigration Advice Service</div>
+    <h1>Your American Life Map</h1>
+    <div class="sub">Discover where your new life in the United States could begin</div>
+  </div>
+
+  <!-- ===== שלב 0: זיהוי לפי אימייל ===== -->
+  <div id="screen-lookup" class="card">
+    <h2>Let's begin with your details</h2>
+    <p class="hint">Enter the email address you registered with, and we will prepare your personal map.</p>
+    <label for="lk-email">Email address</label>
+    <input type="email" id="lk-email" placeholder="name@example.com" autocomplete="email">
+    <div class="err" id="lk-err"></div>
+    <div style="margin-top:18px;">
+      <button class="btn" id="lk-btn" onclick="doLookup()">Continue</button>
+    </div>
+  </div>
+
+  <!-- ===== אישור שם ===== -->
+  <div id="screen-welcome" class="card hidden">
+    <h2 id="welcome-title">Welcome back</h2>
+    <p class="hint">We found your file. Let's map out where your American life could begin — it takes about one minute.</p>
+    <div style="margin-top:10px;">
+      <button class="btn" onclick="startQuiz()">Start my map</button>
+    </div>
+  </div>
+
+  <!-- ===== שאלון ===== -->
+  <div id="screen-quiz" class="hidden">
+    <div class="progress"><span id="p-label">Step 1 of 5</span><div class="bar"><div class="fill" id="p-fill"></div></div></div>
+
+    <!-- שלב 1: מקצוע -->
+    <div class="card q-step" id="q1">
+      <h2>What do you do for a living?</h2>
+      <p class="hint">We match salaries in your field across the United States.</p>
+      <div class="opt-grid" data-q="profession">
+        <div class="opt" data-v="tech"><span class="ico">&#128187;</span>Technology &amp; IT</div>
+        <div class="opt" data-v="health"><span class="ico">&#9877;&#65039;</span>Healthcare &amp; Medicine</div>
+        <div class="opt" data-v="business"><span class="ico">&#128188;</span>Business &amp; Finance</div>
+        <div class="opt" data-v="engineering"><span class="ico">&#9881;&#65039;</span>Engineering</div>
+        <div class="opt" data-v="education"><span class="ico">&#127891;</span>Education &amp; Research</div>
+        <div class="opt" data-v="trades"><span class="ico">&#128736;&#65039;</span>Skilled Trades &amp; Construction</div>
+        <div class="opt" data-v="creative"><span class="ico">&#127912;</span>Creative &amp; Media</div>
+        <div class="opt" data-v="hospitality"><span class="ico">&#127869;&#65039;</span>Hospitality &amp; Service</div>
+      </div>
+      <div class="step-nav"><span></span><button class="btn" id="n1" disabled onclick="nextStep(2)">Next</button></div>
+    </div>
+
+    <!-- שלב 2: משפחה -->
+    <div class="card q-step hidden" id="q2">
+      <h2>Who is making the journey with you?</h2>
+      <p class="hint">This helps us weigh schools and family neighborhoods.</p>
+      <div class="opt-grid" data-q="family">
+        <div class="opt" data-v="single"><span class="ico">&#129489;</span>Just me</div>
+        <div class="opt" data-v="couple"><span class="ico">&#128107;</span>My partner and me</div>
+        <div class="opt" data-v="kids"><span class="ico">&#128106;</span>Family with children</div>
+        <div class="opt" data-v="kids_teen"><span class="ico">&#127890;</span>Family with teenagers</div>
+      </div>
+      <div class="step-nav"><button class="btn btn-ghost" onclick="prevStep(1)">Back</button><button class="btn" id="n2" disabled onclick="nextStep(3)">Next</button></div>
+    </div>
+
+    <!-- שלב 3: סגנון חיים -->
+    <div class="card q-step hidden" id="q3">
+      <h2>Where do you see yourself living?</h2>
+      <p class="hint">Picture your everyday life — the street outside your window.</p>
+      <div class="opt-grid" data-q="lifestyle">
+        <div class="opt" data-v="urban"><span class="ico">&#127961;&#65039;</span>Big city energy<small>Downtown, transit, everything nearby</small></div>
+        <div class="opt" data-v="suburban"><span class="ico">&#127968;</span>Quiet suburbs<small>A house, a yard, good schools</small></div>
+        <div class="opt" data-v="nature"><span class="ico">&#127956;&#65039;</span>Close to nature<small>Mountains, trails, open space</small></div>
+        <div class="opt" data-v="coastal"><span class="ico">&#127958;&#65039;</span>Near the water<small>Ocean air, beach weekends</small></div>
+      </div>
+      <div class="step-nav"><button class="btn btn-ghost" onclick="prevStep(2)">Back</button><button class="btn" id="n3" disabled onclick="nextStep(4)">Next</button></div>
+    </div>
+
+    <!-- שלב 4: תקציב -->
+    <div class="card q-step hidden" id="q4">
+      <h2>Your monthly housing budget</h2>
+      <p class="hint">An estimate is fine — rent or mortgage, in US dollars.</p>
+      <div class="opt-grid" data-q="budget">
+        <div class="opt" data-v="1000">Up to $1,200</div>
+        <div class="opt" data-v="1600">$1,200 &ndash; $2,000</div>
+        <div class="opt" data-v="2500">$2,000 &ndash; $3,000</div>
+        <div class="opt" data-v="3600">Over $3,000</div>
+      </div>
+      <div class="step-nav"><button class="btn btn-ghost" onclick="prevStep(3)">Back</button><button class="btn" id="n4" disabled onclick="nextStep(5)">Next</button></div>
+    </div>
+
+    <!-- שלב 5: עדיפויות -->
+    <div class="card q-step hidden" id="q5">
+      <h2>What matters most to you?</h2>
+      <p class="hint">Choose up to three.</p>
+      <div class="opt-grid" data-q="priorities" data-multi="3">
+        <div class="opt" data-v="salary"><span class="ico">&#128176;</span>Higher salary</div>
+        <div class="opt" data-v="afford"><span class="ico">&#127974;</span>Affordable living</div>
+        <div class="opt" data-v="schools"><span class="ico">&#127979;</span>Excellent schools</div>
+        <div class="opt" data-v="warm"><span class="ico">&#9728;&#65039;</span>Warm, sunny weather</div>
+        <div class="opt" data-v="ocean"><span class="ico">&#127754;</span>Near the ocean</div>
+        <div class="opt" data-v="community"><span class="ico">&#129309;</span>Strong local community</div>
+      </div>
+      <div class="step-nav"><button class="btn btn-ghost" onclick="prevStep(4)">Back</button><button class="btn" id="n5" disabled onclick="revealMap()">Reveal my map</button></div>
+    </div>
+  </div>
+
+  <!-- ===== מסך טעינה ===== -->
+  <div id="screen-loading" class="card loading-screen hidden">
+    <svg class="spin" viewBox="0 0 48 48" aria-hidden="true">
+      <circle cx="24" cy="24" r="21" fill="none" stroke="#B08D3E" stroke-width="1.5"/>
+      <polygon points="24,6 27,24 24,42 21,24" fill="#1F3A5F"/>
+      <polygon points="6,24 24,21 42,24 24,27" fill="#B08D3E"/>
+      <circle cx="24" cy="24" r="2.5" fill="#1F3A5F"/>
+    </svg>
+    <p id="loading-text">Reviewing 30 metropolitan areas...</p>
+  </div>
+
+  <!-- ===== תוצאות ===== -->
+  <div id="screen-results" class="hidden">
+    <div class="cert-head">
+      <div class="eyebrow">Personal Relocation Map</div>
+      <h2>Where your American life begins</h2>
+      <div class="name-line" id="cert-name"></div>
+    </div>
+
+    <div id="map" role="img" aria-label="Map of the United States showing your matched cities"></div>
+
+    <div id="top-city"></div>
+
+    <div class="locked-zone">
+      <div class="locked-cards" id="locked-cards" aria-hidden="true"></div>
+      <div class="lock-overlay">
+        <div class="lock-ico">&#128274;</div>
+        <h3><span id="lock-count">4</span> more matched cities are waiting</h3>
+        <p>Unlock your complete relocation report — every matched city with salary data for your profession, plus your full immigration pathway assessment reviewed by our team.</p>
+        <button class="btn btn-gold" onclick="goToPayment()">Unlock my full report &mdash; $29</button>
+        <div class="fine">One-time payment &middot; Includes your professional immigration assessment</div>
+      </div>
+    </div>
+
+    <p class="disclaimer">Salary, rent and cost-of-living figures are estimates based on publicly available data and are provided for general guidance only. They do not constitute financial or legal advice. Immigration Advice Service &middot; All rights reserved.</p>
+  </div>
+
+</div>
+<script>
+/* =====================================================================
+   Your American Life Map — Immigration Advice Service
+   כלי עצמאי: זיהוי לפי אימייל -> שאלון -> מפת התאמה -> CTA לתשלום $29
+   שמירה ל-Bitrix24: הערת Timeline + עדכון COMMENTS (ללא שינוי סטטוס)
+   ===================================================================== */
+
+/* ---------- הגדרות ---------- */
+var WEBHOOK = 'https://immiworld.org/rest/147/47yrflms2cje1cbe/';
+var PAYMENT_URL = 'https://immiworld.org/new-va-payment-29/?utm_source=dream_map&utm_medium=landing&utm_campaign=attorneypayment';
+
+/* ---------- מאגר ערים: 30 מטרופולינים ----------
+   col = מדד יוקר מחיה (100 = ממוצע ארצי)
+   rent = שכ"ד חודשי ממוצע לדירת 2 חדרים ($)
+   schools/comm = ציון 1-10 | climate: warm/mild/cold | sun/coast: 0/1
+   vibes: עירוני/פרברי/טבע 0-10 | sal: שכר שנתי חציוני לפי תחום ($K)
+*/
+var CITIES=[
+{n:'Austin',s:'Texas',lat:30.27,lng:-97.74,col:103,rent:1650,schools:7,comm:7,climate:'warm',sun:1,coast:0,vibes:{urban:7,suburban:8,nature:6},sal:{tech:128,health:82,business:86,engineering:98,education:58,trades:56,creative:64,hospitality:38}},
+{n:'Dallas–Fort Worth',s:'Texas',lat:32.78,lng:-96.80,col:101,rent:1550,schools:7,comm:6,climate:'warm',sun:1,coast:0,vibes:{urban:7,suburban:9,nature:4},sal:{tech:115,health:80,business:88,engineering:96,education:57,trades:55,creative:60,hospitality:37}},
+{n:'Houston',s:'Texas',lat:29.76,lng:-95.37,col:96,rent:1400,schools:6,comm:6,climate:'warm',sun:1,coast:1,vibes:{urban:7,suburban:8,nature:4},sal:{tech:108,health:84,business:87,engineering:105,education:57,trades:58,creative:57,hospitality:36}},
+{n:'San Antonio',s:'Texas',lat:29.42,lng:-98.49,col:92,rent:1250,schools:6,comm:7,climate:'warm',sun:1,coast:0,vibes:{urban:5,suburban:8,nature:5},sal:{tech:98,health:76,business:74,engineering:88,education:54,trades:52,creative:52,hospitality:34}},
+{n:'Miami',s:'Florida',lat:25.76,lng:-80.19,col:114,rent:2350,schools:6,comm:7,climate:'warm',sun:1,coast:1,vibes:{urban:8,suburban:6,nature:4},sal:{tech:100,health:78,business:84,engineering:86,education:53,trades:52,creative:60,hospitality:40}},
+{n:'Orlando',s:'Florida',lat:28.54,lng:-81.38,col:99,rent:1650,schools:6,comm:6,climate:'warm',sun:1,coast:0,vibes:{urban:6,suburban:8,nature:5},sal:{tech:96,health:74,business:73,engineering:85,education:52,trades:50,creative:55,hospitality:38}},
+{n:'Tampa',s:'Florida',lat:27.95,lng:-82.46,col:100,rent:1700,schools:6,comm:7,climate:'warm',sun:1,coast:1,vibes:{urban:6,suburban:8,nature:5},sal:{tech:100,health:76,business:78,engineering:87,education:53,trades:51,creative:55,hospitality:37}},
+{n:'Jacksonville',s:'Florida',lat:30.33,lng:-81.66,col:93,rent:1350,schools:6,comm:6,climate:'warm',sun:1,coast:1,vibes:{urban:5,suburban:8,nature:6},sal:{tech:95,health:74,business:74,engineering:84,education:52,trades:51,creative:51,hospitality:35}},
+{n:'Atlanta',s:'Georgia',lat:33.75,lng:-84.39,col:98,rent:1600,schools:7,comm:7,climate:'warm',sun:1,coast:0,vibes:{urban:8,suburban:8,nature:5},sal:{tech:112,health:79,business:85,engineering:92,education:57,trades:53,creative:62,hospitality:37}},
+{n:'Charlotte',s:'North Carolina',lat:35.23,lng:-80.84,col:97,rent:1500,schools:7,comm:7,climate:'mild',sun:1,coast:0,vibes:{urban:6,suburban:8,nature:6},sal:{tech:108,health:77,business:90,engineering:90,education:55,trades:53,creative:57,hospitality:36}},
+{n:'Raleigh–Durham',s:'North Carolina',lat:35.78,lng:-78.64,col:98,rent:1450,schools:8,comm:8,climate:'mild',sun:1,coast:0,vibes:{urban:5,suburban:9,nature:7},sal:{tech:118,health:80,business:82,engineering:95,education:60,trades:53,creative:58,hospitality:36}},
+{n:'Nashville',s:'Tennessee',lat:36.16,lng:-86.78,col:99,rent:1550,schools:6,comm:7,climate:'mild',sun:1,coast:0,vibes:{urban:7,suburban:7,nature:6},sal:{tech:104,health:80,business:80,engineering:88,education:55,trades:53,creative:65,hospitality:38}},
+{n:'Phoenix',s:'Arizona',lat:33.45,lng:-112.07,col:103,rent:1500,schools:6,comm:6,climate:'warm',sun:1,coast:0,vibes:{urban:6,suburban:9,nature:7},sal:{tech:106,health:80,business:78,engineering:92,education:54,trades:55,creative:56,hospitality:37}},
+{n:'Las Vegas',s:'Nevada',lat:36.17,lng:-115.14,col:101,rent:1450,schools:5,comm:5,climate:'warm',sun:1,coast:0,vibes:{urban:7,suburban:8,nature:6},sal:{tech:96,health:82,business:72,engineering:88,education:55,trades:58,creative:54,hospitality:44}},
+{n:'Denver',s:'Colorado',lat:39.74,lng:-104.99,col:110,rent:1800,schools:7,comm:7,climate:'cold',sun:1,coast:0,vibes:{urban:7,suburban:7,nature:10},sal:{tech:118,health:83,business:84,engineering:98,education:58,trades:58,creative:62,hospitality:39}},
+{n:'Salt Lake City',s:'Utah',lat:40.76,lng:-111.89,col:104,rent:1550,schools:7,comm:8,climate:'cold',sun:1,coast:0,vibes:{urban:5,suburban:8,nature:10},sal:{tech:112,health:78,business:80,engineering:92,education:56,trades:56,creative:56,hospitality:36}},
+{n:'Seattle',s:'Washington',lat:47.61,lng:-122.33,col:128,rent:2200,schools:8,comm:6,climate:'mild',sun:0,coast:1,vibes:{urban:8,suburban:7,nature:9},sal:{tech:145,health:92,business:96,engineering:110,education:66,trades:66,creative:70,hospitality:45}},
+{n:'Portland',s:'Oregon',lat:45.52,lng:-122.68,col:115,rent:1750,schools:7,comm:7,climate:'mild',sun:0,coast:1,vibes:{urban:7,suburban:7,nature:9},sal:{tech:112,health:85,business:80,engineering:95,education:60,trades:60,creative:62,hospitality:40}},
+{n:'San Francisco Bay Area',s:'California',lat:37.77,lng:-122.42,col:170,rent:3100,schools:8,comm:6,climate:'mild',sun:1,coast:1,vibes:{urban:9,suburban:7,nature:8},sal:{tech:175,health:105,business:115,engineering:130,education:75,trades:75,creative:85,hospitality:50}},
+{n:'San Diego',s:'California',lat:32.72,lng:-117.16,col:140,rent:2600,schools:7,comm:7,climate:'warm',sun:1,coast:1,vibes:{urban:7,suburban:8,nature:8},sal:{tech:125,health:92,business:88,engineering:105,education:64,trades:62,creative:66,hospitality:42}},
+{n:'Los Angeles',s:'California',lat:34.05,lng:-118.24,col:145,rent:2500,schools:6,comm:6,climate:'warm',sun:1,coast:1,vibes:{urban:9,suburban:7,nature:7},sal:{tech:130,health:90,business:92,engineering:105,education:65,trades:62,creative:80,hospitality:42}},
+{n:'Sacramento',s:'California',lat:38.58,lng:-121.49,col:112,rent:1750,schools:6,comm:6,climate:'warm',sun:1,coast:0,vibes:{urban:5,suburban:8,nature:7},sal:{tech:110,health:90,business:80,engineering:95,education:62,trades:60,creative:58,hospitality:38}},
+{n:'New York City',s:'New York',lat:40.71,lng:-74.01,col:168,rent:3300,schools:7,comm:7,climate:'cold',sun:0,coast:1,vibes:{urban:10,suburban:5,nature:3},sal:{tech:145,health:98,business:120,engineering:105,education:72,trades:70,creative:85,hospitality:48}},
+{n:'North New Jersey',s:'New Jersey',lat:40.85,lng:-74.10,col:130,rent:2300,schools:8,comm:8,climate:'cold',sun:0,coast:1,vibes:{urban:6,suburban:9,nature:5},sal:{tech:130,health:95,business:105,engineering:100,education:70,trades:66,creative:70,hospitality:42}},
+{n:'Boston',s:'Massachusetts',lat:42.36,lng:-71.06,col:145,rent:2800,schools:9,comm:7,climate:'cold',sun:0,coast:1,vibes:{urban:8,suburban:7,nature:5},sal:{tech:140,health:100,business:105,engineering:108,education:75,trades:68,creative:72,hospitality:44}},
+{n:'Philadelphia',s:'Pennsylvania',lat:39.95,lng:-75.17,col:105,rent:1700,schools:6,comm:7,climate:'cold',sun:0,coast:0,vibes:{urban:8,suburban:7,nature:4},sal:{tech:110,health:88,business:88,engineering:92,education:62,trades:60,creative:60,hospitality:38}},
+{n:'Washington DC Metro',s:'DC / Virginia / Maryland',lat:38.90,lng:-77.04,col:140,rent:2400,schools:8,comm:7,climate:'mild',sun:0,coast:0,vibes:{urban:8,suburban:8,nature:5},sal:{tech:135,health:95,business:105,engineering:108,education:72,trades:65,creative:70,hospitality:42}},
+{n:'Chicago',s:'Illinois',lat:41.88,lng:-87.63,col:107,rent:1900,schools:7,comm:7,climate:'cold',sun:0,coast:0,vibes:{urban:9,suburban:7,nature:3},sal:{tech:115,health:86,business:95,engineering:95,education:63,trades:64,creative:64,hospitality:40}},
+{n:'Minneapolis',s:'Minnesota',lat:44.98,lng:-93.27,col:103,rent:1500,schools:8,comm:8,climate:'cold',sun:0,coast:0,vibes:{urban:6,suburban:8,nature:7},sal:{tech:110,health:88,business:88,engineering:94,education:62,trades:62,creative:60,hospitality:39}},
+{n:'Columbus',s:'Ohio',lat:39.96,lng:-83.00,col:92,rent:1300,schools:7,comm:7,climate:'cold',sun:0,coast:0,vibes:{urban:5,suburban:8,nature:4},sal:{tech:100,health:78,business:78,engineering:88,education:56,trades:55,creative:54,hospitality:35}},
+{n:'Kansas City',s:'Missouri',lat:39.10,lng:-94.58,col:90,rent:1250,schools:6,comm:7,climate:'cold',sun:1,coast:0,vibes:{urban:5,suburban:8,nature:5},sal:{tech:98,health:76,business:76,engineering:87,education:55,trades:55,creative:53,hospitality:34}}
+];
+
+/* תוויות תצוגה */
+var PROF_LABEL={tech:'Technology & IT',health:'Healthcare & Medicine',business:'Business & Finance',engineering:'Engineering',education:'Education & Research',trades:'Skilled Trades & Construction',creative:'Creative & Media',hospitality:'Hospitality & Service'};
+var LIFE_LABEL={urban:'Big city energy',suburban:'Quiet suburbs',nature:'Close to nature',coastal:'Near the water'};
+var FAM_LABEL={single:'Just me',couple:'Partner and me',kids:'Family with children',kids_teen:'Family with teenagers'};
+var PRI_LABEL={salary:'Higher salary',afford:'Affordable living',schools:'Excellent schools',warm:'Warm weather',ocean:'Near the ocean',community:'Strong community'};
+var BUDGET_LABEL={1000:'Up to $1,200',1600:'$1,200–$2,000',2500:'$2,000–$3,000',3600:'Over $3,000'};
+
+/* ---------- מצב ---------- */
+var state={leadId:null,leadType:null,leadName:'',email:'',existingComments:'',answers:{profession:null,family:null,lifestyle:null,budget:null,priorities:[]},results:[]};
+
+/* ---------- זיהוי לפי אימייל (כמו בכלים הקיימים) ---------- */
+function showErr(id,msg){var e=document.getElementById(id);e.textContent=msg;e.style.display='block';}
+function hideErr(id){document.getElementById(id).style.display='none';}
+
+function doLookup(){
+  var email=document.getElementById('lk-email').value.trim();
+  hideErr('lk-err');
+  if(!email||email.indexOf('@')<1){showErr('lk-err','Please enter a valid email address.');return;}
+  var btn=document.getElementById('lk-btn');
+  btn.disabled=true;btn.textContent='Checking...';
+  state.email=email;
+
+  /* חיפוש ליד לפי אימייל */
+  fetch(WEBHOOK+'crm.lead.list?filter[EMAIL]='+encodeURIComponent(email)+'&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=COMMENTS&select[]=STATUS_ID')
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d.result&&d.result.length>0){
+      var L=d.result[0];
+      state.leadId=L.ID;state.leadType='lead';
+      state.leadName=(L.NAME||'').trim();
+      state.existingComments=L.COMMENTS||'';
+      showWelcome();
+    }else{
+      /* אם אין ליד — חיפוש איש קשר */
+      return fetch(WEBHOOK+'crm.contact.list?filter[EMAIL]='+encodeURIComponent(email)+'&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=COMMENTS')
+      .then(function(r2){return r2.json();})
+      .then(function(d2){
+        if(d2.result&&d2.result.length>0){
+          var C=d2.result[0];
+          state.leadId=C.ID;state.leadType='contact';
+          state.leadName=(C.NAME||'').trim();
+          state.existingComments=C.COMMENTS||'';
+          showWelcome();
+        }else{
+          /* לא נמצא — ממשיכים כאורח, ללא שמירה ל-CRM */
+          state.leadId=null;state.leadType=null;state.leadName='';
+          showWelcome();
+        }
+      });
+    }
+  })
+  .catch(function(){
+    /* גם במקרה תקלה — לא חוסמים את הלקוח */
+    state.leadId=null;showWelcome();
+  })
+  .finally(function(){btn.disabled=false;btn.textContent='Continue';});
+}
+
+function showWelcome(){
+  document.getElementById('screen-lookup').classList.add('hidden');
+  var t=document.getElementById('welcome-title');
+  t.textContent=state.leadName?('Welcome back, '+state.leadName):'Welcome';
+  document.getElementById('screen-welcome').classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---------- שאלון ---------- */
+function startQuiz(){
+  document.getElementById('screen-welcome').classList.add('hidden');
+  document.getElementById('screen-quiz').classList.remove('hidden');
+  setProgress(1);
+}
+function setProgress(step){
+  document.getElementById('p-label').textContent='Step '+step+' of 5';
+  document.getElementById('p-fill').style.width=(step*20)+'%';
+}
+function nextStep(step){
+  for(var i=1;i<=5;i++){document.getElementById('q'+i).classList.add('hidden');}
+  document.getElementById('q'+step).classList.remove('hidden');
+  setProgress(step);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function prevStep(step){nextStep(step);}
+
+/* בחירת אפשרויות — כולל תמיכה בבחירה מרובה */
+document.addEventListener('click',function(ev){
+  var opt=ev.target.closest('.opt');
+  if(!opt)return;
+  var grid=opt.parentElement;
+  var q=grid.getAttribute('data-q');
+  var multi=parseInt(grid.getAttribute('data-multi')||'0',10);
+  if(multi>0){
+    if(opt.classList.contains('sel')){opt.classList.remove('sel');}
+    else{
+      var selCount=grid.querySelectorAll('.opt.sel').length;
+      if(selCount>=multi)return; /* מקסימום 3 */
+      opt.classList.add('sel');
+    }
+    state.answers[q]=Array.prototype.map.call(grid.querySelectorAll('.opt.sel'),function(o){return o.getAttribute('data-v');});
+    document.getElementById('n5').disabled=state.answers[q].length===0;
+  }else{
+    Array.prototype.forEach.call(grid.querySelectorAll('.opt'),function(o){o.classList.remove('sel');});
+    opt.classList.add('sel');
+    state.answers[q]=opt.getAttribute('data-v');
+    var stepNum={profession:1,family:2,lifestyle:3,budget:4}[q];
+    if(stepNum){document.getElementById('n'+stepNum).disabled=false;}
+  }
+});
+
+/* ---------- אלגוריתם התאמה ---------- */
+function computeMatches(){
+  var a=state.answers;
+  var budget=parseInt(a.budget,10);
+  var pri=a.priorities||[];
+  var hasKids=(a.family==='kids'||a.family==='kids_teen');
+
+  /* טווח שכר בתחום — לנרמול */
+  var sals=CITIES.map(function(c){return c.sal[a.profession];});
+  var sMin=Math.min.apply(null,sals),sMax=Math.max.apply(null,sals);
+
+  var scored=CITIES.map(function(c){
+    var score=0;
+
+    /* התאמת שכ"ד לתקציב — הפרמטר הכבד ביותר */
+    if(c.rent<=budget)score+=30;
+    else if(c.rent<=budget*1.15)score+=18;
+    else if(c.rent<=budget*1.35)score+=6;
+    else score-=20;
+
+    /* סגנון חיים */
+    if(a.lifestyle==='coastal'){score+=(c.coast?22:0)+c.vibes.urban;}
+    else{score+=c.vibes[a.lifestyle]*2.6;}
+
+    /* שכר יחסי בתחום */
+    var salNorm=(c.sal[a.profession]-sMin)/(sMax-sMin||1);
+    score+=salNorm*14;
+
+    /* משפחה עם ילדים — בתי ספר ופרברים */
+    if(hasKids){score+=c.schools*1.8+c.vibes.suburban*0.8;}
+
+    /* עדיפויות שנבחרו */
+    if(pri.indexOf('salary')>-1)score+=salNorm*16;
+    if(pri.indexOf('afford')>-1)score+=(120-c.col)*0.45;
+    if(pri.indexOf('schools')>-1)score+=c.schools*2.2;
+    if(pri.indexOf('warm')>-1)score+=(c.climate==='warm'?14:(c.climate==='mild'?7:0))+(c.sun?4:0);
+    if(pri.indexOf('ocean')>-1)score+=(c.coast?16:0);
+    if(pri.indexOf('community')>-1)score+=c.comm*2.2;
+
+    return {city:c,raw:score};
+  });
+
+  scored.sort(function(x,y){return y.raw-x.raw;});
+  var top=scored.slice(0,5);
+
+  /* נרמול לסקאלה 70–97 (המוסכמה הקיימת של הכלים שלכם) */
+  var rMax=top[0].raw,rMin=top[top.length-1].raw;
+  top.forEach(function(t,i){
+    var pct=rMax===rMin?90:70+((t.raw-rMin)/(rMax-rMin))*27;
+    t.match=Math.min(97,Math.max(70,Math.round(pct)));
+  });
+  /* מניעת אחוזים זהים ברצף */
+  for(var i=1;i<top.length;i++){if(top[i].match>=top[i-1].match)top[i].match=top[i-1].match-1;}
+  state.results=top;
+}
+
+/* ---------- מסך טעינה ---------- */
+var LOADING_MSGS=['Reviewing 30 metropolitan areas...','Comparing salaries in your profession...','Checking housing costs against your budget...','Weighing schools and communities...','Drawing your map...'];
+function revealMap(){
+  document.getElementById('screen-quiz').classList.add('hidden');
+  var ls=document.getElementById('screen-loading');
+  ls.classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+  computeMatches();
+  var i=0;
+  var iv=setInterval(function(){
+    i++;
+    if(i<LOADING_MSGS.length){document.getElementById('loading-text').textContent=LOADING_MSGS[i];}
+    else{clearInterval(iv);ls.classList.add('hidden');showResults();}
+  },900);
+}
+
+/* ---------- תוצאות ---------- */
+function matchClass(m){return m>=88?'g':(m>=79?'y':'b');}
+function fmtMoney(k){return '$'+(k*1000).toLocaleString('en-US');}
+
+function cityTags(c){
+  var a=state.answers,tags=[];
+  if(c.rent<=parseInt(a.budget,10))tags.push('Within your budget');
+  if(c.climate==='warm')tags.push('Warm climate');
+  if(c.coast)tags.push('Coastal');
+  if(c.schools>=7)tags.push('Strong schools');
+  if(c.comm>=7)tags.push('Welcoming community');
+  if(c.col<=100)tags.push('Affordable living');
+  if(c.vibes.nature>=8)tags.push('Outdoor lifestyle');
+  return tags.slice(0,4);
+}
+
+function cityCardHTML(t,isTop){
+  var c=t.city,a=state.answers;
+  var tags=cityTags(c).map(function(x){return '<span class="tag">'+x+'</span>';}).join('');
+  return '<div class="city-card'+(isTop?' top':'')+'">'
+    +(isTop?'<div class="rank-seal">Your No. 1 Match</div>':'')
+    +'<div class="city-head"><div><h3>'+c.n+'</h3><span class="state">'+c.s+'</span></div>'
+    +'<div class="match '+matchClass(t.match)+'">'+t.match+'%<small>match</small></div></div>'
+    +'<div class="facts">'
+    +'<div class="fact">Typical salary in '+PROF_LABEL[a.profession]+'<b>'+fmtMoney(c.sal[a.profession])+' / year</b></div>'
+    +'<div class="fact">Average monthly rent<b>$'+c.rent.toLocaleString('en-US')+'</b></div>'
+    +'<div class="fact">Cost of living<b>'+(c.col<=97?'Below':(c.col<=106?'Near':'Above'))+' US average</b></div>'
+    +'<div class="fact">School quality<b>'+c.schools+' / 10</b></div>'
+    +'</div><div class="tags">'+tags+'</div></div>';
+}
+
+function showResults(){
+  var res=document.getElementById('screen-results');
+  res.classList.remove('hidden');
+  document.getElementById('cert-name').textContent=state.leadName?('Prepared for '+state.leadName):'Prepared personally for you';
+
+  /* כרטיס עיר מובילה + כרטיסים נעולים */
+  document.getElementById('top-city').innerHTML=cityCardHTML(state.results[0],true);
+  var lockedHTML='';
+  for(var i=1;i<state.results.length;i++){lockedHTML+=cityCardHTML(state.results[i],false);}
+  document.getElementById('locked-cards').innerHTML=lockedHTML;
+  document.getElementById('lock-count').textContent=String(state.results.length-1);
+
+  buildMap();
+  saveToCRM();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---------- מפה ----------
+   סימון העיר המובילה בפליז; שאר הערים בסימון "נעול" מעומעם.
+   הסימונים נוחתים בהדרגה — רגע ה"וואו".
+*/
+var mapObj=null;
+function buildMap(){
+  if(mapObj){mapObj.remove();}
+  mapObj=L.map('map',{scrollWheelZoom:false}).setView([38.5,-96.5],4);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
+    attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:10,minZoom:3
+  }).addTo(mapObj);
+
+  var reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  state.results.forEach(function(t,i){
+    var c=t.city;
+    var delay=reduced?0:400+i*550;
+    setTimeout(function(){
+      var isTop=(i===0);
+      var icon=L.divIcon({
+        className:'',
+        html:isTop
+          ?'<div style="width:34px;height:34px;border-radius:50%;background:#B08D3E;border:3px solid #FCFAF4;box-shadow:0 2px 8px rgba(31,58,95,.45);display:flex;align-items:center;justify-content:center;color:#fff;font:bold 13px Arial;">1</div>'
+          :'<div style="width:26px;height:26px;border-radius:50%;background:#8B92A0;border:2px solid #FCFAF4;box-shadow:0 1px 5px rgba(31,58,95,.35);display:flex;align-items:center;justify-content:center;color:#fff;font:11px Arial;">&#128274;</div>',
+        iconSize:isTop?[34,34]:[26,26],iconAnchor:isTop?[17,17]:[13,13]
+      });
+      var mk=L.marker([c.lat,c.lng],{icon:icon}).addTo(mapObj);
+      if(isTop){
+        mk.bindPopup('<b>'+c.n+', '+c.s+'</b><br>'+t.match+'% match &mdash; your No. 1 city').openPopup();
+      }else{
+        mk.bindPopup('<b>A matched city awaits</b><br>Unlock your full report to reveal it');
+      }
+    },delay);
+  });
+}
+
+/* ---------- שמירה ל-Bitrix24 ----------
+   רק אם הלקוח זוהה. ללא שינוי סטטוס — הערת Timeline + הוספה ל-COMMENTS.
+*/
+function saveToCRM(){
+  if(!state.leadId)return;
+  var a=state.answers;
+  var top=state.results[0].city;
+  var others=state.results.slice(1).map(function(t){return t.city.n;}).join(', ');
+  var pris=(a.priorities||[]).map(function(p){return PRI_LABEL[p];}).join(', ');
+
+  var summary='=== American Life Map — Dream Destination ===\n'
+    +'Top match: '+top.n+', '+top.s+' ('+state.results[0].match+'%)\n'
+    +'Other matches: '+others+'\n'
+    +'Profession: '+PROF_LABEL[a.profession]+'\n'
+    +'Family: '+FAM_LABEL[a.family]+'\n'
+    +'Lifestyle: '+LIFE_LABEL[a.lifestyle]+'\n'
+    +'Housing budget: '+BUDGET_LABEL[a.budget]+'\n'
+    +'Priorities: '+(pris||'—')+'\n'
+    +'Completed: '+new Date().toLocaleString('en-US');
+
+  /* הערת Timeline — ENTITY_TYPE באותיות קטנות (לפי הכלל שלמדנו) */
+  var params='fields[ENTITY_ID]='+encodeURIComponent(state.leadId)
+    +'&fields[ENTITY_TYPE]='+encodeURIComponent(state.leadType)
+    +'&fields[COMMENT]='+encodeURIComponent(summary);
+  fetch(WEBHOOK+'crm.timeline.comment.add?'+params).catch(function(){});
+
+  /* הוספה ל-COMMENTS של הרשומה — בלי למחוק תוכן קיים */
+  var updMethod=state.leadType==='contact'?'crm.contact.update':'crm.lead.update';
+  var newComments=(state.existingComments?state.existingComments+'<br><br>':'')
+    +summary.replace(/\n/g,'<br>');
+  fetch(WEBHOOK+updMethod+'?id='+encodeURIComponent(state.leadId)
+    +'&fields[COMMENTS]='+encodeURIComponent(newComments)).catch(function(){});
+}
+
+/* ---------- מעבר לתשלום ---------- */
+function goToPayment(){
+  var url=PAYMENT_URL;
+  if(state.leadId&&state.leadType==='lead'){url+='&lead_id='+encodeURIComponent(state.leadId);}
+  window.location.href=url;
+}
+</script>
+</body>
+</html>
