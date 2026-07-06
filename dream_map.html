@@ -627,19 +627,55 @@ function cityCardHTML(t,idx){
 }
 
 /* ---------- שיטוט ברחוב — Street View בתוך הדף ----------
-   נקודת ה-embed הישנה של גוגל עובדת ללא מפתח API ונצמדת לפנורמה
-   הקרובה ביותר לנקודת מרכז העיר. הלקוח מסתובב 360 והולך ברחובות.
+   נקודות מדויקות על הרחובות האיקוניים של כל עיר (על הכביש עצמו),
+   כדי שה-embed של גוגל ימצא פנורמה ויציב את הלקוח ממש ברחוב.
 */
+var SV_POINTS={
+'Austin':[30.2680,-97.7431],               /* Congress Avenue */
+'Dallas–Fort Worth':[32.7809,-96.7995],    /* Main Street downtown */
+'Houston':[29.7589,-95.3626],              /* Main Street */
+'San Antonio':[29.4241,-98.4861],          /* Alamo Plaza */
+'Miami':[25.7804,-80.1300],                /* Ocean Drive, South Beach */
+'Orlando':[28.5421,-81.3790],              /* Orange Avenue */
+'Tampa':[27.9477,-82.4584],                /* Franklin Street */
+'Jacksonville':[30.3255,-81.6590],         /* Laura Street */
+'Atlanta':[33.7590,-84.3880],              /* Peachtree Street */
+'Charlotte':[35.2271,-80.8431],            /* Tryon Street */
+'Raleigh–Durham':[35.7773,-78.6390],       /* Fayetteville Street */
+'Nashville':[36.1610,-86.7785],            /* Broadway */
+'Phoenix':[33.4489,-112.0740],             /* Central Avenue */
+'Las Vegas':[36.1147,-115.1728],           /* Las Vegas Boulevard */
+'Denver':[39.7477,-104.9989],              /* Larimer Square */
+'Salt Lake City':[40.7660,-111.8910],      /* Main Street */
+'Seattle':[47.6094,-122.3417],             /* Pike Place Market */
+'Portland':[45.5190,-122.6793],            /* SW Broadway */
+'San Francisco Bay Area':[37.8021,-122.4194], /* Lombard Street */
+'San Diego':[32.7115,-117.1600],           /* Gaslamp Quarter, 5th Ave */
+'Los Angeles':[34.1017,-118.3406],         /* Hollywood Boulevard */
+'Sacramento':[38.5767,-121.4934],          /* Capitol, 10th Street */
+'New York City':[40.7580,-73.9855],        /* Times Square */
+'North New Jersey':[40.7440,-74.0290],     /* Washington St, Hoboken */
+'Boston':[42.3505,-71.0763],               /* Newbury Street */
+'Philadelphia':[39.9489,-75.1500],         /* Chestnut St, Independence Hall */
+'Washington DC Metro':[38.8938,-77.0263],  /* Pennsylvania Avenue */
+'Chicago':[41.8917,-87.6244],              /* Michigan Ave, Magnificent Mile */
+'Minneapolis':[44.9762,-93.2759],          /* Nicollet Mall */
+'Columbus':[39.9640,-83.0007],             /* High Street, Short North */
+'Kansas City':[39.0420,-94.5910]           /* Country Club Plaza */
+};
+
 function walkCity(idx){
   var t=state.results[idx];if(!t)return;
   var c=t.city;
-  var src='https://maps.google.com/maps?layer=c&cbll='+c.lat+','+c.lng+'&output=svembed';
+  var pt=SV_POINTS[c.n]||[c.lat,c.lng];
+  var src='https://maps.google.com/maps?layer=c&cbll='+pt[0]+','+pt[1]+'&cbp=12,0,0,0,0&output=svembed';
+  var fallback='https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='+pt[0]+','+pt[1];
   var ov=document.createElement('div');
   ov.className='sv-overlay';
   ov.id='sv-overlay';
   ov.innerHTML='<div class="sv-box" role="dialog" aria-label="Street view of '+c.n+'">'
     +'<div class="sv-head"><div><h3>Walking in '+c.n+', '+c.s+'</h3>'
-    +'<div class="hint2">Drag to look around &middot; Click the arrows on the street to walk</div></div>'
+    +'<div class="hint2">Drag to look around &middot; Click the arrows on the street to walk &middot; <a href="'+fallback+'" target="_blank" rel="noopener" style="color:#B08D3E;">Open full view</a></div></div>'
     +'<button class="sv-close" onclick="closeWalk()">Close &times;</button></div>'
     +'<iframe src="'+src+'" allow="accelerometer; gyroscope" loading="lazy" title="Street view of '+c.n+'"></iframe>'
     +'</div>';
