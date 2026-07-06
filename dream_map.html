@@ -310,6 +310,7 @@
     text-align:center;line-height:22px;font-family:Arial,sans-serif;font-size:12px;font-weight:bold;margin-right:8px;
   }
   .j-school .jnum{background:var(--green);color:#fff;}
+  .j-fun{background:var(--brass);border-color:var(--brass);color:#fff;}
   .jbtn.dim{opacity:.75;font-style:italic;}
   @media(max-width:520px){.jbtn{font-size:16px;padding:16px;}}
 
@@ -513,7 +514,22 @@
         <div class="opt" data-v="ocean"><span class="ico">&#127754;</span>Near the ocean</div>
         <div class="opt" data-v="community"><span class="ico">&#129309;</span>Strong local community</div>
       </div>
-      <div class="step-nav"><button class="btn btn-ghost" onclick="prevStep(4)">Back</button><button class="btn" id="n5" disabled onclick="revealMap()">Reveal my map</button></div>
+      <div class="step-nav"><button class="btn btn-ghost" onclick="prevStep(4)">Back</button><button class="btn" id="n5" disabled onclick="nextStep(6)">Next</button></div>
+    </div>
+
+    <!-- שלב 6: סופי שבוע ותחביבים -->
+    <div class="card q-step hidden" id="q6">
+      <h2>How do you love spending weekends?</h2>
+      <p class="hint">Choose up to two — we'll show these near your new home.</p>
+      <div class="opt-grid" data-q="weekend" data-multi="2">
+        <div class="opt" data-v="outdoors"><span class="ico">&#129406;</span>Nature &amp; hiking</div>
+        <div class="opt" data-v="beach"><span class="ico">&#127958;&#65039;</span>Beach &amp; water</div>
+        <div class="opt" data-v="golf"><span class="ico">&#9971;</span>Golf</div>
+        <div class="opt" data-v="fitness"><span class="ico">&#127947;&#65039;</span>Fitness &amp; sports</div>
+        <div class="opt" data-v="arts"><span class="ico">&#127917;</span>Arts &amp; culture</div>
+        <div class="opt" data-v="food"><span class="ico">&#127869;&#65039;</span>Food &amp; dining</div>
+      </div>
+      <div class="step-nav"><button class="btn btn-ghost" onclick="prevStep(5)">Back</button><button class="btn" id="n6" disabled onclick="revealMap()">Reveal my map</button></div>
     </div>
   </div>
 
@@ -612,9 +628,10 @@ var LIFE_LABEL={urban:'Big city energy',suburban:'Quiet suburbs',nature:'Close t
 var FAM_LABEL={single:'Just me',couple:'Partner and me',kids:'Family with children',kids_teen:'Family with teenagers'};
 var PRI_LABEL={salary:'Higher salary',afford:'Affordable living',schools:'Excellent schools',warm:'Warm weather',ocean:'Near the ocean',community:'Strong community'};
 var BUDGET_LABEL={1000:'Up to $1,200',1600:'$1,200–$2,000',2500:'$2,000–$3,000',3600:'Over $3,000'};
+var WEEKEND_LABEL={outdoors:'Nature & hiking',beach:'Beach & water',golf:'Golf',fitness:'Fitness & sports',arts:'Arts & culture',food:'Food & dining'};
 
 /* ---------- מצב ---------- */
-var state={leadId:null,leadType:null,leadName:'',email:'',existingComments:'',answers:{profession:null,family:null,lifestyle:null,budget:null,priorities:[]},results:[]};
+var state={leadId:null,leadType:null,leadName:'',email:'',existingComments:'',answers:{profession:null,family:null,lifestyle:null,budget:null,priorities:[],weekend:[]},results:[]};
 
 /* ---------- זיהוי לפי אימייל (כמו בכלים הקיימים) ---------- */
 function showErr(id,msg){var e=document.getElementById(id);e.textContent=msg;e.style.display='block';}
@@ -725,11 +742,11 @@ function startQuiz(){
   setProgress(1);
 }
 function setProgress(step){
-  document.getElementById('p-label').textContent='Step '+step+' of 5';
-  document.getElementById('p-fill').style.width=(step*20)+'%';
+  document.getElementById('p-label').textContent='Step '+step+' of 6';
+  document.getElementById('p-fill').style.width=Math.round(step*100/6)+'%';
 }
 function nextStep(step){
-  for(var i=1;i<=5;i++){document.getElementById('q'+i).classList.add('hidden');}
+  for(var i=1;i<=6;i++){document.getElementById('q'+i).classList.add('hidden');}
   document.getElementById('q'+step).classList.remove('hidden');
   setProgress(step);
   window.scrollTo({top:0,behavior:'smooth'});
@@ -751,7 +768,8 @@ document.addEventListener('click',function(ev){
       opt.classList.add('sel');
     }
     state.answers[q]=Array.prototype.map.call(grid.querySelectorAll('.opt.sel'),function(o){return o.getAttribute('data-v');});
-    document.getElementById('n5').disabled=state.answers[q].length===0;
+    var btnId={priorities:'n5',weekend:'n6'}[q];
+    if(btnId){document.getElementById(btnId).disabled=state.answers[q].length===0;}
   }else{
     Array.prototype.forEach.call(grid.querySelectorAll('.opt'),function(o){o.classList.remove('sel');});
     opt.classList.add('sel');
@@ -799,6 +817,14 @@ function computeMatches(){
     if(pri.indexOf('warm')>-1)score+=(c.climate==='warm'?14:(c.climate==='mild'?7:0))+(c.sun?4:0);
     if(pri.indexOf('ocean')>-1)score+=(c.coast?16:0);
     if(pri.indexOf('community')>-1)score+=c.comm*2.2;
+
+    /* העדפות סופ"ש — משקל קל */
+    var wk=a.weekend||[];
+    if(wk.indexOf('outdoors')>-1)score+=c.vibes.nature*0.8;
+    if(wk.indexOf('beach')>-1)score+=(c.coast?7:0)+(c.climate==='warm'?2:0);
+    if(wk.indexOf('golf')>-1)score+=(c.climate==='warm'?4:1)+c.vibes.suburban*0.3;
+    if(wk.indexOf('arts')>-1)score+=c.vibes.urban*0.6;
+    if(wk.indexOf('food')>-1)score+=c.vibes.urban*0.5;
 
     return {city:c,raw:score};
   });
@@ -1051,7 +1077,7 @@ function showNeighborhood(idx){
   /* ניקוי שכבת שכונה קודמת + שכבות מקומות */
   if(nbLayer){mapObj.removeLayer(nbLayer);}
   nbLayer=L.layerGroup().addTo(mapObj);
-  ['work','school'].forEach(function(k){
+  ['work','school','fun'].forEach(function(k){
     if(poiLayers[k]&&mapObj.hasLayer(poiLayers[k])){mapObj.removeLayer(poiLayers[k]);}
     poiLayers[k]=null;poiState[k]='idle';
   });
@@ -1075,12 +1101,14 @@ function showNeighborhood(idx){
   hint.innerHTML='<b style="font-size:14px;">Your life in '+nb.n+'</b><span style="color:var(--text-muted);"> — take the tour:</span>'
     +'<button class="jbtn j-home" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\')"><span class="jnum">1</span><span class="walker">&#128694;</span> Stand on your street</button>'
     +'<button class="jbtn j-work dim" id="jbtn-work" onclick="goPOI(\'work\')"><span class="jnum">2</span>&#128188; Searching places you\'d work&hellip;</button>'
-    +'<button class="jbtn j-school dim" id="jbtn-school" onclick="goPOI(\'school\')"><span class="jnum">3</span>&#127979; Searching '+(hasKids?'the kids\' schools':'schools nearby')+'&hellip;</button>';
+    +'<button class="jbtn j-school dim" id="jbtn-school" onclick="goPOI(\'school\')"><span class="jnum">3</span>&#127979; Searching '+(hasKids?'the kids\' schools':'schools nearby')+'&hellip;</button>'
+    +'<button class="jbtn j-fun dim" id="jbtn-fun" onclick="goPOI(\'fun\')"><span class="jnum">4</span>&#11088; Finding your weekend spots&hellip;</button>';
 
   /* טעינה אוטומטית של המקומות — והכפתורים נותנים שליטה גלויה */
-  currentNb={nb:nb,prof:a.profession,hasKids:hasKids};
+  currentNb={nb:nb,prof:a.profession,hasKids:hasKids,weekend:a.weekend||[]};
   loadPOI('work');
   loadPOI('school');
+  loadPOI('fun');
 }
 
 /* ---------- שליפת מקומות אמיתיים מ-OpenStreetMap ----------
@@ -1088,25 +1116,46 @@ function showNeighborhood(idx){
    לכל סוג (עבודה/בתי ספר) שכבה נפרדת וכפתור בחירה עם חיווי מצב.
 */
 var currentNb=null;
-var poiLayers={work:null,school:null};
-var poiState={work:'idle',school:'idle'};
+var poiLayers={work:null,school:null,fun:null};
+var poiState={work:'idle',school:'idle',fun:'idle'};
 var OVERPASS_MIRRORS=[
 'https://overpass-api.de/api/interpreter',
 'https://overpass.kumi.systems/api/interpreter',
 'https://overpass.private.coffee/api/interpreter'
 ];
 
+var POI_NUM={work:'2',school:'3',fun:'4'};
+var POI_CLS={work:'j-work',school:'j-school',fun:'j-fun'};
 function setJBtn(kind,html,dim){
   var b=document.getElementById('jbtn-'+kind);
   if(!b)return;
-  var num=(kind==='work')?'2':'3';
-  b.innerHTML='<span class="jnum">'+num+'</span>'+html;
-  b.className='jbtn '+(kind==='work'?'j-work':'j-school')+(dim?' dim':'');
+  b.innerHTML='<span class="jnum">'+POI_NUM[kind]+'</span>'+html;
+  b.className='jbtn '+POI_CLS[kind]+(dim?' dim':'');
+}
+
+/* שאילתות סופ"ש לפי ההעדפות שנבחרו + אימוג'י לפי סוג המקום */
+var FUN_QUERIES={
+outdoors:['["leisure"~"park|nature_reserve"]',6000],
+beach:['["natural"="beach"]',12000],
+golf:['["leisure"="golf_course"]',9000],
+fitness:['["leisure"~"fitness_centre|sports_centre"]',4000],
+arts:['["tourism"~"museum|gallery"]',6000],
+food:['["amenity"="restaurant"]',1800]
+};
+function funEmoji(tags){
+  tags=tags||{};
+  if(tags.leisure==='golf_course')return '&#9971;';
+  if(tags.natural==='beach')return '&#127958;&#65039;';
+  if(tags.leisure==='park'||tags.leisure==='nature_reserve')return '&#127794;';
+  if(tags.leisure==='fitness_centre'||tags.leisure==='sports_centre')return '&#127947;&#65039;';
+  if(tags.tourism==='museum'||tags.tourism==='gallery')return '&#127917;';
+  if(tags.amenity==='restaurant')return '&#127869;&#65039;';
+  return '&#11088;';
 }
 
 /* נתוני המקומות שנטענו + אינדקס דפדוף (כל לחיצה מקפיצה למקום הבא) */
-var poiData={work:[],school:[]};
-var poiCycle={work:0,school:0};
+var poiData={work:[],school:[],fun:[]};
+var poiCycle={work:0,school:0,fun:0};
 
 function goPOI(kind){
   if(!currentNb)return;
@@ -1122,19 +1171,28 @@ function goPOI(kind){
   document.getElementById('map').scrollIntoView({behavior:'smooth',block:'center'});
   mapObj.flyTo([m.lat,m.lng],15,{duration:1.1});
   setTimeout(function(){m.marker.openPopup();},1200);
-  var label=(kind==='work'?'&#128188; Your work: ':(currentNb.hasKids?'&#127979; The kids\' schools: ':'&#127979; Schools nearby: '));
+  var label=(kind==='work'?'&#128188; Your work: ':(kind==='fun'?'&#11088; Your weekend: ':(currentNb.hasKids?'&#127979; The kids\' schools: ':'&#127979; Schools nearby: ')));
   setJBtn(kind,label+m.name+' <span style="opacity:.75;font-size:12px;">('+(i+1)+'/'+list.length+' — tap for next)</span>',false);
 }
 
 function loadPOI(kind,goAfter){
   if(!currentNb||poiState[kind]==='loading')return;
   poiState[kind]='loading';
-  setJBtn(kind,(kind==='work'?'&#128188; Searching places you\'d work&hellip;':'&#127979; Searching '+(currentNb.hasKids?'the kids\' schools':'schools nearby')+'&hellip;'),true);
+  setJBtn(kind,(kind==='work'?'&#128188; Searching places you\'d work&hellip;':(kind==='fun'?'&#11088; Finding your weekend spots&hellip;':'&#127979; Searching '+(currentNb.hasKids?'the kids\' schools':'schools nearby')+'&hellip;')),true);
 
   var nb=currentNb.nb;
   var q;
   if(kind==='school'){
     q='[out:json][timeout:15];(node["amenity"="school"](around:3000,'+nb.lat+','+nb.lng+');way["amenity"="school"](around:3000,'+nb.lat+','+nb.lng+'););out center 30;';
+  }else if(kind==='fun'){
+    /* איחוד שאילתות לפי העדפות הסופ"ש שנבחרו */
+    var prefs=(currentNb.weekend&&currentNb.weekend.length?currentNb.weekend:['outdoors']);
+    var parts='';
+    prefs.forEach(function(p){
+      var fq=FUN_QUERIES[p];if(!fq)return;
+      parts+='node'+fq[0]+'(around:'+fq[1]+','+nb.lat+','+nb.lng+');way'+fq[0]+'(around:'+fq[1]+','+nb.lat+','+nb.lng+');';
+    });
+    q='[out:json][timeout:15];('+parts+');out center 40;';
   }else{
     var wq=WORK_QUERY[currentNb.prof]||'["office"]';
     q='[out:json][timeout:15];(node'+wq+'(around:5000,'+nb.lat+','+nb.lng+');way'+wq+'(around:5000,'+nb.lat+','+nb.lng+'););out center 30;';
@@ -1153,19 +1211,20 @@ function loadPOI(kind,goAfter){
       var lng=el.lon||(el.center&&el.center.lon);
       if(!lat||!lng)return;
       var d=Math.pow(lat-nb.lat,2)+Math.pow(lng-nb.lng,2);
-      items.push({name:name,lat:lat,lng:lng,d:d});
+      items.push({name:name,lat:lat,lng:lng,d:d,tags:el.tags});
     });
     items.sort(function(a,b){return a.d-b.d;});
     items=items.slice(0,6);
 
-    var isSchool=(kind==='school');
+    var colors={work:'#1F3A5F',school:'#2E7D4F',fun:'#B08D3E'};
+    var popTexts={work:'A place you could work',school:'A school near your neighborhood',fun:'Your kind of weekend spot'};
     items.forEach(function(it){
-      var emoji=isSchool?'&#127979;':'&#128188;';
-      var icon=L.divIcon({className:'',html:'<div style="width:34px;height:34px;border-radius:50%;background:'+(isSchool?'#2E7D4F':'#1F3A5F')+';border:2.5px solid #FCFAF4;box-shadow:0 2px 7px rgba(31,58,95,.4);display:flex;align-items:center;justify-content:center;font-size:16px;">'+emoji+'</div>',iconSize:[34,34],iconAnchor:[17,17]});
+      var emoji=(kind==='school')?'&#127979;':(kind==='work'?'&#128188;':funEmoji(it.tags));
+      var icon=L.divIcon({className:'',html:'<div style="width:34px;height:34px;border-radius:50%;background:'+colors[kind]+';border:2.5px solid #FCFAF4;box-shadow:0 2px 7px rgba(31,58,95,.4);display:flex;align-items:center;justify-content:center;font-size:16px;">'+emoji+'</div>',iconSize:[34,34],iconAnchor:[17,17]});
       var shortName=it.name.length>24?it.name.slice(0,22)+'&hellip;':it.name;
       var mk=L.marker([it.lat,it.lng],{icon:icon}).addTo(poiLayers[kind])
-        .bindTooltip(shortName,{permanent:true,direction:'bottom',offset:[0,16],className:'poi-label'+(isSchool?' school-label':'')})
-        .bindPopup('<b>'+it.name+'</b><br>'+(isSchool?'A school near your neighborhood':'A place you could work')+'<br><a href="#" onclick="walkAt('+it.lat+','+it.lng+',\''+it.name.replace(/'/g,"\\'")+'\');return false;" style="color:#B08D3E;font-weight:bold;">&#128694; See it from the street &raquo;</a>');
+        .bindTooltip(shortName,{permanent:true,direction:'bottom',offset:[0,16],className:'poi-label'+(kind==='school'?' school-label':(kind==='fun'?' home-label':''))})
+        .bindPopup('<b>'+it.name+'</b><br>'+popTexts[kind]+'<br><a href="#" onclick="walkAt('+it.lat+','+it.lng+',\''+it.name.replace(/'/g,"\\'")+'\');return false;" style="color:#B08D3E;font-weight:bold;">&#128694; See it from the street &raquo;</a>');
       it.marker=mk;
       poiData[kind].push(it);
     });
@@ -1174,15 +1233,18 @@ function loadPOI(kind,goAfter){
     poiState[kind]='loaded';
 
     if(poiData[kind].length>0){
-      setJBtn(kind,(kind==='work'?'&#128188; See where you\'d work <span style="opacity:.75;font-size:12px;">('+poiData[kind].length+' found)</span>':'&#127979; '+(currentNb.hasKids?'Visit the kids\' schools':'See the schools nearby')+' <span style="opacity:.75;font-size:12px;">('+poiData[kind].length+' found)</span>'),false);
+      var doneTxt=(kind==='work')?'&#128188; See where you\'d work'
+        :(kind==='fun'?'&#11088; Explore your weekend'
+        :'&#127979; '+(currentNb.hasKids?'Visit the kids\' schools':'See the schools nearby'));
+      setJBtn(kind,doneTxt+' <span style="opacity:.75;font-size:12px;">('+poiData[kind].length+' found)</span>',false);
       fitAllPOIs();
       if(goAfter)goPOI(kind);
     }else{
-      setJBtn(kind,(kind==='work'?'&#128188; No workplaces mapped in this area':'&#127979; No schools mapped in this area'),true);
+      setJBtn(kind,(kind==='work'?'&#128188; No workplaces mapped in this area':(kind==='fun'?'&#11088; No weekend spots mapped here':'&#127979; No schools mapped in this area')),true);
     }
   },function(){
     poiState[kind]='error';
-    setJBtn(kind,(kind==='work'?'&#128188; Couldn\'t load — tap to retry':'&#127979; Couldn\'t load — tap to retry'),true);
+    setJBtn(kind,'&#9888;&#65039; Couldn\'t load — tap to retry',true);
   });
 }
 
@@ -1190,7 +1252,7 @@ function loadPOI(kind,goAfter){
 function fitAllPOIs(){
   if(!currentNb)return;
   var pts=[[currentNb.nb.lat,currentNb.nb.lng]];
-  ['work','school'].forEach(function(k){
+  ['work','school','fun'].forEach(function(k){
     (poiData[k]||[]).forEach(function(it){pts.push([it.lat,it.lng]);});
   });
   if(pts.length>1){mapObj.fitBounds(L.latLngBounds(pts),{padding:[42,42],maxZoom:14});}
@@ -1365,6 +1427,7 @@ function buildCRMSummary(){
     'Lifestyle preference: '+LIFE_LABEL[a.lifestyle],
     'Housing budget: '+BUDGET_LABEL[a.budget],
     'Priorities: '+(pris||'—'),
+    'Weekend interests: '+((a.weekend||[]).map(function(w){return WEEKEND_LABEL[w];}).join(', ')||'—'),
     '',
     'Completed: '+new Date().toLocaleString('en-US'),
     'Source: American Life Map (dream_map)');
