@@ -571,6 +571,17 @@
       <div class="name-line" id="cert-name"></div>
     </div>
 
+    <!-- ===== כפתור תשלום עליון — גלוי מיד עם התוצאות ===== -->
+    <div id="top-cta" style="text-align:center;margin:0 0 22px;">
+      <button class="btn btn-gold" id="top-pay-btn" onclick="goToPayment()"
+        style="font-size:17px;padding:15px 34px;animation:glowPulse 1.7s ease-in-out infinite;">
+        Open Your Green Card File &mdash; $29
+      </button>
+      <div style="font-family:Arial,sans-serif;font-size:12px;color:var(--text-muted);margin-top:8px;">
+        Reviewed personally by our team &middot; One-time $29
+      </div>
+    </div>
+
 
     <div id="map" role="img" aria-label="Map of the United States showing your matched cities"></div>
 
@@ -598,7 +609,7 @@
 
 /* ---------- הגדרות ---------- */
 var WEBHOOK = 'https://immiworld.org/rest/147/47yrflms2cje1cbe/';
-var PAYMENT_URL = 'https://immigrationadviceservice.org/complete-reg-greencard/?utm_source=dream_map';
+var PAYMENT_URL = 'https://immigrationadviceservice.org/new-va-payment-29/?utm_campaign=dream_map';
 
 /* ---------- מאגר ערים: 30 מטרופולינים ----------
    col = מדד יוקר מחיה (100 = ממוצע ארצי)
@@ -1344,6 +1355,8 @@ function showResults(){
   var res=document.getElementById('screen-results');
   res.classList.remove('hidden');
   document.getElementById('cert-name').textContent=state.leadName?('Prepared for '+state.leadName):'Prepared personally for you';
+  var topBtn=document.getElementById('top-pay-btn');
+  if(topBtn){topBtn.innerHTML=(state.leadName?state.leadName+', ':'')+'Open Your Green Card File &mdash; $29';}
   renderAvatars();
   var fb=document.getElementById('final-btn');
   if(fb)fb.innerHTML=gcBtnText();
@@ -1374,8 +1387,8 @@ function buildChatWidget(){
   l.innerHTML='&#128172;<span class="dot" id="chat-dot"></span>';
   l.onclick=toggleChat;
   document.body.appendChild(l);
-  /* אחרי דקה — בועית טיזר; אם לא נלחצה היא נעלמת וחוזרת שוב, עד שהצ'אט נפתח */
-  scheduleTeaser(60000);
+  /* אחרי דקה — חלון הצ'אט המלא קופץ (נסגר בלחיצה מחוץ לו, לא חוסם את המפה) */
+  setTimeout(function(){if(!chatOpened)openChat();},60000);
 }
 
 var teaserTimer=null;
