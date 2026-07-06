@@ -130,7 +130,66 @@
 
   /* כרטיס עיר */
   .city-card{position:relative;border:1px solid var(--line);background:#FCFAF4;border-radius:2px;padding:24px 22px;margin-bottom:16px;}
-  .city-card.top{border:1px solid var(--brass);outline:3px double var(--brass);outline-offset:3px;margin:6px 4px 24px;}
+
+  /* ===== התוצאה המובילה — בצבע שונה מכל השאר: כחול-דיו עמוק ===== */
+  .city-card.top{
+    background:var(--ink);border:1px solid var(--brass);
+    outline:3px double var(--brass);outline-offset:3px;margin:6px 4px 24px;
+    color:#FCFAF4;
+  }
+  .city-card.top h3{color:#fff;}
+  .city-card.top .state{color:var(--brass-light);}
+  .city-card.top .fact{color:#C7D2E2;}
+  .city-card.top .fact b{color:#fff;}
+  .city-card.top .tag{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25);color:#E8DFC8;}
+  .city-card.top .match.g{color:#8FDCAC;}
+  .city-card.top .match.y{color:#F0C868;}
+  .city-card.top .match.b{color:#9CC4E8;}
+  .city-card.top .match small{color:#C7D2E2;}
+  .city-card.top .explore-btn{background:transparent;border-color:#FCFAF4;color:#FCFAF4;}
+  .city-card.top .explore-btn:hover{background:rgba(255,255,255,.1);}
+
+  /* ===== חלונית תשלום בסגנון צ'אט ===== */
+  .chat-launcher{
+    position:fixed;bottom:20px;right:20px;z-index:1500;
+    width:60px;height:60px;border-radius:50%;cursor:pointer;
+    background:var(--brass);border:2.5px solid #FCFAF4;
+    box-shadow:0 4px 16px rgba(31,58,95,.4);
+    display:flex;align-items:center;justify-content:center;font-size:26px;
+    transition:transform .2s;
+  }
+  .chat-launcher:hover{transform:scale(1.08);}
+  .chat-launcher .dot{
+    position:absolute;top:-2px;right:-2px;width:16px;height:16px;border-radius:50%;
+    background:#C0392B;border:2px solid #FCFAF4;
+  }
+  .chatw{
+    position:fixed;bottom:92px;right:20px;z-index:1500;width:330px;max-width:calc(100vw - 32px);
+    background:#FCFAF4;border:1px solid var(--ink);outline:3px double var(--ink);outline-offset:3px;
+    box-shadow:0 8px 30px rgba(31,58,95,.35);
+    animation:chatIn .3s ease;
+  }
+  @keyframes chatIn{0%{opacity:0;transform:translateY(14px);}100%{opacity:1;transform:translateY(0);}}
+  @media (prefers-reduced-motion:reduce){.chatw{animation:none;}}
+  .chatw .cw-head{
+    background:var(--ink);color:#FCFAF4;padding:12px 14px;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .chatw .cw-head .cw-title{font-family:Georgia,serif;font-size:15px;}
+  .chatw .cw-head .cw-sub{font-family:Arial,sans-serif;font-size:10.5px;color:#C7D2E2;}
+  .chatw .cw-close{cursor:pointer;background:transparent;border:0;color:#FCFAF4;font-size:20px;line-height:1;padding:2px 6px;}
+  .chatw .cw-body{padding:14px;}
+  .chatw .cw-msg{
+    background:#fff;border:1px solid var(--line);border-radius:2px 12px 12px 12px;
+    padding:12px 14px;font-family:Georgia,serif;font-size:14px;color:var(--ink);line-height:1.55;
+    margin-bottom:12px;
+  }
+  .chatw .btn-gold{width:100%;font-size:15.5px;padding:13px 14px;}
+  .chatw .cw-fine{font-family:Arial,sans-serif;font-size:10.5px;color:var(--text-muted);text-align:center;margin-top:8px;}
+  @media(max-width:520px){
+    .chatw{right:12px;bottom:86px;}
+    .chat-launcher{right:14px;bottom:16px;}
+  }
   .rank-seal{
     position:absolute;top:-14px;right:18px;background:var(--brass);color:#fff;
     font-family:Arial,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;
@@ -193,15 +252,31 @@
   .nb-btn:hover{background:#9A7A32;}
   .nb-btn:focus-visible{outline:3px solid var(--ink);outline-offset:2px;}
 
-  /* ===== חץ מנחה — "לחץ כאן" ===== */
+  /* ===== חץ מנחה — "לחץ כאן" — גדול ובולט ===== */
   .coach{
-    display:flex;align-items:center;justify-content:center;gap:8px;
-    font-family:Georgia,serif;font-style:italic;font-size:14px;color:var(--brass);
-    margin:10px 0 -2px;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    font-family:Georgia,serif;font-style:italic;font-size:16.5px;font-weight:bold;color:var(--brass);
+    margin:12px 0 2px;text-align:center;
   }
-  .coach .c-arrow{display:inline-block;animation:bounce 1.1s ease-in-out infinite;font-size:18px;font-style:normal;}
-  @keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(6px);}}
+  .coach .c-arrow{display:inline-block;animation:bounce .9s ease-in-out infinite;font-size:40px;font-style:normal;line-height:1;}
+  @keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(12px);}}
   @media (prefers-reduced-motion:reduce){.coach .c-arrow{animation:none;}}
+
+  /* הילה פועמת סביב כפתור השכונה בכרטיס המוביל — אי אפשר לפספס */
+  .city-card.top .nb-btn{animation:glowPulse 1.7s ease-in-out infinite;}
+  @keyframes glowPulse{0%,100%{box-shadow:0 0 0 0 rgba(176,141,62,.55);}50%{box-shadow:0 0 0 10px rgba(176,141,62,0);}}
+  @media (prefers-reduced-motion:reduce){.city-card.top .nb-btn{animation:none;}}
+
+  /* ===== דמות הולכת — צועדת בתוך כפתורי ההליכה ===== */
+  .walker{display:inline-block;animation:walkMarch 2s ease-in-out infinite;}
+  @keyframes walkMarch{
+    0%{transform:translateX(0) translateY(0);}
+    25%{transform:translateX(7px) translateY(-2px);}
+    50%{transform:translateX(14px) translateY(0);}
+    75%{transform:translateX(7px) translateY(-2px);}
+    100%{transform:translateX(0) translateY(0);}
+  }
+  @media (prefers-reduced-motion:reduce){.walker{animation:none;}}
 
   /* ===== באנר הסבר מעל המפה ===== */
   .map-hint{
@@ -237,40 +312,33 @@
   .poi-label.school-label{border-color:var(--green);color:var(--green);}
   .poi-label::before{display:none;}
 
-  /* ===== התיק האישי — Relocation File ===== */
-  .dossier{
-    background:#FCFAF4;border:1px solid var(--ink);outline:3px double var(--ink);outline-offset:3px;
-    padding:18px 18px 16px;margin:6px 4px 30px;
+  /* ===== מסע מודרך — "היום שלך בשכונה" ===== */
+  .jbtn{
+    display:block;width:100%;margin:8px 0 0;cursor:pointer;text-align:left;
+    font-family:Georgia,serif;font-size:15.5px;border-radius:2px;padding:14px 16px;
+    border:1.5px solid;transition:filter .15s;
   }
-  .dossier .d-eyebrow{font-family:Arial,sans-serif;font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--brass);text-align:center;}
-  .dossier .d-name{font-size:20px;text-align:center;margin:4px 0 2px;}
-  .dossier .d-sub{font-family:Arial,sans-serif;font-size:11px;color:var(--text-muted);text-align:center;margin-bottom:14px;font-style:italic;}
-  .drow{
-    display:flex;align-items:center;gap:10px;padding:8px 2px;border-top:1px dotted var(--line);
-    font-family:Arial,sans-serif;font-size:13px;color:var(--ink-soft);
+  .jbtn:hover{filter:brightness(1.08);}
+  .jbtn:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
+  .j-home{background:var(--green);border-color:var(--green);color:#fff;}
+  .j-work{background:var(--ink);border-color:var(--ink);color:#FCFAF4;}
+  .j-school{background:#fff;border-color:var(--green);color:var(--green);font-weight:bold;}
+  .jbtn .jnum{
+    display:inline-block;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.25);
+    text-align:center;line-height:22px;font-family:Arial,sans-serif;font-size:12px;font-weight:bold;margin-right:8px;
   }
-  .drow .dbox{
-    width:20px;height:20px;flex:0 0 20px;border:1.5px solid var(--line);border-radius:2px;
-    display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;background:#fff;
-    transition:all .25s;
-  }
-  .drow.done{color:var(--ink);}
-  .drow.done .dbox{background:var(--green);border-color:var(--green);animation:pop .35s ease;}
-  @keyframes pop{0%{transform:scale(.4);}70%{transform:scale(1.25);}100%{transform:scale(1);}}
-  @media (prefers-reduced-motion:reduce){.drow.done .dbox{animation:none;}}
-  .drow .dval{margin-left:auto;font-family:Georgia,serif;font-size:13px;color:var(--ink);text-align:right;max-width:55%;}
-  .drow.pending .dval{color:var(--text-muted);font-style:italic;}
+  .j-school .jnum{background:var(--green);color:#fff;}
+  .jbtn.dim{opacity:.75;font-style:italic;}
+  @media(max-width:520px){.jbtn{font-size:16px;padding:16px;}}
 
-  .d-final{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);text-align:center;}
-  .d-final .d-msg{font-family:Georgia,serif;font-style:italic;font-size:13.5px;color:var(--text-muted);margin-bottom:10px;}
-  .d-final .btn-gold{font-size:16px;padding:12px 18px;}
-  .d-final .btn-gold:disabled{background:#CBB98A;border-color:#CBB98A;cursor:not-allowed;opacity:.7;}
-  .d-final.ready .d-msg{color:var(--green);font-style:normal;font-weight:bold;font-family:Arial,sans-serif;font-size:13px;}
-
-  /* בדסקטופ רחב — התיק צף בצד ימין וצמוד למסך בזמן גלילה */
-  @media(min-width:1220px){
-    .dossier{position:fixed;top:90px;right:24px;width:250px;margin:0;z-index:500;max-height:calc(100vh - 130px);overflow-y:auto;}
+  /* תוויות שם קבועות על סימוני המפה */
+  .poi-label{
+    background:#FCFAF4;border:1px solid var(--line);border-radius:2px;
+    color:var(--ink);font-family:Arial,sans-serif;font-size:11px;font-weight:bold;
+    padding:2px 7px;box-shadow:0 1px 3px rgba(31,58,95,.25);white-space:nowrap;
   }
+  .poi-label.school-label{border-color:var(--green);color:var(--green);}
+  .poi-label::before{display:none;}
 
   /* ===== חלון שיטוט ברחוב (Street View) ===== */
   .sv-overlay{
@@ -455,8 +523,6 @@
       <div class="name-line" id="cert-name"></div>
     </div>
 
-    <!-- ===== התיק האישי — נבנה מול העיניים ===== -->
-    <div class="dossier" id="dossier"></div>
 
     <div id="map" role="img" aria-label="Map of the United States showing your matched cities"></div>
 
@@ -765,7 +831,7 @@ function cityCardHTML(t,idx){
     +'</div><div class="tags">'+tags+'</div>'
     +nbHTML
     +'<button class="explore-btn" onclick="exploreCity('+idx+')">&#128269;&nbsp; Explore '+c.n+' on the map</button>'
-    +'<button class="walk-btn" onclick="walkCity('+idx+')">&#128694;&nbsp; Walk the streets of '+c.n+'</button>'
+    +'<button class="walk-btn" onclick="walkCity('+idx+')"><span class="walker">&#128694;</span>&nbsp; Walk the streets of '+c.n+'</button>'
     +'</div>';
 }
 
@@ -955,16 +1021,9 @@ function showNeighborhood(idx){
     mapEl.parentNode.insertBefore(hint,mapEl.nextSibling);
   }
   hint.innerHTML='<b style="font-size:14px;">Your life in '+nb.n+'</b><span style="color:var(--text-muted);"> — take the tour:</span>'
-    +'<button class="jbtn j-home" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\')"><span class="jnum">1</span>&#128694; Stand on your street</button>'
+    +'<button class="jbtn j-home" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\')"><span class="jnum">1</span><span class="walker">&#128694;</span> Stand on your street</button>'
     +'<button class="jbtn j-work dim" id="jbtn-work" onclick="goPOI(\'work\')"><span class="jnum">2</span>&#128188; Searching places you\'d work&hellip;</button>'
     +(hasKids?'<button class="jbtn j-school dim" id="jbtn-school" onclick="goPOI(\'school\')"><span class="jnum">3</span>&#127979; Searching the kids\' schools&hellip;</button>':'');
-
-  /* עדכון התיק האישי — הצ'קים מתמלאים כשחוקרים את השכונה של העיר המובילה */
-  if(idx===0){
-    markDossier('neighborhood',nb.n);
-    markDossier('work','Near '+nb.n);
-    if(hasKids)markDossier('schools','Near '+nb.n);
-  }
 
   /* טעינה אוטומטית של המקומות — והכפתורים נותנים שליטה גלויה */
   currentNb={nb:nb,prof:a.profession};
@@ -1114,74 +1173,61 @@ function showResults(){
   for(var i=1;i<state.results.length;i++){othersHTML+=cityCardHTML(state.results[i],i);}
   document.getElementById('other-cities').innerHTML=othersHTML;
 
-  buildDossier();
   buildMap();
   saveToCRM();
+  buildChatWidget();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-/* ---------- התיק האישי ----------
-   נבנה מהתשובות: מה שכבר ידוע מקבל צ'ק מיד; שכונה, עבודה ובתי ספר
-   מקבלים צ'ק כשהלקוח חוקר אותם על המפה. תיק מלא -> נפתח שלב פתיחת התיק.
+/* ---------- חלונית תשלום בסגנון צ'אט ----------
+   בועת שיחה צפה בפינה; נפתחת אוטומטית כמה שניות אחרי התוצאות,
+   עם פנייה אישית בשם + כפתור פתיחת תיק גרין קארד.
 */
-var dossierState={};
-function buildDossier(){
-  var a=state.answers;
-  var hasKids=(a.family==='kids'||a.family==='kids_teen');
-  var top=state.results[0];
-  var nb=pickNeighborhood(top.city.n);
-
-  /* סעיפי התיק: key, תווית, ערך, האם מסומן כבר עכשיו */
-  var rows=[
-    {k:'status',label:'Family status',val:FAM_LABEL[a.family],done:true},
-    {k:'prof',label:'Profession',val:PROF_LABEL[a.profession],done:true},
-    {k:'budget',label:'Housing budget',val:BUDGET_LABEL[a.budget],done:true},
-    {k:'dest',label:'Destination city',val:top.city.n+' ('+top.match+'%)',done:true},
-    {k:'neighborhood',label:'Your neighborhood',val:nb?nb.n:'—',done:false,pendingText:'tap &#127968; to confirm'},
-    {k:'work',label:'Workplace nearby',val:'',done:false,pendingText:'explore to confirm'}
-  ];
-  if(hasKids){rows.push({k:'schools',label:'Schools for the children',val:'',done:false,pendingText:'explore to confirm'});}
-
-  dossierState={rows:rows,hasKids:hasKids};
-
-  var html='<div class="d-eyebrow">Relocation File</div>'
-    +'<div class="d-name">'+(state.leadName||'Your Journey')+'</div>'
-    +'<div class="d-sub">Case in preparation</div>';
-  rows.forEach(function(r){
-    html+='<div class="drow'+(r.done?' done':' pending')+'" id="drow-'+r.k+'">'
-      +'<div class="dbox">'+(r.done?'&#10003;':'')+'</div>'
-      +'<div>'+r.label+'</div>'
-      +'<div class="dval">'+(r.done?r.val:(r.pendingText||''))+'</div></div>';
-  });
-  html+='<div class="d-final" id="d-final">'
-    +'<div class="d-msg" id="d-msg">Explore your neighborhood on the map to complete your file &#128071;</div>'
-    +'<button class="btn btn-gold" id="d-btn" disabled onclick="goToPayment()">'+gcBtnText()+'</button>'
-    +'</div>';
-  document.getElementById('dossier').innerHTML=html;
+var chatOpened=false;
+function buildChatWidget(){
+  if(document.getElementById('chat-launcher'))return;
+  var l=document.createElement('div');
+  l.id='chat-launcher';l.className='chat-launcher';
+  l.setAttribute('role','button');
+  l.setAttribute('aria-label','Open your Green Card chat');
+  l.innerHTML='&#128172;<span class="dot" id="chat-dot"></span>';
+  l.onclick=toggleChat;
+  document.body.appendChild(l);
+  /* פתיחה אוטומטית — אחרי שהלקוח הספיק לראות את התוצאות */
+  setTimeout(function(){if(!chatOpened)openChat();},6000);
 }
 
-function markDossier(key,val){
-  var rows=dossierState.rows||[];
-  var r=null;
-  for(var i=0;i<rows.length;i++){if(rows[i].k===key){r=rows[i];break;}}
-  if(!r||r.done)return;
-  r.done=true;if(val)r.val=val;
-  var el=document.getElementById('drow-'+key);
-  if(el){
-    el.classList.remove('pending');el.classList.add('done');
-    el.querySelector('.dbox').innerHTML='&#10003;';
-    el.querySelector('.dval').innerHTML=r.val||'&#10003;';
-  }
-  /* בדיקה: כל הסעיפים מולאו? */
-  var allDone=rows.every(function(x){return x.done;});
-  if(allDone){
-    var fin=document.getElementById('d-final');
-    if(fin){
-      fin.classList.add('ready');
-      document.getElementById('d-msg').innerHTML='&#10003; Your direction is clear. The next step is yours.';
-      document.getElementById('d-btn').disabled=false;
-    }
-  }
+function toggleChat(){
+  if(document.getElementById('chatw')){closeChat();}else{openChat();}
+}
+
+function openChat(){
+  if(document.getElementById('chatw'))return;
+  chatOpened=true;
+  var dot=document.getElementById('chat-dot');if(dot)dot.style.display='none';
+  var top=state.results[0];
+  var firstName=state.leadName||'';
+  var msg=(firstName?('Hi '+firstName+' &#128075;'):'Hi &#128075;')
+    +'<br>You\'ve just seen your new life in <b>'+top.city.n+'</b> — the street, the neighborhood, everything.'
+    +'<br><br>The only thing missing is the Green Card. Ready to make it real?';
+  var w=document.createElement('div');
+  w.id='chatw';w.className='chatw';
+  w.setAttribute('role','dialog');
+  w.setAttribute('aria-label','Green Card next step');
+  w.innerHTML='<div class="cw-head"><div><div class="cw-title">Immigration Advice Service</div>'
+    +'<div class="cw-sub">Your Green Card team</div></div>'
+    +'<button class="cw-close" onclick="closeChat()" aria-label="Close">&times;</button></div>'
+    +'<div class="cw-body">'
+    +'<div class="cw-msg">'+msg+'</div>'
+    +'<button class="btn btn-gold" onclick="goToPayment()">'+gcBtnText()+'</button>'
+    +'<div class="cw-fine">One-time $29 &middot; Reviewed personally by our team</div>'
+    +'</div>';
+  document.body.appendChild(w);
+}
+
+function closeChat(){
+  var w=document.getElementById('chatw');
+  if(w)w.remove();
 }
 
 /* ---------- מפה ----------
