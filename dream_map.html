@@ -209,20 +209,33 @@
     background:#F8F1DE;border:1px solid var(--brass-light);border-radius:2px;
     padding:10px 14px;margin:-22px 4px 26px;text-align:center;line-height:1.6;
   }
-  .poi-chip{
-    display:inline-block;margin:3px 4px;cursor:pointer;
-    font-family:Arial,sans-serif;font-size:12.5px;color:var(--ink);
-    background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:8px 14px;
-    transition:all .15s;
+  /* ===== מסע מודרך — "היום שלך בשכונה" ===== */
+  .jbtn{
+    display:block;width:100%;margin:8px 0 0;cursor:pointer;text-align:left;
+    font-family:Georgia,serif;font-size:15.5px;border-radius:2px;padding:14px 16px;
+    border:1.5px solid;transition:filter .15s;
   }
-  .chip-work-style{border-color:var(--ink);color:var(--ink);}
-  .chip-work-style.on{background:var(--ink);color:#FCFAF4;}
-  .chip-school-style{border-color:var(--green);color:var(--green);}
-  .chip-school-style.on{background:var(--green);color:#fff;}
-  .poi-chip:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
-  @media(max-width:520px){
-    .poi-chip{display:block;width:100%;margin:6px 0;font-size:14px;padding:12px 14px;}
+  .jbtn:hover{filter:brightness(1.08);}
+  .jbtn:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
+  .j-home{background:var(--green);border-color:var(--green);color:#fff;}
+  .j-work{background:var(--ink);border-color:var(--ink);color:#FCFAF4;}
+  .j-school{background:#fff;border-color:var(--green);color:var(--green);font-weight:bold;}
+  .jbtn .jnum{
+    display:inline-block;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.25);
+    text-align:center;line-height:22px;font-family:Arial,sans-serif;font-size:12px;font-weight:bold;margin-right:8px;
   }
+  .j-school .jnum{background:var(--green);color:#fff;}
+  .jbtn.dim{opacity:.75;font-style:italic;}
+  @media(max-width:520px){.jbtn{font-size:16px;padding:16px;}}
+
+  /* תוויות שם קבועות על סימוני המפה */
+  .poi-label{
+    background:#FCFAF4;border:1px solid var(--line);border-radius:2px;
+    color:var(--ink);font-family:Arial,sans-serif;font-size:11px;font-weight:bold;
+    padding:2px 7px;box-shadow:0 1px 3px rgba(31,58,95,.25);white-space:nowrap;
+  }
+  .poi-label.school-label{border-color:var(--green);color:var(--green);}
+  .poi-label::before{display:none;}
 
   /* ===== התיק האישי — Relocation File ===== */
   .dossier{
@@ -941,14 +954,10 @@ function showNeighborhood(idx){
     var mapEl=document.getElementById('map');
     mapEl.parentNode.insertBefore(hint,mapEl.nextSibling);
   }
-  hint.innerHTML='<b>&#127968; '+nb.n+'</b> — this is where you could live.'
-    +'<div style="margin-top:10px;">'
-    +'<button class="walk-btn" style="margin-top:0;" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\')">&#128694;&nbsp; Walk in '+nb.n+' right now</button>'
-    +'</div>'
-    +'<div style="margin-top:10px;">'
-    +'<button class="poi-chip chip-work-style" id="chip-work" onclick="togglePOI(\'work\')">&#128188; Show places to work</button>'
-    +'<button class="poi-chip chip-school-style" id="chip-school" onclick="togglePOI(\'school\')">&#127979; Show schools nearby</button>'
-    +'</div>';
+  hint.innerHTML='<b style="font-size:14px;">Your life in '+nb.n+'</b><span style="color:var(--text-muted);"> — take the tour:</span>'
+    +'<button class="jbtn j-home" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\')"><span class="jnum">1</span>&#128694; Stand on your street</button>'
+    +'<button class="jbtn j-work dim" id="jbtn-work" onclick="goPOI(\'work\')"><span class="jnum">2</span>&#128188; Searching places you\'d work&hellip;</button>'
+    +(hasKids?'<button class="jbtn j-school dim" id="jbtn-school" onclick="goPOI(\'school\')"><span class="jnum">3</span>&#127979; Searching the kids\' schools&hellip;</button>':'');
 
   /* עדכון התיק האישי — הצ'קים מתמלאים כשחוקרים את השכונה של העיר המובילה */
   if(idx===0){
@@ -976,35 +985,40 @@ var OVERPASS_MIRRORS=[
 'https://overpass.private.coffee/api/interpreter'
 ];
 
-function setChip(kind,text,cls){
-  var chip=document.getElementById('chip-'+kind);
-  if(!chip)return;
-  chip.innerHTML=text;
-  chip.className='poi-chip chip-'+kind+'-style'+(cls?' '+cls:'');
+function setJBtn(kind,html,dim){
+  var b=document.getElementById('jbtn-'+kind);
+  if(!b)return;
+  var num=(kind==='work')?'2':'3';
+  b.innerHTML='<span class="jnum">'+num+'</span>'+html;
+  b.className='jbtn '+(kind==='work'?'j-work':'j-school')+(dim?' dim':'');
 }
 
-function togglePOI(kind){
+/* נתוני המקומות שנטענו + אינדקס דפדוף (כל לחיצה מקפיצה למקום הבא) */
+var poiData={work:[],school:[]};
+var poiCycle={work:0,school:0};
+
+function goPOI(kind){
   if(!currentNb)return;
   var st=poiState[kind];
   if(st==='loading')return;
-  if(st==='loaded'){
-    /* כיבוי/הדלקה של השכבה */
-    if(poiLayers[kind]&&mapObj.hasLayer(poiLayers[kind])){
-      mapObj.removeLayer(poiLayers[kind]);
-      setChip(kind,(kind==='work'?'&#128188; Show places to work':'&#127979; Show schools nearby'),'');
-    }else if(poiLayers[kind]){
-      poiLayers[kind].addTo(mapObj);
-      setChip(kind,(kind==='work'?'&#128188; Workplaces shown':'&#127979; Schools shown'),'on');
-    }
-    return;
-  }
-  loadPOI(kind); /* idle או error — מנסים לטעון */
+  if(st!=='loaded'){loadPOI(kind,true);return;} /* טרם נטען / שגיאה — טוענים ואז קופצים */
+  var list=poiData[kind];
+  if(!list.length)return;
+  /* דפדוף: כל לחיצה עוברת למקום הבא ופותחת את החלונית שלו */
+  var i=poiCycle[kind]%list.length;
+  var m=list[i];
+  poiCycle[kind]=i+1;
+  document.getElementById('map').scrollIntoView({behavior:'smooth',block:'center'});
+  mapObj.flyTo([m.lat,m.lng],15,{duration:1.1});
+  setTimeout(function(){m.marker.openPopup();},1200);
+  var label=(kind==='work'?'&#128188; Your work: ':'&#127979; The kids\' schools: ');
+  setJBtn(kind,label+m.name+' <span style="opacity:.75;font-size:12px;">('+(i+1)+'/'+list.length+' — tap for next)</span>',false);
 }
 
-function loadPOI(kind){
+function loadPOI(kind,goAfter){
   if(!currentNb||poiState[kind]==='loading')return;
   poiState[kind]='loading';
-  setChip(kind,(kind==='work'?'&#128188; Searching workplaces&hellip;':'&#127979; Searching schools&hellip;'),'on');
+  setJBtn(kind,(kind==='work'?'&#128188; Searching places you\'d work&hellip;':'&#127979; Searching the kids\' schools&hellip;'),true);
 
   var nb=currentNb.nb;
   var q;
@@ -1016,36 +1030,59 @@ function loadPOI(kind){
   }
 
   tryOverpass(q,0,function(elements){
-    /* הצלחה */
     if(poiLayers[kind]&&mapObj.hasLayer(poiLayers[kind])){mapObj.removeLayer(poiLayers[kind]);}
     poiLayers[kind]=L.layerGroup();
-    var count=0;
+    poiData[kind]=[];poiCycle[kind]=0;
+
+    /* מיון לפי מרחק מהבית — הקרובים קודם */
+    var items=[];
     (elements||[]).forEach(function(el){
-      if(count>=6)return;
       var name=el.tags&&el.tags.name;if(!name)return;
       var lat=el.lat||(el.center&&el.center.lat);
       var lng=el.lon||(el.center&&el.center.lon);
       if(!lat||!lng)return;
-      var isSchool=(kind==='school');
-      var emoji=isSchool?'&#127979;':'&#128188;';
-      var icon=L.divIcon({className:'',html:'<div style="width:28px;height:28px;border-radius:50%;background:#FCFAF4;border:2px solid '+(isSchool?'#2E7D4F':'#1F3A5F')+';box-shadow:0 1px 5px rgba(31,58,95,.3);display:flex;align-items:center;justify-content:center;font-size:14px;">'+emoji+'</div>',iconSize:[28,28],iconAnchor:[14,14]});
-      L.marker([lat,lng],{icon:icon}).addTo(poiLayers[kind])
-        .bindPopup('<b>'+name+'</b><br>'+(isSchool?'School near your neighborhood':'A place you could work')+'<br><a href="#" onclick="walkAt('+lat+','+lng+',\''+name.replace(/'/g,"\\'")+'\');return false;" style="color:#B08D3E;">&#128694; See it from the street &raquo;</a>');
-      count++;
+      var d=Math.pow(lat-nb.lat,2)+Math.pow(lng-nb.lng,2);
+      items.push({name:name,lat:lat,lng:lng,d:d});
     });
-    if(count>0){
-      poiLayers[kind].addTo(mapObj);
-      poiState[kind]='loaded';
-      setChip(kind,(kind==='work'?'&#128188; '+count+' workplaces shown':'&#127979; '+count+' schools shown'),'on');
+    items.sort(function(a,b){return a.d-b.d;});
+    items=items.slice(0,6);
+
+    var isSchool=(kind==='school');
+    items.forEach(function(it){
+      var emoji=isSchool?'&#127979;':'&#128188;';
+      var icon=L.divIcon({className:'',html:'<div style="width:34px;height:34px;border-radius:50%;background:'+(isSchool?'#2E7D4F':'#1F3A5F')+';border:2.5px solid #FCFAF4;box-shadow:0 2px 7px rgba(31,58,95,.4);display:flex;align-items:center;justify-content:center;font-size:16px;">'+emoji+'</div>',iconSize:[34,34],iconAnchor:[17,17]});
+      var shortName=it.name.length>24?it.name.slice(0,22)+'&hellip;':it.name;
+      var mk=L.marker([it.lat,it.lng],{icon:icon}).addTo(poiLayers[kind])
+        .bindTooltip(shortName,{permanent:true,direction:'bottom',offset:[0,16],className:'poi-label'+(isSchool?' school-label':'')})
+        .bindPopup('<b>'+it.name+'</b><br>'+(isSchool?'A school near your neighborhood':'A place you could work')+'<br><a href="#" onclick="walkAt('+it.lat+','+it.lng+',\''+it.name.replace(/'/g,"\\'")+'\');return false;" style="color:#B08D3E;font-weight:bold;">&#128694; See it from the street &raquo;</a>');
+      it.marker=mk;
+      poiData[kind].push(it);
+    });
+
+    poiLayers[kind].addTo(mapObj);
+    poiState[kind]='loaded';
+
+    if(poiData[kind].length>0){
+      setJBtn(kind,(kind==='work'?'&#128188; See where you\'d work <span style="opacity:.75;font-size:12px;">('+poiData[kind].length+' found)</span>':'&#127979; Visit the kids\' schools <span style="opacity:.75;font-size:12px;">('+poiData[kind].length+' found)</span>'),false);
+      fitAllPOIs();
+      if(goAfter)goPOI(kind);
     }else{
-      poiState[kind]='loaded';
-      setChip(kind,(kind==='work'?'&#128188; No workplaces mapped here':'&#127979; No schools mapped here'),'');
+      setJBtn(kind,(kind==='work'?'&#128188; No workplaces mapped in this area':'&#127979; No schools mapped in this area'),true);
     }
   },function(){
-    /* כל השרתים נכשלו */
     poiState[kind]='error';
-    setChip(kind,(kind==='work'?'&#128188; Couldn\'t load — tap to retry':'&#127979; Couldn\'t load — tap to retry'),'');
+    setJBtn(kind,(kind==='work'?'&#128188; Couldn\'t load — tap to retry':'&#127979; Couldn\'t load — tap to retry'),true);
   });
+}
+
+/* כיוון המפה כך שהבית וכל המקומות שנטענו ייכנסו לפריים */
+function fitAllPOIs(){
+  if(!currentNb)return;
+  var pts=[[currentNb.nb.lat,currentNb.nb.lng]];
+  ['work','school'].forEach(function(k){
+    (poiData[k]||[]).forEach(function(it){pts.push([it.lat,it.lng]);});
+  });
+  if(pts.length>1){mapObj.fitBounds(L.latLngBounds(pts),{padding:[42,42],maxZoom:14});}
 }
 
 /* ניסיון מול שרתי Overpass לפי הסדר */
