@@ -468,15 +468,15 @@
     <input type="email" id="lk-email" placeholder="name@example.com" autocomplete="email">
     <div class="err" id="lk-err"></div>
 
-    <!-- שדות לליד חדש — מוצגים רק אם האימייל לא נמצא במערכת -->
+    <!-- שדות לליד חדש — מוצגים רק אם האימייל לא נמצא במערכת. כל השדות חובה -->
     <div id="guest-fields" class="hidden" style="margin-top:16px;">
-      <p class="hint" style="margin-bottom:12px;background:#F8F1DE;border:1px solid var(--brass-light);border-radius:2px;padding:10px 12px;">We didn't find you yet. Just add your name and we'll make your map.</p>
+      <p class="hint" style="margin-bottom:12px;background:#F8F1DE;border:1px solid var(--brass-light);border-radius:2px;padding:10px 12px;">We didn't find you yet. Please fill in your details and we'll make your map.</p>
       <label for="g-first">First name</label>
       <input type="text" id="g-first" autocomplete="given-name" style="margin-bottom:12px;">
-      <label for="g-last">Last name (optional)</label>
+      <label for="g-last">Last name</label>
       <input type="text" id="g-last" autocomplete="family-name" style="margin-bottom:12px;">
-      <label for="g-phone">Phone (optional)</label>
-      <input type="text" id="g-phone" autocomplete="tel">
+      <label for="g-phone">Phone number</label>
+      <input type="tel" id="g-phone" inputmode="tel" placeholder="+1 555 123 4567" autocomplete="tel">
     </div>
 
     <div style="margin-top:18px;">
@@ -798,24 +798,47 @@ function restoreLookup(){
 function showErr(id,msg){var e=document.getElementById(id);e.textContent=msg;e.style.display='block';}
 function hideErr(id){document.getElementById(id).style.display='none';}
 
+/* אימות אימייל אמיתי — מבנה name@domain.tld */
+function isValidEmail(v){
+  if(!v)return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+}
+
+/* יצירת Client ID בפורמט IASFM + 7 ספרות (לא ה-ID של Bitrix) */
+function generateClientId(){
+  var n='';
+  for(var i=0;i<7;i++){n+=Math.floor(Math.random()*10);}
+  return 'IASFM'+n;
+}
+
 function doLookup(){
-  /* אם שדות האורח כבר גלויים — זהו השלב השני: שמירת הפרטים והמשך */
+  /* אם שדות האורח כבר גלויים — זהו השלב השני: כל הפרטים חובה ותקינים */
   var guestFields=document.getElementById('guest-fields');
   if(!guestFields.classList.contains('hidden')){
     var gf=document.getElementById('g-first').value.trim();
-    if(!gf){showErr('lk-err','Please enter your first name.');return;}
+    var gl=document.getElementById('g-last').value.trim();
+    var gp=document.getElementById('g-phone').value.trim();
     hideErr('lk-err');
+    if(!gf){showErr('lk-err','Please enter your first name.');return;}
+    if(!gl){showErr('lk-err','Please enter your last name.');return;}
+    if(!gp){showErr('lk-err','Please enter your phone number.');return;}
+    /* אימות טלפון — רק ספרות, רווחים, +, -, ( ) ; לפחות 7 ספרות אמיתיות */
+    var digits=gp.replace(/[^0-9]/g,'');
+    if(!/^[0-9 ()+\-]+$/.test(gp)||digits.length<7){
+      showErr('lk-err','Please enter a valid phone number (digits only).');return;
+    }
     state.leadName=gf;
     state.guestFirst=gf;
-    state.guestLast=document.getElementById('g-last').value.trim();
-    state.guestPhone=document.getElementById('g-phone').value.trim();
+    state.guestLast=gl;
+    state.guestPhone=gp;
     showWelcome();
     return;
   }
 
   var email=document.getElementById('lk-email').value.trim();
   hideErr('lk-err');
-  if(!email||email.indexOf('@')<1){showErr('lk-err','Please enter a valid email address.');return;}
+  /* אימות אימייל אמיתי — לא רק @ אלא מבנה תקין */
+  if(!isValidEmail(email)){showErr('lk-err','Please enter a valid email address.');return;}
   var btn=document.getElementById('lk-btn');
   btn.disabled=true;btn.textContent='Checking...';
   state.email=email;
@@ -1657,6 +1680,7 @@ function buildCRMSummary(){
   var a=state.answers;
   var pris=(a.priorities||[]).map(function(p){return PRI_LABEL[p];}).join(', ');
   var lines=['=== AMERICAN LIFE MAP — DREAM DESTINATION ===',
+    state.clientId?('Client ID: '+state.clientId):'',
     'Name: '+(state.leadName||[state.guestFirst,state.guestLast].filter(Boolean).join(' ')||''),
     'Email: '+(state.email||''),
     state.guestPhone?('Phone: '+state.guestPhone):'',
@@ -1711,15 +1735,18 @@ function saveToCRM(){
       +'&fields[COMMENT]='+encodeURIComponent(summary)).catch(function(){});
 
   }else if(state.email&&state.guestFirst){
-    /* ── לא נמצא במערכת: יצירת ליד חדש ── */
+    /* ── לא נמצא במערכת: יצירת ליד חדש עם Client ID ── */
     var name=[state.guestFirst,state.guestLast].filter(Boolean).join(' ');
     var titlePrefix=state._newcomer?'American Life Map (Facebook): ':'American Life Map: ';
+    /* Client ID בפורמט IASFM + 7 ספרות */
+    state.clientId=generateClientId();
     var url=WEBHOOK+'crm.lead.add?fields[TITLE]='+encodeURIComponent(titlePrefix+name)
       +'&fields[NAME]='+encodeURIComponent(state.guestFirst)
       +'&fields[LAST_NAME]='+encodeURIComponent(state.guestLast||'')
       +'&fields[SOURCE_ID]=4'
       +'&fields[UF_CRM_1547484113]='+encodeURIComponent('DREAM DESTINATION')
       +'&fields[UF_CRM_1709560603]='+encodeURIComponent(profession)
+      +'&fields[UF_CRM_1449131692]='+encodeURIComponent(state.clientId)
       +'&fields[COMMENTS]='+encodeURIComponent(summary.replace(/\n/g,'<br>'))
       +'&fields[EMAIL][0][VALUE]='+encodeURIComponent(state.email)
       +'&fields[EMAIL][0][VALUE_TYPE]=WORK';
