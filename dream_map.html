@@ -38,7 +38,9 @@
     border:1px solid var(--ink);
     outline:3px double var(--ink);
     outline-offset:4px;
-    background:#FCFAF4;
+    background-color:#1F3A5F;
+    background-image:linear-gradient(rgba(255,255,255,0.07) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.07) 1px,transparent 1px);
+    background-size:22px 22px;
     text-align:center;
     padding:28px 20px 22px;
     margin:10px 4px 30px;
@@ -46,22 +48,23 @@
   .letterhead .eyebrow{
     font-family:Arial,Helvetica,sans-serif;
     font-size:11px;letter-spacing:3px;text-transform:uppercase;
-    color:var(--brass);margin-bottom:10px;
+    color:#F0C868;margin-bottom:10px;
   }
-  .letterhead h1{font-size:30px;font-weight:normal;letter-spacing:.5px;}
-  .letterhead .sub{font-size:15px;color:var(--text-muted);margin-top:8px;font-style:italic;}
+  .letterhead h1{font-family:var(--font-head);font-size:30px;font-weight:700;letter-spacing:.5px;color:#FFFFFF;}
+  .letterhead .sub{font-size:15px;color:#EAD9A8;margin-top:8px;font-style:italic;}
   .compass{width:44px;height:44px;margin:0 auto 12px;display:block;}
 
   /* ===== כרטיסים ===== */
   .card{
-    background:#FCFAF4;
+    background:#FFFDF7;
     border:1px solid var(--line);
+    border-top:3px solid var(--brass);
     border-radius:2px;
     padding:28px 26px;
     margin-bottom:22px;
     box-shadow:0 1px 3px rgba(31,58,95,.06);
   }
-  .card h2{font-family:var(--font-head);font-size:23px;font-weight:600;margin-bottom:6px;}
+  .card h2{font-family:var(--font-head);font-size:24px;font-weight:700;color:var(--ink);margin-bottom:6px;}
   .card .hint{font-family:Arial,Helvetica,sans-serif;font-size:13px;color:var(--text-muted);margin-bottom:18px;}
 
   /* ===== שדות ===== */
@@ -446,11 +449,11 @@
   <!-- ===== כותרת ===== -->
   <div class="letterhead">
     <svg class="compass" viewBox="0 0 48 48" aria-hidden="true">
-      <circle cx="24" cy="24" r="21" fill="none" stroke="#B08D3E" stroke-width="1.5"/>
-      <circle cx="24" cy="24" r="16" fill="none" stroke="#B08D3E" stroke-width=".7" opacity=".6"/>
-      <polygon points="24,6 27,24 24,42 21,24" fill="#1F3A5F"/>
-      <polygon points="6,24 24,21 42,24 24,27" fill="#B08D3E"/>
-      <circle cx="24" cy="24" r="2.5" fill="#1F3A5F"/>
+      <circle cx="24" cy="24" r="21" fill="none" stroke="#F0C868" stroke-width="1.5"/>
+      <circle cx="24" cy="24" r="16" fill="none" stroke="#F0C868" stroke-width=".7" opacity=".5"/>
+      <polygon points="24,6 27,24 24,42 21,24" fill="#FFFFFF"/>
+      <polygon points="6,24 24,21 42,24 24,27" fill="#F0C868"/>
+      <circle cx="24" cy="24" r="2.5" fill="#FFFFFF"/>
     </svg>
     <div class="eyebrow">Immigration Advice Service</div>
     <h1>Your American Life Map</h1>
@@ -554,8 +557,8 @@
     <!-- שלב 5: עדיפויות -->
     <div class="card q-step hidden" id="q5">
       <h2>What matters most to you?</h2>
-      <p class="hint">Pick the one thing that matters most.</p>
-      <div class="opt-grid" data-q="priorities">
+      <p class="hint">Pick up to three.</p>
+      <div class="opt-grid" data-q="priorities" data-multi="3">
         <div class="opt" data-v="salary"><span class="ico">&#128176;</span>Higher salary</div>
         <div class="opt" data-v="afford"><span class="ico">&#127974;</span>Affordable living</div>
         <div class="opt" data-v="schools"><span class="ico">&#127979;</span>Excellent schools</div>
@@ -569,8 +572,8 @@
     <!-- שלב 6: סופי שבוע ותחביבים -->
     <div class="card q-step hidden" id="q6">
       <h2>What do you like to do on weekends?</h2>
-      <p class="hint">Pick the one you enjoy most.</p>
-      <div class="opt-grid" data-q="weekend">
+      <p class="hint">Pick up to two.</p>
+      <div class="opt-grid" data-q="weekend" data-multi="2">
         <div class="opt" data-v="outdoors"><span class="ico">&#129406;</span>Nature &amp; hiking</div>
         <div class="opt" data-v="beach"><span class="ico">&#127958;&#65039;</span>Beach &amp; water</div>
         <div class="opt" data-v="golf"><span class="ico">&#9971;</span>Golf</div>
@@ -708,7 +711,7 @@ var EMPLOYERS_CITY={"Austin": {"tech": ["Dell Technologies", "Apple", "Oracle", 
 var WEEKEND_LABEL={outdoors:'Nature & hiking',beach:'Beach & water',golf:'Golf',fitness:'Fitness & sports',arts:'Arts & culture',food:'Food & dining'};
 
 /* ---------- מצב ---------- */
-var state={leadId:null,leadType:null,leadName:'',email:'',existingComments:'',answers:{profession:null,family:null,lifestyle:null,budget:null,priorities:null,weekend:null},results:[]};
+var state={leadId:null,leadType:null,leadName:'',email:'',existingComments:'',answers:{profession:null,family:null,lifestyle:null,budget:null,priorities:[],weekend:[]},results:[]};
 
 /* ---------- זיהוי מקור התנועה + זיהוי אוטומטי לפי ID מה-URL ---------- */
 (function detectSource(){
@@ -911,23 +914,31 @@ function nextStep(step){
 }
 function prevStep(step){nextStep(step);}
 
-/* בחירת אפשרות — בחירה יחידה בלבד, מעבר אוטומטי לשאלה הבאה */
+/* בחירת אפשרויות — יחיד עם מעבר אוטומטי; מרובה עם כפתור Next */
 var STEP_OF={profession:1,family:2,lifestyle:3,budget:4,priorities:5,weekend:6};
 document.addEventListener('click',function(ev){
   var opt=ev.target.closest('.opt');
   if(!opt)return;
   var grid=opt.parentElement;
   var q=grid.getAttribute('data-q');
-  Array.prototype.forEach.call(grid.querySelectorAll('.opt'),function(o){o.classList.remove('sel');});
-  opt.classList.add('sel');
-  state.answers[q]=opt.getAttribute('data-v');
+  var multi=parseInt(grid.getAttribute('data-multi')||'0',10);
   var stepNum=STEP_OF[q];
-  if(stepNum){document.getElementById('n'+stepNum).disabled=false;}
-  /* מעבר אוטומטי אחרי רגע קצר — הבחירה נראית ואז עוברים */
-  if(stepNum&&stepNum<6){
-    setTimeout(function(){nextStep(stepNum+1);},280);
-  }else if(stepNum===6){
-    setTimeout(function(){revealMap();},280);
+  if(multi>0){
+    /* בחירה מרובה — לוחצים לבחור/לבטל, ממשיכים עם הכפתור */
+    if(opt.classList.contains('sel')){opt.classList.remove('sel');}
+    else{
+      if(grid.querySelectorAll('.opt.sel').length>=multi)return;
+      opt.classList.add('sel');
+    }
+    state.answers[q]=Array.prototype.map.call(grid.querySelectorAll('.opt.sel'),function(o){return o.getAttribute('data-v');});
+    if(stepNum){document.getElementById('n'+stepNum).disabled=(state.answers[q].length===0);}
+  }else{
+    /* בחירה יחידה — מעבר אוטומטי לשאלה הבאה */
+    Array.prototype.forEach.call(grid.querySelectorAll('.opt'),function(o){o.classList.remove('sel');});
+    opt.classList.add('sel');
+    state.answers[q]=opt.getAttribute('data-v');
+    if(stepNum){document.getElementById('n'+stepNum).disabled=false;}
+    if(stepNum&&stepNum<5){setTimeout(function(){nextStep(stepNum+1);},280);}
   }
 });
 
@@ -935,7 +946,7 @@ document.addEventListener('click',function(ev){
 function computeMatches(){
   var a=state.answers;
   var budget=parseInt(a.budget,10);
-  var pri=a.priorities||'';
+  var pri=a.priorities||[];
   var hasKids=(a.family==='kids'||a.family==='kids_teen');
 
   /* טווח שכר בתחום — לנרמול */
@@ -963,20 +974,20 @@ function computeMatches(){
     if(hasKids){score+=c.schools*1.8+c.vibes.suburban*0.8;}
 
     /* עדיפויות שנבחרו */
-    if(pri==='salary')score+=salNorm*16;
-    if(pri==='afford')score+=(120-c.col)*0.45;
-    if(pri==='schools')score+=c.schools*2.2;
-    if(pri==='warm')score+=(c.climate==='warm'?14:(c.climate==='mild'?7:0))+(c.sun?4:0);
-    if(pri==='ocean')score+=(c.coast?16:0);
-    if(pri==='community')score+=c.comm*2.2;
+    if(pri.indexOf('salary')>-1)score+=salNorm*16;
+    if(pri.indexOf('afford')>-1)score+=(120-c.col)*0.45;
+    if(pri.indexOf('schools')>-1)score+=c.schools*2.2;
+    if(pri.indexOf('warm')>-1)score+=(c.climate==='warm'?14:(c.climate==='mild'?7:0))+(c.sun?4:0);
+    if(pri.indexOf('ocean')>-1)score+=(c.coast?16:0);
+    if(pri.indexOf('community')>-1)score+=c.comm*2.2;
 
     /* העדפות סופ"ש — משקל קל */
-    var wk=a.weekend||'';
-    if(wk==='outdoors')score+=c.vibes.nature*0.8;
-    if(wk==='beach')score+=(c.coast?7:0)+(c.climate==='warm'?2:0);
-    if(wk==='golf')score+=(c.climate==='warm'?4:1)+c.vibes.suburban*0.3;
-    if(wk==='arts')score+=c.vibes.urban*0.6;
-    if(wk==='food')score+=c.vibes.urban*0.5;
+    var wk=a.weekend||[];
+    if(wk.indexOf('outdoors')>-1)score+=c.vibes.nature*0.8;
+    if(wk.indexOf('beach')>-1)score+=(c.coast?7:0)+(c.climate==='warm'?2:0);
+    if(wk.indexOf('golf')>-1)score+=(c.climate==='warm'?4:1)+c.vibes.suburban*0.3;
+    if(wk.indexOf('arts')>-1)score+=c.vibes.urban*0.6;
+    if(wk.indexOf('food')>-1)score+=c.vibes.urban*0.5;
 
     return {city:c,raw:score};
   });
@@ -1258,7 +1269,7 @@ function showNeighborhood(idx){
     +employersHTML(t.city.n,a.profession);
 
   /* טעינה אוטומטית של המקומות — והכפתורים נותנים שליטה גלויה */
-  currentNb={nb:nb,prof:a.profession,hasKids:hasKids,weekend:a.weekend?[a.weekend]:[]};
+  currentNb={nb:nb,prof:a.profession,hasKids:hasKids,weekend:a.weekend||[]};
   loadPOI('work');
   if(hasKids)loadPOI('school');
   loadPOI('fun');
@@ -1646,7 +1657,7 @@ function buildMap(){
 */
 function buildCRMSummary(){
   var a=state.answers;
-  var pris=a.priorities?PRI_LABEL[a.priorities]:'';
+  var pris=(a.priorities||[]).map(function(p){return PRI_LABEL[p];}).join(', ');
   var lines=['=== AMERICAN LIFE MAP — DREAM DESTINATION ===',
     'Name: '+(state.leadName||[state.guestFirst,state.guestLast].filter(Boolean).join(' ')||''),
     'Email: '+(state.email||''),
@@ -1667,7 +1678,7 @@ function buildCRMSummary(){
     'Lifestyle preference: '+LIFE_LABEL[a.lifestyle],
     'Housing budget: '+BUDGET_LABEL[a.budget],
     'Priorities: '+(pris||'—'),
-    'Weekend interests: '+(a.weekend?WEEKEND_LABEL[a.weekend]:'—'),
+    'Weekend interests: '+((a.weekend||[]).map(function(w){return WEEKEND_LABEL[w];}).join(', ')||'—'),
     '',
     'Completed: '+new Date().toLocaleString('en-US'),
     'Source: American Life Map (dream_map)');
