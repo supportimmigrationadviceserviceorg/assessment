@@ -10,6 +10,7 @@
 <style>
   /* ===== פלטת צבעים — אטלס וינטג': קלף, דיו כחול, פליז ===== */
   :root{
+  --font-head:'Playfair Display',Georgia,'Times New Roman',serif;
     --parchment:#F7F3EA;
     --parchment-deep:#EFE8D8;
     --ink:#1F3A5F;
@@ -60,7 +61,7 @@
     margin-bottom:22px;
     box-shadow:0 1px 3px rgba(31,58,95,.06);
   }
-  .card h2{font-size:21px;font-weight:normal;margin-bottom:6px;}
+  .card h2{font-family:var(--font-head);font-size:23px;font-weight:600;margin-bottom:6px;}
   .card .hint{font-family:Arial,Helvetica,sans-serif;font-size:13px;color:var(--text-muted);margin-bottom:18px;}
 
   /* ===== שדות ===== */
@@ -98,10 +99,21 @@
     padding:14px 12px;text-align:center;cursor:pointer;transition:all .15s;
     font-size:15px;user-select:none;
   }
-  .opt .ico{font-size:22px;display:block;margin-bottom:6px;}
+  .opt .ico{
+    font-size:22px;display:inline-flex;align-items:center;justify-content:center;
+    width:46px;height:46px;margin:0 auto 8px;border-radius:14px;
+    background:linear-gradient(135deg,#FBF6E9,#F4EAD0);
+    border:1px solid var(--brass-light);
+    box-shadow:0 2px 6px rgba(31,58,95,.08);
+    transition:transform .18s,box-shadow .18s;
+  }
+  .opt.sel .ico{
+    transform:translateY(-2px) scale(1.06);
+    background:linear-gradient(135deg,#1F3A5F,#2C5F8A);
+    box-shadow:0 4px 12px rgba(31,58,95,.35);
+  }
   .opt:hover{border-color:var(--brass);background:#FDFBF3;}
   .opt.sel{border-color:var(--brass);background:#F8F1DE;box-shadow:inset 0 0 0 1px var(--brass);}
-  .opt.sel .ico{transform:scale(1.1);}
   .opt small{display:block;font-family:Arial,sans-serif;font-size:11px;color:var(--text-muted);margin-top:3px;}
 
   .step-nav{display:flex;justify-content:space-between;align-items:center;margin-top:22px;gap:12px;}
@@ -120,7 +132,7 @@
   /* ===== תוצאות ===== */
   .cert-head{text-align:center;margin-bottom:20px;}
   .cert-head .eyebrow{font-family:Arial,sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--brass);}
-  .cert-head h2{font-size:26px;font-weight:normal;margin-top:6px;}
+  .cert-head h2{font-family:var(--font-head);font-size:28px;font-weight:700;margin-top:6px;}
   .cert-head .name-line{font-style:italic;color:var(--text-muted);margin-top:4px;}
 
   #map{
@@ -224,7 +236,7 @@
     padding:5px 14px;border-radius:2px;
   }
   .city-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;}
-  .city-head h3{font-size:22px;font-weight:normal;}
+  .city-head h3{font-family:var(--font-head);font-size:23px;font-weight:600;}
   .city-head .state{color:var(--text-muted);font-size:15px;font-style:italic;}
   .match{font-family:Arial,sans-serif;font-weight:bold;font-size:20px;}
   .match.g{color:var(--green);} .match.y{color:var(--amber);} .match.b{color:var(--blue-badge);}
@@ -409,7 +421,25 @@
   /* Leaflet popup בהתאמה לעיצוב */
   .leaflet-popup-content-wrapper{border-radius:2px;font-family:Georgia,serif;color:var(--ink);}
   .leaflet-popup-content{margin:12px 16px;font-size:14px;}
+  /* ===== פישוט מובייל — פחות עומס, פחות גלילה ===== */
+  @media(max-width:520px){
+    /* ריווח הדוק יותר בכל הכרטיסים */
+    .card{padding:20px 16px;}
+    .city-card{padding:18px 15px;margin-bottom:12px;}
+    .city-card.top{padding:20px 16px;}
+    /* המפה נמוכה יותר כדי שהתוכן שמתחת נגיש בלי גלילה ארוכה */
+    #map{height:300px !important;}
+    /* פאנל המעסיקים — קומפקטי */
+    .emp-box{margin-top:10px;padding-top:8px;}
+    .emp-chip{font-size:11px;padding:4px 9px;margin:2px;}
+    /* פחות ריווח בין שאלות */
+    .q-step h2{font-size:20px;}
+    .opt-grid{gap:8px;}
+    /* האווטאר קטן יותר במובייל */
+    .avatar{width:52px;height:52px;font-size:20px;}
+  }
 </style>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 <div class="wrap">
@@ -430,15 +460,15 @@
 
   <!-- ===== שלב 0: זיהוי לפי אימייל ===== -->
   <div id="screen-lookup" class="card">
-    <h2>Let's begin with your details</h2>
-    <p class="hint">Enter the email address you registered with, and we will prepare your personal map.</p>
+    <h2>First, let's find you</h2>
+    <p class="hint">Type your email and we'll make your map.</p>
     <label for="lk-email">Email address</label>
     <input type="email" id="lk-email" placeholder="name@example.com" autocomplete="email">
     <div class="err" id="lk-err"></div>
 
     <!-- שדות לליד חדש — מוצגים רק אם האימייל לא נמצא במערכת -->
     <div id="guest-fields" class="hidden" style="margin-top:16px;">
-      <p class="hint" style="margin-bottom:12px;background:#F8F1DE;border:1px solid var(--brass-light);border-radius:2px;padding:10px 12px;">We couldn't find an existing profile — tell us who you are and we'll prepare your personal map.</p>
+      <p class="hint" style="margin-bottom:12px;background:#F8F1DE;border:1px solid var(--brass-light);border-radius:2px;padding:10px 12px;">We didn't find you yet. Just add your name and we'll make your map.</p>
       <label for="g-first">First name</label>
       <input type="text" id="g-first" autocomplete="given-name" style="margin-bottom:12px;">
       <label for="g-last">Last name (optional)</label>
@@ -455,8 +485,8 @@
   <!-- ===== אישור שם ===== -->
   <div id="screen-welcome" class="card hidden" style="text-align:center;">
     <div id="welcome-avatar"></div>
-    <h2 id="welcome-title">Welcome back</h2>
-    <p class="hint">We found your file. Let's map out where your American life could begin — it takes about one minute.</p>
+    <h2 id="welcome-title" style="font-family:var(--font-head);font-weight:700;">Welcome back</h2>
+    <p class="hint">We found you! Let's make your map — it takes about one minute.</p>
     <div style="margin-top:10px;">
       <button class="btn" onclick="startQuiz()">Start my map</button>
     </div>
@@ -468,8 +498,8 @@
 
     <!-- שלב 1: מקצוע -->
     <div class="card q-step" id="q1">
-      <h2>What do you do for a living?</h2>
-      <p class="hint">We match salaries in your field across the United States.</p>
+      <h2>What work do you do?</h2>
+      <p class="hint">We'll show you jobs and pay in your field.</p>
       <div class="opt-grid" data-q="profession">
         <div class="opt" data-v="tech"><span class="ico">&#128187;</span>Technology &amp; IT</div>
         <div class="opt" data-v="health"><span class="ico">&#9877;&#65039;</span>Healthcare &amp; Medicine</div>
@@ -485,8 +515,8 @@
 
     <!-- שלב 2: משפחה -->
     <div class="card q-step hidden" id="q2">
-      <h2>Who is making the journey with you?</h2>
-      <p class="hint">This helps us weigh schools and family neighborhoods.</p>
+      <h2>Who is coming with you?</h2>
+      <p class="hint">This helps us pick the right area for you.</p>
       <div class="opt-grid" data-q="family">
         <div class="opt" data-v="single"><span class="ico">&#129489;</span>Just me</div>
         <div class="opt" data-v="couple"><span class="ico">&#128107;</span>My partner and me</div>
@@ -498,21 +528,21 @@
 
     <!-- שלב 3: סגנון חיים -->
     <div class="card q-step hidden" id="q3">
-      <h2>Where do you see yourself living?</h2>
-      <p class="hint">Picture your everyday life — the street outside your window.</p>
+      <h2>What kind of place do you want?</h2>
+      <p class="hint">Think about the street where you'd live.</p>
       <div class="opt-grid" data-q="lifestyle">
-        <div class="opt" data-v="urban"><span class="ico">&#127961;&#65039;</span>Big city energy<small>Downtown, transit, everything nearby</small></div>
-        <div class="opt" data-v="suburban"><span class="ico">&#127968;</span>Quiet suburbs<small>A house, a yard, good schools</small></div>
-        <div class="opt" data-v="nature"><span class="ico">&#127956;&#65039;</span>Close to nature<small>Mountains, trails, open space</small></div>
-        <div class="opt" data-v="coastal"><span class="ico">&#127958;&#65039;</span>Near the water<small>Ocean air, beach weekends</small></div>
+        <div class="opt" data-v="urban"><span class="ico">&#127961;&#65039;</span>Big city<small>Busy, lots to do nearby</small></div>
+        <div class="opt" data-v="suburban"><span class="ico">&#127968;</span>Quiet suburb<small>A house, a yard, good schools</small></div>
+        <div class="opt" data-v="nature"><span class="ico">&#127956;&#65039;</span>Near nature<small>Mountains, trails, open space</small></div>
+        <div class="opt" data-v="coastal"><span class="ico">&#127958;&#65039;</span>Near water<small>Beach, ocean air</small></div>
       </div>
       <div class="step-nav"><button class="btn btn-ghost" onclick="prevStep(2)">Back</button><button class="btn" id="n3" disabled onclick="nextStep(4)">Next</button></div>
     </div>
 
     <!-- שלב 4: תקציב -->
     <div class="card q-step hidden" id="q4">
-      <h2>Your monthly housing budget</h2>
-      <p class="hint">An estimate is fine — rent or mortgage, in US dollars.</p>
+      <h2>How much can you pay for a home each month?</h2>
+      <p class="hint">A rough number is fine — in US dollars.</p>
       <div class="opt-grid" data-q="budget">
         <div class="opt" data-v="1000">Up to $1,200</div>
         <div class="opt" data-v="1600">$1,200 &ndash; $2,000</div>
@@ -524,8 +554,8 @@
 
     <!-- שלב 5: עדיפויות -->
     <div class="card q-step hidden" id="q5">
-      <h2>What matters most to you?</h2>
-      <p class="hint">Choose up to three.</p>
+      <h2>What is most important to you?</h2>
+      <p class="hint">Pick up to three.</p>
       <div class="opt-grid" data-q="priorities" data-multi="3">
         <div class="opt" data-v="salary"><span class="ico">&#128176;</span>Higher salary</div>
         <div class="opt" data-v="afford"><span class="ico">&#127974;</span>Affordable living</div>
@@ -539,8 +569,8 @@
 
     <!-- שלב 6: סופי שבוע ותחביבים -->
     <div class="card q-step hidden" id="q6">
-      <h2>How do you love spending weekends?</h2>
-      <p class="hint">Choose up to two — we'll show these near your new home.</p>
+      <h2>What do you like to do on weekends?</h2>
+      <p class="hint">Pick up to two. We'll show them near your home.</p>
       <div class="opt-grid" data-q="weekend" data-multi="2">
         <div class="opt" data-v="outdoors"><span class="ico">&#129406;</span>Nature &amp; hiking</div>
         <div class="opt" data-v="beach"><span class="ico">&#127958;&#65039;</span>Beach &amp; water</div>
@@ -549,7 +579,7 @@
         <div class="opt" data-v="arts"><span class="ico">&#127917;</span>Arts &amp; culture</div>
         <div class="opt" data-v="food"><span class="ico">&#127869;&#65039;</span>Food &amp; dining</div>
       </div>
-      <div class="step-nav"><button class="btn btn-ghost" onclick="prevStep(5)">Back</button><button class="btn" id="n6" disabled onclick="revealMap()">Reveal my map</button></div>
+      <div class="step-nav"><button class="btn btn-ghost" onclick="prevStep(5)">Back</button><button class="btn" id="n6" disabled onclick="revealMap()">Show my map</button></div>
     </div>
   </div>
 
@@ -569,7 +599,7 @@
     <div class="cert-head">
       <div id="cert-avatar"></div>
       <div class="eyebrow">Personal Relocation Map</div>
-      <h2>Where your American life begins</h2>
+      <h2>This could be your new life</h2>
       <div class="name-line" id="cert-name"></div>
     </div>
 
@@ -582,7 +612,7 @@
         Open Your Green Card File
       </button>
       <div style="font-family:Arial,sans-serif;font-size:12px;color:var(--text-muted);margin-top:8px;">
-        Reviewed personally by our team
+        Checked by our team
       </div>
     </div>
 
@@ -594,10 +624,10 @@
 
     <!-- ===== CTA סיום — הזמנה לתכנן את הדרך (ללא נעילת תוכן) ===== -->
     <div class="card" style="text-align:center;border:1px solid var(--brass);outline:3px double var(--brass);outline-offset:3px;margin:26px 4px 0;">
-      <h3 style="font-size:23px;font-weight:normal;margin-bottom:8px;">You've seen where. Now let's make it real.</h3>
+      <h3 style="font-family:var(--font-head);font-size:24px;font-weight:700;margin-bottom:8px;">You saw it. Now let's make it real.</h3>
       <p style="font-family:Arial,sans-serif;font-size:14px;color:var(--text-muted);max-width:460px;margin:0 auto 20px;">Your map shows the destination &mdash; your Green Card file opens the way there. Our team will review your profile and match you with the pathway that fits your direction.</p>
       <button class="btn btn-gold" style="max-width:400px;" id="final-btn" onclick="goToPayment()">Open my Green Card file &mdash; $29</button>
-      <div style="font-family:Arial,sans-serif;font-size:11px;color:var(--text-muted);margin-top:10px;">One-time payment &middot; Reviewed personally by our team</div>
+      <div style="font-family:Arial,sans-serif;font-size:11px;color:var(--text-muted);margin-top:10px;">One-time payment &middot; Checked by our team</div>
     </div>
 
     <p class="disclaimer">Salary, rent and cost-of-living figures are estimates based on publicly available data and are provided for general guidance only. They do not constitute financial or legal advice. Immigration Advice Service &middot; All rights reserved.</p>
@@ -681,29 +711,86 @@ var WEEKEND_LABEL={outdoors:'Nature & hiking',beach:'Beach & water',golf:'Golf',
 /* ---------- מצב ---------- */
 var state={leadId:null,leadType:null,leadName:'',email:'',existingComments:'',answers:{profession:null,family:null,lifestyle:null,budget:null,priorities:[],weekend:[]},results:[]};
 
-/* ---------- זיהוי מקור התנועה — התאמת מסך הכניסה למי שמגיע מפרסום/רשת חברתית ---------- */
+/* ---------- זיהוי מקור התנועה + זיהוי אוטומטי לפי ID מה-URL ---------- */
 (function detectSource(){
   try{
     var p=new URLSearchParams(window.location.search);
     var src=(p.get('utm_source')||'').toLowerCase();
     var social=['facebook','instagram','fb','ig','social','tiktok','twitter','x','youtube','ad','ads'];
     var isNewcomer=social.indexOf(src)>-1;
+
+    /* זיהוי אוטומטי לפי מזהה שהמערכת הזריקה ל-URL — בלי מסך אימייל כלל.
+       תומך בכמה שמות פרמטרים נפוצים ש-Bitrix עשוי להשתמש בהם. */
+    /* שם מהקמפיין (#NAME#) — לברכה אישית עוד לפני הקלדת אימייל */
+    var nameParam=p.get('name')||p.get('NAME');
+    if(nameParam&&nameParam.indexOf('#')<0){state.leadName=decodeURIComponent(nameParam).trim();}
+
+    var leadId=p.get('lead_id')||p.get('leadId')||p.get('LEAD_ID');
+    var contactId=p.get('contact_id')||p.get('contactId')||p.get('CONTACT_ID');
+    /* מסננים ערכים לא-תקינים כמו שדה מיזוג שלא הוחלף (#LEAD.ID#) */
+    function valid(id){return id&&/^\d+$/.test(id);}
+
     document.addEventListener('DOMContentLoaded',function(){
+      if(valid(contactId)){autoLoadById(contactId,'contact');return;}
+      if(valid(leadId)){autoLoadById(leadId,'lead');return;}
+
+      /* אם הגיע שם מהקמפיין — ברכה אישית במסך הפתיחה */
+      if(state.leadName){
+        var h0=document.querySelector('#screen-lookup h2');
+        if(h0)h0.textContent='Hi '+state.leadName+'!';
+        var hint0=document.querySelector('#screen-lookup .hint');
+        if(hint0)hint0.textContent='Just add your email and we\'ll make your map.';
+      }
       if(!isNewcomer)return;
-      /* מבקרים חדשים מפרסום — מסך פתיחה מזמין, לא "הזן אימייל שנרשמת איתו" */
+      /* מבקרים חדשים מפרסום — מסך פתיחה מזמין */
       var h=document.querySelector('#screen-lookup h2');
       var hint=document.querySelector('#screen-lookup .hint');
       var btn=document.getElementById('lk-btn');
-      if(h)h.textContent='Welcome — let\'s build your American Life Map';
-      if(hint)hint.textContent='Enter your email to begin. In 60 seconds you\'ll see the American neighborhood that fits your life.';
+      if(h)h.textContent='Welcome! Let\'s make your map';
+      if(hint)hint.textContent='Type your email to start. In one minute you\'ll see where you could live in America.';
       if(btn)btn.textContent='Start my map';
-      /* אין צורך בהודעת "לא מצאנו פרופיל" — לזרים זה טבעי; מרככים אותה */
       var gh=document.querySelector('#guest-fields .hint');
-      if(gh)gh.textContent='Almost there — just tell us your name and we\'ll draw your personal map.';
+      if(gh)gh.textContent='Almost done — just add your name and we\'ll make your map.';
       state._newcomer=true;
     });
   }catch(e){}
 })();
+
+/* טעינה אוטומטית לפי ID — שולף מ-Bitrix ומדלג ישר לשאלון */
+function autoLoadById(id,type){
+  var lookupScreen=document.getElementById('screen-lookup');
+  if(lookupScreen){
+    lookupScreen.querySelector('h2').textContent='Making your map…';
+    var hint=lookupScreen.querySelector('.hint');if(hint)hint.textContent='One moment please.';
+    var emailField=document.getElementById('lk-email');if(emailField)emailField.style.display='none';
+    var lkBtn=document.getElementById('lk-btn');if(lkBtn)lkBtn.style.display='none';
+  }
+  var method=(type==='contact')?'crm.contact.get':'crm.lead.get';
+  fetch(WEBHOOK+method+'?id='+encodeURIComponent(id))
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d.result&&d.result.ID){
+      var R=d.result;
+      state.leadId=R.ID;state.leadType=type;
+      state.leadName=(R.NAME||'').trim();
+      state.existingComments=R.COMMENTS||'';
+      /* אימייל לצורך אווטאר, אם קיים */
+      if(R.EMAIL&&R.EMAIL[0]&&R.EMAIL[0].VALUE){state.email=R.EMAIL[0].VALUE;}
+      showWelcome();
+    }else{
+      /* ID לא נמצא — נופלים בחזרה למסך האימייל הרגיל */
+      restoreLookup();
+    }
+  })
+  .catch(function(){restoreLookup();});
+}
+function restoreLookup(){
+  var s=document.getElementById('screen-lookup');if(!s)return;
+  s.querySelector('h2').textContent='First, let\'s find you';
+  var hint=s.querySelector('.hint');if(hint)hint.textContent='Type your email and we\'ll make your map.';
+  var emailField=document.getElementById('lk-email');if(emailField)emailField.style.display='';
+  var lkBtn=document.getElementById('lk-btn');if(lkBtn){lkBtn.style.display='';lkBtn.textContent='Continue';}
+}
 
 /* ---------- זיהוי לפי אימייל (כמו בכלים הקיימים) ---------- */
 function showErr(id,msg){var e=document.getElementById(id);e.textContent=msg;e.style.display='block';}
@@ -1170,9 +1257,9 @@ function showNeighborhood(idx){
     var mapEl=document.getElementById('map');
     mapEl.parentNode.insertBefore(hint,mapEl.nextSibling);
   }
-  hint.innerHTML='<b style="font-size:14px;">Your life in '+nb.n+'</b><span style="color:var(--text-muted);"> — take the tour:</span>'
-    +'<button class="jbtn j-home" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\')"><span class="jnum">1</span><span class="walker">&#128694;</span> Stand on your street</button>'
-    +'<button class="jbtn j-work dim" id="jbtn-work" onclick="goPOI(\'work\')"><span class="jnum">2</span>&#128188; Searching places you\'d work&hellip;</button>'
+  hint.innerHTML='<b style="font-size:14px;">Your life in '+nb.n+'</b><span style="color:var(--text-muted);"> — see it step by step:</span>'
+    +'<button class="jbtn j-home" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\')"><span class="jnum">1</span><span class="walker">&#128694;</span> See your street</button>'
+    +'<button class="jbtn j-work dim" id="jbtn-work" onclick="goPOI(\'work\')"><span class="jnum">2</span>&#128188; Finding jobs near you&hellip;</button>'
     +(hasKids?'<button class="jbtn j-school dim" id="jbtn-school" onclick="goPOI(\'school\')"><span class="jnum">3</span>&#127979; Searching the kids\' schools&hellip;</button>':'')
     +'<button class="jbtn j-fun dim" id="jbtn-fun" onclick="goPOI(\'fun\')"><span class="jnum">'+(hasKids?'4':'3')+'</span>&#11088; Finding your weekend spots&hellip;</button>'
     +employersHTML(t.city.n,a.profession);
@@ -1191,6 +1278,7 @@ function showNeighborhood(idx){
 var currentNb=null;
 var poiLayers={work:null,school:null,fun:null};
 var poiState={work:'idle',school:'idle',fun:'idle'};
+var poiWatchdog={work:null,school:null,fun:null};
 var OVERPASS_MIRRORS=[
 'https://overpass-api.de/api/interpreter',
 'https://overpass.kumi.systems/api/interpreter',
@@ -1246,7 +1334,7 @@ function goPOI(kind){
   document.getElementById('map').scrollIntoView({behavior:'smooth',block:'center'});
   mapObj.flyTo([m.lat,m.lng],15,{duration:1.1});
   setTimeout(function(){m.marker.openPopup();},1200);
-  var label=(kind==='work'?'&#128188; Your work: ':(kind==='fun'?'&#11088; Your weekend: ':(currentNb.hasKids?'&#127979; The kids\' schools: ':'&#127979; Schools nearby: ')));
+  var label=(kind==='work'?'&#128188; Your job: ':(kind==='fun'?'&#11088; Your weekend: ':(currentNb.hasKids?'&#127979; The kids\' schools: ':'&#127979; Schools nearby: ')));
   setJBtn(kind,label+m.name+' <span style="opacity:.75;font-size:12px;">('+(i+1)+'/'+list.length+' — tap for next)</span>',false);
 }
 
@@ -1255,7 +1343,7 @@ function employersHTML(cityName,prof){
   var cityList=(EMPLOYERS_CITY[cityName]&&EMPLOYERS_CITY[cityName][prof])||null;
   var list=cityList||EMPLOYERS_GENERAL[prof]||[];
   if(!list.length)return '';
-  var lbl=cityList?('Top employers in '+cityName+' for your field'):'Leading U.S. employers in your field';
+  var lbl=cityList?('Top places to work in '+cityName):'Top places to work in the U.S.';
   var chips=list.slice(0,8).map(function(n){return '<span class="emp-chip">'+n+'</span>';}).join('');
   return '<div class="emp-box"><div class="emp-lbl">&#128188; '+lbl+':</div>'+chips+'</div>';
 }
@@ -1293,12 +1381,22 @@ function poiQuery(kind,level,nb){
 function loadPOI(kind,goAfter){
   if(!currentNb||poiState[kind]==='loading')return;
   poiState[kind]='loading';
-  setJBtn(kind,(kind==='work'?'&#128188; Searching places you\'d work&hellip;':(kind==='fun'?'&#11088; Finding your weekend spots&hellip;':'&#127979; Searching '+(currentNb.hasKids?'the kids\' schools':'schools nearby')+'&hellip;')),true);
+  setJBtn(kind,(kind==='work'?'&#128188; Finding jobs near you&hellip;':(kind==='fun'?'&#11088; Finding your weekend spots&hellip;':'&#127979; Finding schools near you&hellip;')),true);
+
+  /* שומר-ראש: אם השרתים לא ענו תוך 14 שניות — משחררים את הכפתור לניסיון חוזר */
+  if(poiWatchdog[kind])clearTimeout(poiWatchdog[kind]);
+  poiWatchdog[kind]=setTimeout(function(){
+    if(poiState[kind]==='loading'){
+      poiState[kind]='idle';
+      setJBtn(kind,(kind==='work'?'&#128188; Show jobs near you':(kind==='fun'?'&#11088; Show weekend places':'&#127979; Show schools near you')),true);
+    }
+  },14000);
 
   var nb=currentNb.nb;
 
   function attempt(level){
     tryOverpass(poiQuery(kind,level,nb),0,function(elements){
+      if(poiWatchdog[kind]){clearTimeout(poiWatchdog[kind]);poiWatchdog[kind]=null;}
       /* איסוף תוצאות עם שם */
       var items=[];
       (elements||[]).forEach(function(el){
@@ -1321,14 +1419,14 @@ function loadPOI(kind,goAfter){
       items=items.slice(0,6);
 
       var colors={work:'#1F3A5F',school:'#2E7D4F',fun:'#B08D3E'};
-      var popTexts={work:'A place you could work',school:'A school near your neighborhood',fun:'Your kind of weekend spot'};
+      var popTexts={work:'A job near your home',school:'A school near your home',fun:'A weekend place for you'};
       items.forEach(function(it){
         var emoji=(kind==='school')?'&#127979;':(kind==='work'?'&#128188;':funEmoji(it.tags));
         var icon=L.divIcon({className:'',html:'<div style="width:34px;height:34px;border-radius:50%;background:'+colors[kind]+';border:2.5px solid #FCFAF4;box-shadow:0 2px 7px rgba(31,58,95,.4);display:flex;align-items:center;justify-content:center;font-size:16px;">'+emoji+'</div>',iconSize:[34,34],iconAnchor:[17,17]});
         var shortName=it.name.length>24?it.name.slice(0,22)+'&hellip;':it.name;
         var mk=L.marker([it.lat,it.lng],{icon:icon}).addTo(poiLayers[kind])
           .bindTooltip(shortName,{permanent:true,direction:'bottom',offset:[0,16],className:'poi-label'+(kind==='school'?' school-label':(kind==='fun'?' home-label':''))})
-          .bindPopup('<b>'+it.name+'</b><br>'+popTexts[kind]+'<br><a href="#" onclick="walkAt('+it.lat+','+it.lng+',\''+it.name.replace(/'/g,"\\'")+'\');return false;" style="color:#B08D3E;font-weight:bold;">&#128694; See it from the street &raquo;</a>');
+          .bindPopup('<b>'+it.name+'</b><br>'+popTexts[kind]+'<br><a href="#" onclick="walkAt('+it.lat+','+it.lng+',\''+it.name.replace(/'/g,"\\'")+'\');return false;" style="color:#B08D3E;font-weight:bold;">&#128694; See it up close &raquo;</a>');
         it.marker=mk;
         poiData[kind].push(it);
       });
@@ -1337,18 +1435,19 @@ function loadPOI(kind,goAfter){
       poiState[kind]='loaded';
 
       if(poiData[kind].length>0){
-        var doneTxt=(kind==='work')?'&#128188; See where you\'d work'
-          :(kind==='fun'?'&#11088; Explore your weekend'
-          :'&#127979; '+(currentNb.hasKids?'Visit the kids\' schools':'See the schools nearby'));
+        var doneTxt=(kind==='work')?'&#128188; See your jobs'
+          :(kind==='fun'?'&#11088; See weekend places'
+          :'&#127979; See your schools');
         setJBtn(kind,doneTxt+' <span style="opacity:.75;font-size:12px;">('+poiData[kind].length+' found)</span>',false);
         fitAllPOIs();
         if(goAfter)goPOI(kind);
       }else{
         /* אין תוצאות — משאירים את הכפתור לחיץ לניסיון חוזר */
         poiState[kind]='idle';
-        setJBtn(kind,(kind==='work'?'&#128188; Find where you\'d work &mdash; tap to search':(kind==='fun'?'&#11088; Find your weekend spots &mdash; tap to search':'&#127979; '+(currentNb.hasKids?'Find the kids\' schools':'Find schools')+' &mdash; tap to search')),true);
+        setJBtn(kind,(kind==='work'?'&#128188; Show jobs near you':(kind==='fun'?'&#11088; Show weekend places':'&#127979; Show schools near you')),true);
       }
     },function(){
+      if(poiWatchdog[kind]){clearTimeout(poiWatchdog[kind]);poiWatchdog[kind]=null;}
       poiState[kind]='error';
       setJBtn(kind,'&#9888;&#65039; Couldn\'t load — tap to retry',true);
     });
@@ -1379,14 +1478,14 @@ function tryOverpass(q,mirrorIdx,onOk,onFail){
 /* טקסט כפתור גרין קארד — אישי עם שם הלקוח אם זוהה */
 function gcBtnText(){
   return state.leadName
-    ?(state.leadName+', open your Green Card file &mdash; $29')
+    ?(state.leadName+', start my Green Card &mdash; $29')
     :'Open my Green Card file &mdash; $29';
 }
 
 function showResults(){
   var res=document.getElementById('screen-results');
   res.classList.remove('hidden');
-  document.getElementById('cert-name').textContent=state.leadName?('Prepared for '+state.leadName):'Prepared personally for you';
+  document.getElementById('cert-name').textContent=state.leadName?('Made for '+state.leadName):'Made just for you';
   var topBtn=document.getElementById('top-pay-btn');
   if(topBtn){topBtn.innerHTML=(state.leadName?state.leadName+', ':'')+'Open Your Green Card File';}
   renderAvatars();
@@ -1420,7 +1519,11 @@ function buildChatWidget(){
   l.onclick=toggleChat;
   document.body.appendChild(l);
   /* אחרי דקה — חלון הצ'אט המלא קופץ (נסגר בלחיצה מחוץ לו, לא חוסם את המפה) */
-  setTimeout(function(){if(!chatOpened)openChat();},60000);
+  /* פופ-אפ הצ'אט קופץ מעצמו רק בדסקטופ — במובייל הוא עומס; שם נשאר רק הכפתור */
+  var isMobile=window.matchMedia&&window.matchMedia('(max-width:520px)').matches;
+  if(!isMobile){
+    setTimeout(function(){if(!chatOpened)openChat();},60000);
+  }
 }
 
 var teaserTimer=null;
@@ -1434,7 +1537,7 @@ function showTeaser(){
   if(document.getElementById('chat-teaser')||document.getElementById('chatw'))return;
   var t=document.createElement('div');
   t.id='chat-teaser';t.className='chat-teaser';
-  t.innerHTML=(state.leadName?state.leadName+', r':'R')+'eady to make it real? &#128172;';
+  t.innerHTML=(state.leadName?state.leadName+', a':'A')+'re you ready? &#128172;';
   t.onclick=function(){t.remove();openChat();};
   document.body.appendChild(t);
   /* נעלמת אחרי 25 שניות — וחוזרת שוב אחרי דקה, עד שהצ'אט נפתח */
@@ -1455,8 +1558,8 @@ function openChat(){
   var top=state.results[0];
   var firstName=state.leadName||'';
   var msg=(firstName?('Hi '+firstName+' &#128075;'):'Hi &#128075;')
-    +'<br>You\'ve just seen your new life in <b>'+top.city.n+'</b> — the street, the neighborhood, everything.'
-    +'<br><br>The only thing missing is the Green Card. Ready to make it real?';
+    +'<br>You just saw your new life in <b>'+top.city.n+'</b> — your street, your area, everything.'
+    +'<br><br>Now let\'s get your Green Card. Ready?';
   var w=document.createElement('div');
   w.id='chatw';w.className='chatw';
   w.setAttribute('role','dialog');
@@ -1467,7 +1570,7 @@ function openChat(){
     +'<div class="cw-body">'
     +'<div class="cw-msg">'+msg+'</div>'
     +'<button onclick="goToPayment()" style="width:100%;font-family:Georgia,serif;font-size:15.5px;font-weight:bold;color:#fff;cursor:pointer;background:#0E9F6E;border:2px solid #0B7D57;border-radius:6px;padding:14px;">&#128274; '+gcBtnText()+'</button>'
-    +'<div class="cw-fine">One-time $29 &middot; Reviewed personally by our team</div>'
+    +'<div class="cw-fine">One-time $29 &middot; Checked by our team</div>'
     +'</div>';
   document.body.appendChild(w);
   /* הסרת הטיזר אם קיים + האזנה ללחיצה בחוץ */
