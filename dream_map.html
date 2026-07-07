@@ -993,16 +993,14 @@ function computeMatches(){
   });
 
   scored.sort(function(x,y){return y.raw-x.raw;});
-  var top=scored.slice(0,3);
+  var top=scored.slice(0,1);
 
-  /* נרמול לסקאלה 70–97 (המוסכמה הקיימת של הכלים שלכם) */
-  var rMax=top[0].raw,rMin=top[top.length-1].raw;
-  top.forEach(function(t,i){
-    var pct=rMax===rMin?90:70+((t.raw-rMin)/(rMax-rMin))*27;
-    t.match=Math.min(97,Math.max(70,Math.round(pct)));
+  /* אחוז התאמה לעיר היחידה — לפי מיקומה בטווח כל הערים (סקאלה 88–97) */
+  var allMax=scored[0].raw,allMin=scored[scored.length-1].raw;
+  top.forEach(function(t){
+    var pct=allMax===allMin?95:88+((t.raw-allMin)/(allMax-allMin))*9;
+    t.match=Math.min(97,Math.max(88,Math.round(pct)));
   });
-  /* מניעת אחוזים זהים ברצף */
-  for(var i=1;i<top.length;i++){if(top[i].match>=top[i-1].match)top[i].match=top[i-1].match-1;}
   state.results=top;
 }
 
