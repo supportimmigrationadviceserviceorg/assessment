@@ -69,11 +69,12 @@
 
   /* ===== שדות ===== */
   label{font-family:Arial,Helvetica,sans-serif;font-size:13px;color:var(--ink-soft);display:block;margin-bottom:6px;}
-  input[type=email],input[type=text]{
+  input[type=email],input[type=text],input[type=tel],select{
     width:100%;padding:12px 14px;font-size:16px;font-family:Georgia,serif;
     border:1px solid var(--line);border-radius:2px;background:#fff;color:var(--ink);
   }
-  input:focus{outline:2px solid var(--brass);outline-offset:1px;border-color:var(--brass);}
+  select{cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%231F3A5F' d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:34px;}
+  input:focus,select:focus{outline:2px solid var(--brass);outline-offset:1px;border-color:var(--brass);}
 
   /* ===== כפתורים ===== */
   .btn{
@@ -348,6 +349,26 @@
   .jbtn.dim{opacity:.75;font-style:italic;}
   @media(max-width:520px){.jbtn{font-size:16px;padding:16px;}}
 
+  /* ===== חץ מונפש + הבהוב שמכוון ללחוץ על הכפתור הראשון ===== */
+  .start-here{
+    display:flex;align-items:center;gap:8px;justify-content:center;
+    margin:12px 0 2px;font-family:var(--font-head);font-weight:700;
+    font-size:15px;color:var(--brass);
+  }
+  .start-here .arrow-dn{
+    display:inline-block;font-size:22px;color:var(--brass);line-height:1;
+    animation:bounceDn 1.1s ease-in-out infinite;
+  }
+  @keyframes bounceDn{
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(7px);}
+  }
+  .j-home.pulse{animation:pulseGlow 1.4s ease-in-out infinite;}
+  @keyframes pulseGlow{
+    0%,100%{box-shadow:0 0 0 0 rgba(30,120,80,0);}
+    50%{box-shadow:0 0 0 5px rgba(30,120,80,.30);}
+  }
+
   /* תוויות שם קבועות על סימוני המפה */
   .poi-label{
     background:#FCFAF4;border:1px solid var(--line);border-radius:2px;
@@ -475,8 +496,13 @@
       <input type="text" id="g-first" autocomplete="given-name" style="margin-bottom:12px;">
       <label for="g-last">Last name</label>
       <input type="text" id="g-last" autocomplete="family-name" style="margin-bottom:12px;">
+      <label for="g-country">Country</label>
+      <select id="g-country" style="margin-bottom:12px;"></select>
       <label for="g-phone">Phone number</label>
-      <input type="tel" id="g-phone" inputmode="tel" placeholder="+1 555 123 4567" autocomplete="tel">
+      <div style="display:flex;gap:8px;align-items:stretch;">
+        <span id="g-dial" style="display:flex;align-items:center;padding:0 12px;font-family:Georgia,serif;font-size:16px;background:#F1EBDA;border:1px solid var(--line);border-radius:2px;color:var(--ink);white-space:nowrap;">+1</span>
+        <input type="tel" id="g-phone" inputmode="tel" placeholder="555 123 4567" autocomplete="tel" style="flex:1;">
+      </div>
     </div>
 
     <div style="margin-top:18px;">
@@ -798,10 +824,10 @@ function restoreLookup(){
 function showErr(id,msg){var e=document.getElementById(id);e.textContent=msg;e.style.display='block';}
 function hideErr(id){document.getElementById(id).style.display='none';}
 
-/* אימות אימייל אמיתי — מבנה name@domain.tld */
+/* אימות אימייל אמיתי — רק תווים לטיניים חוקיים במבנה name@domain.tld */
 function isValidEmail(v){
   if(!v)return false;
-  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+  return /^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$/.test(v);
 }
 
 /* יצירת Client ID בפורמט IASFM + 7 ספרות (לא ה-ID של Bitrix) */
@@ -811,26 +837,88 @@ function generateClientId(){
   return 'IASFM'+n;
 }
 
+/* ---------- רשימת מדינות עם קידומת חיוג ---------- */
+var COUNTRIES=[
+  {n:'United States',d:'+1',f:'\uD83C\uDDFA\uD83C\uDDF8'},
+  {n:'United Kingdom',d:'+44',f:'\uD83C\uDDEC\uD83C\uDDE7'},
+  {n:'Canada',d:'+1',f:'\uD83C\uDDE8\uD83C\uDDE6'},
+  {n:'India',d:'+91',f:'\uD83C\uDDEE\uD83C\uDDF3'},
+  {n:'Nigeria',d:'+234',f:'\uD83C\uDDF3\uD83C\uDDEC'},
+  {n:'Philippines',d:'+63',f:'\uD83C\uDDF5\uD83C\uDDED'},
+  {n:'Pakistan',d:'+92',f:'\uD83C\uDDF5\uD83C\uDDF0'},
+  {n:'Mexico',d:'+52',f:'\uD83C\uDDF2\uD83C\uDDFD'},
+  {n:'Brazil',d:'+55',f:'\uD83C\uDDE7\uD83C\uDDF7'},
+  {n:'Israel',d:'+972',f:'\uD83C\uDDEE\uD83C\uDDF1'},
+  {n:'South Africa',d:'+27',f:'\uD83C\uDDFF\uD83C\uDDE6'},
+  {n:'Germany',d:'+49',f:'\uD83C\uDDE9\uD83C\uDDEA'},
+  {n:'France',d:'+33',f:'\uD83C\uDDEB\uD83C\uDDF7'},
+  {n:'Spain',d:'+34',f:'\uD83C\uDDEA\uD83C\uDDF8'},
+  {n:'Italy',d:'+39',f:'\uD83C\uDDEE\uD83C\uDDF9'},
+  {n:'Australia',d:'+61',f:'\uD83C\uDDE6\uD83C\uDDFA'},
+  {n:'China',d:'+86',f:'\uD83C\uDDE8\uD83C\uDDF3'},
+  {n:'Egypt',d:'+20',f:'\uD83C\uDDEA\uD83C\uDDEC'},
+  {n:'Kenya',d:'+254',f:'\uD83C\uDDF0\uD83C\uDDEA'},
+  {n:'Ghana',d:'+233',f:'\uD83C\uDDEC\uD83C\uDDED'},
+  {n:'Colombia',d:'+57',f:'\uD83C\uDDE8\uD83C\uDDF4'},
+  {n:'Argentina',d:'+54',f:'\uD83C\uDDE6\uD83C\uDDF7'},
+  {n:'Turkey',d:'+90',f:'\uD83C\uDDF9\uD83C\uDDF7'},
+  {n:'Ukraine',d:'+380',f:'\uD83C\uDDFA\uD83C\uDDE6'},
+  {n:'Poland',d:'+48',f:'\uD83C\uDDF5\uD83C\uDDF1'},
+  {n:'Netherlands',d:'+31',f:'\uD83C\uDDF3\uD83C\uDDF1'},
+  {n:'Ireland',d:'+353',f:'\uD83C\uDDEE\uD83C\uDDEA'},
+  {n:'Portugal',d:'+351',f:'\uD83C\uDDF5\uD83C\uDDF9'},
+  {n:'United Arab Emirates',d:'+971',f:'\uD83C\uDDE6\uD83C\uDDEA'},
+  {n:'Saudi Arabia',d:'+966',f:'\uD83C\uDDF8\uD83C\uDDE6'},
+  {n:'Bangladesh',d:'+880',f:'\uD83C\uDDE7\uD83C\uDDE9'},
+  {n:'Vietnam',d:'+84',f:'\uD83C\uDDFB\uD83C\uDDF3'},
+  {n:'Indonesia',d:'+62',f:'\uD83C\uDDEE\uD83C\uDDE9'},
+  {n:'Japan',d:'+81',f:'\uD83C\uDDEF\uD83C\uDDF5'},
+  {n:'South Korea',d:'+82',f:'\uD83C\uDDF0\uD83C\uDDF7'},
+  {n:'Russia',d:'+7',f:'\uD83C\uDDF7\uD83C\uDDFA'},
+  {n:'Other',d:'+',f:'\uD83C\uDF0D'}
+];
+function populateCountries(){
+  var sel=document.getElementById('g-country');
+  if(!sel||sel.options.length)return;
+  COUNTRIES.forEach(function(c){
+    var o=document.createElement('option');
+    o.value=c.d;o.setAttribute('data-name',c.n);
+    o.textContent=c.f+' '+c.n+(c.d!=='+'?' ('+c.d+')':'');
+    sel.appendChild(o);
+  });
+  sel.addEventListener('change',function(){
+    var dial=document.getElementById('g-dial');
+    if(dial)dial.textContent=(sel.value==='+'?'+':sel.value);
+  });
+}
+document.addEventListener('DOMContentLoaded',populateCountries);
+
 function doLookup(){
   /* אם שדות האורח כבר גלויים — זהו השלב השני: כל הפרטים חובה ותקינים */
   var guestFields=document.getElementById('guest-fields');
   if(!guestFields.classList.contains('hidden')){
     var gf=document.getElementById('g-first').value.trim();
     var gl=document.getElementById('g-last').value.trim();
+    var gc=document.getElementById('g-country');
+    var dial=gc?gc.value:'';
+    var countryName=gc&&gc.selectedIndex>=0?gc.options[gc.selectedIndex].getAttribute('data-name'):'';
     var gp=document.getElementById('g-phone').value.trim();
     hideErr('lk-err');
     if(!gf){showErr('lk-err','Please enter your first name.');return;}
     if(!gl){showErr('lk-err','Please enter your last name.');return;}
+    if(!dial){showErr('lk-err','Please choose your country.');return;}
     if(!gp){showErr('lk-err','Please enter your phone number.');return;}
-    /* אימות טלפון — רק ספרות, רווחים, +, -, ( ) ; לפחות 7 ספרות אמיתיות */
+    /* אימות טלפון — רק ספרות ורווחים/סימנים; לפחות 6 ספרות אמיתיות */
     var digits=gp.replace(/[^0-9]/g,'');
-    if(!/^[0-9 ()+\-]+$/.test(gp)||digits.length<7){
+    if(!/^[0-9 ()\-]+$/.test(gp)||digits.length<6){
       showErr('lk-err','Please enter a valid phone number (digits only).');return;
     }
     state.leadName=gf;
     state.guestFirst=gf;
     state.guestLast=gl;
-    state.guestPhone=gp;
+    state.guestCountry=countryName||'';
+    /* מספר מלא עם קידומת בינלאומית */
+    state.guestPhone=(dial==='+'?'':dial+' ')+gp;
     showWelcome();
     return;
   }
@@ -1190,6 +1278,9 @@ function walkCity(idx){
 
 /* פתיחת חלון שיטוט ברחוב בכל נקודה — עיר, שכונה, מקום עבודה או בית ספר */
 function walkAt(lat,lng,label){
+  /* ברגע שהלקוח לחץ — מפסיקים את החץ וההבהוב, הם כבר הבינו */
+  var sh=document.querySelector('.start-here');if(sh)sh.style.display='none';
+  var pj=document.querySelector('.j-home.pulse');if(pj)pj.classList.remove('pulse');
   var src='https://maps.google.com/maps?layer=c&cbll='+lat+','+lng+'&cbp=12,0,0,0,0&hl=en&output=svembed';
   var fallback='https://www.google.com/maps/@?api=1&map_action=pano&viewpoint='+lat+','+lng+'&hl=en';
   var ov=document.createElement('div');
@@ -1283,7 +1374,8 @@ function showNeighborhood(idx){
     mapEl.parentNode.insertBefore(hint,mapEl.nextSibling);
   }
   hint.innerHTML='<b style="font-size:14px;">Your life in '+nb.n+'</b><span style="color:var(--text-muted);"> — see it step by step:</span>'
-    +'<button class="jbtn j-home" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\')"><span class="jnum">1</span><span class="walker">&#128694;</span> See your street</button>'
+    +'<div class="start-here">Start here <span class="arrow-dn">&#8595;</span></div>'
+    +'<button class="jbtn j-home pulse" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\')"><span class="jnum">1</span><span class="walker">&#128694;</span> See your street</button>'
     +'<button class="jbtn j-work dim" id="jbtn-work" onclick="goPOI(\'work\')"><span class="jnum">2</span>&#128188; Finding jobs near you&hellip;</button>'
     +(hasKids?'<button class="jbtn j-school dim" id="jbtn-school" onclick="goPOI(\'school\')"><span class="jnum">3</span>&#127979; Searching the kids\' schools&hellip;</button>':'')
     +'<button class="jbtn j-fun dim" id="jbtn-fun" onclick="goPOI(\'fun\')"><span class="jnum">'+(hasKids?'4':'3')+'</span>&#11088; Finding your weekend spots&hellip;</button>'
@@ -1684,6 +1776,7 @@ function buildCRMSummary(){
     'Name: '+(state.leadName||[state.guestFirst,state.guestLast].filter(Boolean).join(' ')||''),
     'Email: '+(state.email||''),
     state.guestPhone?('Phone: '+state.guestPhone):'',
+    state.guestCountry?('Country: '+state.guestCountry):'',
     '',
     '=== MATCHED CITIES ==='];
   state.results.forEach(function(t,i){
