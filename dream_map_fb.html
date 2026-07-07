@@ -671,7 +671,7 @@
 
 /* ---------- הגדרות ---------- */
 var WEBHOOK = 'https://immiworld.org/rest/147/47yrflms2cje1cbe/';
-var PAYMENT_URL = 'https://immigrationadviceservice.org/new-va-payment-29/?utm_campaign=dream_map';
+var PAYMENT_URL = 'https://immigrationadviceservice.org/complete-reg-greencard/?utm_campaign=dream_map';
 
 /* ---------- מאגר ערים: 30 מטרופולינים ----------
    col = מדד יוקר מחיה (100 = ממוצע ארצי)
@@ -1586,10 +1586,14 @@ function fitAllPOIs(){
 /* ניסיון מול שרתי Overpass לפי הסדר */
 function tryOverpass(q,mirrorIdx,onOk,onFail){
   if(mirrorIdx>=OVERPASS_MIRRORS.length){onFail();return;}
-  fetch(OVERPASS_MIRRORS[mirrorIdx]+'?data='+encodeURIComponent(q))
+  /* טיימאאוט לכל שרת — אם לא ענה תוך 4.5 שניות, עוברים מיד לשרת הבא במקום לחכות */
+  var ctrl=(typeof AbortController!=='undefined')?new AbortController():null;
+  var timer=setTimeout(function(){if(ctrl)ctrl.abort();},4500);
+  var opts=ctrl?{signal:ctrl.signal}:{};
+  fetch(OVERPASS_MIRRORS[mirrorIdx]+'?data='+encodeURIComponent(q),opts)
   .then(function(r){if(!r.ok)throw new Error('bad status');return r.json();})
-  .then(function(d){onOk(d.elements||[]);})
-  .catch(function(){tryOverpass(q,mirrorIdx+1,onOk,onFail);});
+  .then(function(d){clearTimeout(timer);onOk(d.elements||[]);})
+  .catch(function(){clearTimeout(timer);tryOverpass(q,mirrorIdx+1,onOk,onFail);});
 }
 
 /* טקסט כפתור גרין קארד — אישי עם שם הלקוח אם זוהה */
@@ -1810,17 +1814,27 @@ function saveToCRM(){
     var updMethod=state.leadType==='contact'?'crm.contact.update':'crm.lead.update';
     var newComments=(state.existingComments?state.existingComments+'<br><br>':'')
       +summary.replace(/\n/g,'<br>');
-    var params='id='+encodeURIComponent(state.leadId)
-      +'&fields[COMMENTS]='+encodeURIComponent(newComments)
+    var visaField=(state.leadType==='contact')?'UF_CRM_5C5843FC11F1D':'UF_CRM_1547484113';
+
+    /* קריאה 1 — שדות קצרים וקריטיים בלבד (Visa + מקצוע + מקור).
+       מופרד מ-COMMENTS הארוך כדי שאורך ה-URL לא יכשיל את שמירת השדה. */
+    var coreParams='id='+encodeURIComponent(state.leadId)
+      +'&fields['+visaField+']='+encodeURIComponent('DREAM DESTINATION')
       +'&fields[UF_CRM_1709560603]='+encodeURIComponent(profession);
-    /* Interested in Visa = DREAM DESTINATION — שדה שונה לליד ולאיש קשר */
-    if(state.leadType==='lead'){
-      params+='&fields[SOURCE_ID]=4';
-      params+='&fields[UF_CRM_1547484113]='+encodeURIComponent('DREAM DESTINATION');
-    }else{
-      params+='&fields[UF_CRM_5C5843FC11F1D]='+encodeURIComponent('DREAM DESTINATION');
-    }
-    fetch(WEBHOOK+updMethod+'?'+params).catch(function(){});
+    if(state.leadType==='lead'){coreParams+='&fields[SOURCE_ID]=4';}
+    fetch(WEBHOOK+updMethod+'?'+coreParams)
+      .then(function(r){return r.json();})
+      .then(function(res){if(res.error)console.error('Core field update failed:',res.error_description);})
+      .catch(function(e){console.error('Core update network error:',e);});
+
+    /* קריאה 2 — COMMENTS הארוך בנפרד (אם נכשל, השדות כבר נשמרו) */
+    fetch(WEBHOOK+updMethod,{
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body:'id='+encodeURIComponent(state.leadId)+'&fields[COMMENTS]='+encodeURIComponent(newComments)
+    }).then(function(r){return r.json();})
+      .then(function(res){if(res.error)console.error('Comments update failed:',res.error_description);})
+      .catch(function(e){console.error('Comments network error:',e);});
 
     /* הערת Timeline — ENTITY_TYPE באותיות קטנות */
     fetch(WEBHOOK+'crm.timeline.comment.add?fields[ENTITY_ID]='+encodeURIComponent(state.leadId)
