@@ -550,6 +550,28 @@
     font-family:Arial,sans-serif;font-size:13px;color:#8FA6C4;text-decoration:underline;}
   @media(max-width:520px){.ep-hero{height:170px;}.ep-body h2{font-size:22px;}}
 
+  /* ===== אנימציה לכפתור "Experience Day 1" — מושך תשומת לב ===== */
+  #day1-btn{position:relative;overflow:hidden;animation:day1Pulse 2s ease-in-out infinite;}
+  @keyframes day1Pulse{
+    0%,100%{transform:scale(1);box-shadow:0 6px 20px rgba(176,141,62,.45);}
+    50%{transform:scale(1.035);box-shadow:0 8px 30px rgba(176,141,62,.7);}
+  }
+  /* ברק שנע לרוחב הכפתור */
+  #day1-btn:after{
+    content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;
+    background:linear-gradient(120deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.45) 50%,rgba(255,255,255,0) 100%);
+    transform:skewX(-20deg);animation:day1Shine 2.8s ease-in-out infinite;
+  }
+  @keyframes day1Shine{
+    0%{left:-60%;}
+    45%,100%{left:130%;}
+  }
+  #day1-btn:hover{animation-play-state:paused;filter:brightness(1.08);}
+  @media(prefers-reduced-motion:reduce){
+    #day1-btn{animation:none;}
+    #day1-btn:after{animation:none;display:none;}
+  }
+
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 </head>
@@ -738,7 +760,7 @@
 
     <!-- ===== הזמנה למסע Day 1 — שכבה חדשה מעל התוצאות ===== -->
     <div id="day1-invite" style="text-align:center;margin:0 4px 22px;">
-      <button onclick="startEpisodes()" style="font-family:var(--font-head);font-size:20px;font-weight:700;color:#fff;cursor:pointer;background:linear-gradient(135deg,#B08D3E,#C9A34E);border:none;border-radius:12px;padding:20px 32px;width:100%;max-width:460px;box-shadow:0 6px 20px rgba(176,141,62,.45);">
+      <button id="day1-btn" onclick="startEpisodes()" style="font-family:var(--font-head);font-size:20px;font-weight:700;color:#fff;cursor:pointer;background:linear-gradient(135deg,#B08D3E,#C9A34E);border:none;border-radius:12px;padding:20px 32px;width:100%;max-width:460px;box-shadow:0 6px 20px rgba(176,141,62,.45);">
         &#127775; Experience Day 1 of Your New Life
       </button>
       <div style="font-family:Arial,sans-serif;font-size:12px;color:var(--text-muted);margin-top:8px;">A guided walk through your future &mdash; home, work, weekends and more</div>
