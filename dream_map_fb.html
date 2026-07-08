@@ -1074,34 +1074,42 @@ function doLookup(){
   btn.disabled=true;btn.textContent='Checking...';
   state.email=email;
 
-  /* חיפוש ליד לפי אימייל */
-  fetch(WEBHOOK+'crm.lead.list?filter[EMAIL]='+encodeURIComponent(email)+'&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=COMMENTS&select[]=STATUS_ID')
+  /* חיפוש איש קשר תחילה — אם קיים איש קשר, זה הרשומה האמיתית (לקוח קיים/משלם),
+     ומעדכנים אותו ולא ליד ישן/לא רלוונטי. רק אם אין איש קשר — נחפש ליד. */
+  fetch(WEBHOOK+'crm.contact.list?filter[EMAIL]='+encodeURIComponent(email)+'&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=COMMENTS')
   .then(function(r){return r.json();})
   .then(function(d){
-    if(d.result&&d.result.length>0){
-      var L=d.result[0];
-      state.leadId=L.ID;state.leadType='lead';
-      state.leadName=(L.NAME||'').trim();
-      state.existingComments=L.COMMENTS||'';
-      showWelcome();
-    }else{
-      /* אם אין ליד — חיפוש איש קשר */
-      return fetch(WEBHOOK+'crm.contact.list?filter[EMAIL]='+encodeURIComponent(email)+'&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=COMMENTS')
+    var hasContact=d.result&&d.result.length>0;
+    /* בכל מקרה — שולפים את כל הלידים של האימייל (לצורך דה-דופ בסיום) */
+    return fetch(WEBHOOK+'crm.lead.list?filter[EMAIL]='+encodeURIComponent(email)+'&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=COMMENTS&select[]=STATUS_ID&select[]=DATE_CREATE&order[DATE_CREATE]=DESC')
       .then(function(r2){return r2.json();})
       .then(function(d2){
-        if(d2.result&&d2.result.length>0){
-          var C=d2.result[0];
+        var leads=(d2.result||[]);
+        state.allLeads=leads.map(function(L){return {id:L.ID,status:L.STATUS_ID};});
+        if(hasContact){
+          /* יש איש קשר — מעדכנים אותו; כל הלידים יסומנו כלא רלוונטיים */
+          var C=d.result[0];
           state.leadId=C.ID;state.leadType='contact';
           state.leadName=(C.NAME||'').trim();
           state.existingComments=C.COMMENTS||'';
+          state.dedupeLeadIds=state.allLeads.map(function(l){return l.id;}); /* כל הלידים */
+          showWelcome();
+        }else if(leads.length>0){
+          /* אין איש קשר אבל יש לידים — מעדכנים את החדש ביותר (הראשון, ממויין DESC) */
+          var newest=leads[0];
+          state.leadId=newest.ID;state.leadType='lead';
+          state.leadName=(newest.NAME||'').trim();
+          state.existingComments=newest.COMMENTS||'';
+          /* כל השאר (חוץ מהחדש ביותר) יסומנו כלא רלוונטיים */
+          state.dedupeLeadIds=state.allLeads.filter(function(l){return l.id!==newest.ID;}).map(function(l){return l.id;});
           showWelcome();
         }else{
-          /* לא נמצא — מציגים שדות פרטים כדי שניצור ליד חדש בסיום */
+          /* לא נמצא כלום — יצירת ליד חדש בסיום */
           state.leadId=null;state.leadType=null;state.leadName='';
+          state.dedupeLeadIds=[];
           document.getElementById('guest-fields').classList.remove('hidden');
         }
       });
-    }
   })
   .catch(function(){
     /* גם במקרה תקלה — לא חוסמים את הלקוח, מבקשים פרטים ידנית */
@@ -2112,6 +2120,36 @@ function buildCRMSummary(){
   return lines.filter(function(l){return l!=='';}).join('\n');
 }
 
+/* סימון לידים ישנים/כפולים כ-Not Relevant.
+   מדלג על סטטוסים מוגנים: CONVERTED ו-27 (וגם 26 שכבר לא רלוונטי — אין טעם לעדכן שוב).
+   הערך '26' = Not Relevant. אם אצלכם ה-ID שונה — לשנות כאן בלבד. */
+var NOT_RELEVANT_STATUS='26';
+var PROTECTED_STATUSES={'CONVERTED':1,'27':1,'26':1};
+
+/* ── הקצאה וסטטוס ──
+   ליד (אין איש קשר)  -> משויך ל-David Russo (902) + סטטוס Call request
+   איש קשר קיים        -> משויך ל-Ben Buchnik (907)
+   *** CALL_REQUEST_STATUS: להחליף ב-ID האמיתי של "Call request" מ-Bitrix *** */
+var ASSIGNEE_LEAD='902';       /* David Russo */
+var ASSIGNEE_CONTACT='907';    /* Ben Buchnik */
+var CALL_REQUEST_STATUS='21';    /* Call request (STATUS_ID מ-Bitrix) */
+function dedupeOldLeads(){
+  var ids=state.dedupeLeadIds||[];
+  if(!ids.length)return;
+  /* בונים מפה של סטטוס לכל ליד כדי לדעת מה מוגן */
+  var statusById={};
+  (state.allLeads||[]).forEach(function(l){statusById[l.id]=l.status;});
+  ids.forEach(function(id){
+    var st=statusById[id];
+    if(st&&PROTECTED_STATUSES[st])return; /* מדלגים על מוגנים */
+    fetch(WEBHOOK+'crm.lead.update?id='+encodeURIComponent(id)
+      +'&fields[STATUS_ID]='+encodeURIComponent(NOT_RELEVANT_STATUS))
+      .then(function(r){return r.json();})
+      .then(function(res){if(res.error)console.error('Dedupe lead '+id+' failed:',res.error_description);})
+      .catch(function(e){console.error('Dedupe network error for lead '+id+':',e);});
+  });
+}
+
 function saveToCRM(){
   var a=state.answers;
   var summary=buildCRMSummary();
@@ -2124,12 +2162,20 @@ function saveToCRM(){
       +summary.replace(/\n/g,'<br>');
     var visaField=(state.leadType==='contact')?'UF_CRM_5C5843FC11F1D':'UF_CRM_1547484113';
 
-    /* קריאה 1 — שדות קצרים וקריטיים בלבד (Visa + מקצוע + מקור).
+    /* קריאה 1 — שדות קצרים וקריטיים בלבד (Visa + מקצוע + מקור + הקצאה + סטטוס).
        מופרד מ-COMMENTS הארוך כדי שאורך ה-URL לא יכשיל את שמירת השדה. */
     var coreParams='id='+encodeURIComponent(state.leadId)
       +'&fields['+visaField+']='+encodeURIComponent('DREAM DESTINATION')
       +'&fields[UF_CRM_1709560603]='+encodeURIComponent(profession);
-    if(state.leadType==='lead'){coreParams+='&fields[SOURCE_ID]=4';}
+    if(state.leadType==='contact'){
+      /* איש קשר קיים -> משויך ל-Ben Buchnik (907) */
+      coreParams+='&fields[ASSIGNED_BY_ID]='+encodeURIComponent(ASSIGNEE_CONTACT);
+    }else{
+      /* ליד -> מקור, משויך ל-David Russo (902), וסטטוס Call request */
+      coreParams+='&fields[SOURCE_ID]=4';
+      coreParams+='&fields[ASSIGNED_BY_ID]='+encodeURIComponent(ASSIGNEE_LEAD);
+      if(CALL_REQUEST_STATUS){coreParams+='&fields[STATUS_ID]='+encodeURIComponent(CALL_REQUEST_STATUS);}
+    }
     fetch(WEBHOOK+updMethod+'?'+coreParams)
       .then(function(r){return r.json();})
       .then(function(res){if(res.error)console.error('Core field update failed:',res.error_description);})
@@ -2149,6 +2195,9 @@ function saveToCRM(){
       +'&fields[ENTITY_TYPE]='+encodeURIComponent(state.leadType)
       +'&fields[COMMENT]='+encodeURIComponent(summary)).catch(function(){});
 
+    /* דה-דופ: סימון לידים ישנים/כפולים כ-Not Relevant (מדלג על CONVERTED ו-27) */
+    dedupeOldLeads();
+
   }else if(state.email&&state.guestFirst){
     /* ── לא נמצא במערכת: יצירת ליד חדש עם Client ID ── */
     var name=[state.guestFirst,state.guestLast].filter(Boolean).join(' ');
@@ -2159,12 +2208,14 @@ function saveToCRM(){
       +'&fields[NAME]='+encodeURIComponent(state.guestFirst)
       +'&fields[LAST_NAME]='+encodeURIComponent(state.guestLast||'')
       +'&fields[SOURCE_ID]=4'
+      +'&fields[ASSIGNED_BY_ID]='+encodeURIComponent(ASSIGNEE_LEAD)
       +'&fields[UF_CRM_1547484113]='+encodeURIComponent('DREAM DESTINATION')
       +'&fields[UF_CRM_1709560603]='+encodeURIComponent(profession)
       +'&fields[UF_CRM_1449131692]='+encodeURIComponent(state.clientId)
       +'&fields[COMMENTS]='+encodeURIComponent(summary.replace(/\n/g,'<br>'))
       +'&fields[EMAIL][0][VALUE]='+encodeURIComponent(state.email)
       +'&fields[EMAIL][0][VALUE_TYPE]=WORK';
+    if(CALL_REQUEST_STATUS){url+='&fields[STATUS_ID]='+encodeURIComponent(CALL_REQUEST_STATUS);}
     if(state.guestPhone){
       url+='&fields[PHONE][0][VALUE]='+encodeURIComponent(state.guestPhone)
         +'&fields[PHONE][0][VALUE_TYPE]=WORK';
