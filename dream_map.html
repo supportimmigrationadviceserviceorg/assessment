@@ -1343,59 +1343,48 @@ function cityCardHTML(t,idx){
     +'</div>';
 }
 
-/* ---------- תמונות ערים אמיתיות (נבחרו ידנית, URL יציב) ----------
-   כרגע 10 הערים הראשונות. אם תמונה נכשלת — הדף ממשיך כרגיל (fallback).
-   מקור: Wikimedia Commons (Special:FilePath מחזיר קישור ישיר ויציב).
-   שדות: hero (נוף עיר), neighborhood (שכונה/רחוב), weekend (סגנון חיים).
+/* ---------- תמונות ערים — מתארחות ב-GitHub שלנו (יציב, ללא מקור חיצוני) ----------
+   התמונות נמצאות בתיקיית images/cities/ באתר ה-GitHub Pages.
+   לכל עיר עד 3 תמונות לפי סלאג:  <slug>-hero.jpg | <slug>-neighborhood.jpg | <slug>-weekend.jpg
+   אם תמונה חסרה או לא נטענת — הדף ממשיך כרגיל עם העיצוב/גרדיאנט הקיים (fallback).
+
+   כרגע 10 הערים הראשונות מופעלות (CITY_HAS_IMAGES). להוספת עיר:
+   1) מעלים את הקבצים ל-images/cities/ ב-GitHub
+   2) מוסיפים את שם העיר ל-CITY_HAS_IMAGES
 */
-function wm(f){return 'https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(f)+'?width=1000';}
-var CITY_IMAGES={
-'Austin':{
-  hero:wm('Austin_Skyline_2019.jpg'),
-  neighborhood:wm('South_Congress_Avenue_Austin_2013.jpg'),
-  weekend:wm('Lady_Bird_Lake_Austin.jpg')},
-'Dallas–Fort Worth':{
-  hero:wm('Dallas_skyline_daytime.jpg'),
-  neighborhood:wm('Bishop_Arts_District_Dallas.jpg'),
-  weekend:wm('Klyde_Warren_Park_Dallas.jpg')},
-'Houston':{
-  hero:wm('Houston_skyline_from_Sabine_Street_Bridge.jpg'),
-  neighborhood:wm('Montrose_Houston.jpg'),
-  weekend:wm('Buffalo_Bayou_Park_Houston.jpg')},
-'San Antonio':{
-  hero:wm('Skyline_of_San_Antonio,_Texas,_USA.jpg'),
-  neighborhood:wm('Pearl_District_San_Antonio.jpg'),
-  weekend:wm('San_Antonio_River_Walk_2017.jpg')},
-'Miami':{
-  hero:wm('Miami_skyline_2015.jpg'),
-  neighborhood:wm('Brickell_Miami_skyline.jpg'),
-  weekend:wm('South_Beach_Miami_FL.jpg')},
-'Orlando':{
-  hero:wm('Downtown_Orlando_skyline.jpg'),
-  neighborhood:wm('Thornton_Park_Orlando.jpg'),
-  weekend:wm('Lake_Eola_Park_Orlando.jpg')},
-'Tampa':{
-  hero:wm('Tampa_Skyline_from_Bayshore.jpg'),
-  neighborhood:wm('Hyde_Park_Tampa.jpg'),
-  weekend:wm('Tampa_Riverwalk.jpg')},
-'Jacksonville':{
-  hero:wm('Jacksonville_skyline_2019.jpg'),
-  neighborhood:wm('Riverside_Jacksonville.jpg'),
-  weekend:wm('Jacksonville_Beach_Florida.jpg')},
-'Atlanta':{
-  hero:wm('Atlanta_Skyline_from_Buckhead.jpg'),
-  neighborhood:wm('Midtown_Atlanta_skyline.jpg'),
-  weekend:wm('Piedmont_Park_Atlanta.jpg')},
-'Charlotte':{
-  hero:wm('Charlotte_skyline_2020.jpg'),
-  neighborhood:wm('South_End_Charlotte.jpg'),
-  weekend:wm('Freedom_Park_Charlotte.jpg')}
+var IMAGE_BASE='https://supportimmigrationadviceserviceorg.github.io/assessment/images/cities/';
+
+/* המרת שם עיר לסלאג קובץ: אותיות קטנות, מקפים, בלי תווים מיוחדים */
+function citySlug(name){
+  return name.toLowerCase()
+    .replace(/[–—]/g,'-')       /* מקף ארוך -> מקף רגיל */
+    .replace(/[^a-z0-9]+/g,'-') /* כל תו לא-חוקי -> מקף */
+    .replace(/^-+|-+$/g,'');    /* ניקוי מקפים בקצוות */
+}
+
+/* מיפוי שכונה/פרבר -> מטרו-אב (כדי שישתמשו בתמונת המטרו) */
+var METRO_PARENT={
+'Cary':'Raleigh–Durham','Durham':'Raleigh–Durham',
+'Santa Monica':'Los Angeles','Pasadena':'Los Angeles',
+'Palo Alto':'San Francisco Bay Area','Marina District':'San Francisco Bay Area','San Jose':'San Francisco Bay Area',
+'Plano':'Dallas–Fort Worth','Plano (Haggard Park)':'Dallas–Fort Worth',
+'The Woodlands':'Houston','Alamo Heights':'San Antonio',
+'Coral Gables':'Miami','Brickell':'Miami',
+'Winter Park':'Orlando','Decatur':'Atlanta'
 };
-/* מחזיר URL של תמונה לעיר לפי סוג; null אם אין (ואז fallback לעיצוב הקיים) */
+/* רשימת הערים שכבר יש להן תמונות (מופעל בהדרגה) */
+var CITY_HAS_IMAGES={
+'Austin':1,'Dallas–Fort Worth':1,'Houston':1,'San Antonio':1,'Miami':1,
+'Orlando':1,'Tampa':1,'Jacksonville':1,'Atlanta':1,'Charlotte':1
+};
+
+/* מחזיר URL של תמונה לעיר לפי סוג (hero/neighborhood/weekend);
+   null אם לעיר אין תמונות מופעלות -> הדף מציג את העיצוב הקיים */
 function cityImage(cityName,kind){
-  var rec=CITY_IMAGES[cityName];
-  if(!rec)return null;
-  return rec[kind]||rec.hero||null;
+  /* אם זו שכונה עם מטרו-אב — משתמשים בשם המטרו */
+  var resolved=METRO_PARENT[cityName]||cityName;
+  if(!CITY_HAS_IMAGES[resolved])return null;
+  return IMAGE_BASE+citySlug(resolved)+'-'+(kind||'hero')+'.jpg';
 }
 
 /* ---------- מאגר שכונות ----------
