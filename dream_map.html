@@ -100,12 +100,13 @@
   .opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .opt{
     border:1px solid var(--line);border-radius:10px;background:#fff;
-    padding:16px 14px;text-align:center;cursor:pointer;transition:all .15s;
-    font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:var(--ink);user-select:none;
+    padding:16px 12px;text-align:center;cursor:pointer;transition:all .15s;
+    font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:var(--ink);user-select:none;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:104px;line-height:1.25;
   }
   .opt .ico{
-    font-size:22px;display:inline-flex;align-items:center;justify-content:center;
-    width:44px;height:44px;margin:0 auto 10px;border-radius:9px;
+    font-size:24px;display:flex;align-items:center;justify-content:center;
+    width:46px;height:46px;margin:0 auto 10px;border-radius:9px;flex-shrink:0;
     background:var(--ink);
     box-shadow:0 2px 8px rgba(31,58,95,.2);
     transition:transform .18s,box-shadow .18s,background .18s;
@@ -487,6 +488,10 @@
     /* פחות ריווח בין שאלות */
     .q-step h2{font-size:20px;}
     .opt-grid{gap:8px;}
+    /* כרטיסי אפשרות קומפקטיים במובייל — פחות גלילה, אייקון מעל טקסט */
+    .card{padding:18px 14px;}
+    .opt{padding:12px 8px;min-height:96px;font-size:13px;}
+    .opt .ico{width:40px;height:40px;font-size:21px;margin-bottom:7px;}
     /* האווטאר קטן יותר במובייל */
     .avatar{width:52px;height:52px;font-size:20px;}
   }
@@ -645,7 +650,7 @@
       <p class="hint">We'll show you jobs and pay in your field.</p>
       <div class="opt-grid" data-q="profession">
         <div class="opt" data-v="tech"><span class="ico">&#128187;</span>Technology &amp; IT</div>
-        <div class="opt" data-v="health"><span class="ico">&#9877;&#65039;</span>Healthcare &amp; Medicine</div>
+        <div class="opt" data-v="health"><span class="ico">&#127973;</span>Healthcare &amp; Medicine</div>
         <div class="opt" data-v="business"><span class="ico">&#128188;</span>Business &amp; Finance</div>
         <div class="opt" data-v="engineering"><span class="ico">&#9881;&#65039;</span>Engineering</div>
         <div class="opt" data-v="education"><span class="ico">&#127891;</span>Education &amp; Research</div>
