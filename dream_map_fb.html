@@ -101,7 +101,7 @@
   .opt{
     border:1px solid var(--line);border-radius:10px;background:#fff;
     padding:16px 14px;text-align:center;cursor:pointer;transition:all .15s;
-    font-family:var(--font-head);font-size:16px;color:var(--ink);user-select:none;
+    font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:var(--ink);user-select:none;
   }
   .opt .ico{
     font-size:22px;display:inline-flex;align-items:center;justify-content:center;
@@ -156,6 +156,8 @@
   .city-card.top .state{color:var(--brass-light);}
   .city-card.top .fact{color:#C7D2E2;}
   .city-card.top .fact b{color:#fff;}
+  .city-card.top .why-list li{color:#EAF1F8;}
+  .city-card.top .why-box{border-top-color:rgba(255,255,255,.18);}
   .city-card.top .tag{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25);color:#E8DFC8;}
   .city-card.top .match.g{color:#8FDCAC;}
   .city-card.top .match.y{color:#F0C868;}
@@ -283,6 +285,33 @@
   .nb-box{
     margin-top:16px;background:#F8F1DE;border:1px solid var(--brass-light);border-radius:2px;padding:14px 16px;
   }
+  /* תמונת נוף של העיר — רחבה, פינות מעוגלות, סגנון פרימיום */
+  #city-photo{margin:18px 4px 0;}
+  #city-photo .photo-wrap{
+    position:relative;width:100%;border-radius:10px;overflow:hidden;
+    box-shadow:0 4px 18px rgba(31,58,95,.18);border:1px solid var(--brass-light);
+    background:#EDE7DA;
+  }
+  #city-photo img{display:block;width:100%;height:auto;max-height:360px;object-fit:cover;}
+  #city-photo .photo-cap{
+    position:absolute;left:0;bottom:0;width:100%;
+    background:linear-gradient(to top,rgba(31,58,95,.82),rgba(31,58,95,0));
+    color:#fff;font-family:var(--font-head);font-weight:700;font-size:22px;
+    padding:34px 18px 14px;box-sizing:border-box;
+  }
+  #city-photo .photo-cap small{display:block;font-family:Georgia,serif;font-weight:normal;font-style:italic;font-size:13px;color:#EAD9A8;margin-top:2px;}
+  @media(max-width:520px){#city-photo img{max-height:240px;}#city-photo .photo-cap{font-size:18px;}}
+  .why-box{margin:14px 0 4px;padding:2px 0 0;border-top:1px solid var(--line);}
+  .why-box .why-title{font-family:Arial,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--brass);margin:12px 0 8px;}
+  .why-list{list-style:none;margin:0;padding:0;}
+  .why-list li{
+    font-family:Georgia,serif;font-size:14px;color:var(--ink);line-height:1.5;
+    padding:4px 0 4px 26px;position:relative;
+  }
+  .why-list li:before{
+    content:"\2713";position:absolute;left:2px;top:4px;
+    color:var(--brass);font-weight:bold;font-size:14px;
+  }
   .nb-box .nb-label{font-family:Arial,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--brass);}
   .nb-box .nb-name{font-size:18px;color:var(--ink);margin:3px 0 2px;}
   .nb-box .nb-blurb{font-family:Arial,sans-serif;font-size:12.5px;color:var(--text-muted);line-height:1.5;}
@@ -332,8 +361,8 @@
   /* ===== מסע מודרך — "היום שלך בשכונה" ===== */
   .jbtn{
     display:block;width:100%;margin:8px 0 0;cursor:pointer;text-align:left;
-    font-family:Georgia,serif;font-size:15.5px;border-radius:2px;padding:14px 16px;
-    border:1.5px solid;transition:filter .15s;
+    font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;letter-spacing:.2px;
+    border-radius:2px;padding:15px 16px;border:1.5px solid;transition:filter .15s;
   }
   .jbtn:hover{filter:brightness(1.08);}
   .jbtn:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
@@ -346,7 +375,7 @@
   }
   .j-school .jnum{background:var(--green);color:#fff;}
   .j-fun{background:var(--brass);border-color:var(--brass);color:#fff;}
-  .jbtn.dim{opacity:.75;font-style:italic;}
+  .jbtn.dim{opacity:.9;}
   @media(max-width:520px){.jbtn{font-size:16px;padding:16px;}}
 
   /* ===== חץ מונפש + הבהוב שמכוון ללחוץ על הכפתור הראשון ===== */
@@ -382,8 +411,8 @@
   /* ===== מסע מודרך — "היום שלך בשכונה" ===== */
   .jbtn{
     display:block;width:100%;margin:8px 0 0;cursor:pointer;text-align:left;
-    font-family:Georgia,serif;font-size:15.5px;border-radius:2px;padding:14px 16px;
-    border:1.5px solid;transition:filter .15s;
+    font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;letter-spacing:.2px;
+    border-radius:2px;padding:15px 16px;border:1.5px solid;transition:filter .15s;
   }
   .jbtn:hover{filter:brightness(1.08);}
   .jbtn:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
@@ -395,7 +424,7 @@
     text-align:center;line-height:22px;font-family:Arial,sans-serif;font-size:12px;font-weight:bold;margin-right:8px;
   }
   .j-school .jnum{background:var(--green);color:#fff;}
-  .jbtn.dim{opacity:.75;font-style:italic;}
+  .jbtn.dim{opacity:.9;}
   @media(max-width:520px){.jbtn{font-size:16px;padding:16px;}}
 
   /* תוויות שם קבועות על סימוני המפה */
@@ -410,7 +439,7 @@
 
   /* ===== חלון שיטוט ברחוב (Street View) ===== */
   .sv-overlay{
-    position:fixed;inset:0;background:rgba(31,58,95,.55);z-index:2000;
+    position:fixed;inset:0;background:rgba(31,58,95,.55);z-index:10001;
     display:flex;align-items:center;justify-content:center;padding:16px;
   }
   .sv-box{
@@ -461,6 +490,88 @@
     /* האווטאר קטן יותר במובייל */
     .avatar{width:52px;height:52px;font-size:20px;}
   }
+  /* ============================================================
+     Day 1 — מסע 6 הפרקים (שכבה חדשה מעל התוצאות, לא מחליפה כלום)
+     ============================================================ */
+  .ep-overlay{
+    position:fixed;inset:0;z-index:9999;background:#12233B;
+    display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  }
+  .ep-overlay.open{display:block;}
+  .ep-stage{max-width:640px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:0 0 40px;}
+  .ep-progress{position:sticky;top:0;z-index:5;background:#12233B;padding:16px 20px 12px;}
+  .ep-dots{display:flex;gap:6px;justify-content:center;margin-bottom:6px;}
+  .ep-dot{width:34px;height:4px;border-radius:2px;background:rgba(255,255,255,.18);transition:background .3s;}
+  .ep-dot.done{background:#B08D3E;}
+  .ep-dot.active{background:#F0C868;}
+  .ep-count{text-align:center;font-family:Arial,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#8FA6C4;}
+  .ep-exit{position:absolute;right:16px;top:14px;background:rgba(255,255,255,.1);border:none;color:#EAF1F8;font-size:20px;width:36px;height:36px;border-radius:50%;cursor:pointer;line-height:1;}
+  .ep-exit:hover{background:rgba(255,255,255,.2);}
+  .ep-card{
+    background:#FFFDF7;margin:16px;border-radius:14px;overflow:hidden;
+    box-shadow:0 10px 40px rgba(0,0,0,.4);border-top:4px solid #B08D3E;
+    animation:epIn .55s cubic-bezier(.2,.7,.3,1);
+  }
+  @keyframes epIn{from{opacity:0;transform:translateY(30px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+  .ep-hero{position:relative;width:100%;height:210px;background:#22405f;overflow:hidden;}
+  .ep-hero img{width:100%;height:100%;object-fit:cover;display:block;}
+  .ep-hero .ep-emoji{position:absolute;top:14px;left:16px;font-size:34px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));}
+  .ep-hero .ep-badge{position:absolute;bottom:0;left:0;width:100%;padding:26px 18px 12px;
+    background:linear-gradient(to top,rgba(18,35,59,.9),rgba(18,35,59,0));
+    color:#F0C868;font-family:Arial,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;}
+  .ep-body{padding:20px 24px 24px;}
+  .ep-body h2{font-family:var(--font-head);font-size:26px;font-weight:700;color:#1F3A5F;margin:0 0 10px;line-height:1.2;}
+  .ep-body p{font-family:Georgia,serif;font-size:16px;color:#3D3A33;line-height:1.65;margin:0 0 14px;}
+  .ep-facts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;}
+  .ep-fact{background:#F8F1DE;border:1px solid var(--brass-light);border-radius:8px;padding:12px 14px;}
+  .ep-fact .k{font-family:Arial,sans-serif;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;}
+  .ep-fact .v{font-family:var(--font-head);font-size:19px;font-weight:700;color:#1F3A5F;margin-top:2px;}
+  .ep-chips{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0;}
+  .ep-chip{background:#1F3A5F;color:#fff;font-family:Arial,sans-serif;font-size:12px;padding:6px 12px;border-radius:20px;}
+  .ep-list{list-style:none;margin:8px 0;padding:0;}
+  .ep-list li{font-family:Georgia,serif;font-size:15px;color:#1F3A5F;padding:5px 0 5px 26px;position:relative;line-height:1.5;}
+  .ep-list li:before{content:"\2713";position:absolute;left:2px;color:var(--brass);font-weight:bold;}
+  .ep-sv-btn{display:block;width:100%;cursor:pointer;text-align:center;margin:6px 0 0;
+    font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#1F3A5F;
+    background:#F0C868;border:1.5px solid #B08D3E;border-radius:8px;padding:14px;}
+  .ep-sv-btn:hover{background:#EAD48A;}
+  .ep-next{display:block;width:100%;cursor:pointer;text-align:center;margin:18px 0 0;
+    font-family:Arial,sans-serif;font-size:17px;font-weight:700;color:#fff;
+    background:#1F3A5F;border:2px solid #14273F;border-radius:10px;padding:16px;
+    box-shadow:0 4px 14px rgba(31,58,95,.4);transition:filter .15s;}
+  .ep-next:hover{filter:brightness(1.12);}
+  .ep-final .ep-body{text-align:center;}
+  .ep-final .ep-flag{font-size:52px;margin-bottom:6px;}
+  .ep-pay{display:block;width:100%;cursor:pointer;text-align:center;margin:18px 0 0;
+    font-family:var(--font-head);font-size:20px;font-weight:700;color:#fff;
+    background:#1F3A5F;border:3px solid #14273F;border-radius:12px;padding:20px;
+    box-shadow:0 6px 20px rgba(31,58,95,.5);animation:payPulse 1.6s ease-in-out infinite;}
+  .ep-skip{display:block;width:100%;background:none;border:none;cursor:pointer;margin-top:12px;
+    font-family:Arial,sans-serif;font-size:13px;color:#8FA6C4;text-decoration:underline;}
+  @media(max-width:520px){.ep-hero{height:170px;}.ep-body h2{font-size:22px;}}
+
+  /* ===== אנימציה לכפתור "Experience Day 1" — מושך תשומת לב ===== */
+  #day1-btn{position:relative;overflow:hidden;animation:day1Pulse 2s ease-in-out infinite;}
+  @keyframes day1Pulse{
+    0%,100%{transform:scale(1);box-shadow:0 6px 20px rgba(176,141,62,.45);}
+    50%{transform:scale(1.035);box-shadow:0 8px 30px rgba(176,141,62,.7);}
+  }
+  /* ברק שנע לרוחב הכפתור */
+  #day1-btn:after{
+    content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;
+    background:linear-gradient(120deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.45) 50%,rgba(255,255,255,0) 100%);
+    transform:skewX(-20deg);animation:day1Shine 2.8s ease-in-out infinite;
+  }
+  @keyframes day1Shine{
+    0%{left:-60%;}
+    45%,100%{left:130%;}
+  }
+  #day1-btn:hover{animation-play-state:paused;filter:brightness(1.08);}
+  @media(prefers-reduced-motion:reduce){
+    #day1-btn{animation:none;}
+    #day1-btn:after{animation:none;display:none;}
+  }
+
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 </head>
@@ -645,7 +756,18 @@
     </div>
 
 
-    <div id="map" role="img" aria-label="Map of the United States showing your matched cities"></div>
+    <div id="map" role="img" aria-label="Map of the United States showing your matched cities" style="display:none;"></div>
+
+    <!-- ===== הזמנה למסע Day 1 — שכבה חדשה מעל התוצאות ===== -->
+    <div id="day1-invite" style="text-align:center;margin:0 4px 22px;">
+      <button id="day1-btn" onclick="startEpisodes()" style="font-family:var(--font-head);font-size:20px;font-weight:700;color:#fff;cursor:pointer;background:linear-gradient(135deg,#B08D3E,#C9A34E);border:none;border-radius:12px;padding:20px 32px;width:100%;max-width:460px;box-shadow:0 6px 20px rgba(176,141,62,.45);">
+        &#127775; Experience Day 1 of Your New Life
+      </button>
+      <div style="font-family:Arial,sans-serif;font-size:12px;color:var(--text-muted);margin-top:8px;">A guided walk through your future &mdash; home, work, weekends and more</div>
+    </div>
+
+    <!-- ===== תמונת נוף גדולה של העיר שנבחרה ===== -->
+    <div id="city-photo"></div>
 
     <div id="top-city"></div>
     <div id="other-cities"></div>
@@ -659,6 +781,18 @@
     </div>
 
     <p class="disclaimer">Salary, rent and cost-of-living figures are estimates based on publicly available data and are provided for general guidance only. They do not constitute financial or legal advice. Immigration Advice Service &middot; All rights reserved.</p>
+  </div>
+
+  <!-- ===== שכבת מסע Day 1 (6 פרקים) — נבנית דינמית ב-JS ===== -->
+  <div id="ep-overlay" class="ep-overlay" role="dialog" aria-label="Your Day 1 journey">
+    <div class="ep-stage">
+      <div class="ep-progress">
+        <button class="ep-exit" onclick="closeEpisodes()" aria-label="Close">&times;</button>
+        <div class="ep-dots" id="ep-dots"></div>
+        <div class="ep-count" id="ep-count"></div>
+      </div>
+      <div id="ep-content"></div>
+    </div>
   </div>
 
 </div>
@@ -1153,6 +1287,52 @@ function cityTags(c){
   return tags.slice(0,4);
 }
 
+/* ---------- "למה בחרנו את העיר הזו" — נקודות מתוך התשובות והנתונים הקיימים ----------
+   לא ממציא נתונים חדשים ולא משנה את אלגוריתם ההתאמה — רק מנסח את מה שכבר קיים. */
+function whyPicked(t){
+  var c=t.city,a=state.answers,reasons=[];
+  var hasKids=(a.family==='kids'||a.family==='kids_teen');
+  var sal=c.sal[a.profession];
+
+  /* שכר במקצוע */
+  if(sal){
+    if(sal>=95000)reasons.push('Excellent salaries in '+PROF_LABEL[a.profession]);
+    else if(sal>=70000)reasons.push('Strong pay in '+PROF_LABEL[a.profession]);
+    else reasons.push('Real career opportunities in '+PROF_LABEL[a.profession]);
+  }
+  /* תקציב דיור מול שכר דירה — הערכים הם מספרים (1000/1600/2500/3600) */
+  var budgetCap=parseInt(a.budget,10);
+  if(budgetCap&&c.rent<=budgetCap*1.05)reasons.push('Fits your monthly housing budget');
+  /* עלות מחיה */
+  if(c.col<=100)reasons.push('Affordable cost of living');
+  /* בתי ספר — למשפחות עם ילדים */
+  if(hasKids&&parseFloat(schoolDisp(c))>=8.5)reasons.push('Highly rated schools for your children');
+  /* סגנון חיים */
+  var lifeTxt={urban:'Matches your big-city lifestyle',suburban:'Quiet suburbs, just as you wanted',nature:'Close to nature and open space',coastal:'Near the water, as you hoped'}[a.lifestyle];
+  if(lifeTxt)reasons.push(lifeTxt);
+  /* עדיפויות שהלקוח בחר */
+  var pri=a.priorities||[];
+  if(pri.indexOf('warm')>-1&&c.climate==='warm')reasons.push('Warm, sunny weather year-round');
+  if(pri.indexOf('ocean')>-1&&c.coast)reasons.push('Right by the ocean');
+  if(pri.indexOf('community')>-1&&c.comm>=8)reasons.push('A strong, welcoming community');
+
+  /* לכל היותר 5, לפחות 3 */
+  reasons=reasons.slice(0,5);
+  if(reasons.length<3){
+    if(reasons.indexOf('Real career opportunities in '+PROF_LABEL[a.profession])<0&&sal)reasons.push('Growing job market in your field');
+  }
+  return reasons;
+}
+function whyPickedHTML(t){
+  var r=whyPicked(t);
+  if(!r.length)return '';
+  var items=r.map(function(x){return '<li>'+x+'</li>';}).join('');
+  return '<div class="why-box">'
+    +'<div class="why-title">Why we picked this city for you</div>'
+    +'<ul class="why-list">'+items+'</ul>'
+    +'</div>';
+}
+
 function cityCardHTML(t,idx){
   var c=t.city,a=state.answers,isTop=(idx===0);
   var tags=cityTags(c).map(function(x){return '<span class="tag">'+x+'</span>';}).join('');
@@ -1161,10 +1341,10 @@ function cityCardHTML(t,idx){
   var nbHTML='';
   if(nb){
     nbHTML='<div class="nb-box">'
-      +'<div class="nb-label">The neighborhood for you</div>'
+      +'<div class="nb-label">Your future neighborhood</div>'
       +'<div class="nb-name">'+nb.n+'</div>'
       +'<div class="nb-blurb">'+nb.b+'</div>'
-      +(isTop?'<div class="coach">See your street, your work'+(hasKids?', your kids\' schools':'')+' <span class="c-arrow">&#128071;</span></div>':'')
+      +(isTop?'<div class="coach">Walk your street, see your career'+(hasKids?', your future schools':'')+' <span class="c-arrow">&#128071;</span></div>':'')
       +'<button class="nb-btn" onclick="showNeighborhood('+idx+')">&#127968;&nbsp; Show me living in '+nb.n+'</button>'
       +'</div>';
   }
@@ -1172,6 +1352,7 @@ function cityCardHTML(t,idx){
     +(isTop?'<div class="rank-seal">Your No. 1 Match</div>':'<div class="rank-num">'+(idx+1)+'</div>')
     +'<div class="city-head"><div><h3>'+c.n+'</h3><span class="state">'+c.s+'</span></div>'
     +'<div class="match '+matchClass(t.match)+'">'+t.match+'%<small>match</small></div></div>'
+    +whyPickedHTML(t)
     +'<div class="facts">'
     +'<div class="fact">Typical salary in '+PROF_LABEL[a.profession]+'<b>'+fmtMoney(c.sal[a.profession])+' / year</b></div>'
     +'<div class="fact">Average monthly rent<b>$'+c.rent.toLocaleString('en-US')+'</b></div>'
@@ -1182,6 +1363,67 @@ function cityCardHTML(t,idx){
     +'<button class="explore-btn" onclick="exploreCity('+idx+')">&#128269;&nbsp; Explore '+c.n+' on the map</button>'
     +'<button class="walk-btn" onclick="walkCity('+idx+')"><span class="walker">&#128694;</span>&nbsp; Walk the streets of '+c.n+'</button>'
     +'</div>';
+}
+
+/* ---------- תמונות ערים — מתארחות ב-GitHub שלנו (יציב, ללא מקור חיצוני) ----------
+   התמונות נמצאות בתיקיית images/cities/ באתר ה-GitHub Pages.
+   תמונה אחת לכל עיר:  <slug>-hero.jpg  (משמשת בכל המקומות).
+   אם תמונה חסרה או לא נטענת — הדף ממשיך כרגיל עם העיצוב/גרדיאנט הקיים (fallback).
+
+   כרגע 10 הערים הראשונות מופעלות (CITY_HAS_IMAGES). להוספת עיר:
+   1) מעלים את הקובץ <slug>-hero.jpg ל-images/cities/ ב-GitHub
+   2) מוסיפים את שם העיר ל-CITY_HAS_IMAGES
+*/
+/* ---------- תמונות ל-6 הפרקים (כלליות, מתארחות ב-GitHub שלנו) ----------
+   תמונה אחת קבועה לכל פרק — עובדת לכל עיר. הקבצים בשורש ה-repo.
+   אם תמונה חסרה/לא נטענת — הפרק ממשיך עם הרקע/גרדיאנט הקיים (fallback).
+   שמות הקבצים תואמים בדיוק למה שהועלה ל-GitHub (כולל .jpg.jpg והרווחים).
+*/
+var REPO_BASE='https://supportimmigrationadviceserviceorg.github.io/assessment/';
+var EPISODE_IMAGES={
+  home:      REPO_BASE+encodeURIComponent('home-hero.jpg.jpg'),
+  commute:   REPO_BASE+encodeURIComponent('road to your day-hero.jpg.jpg'),
+  career:    REPO_BASE+encodeURIComponent('career-hero.jpg.jpg'),
+  lifestyle: REPO_BASE+encodeURIComponent('lifestyle-hero.jpg.jpg'),
+  weekend:   REPO_BASE+encodeURIComponent('Weekends-hero.jpg.jpg'),
+  final:     REPO_BASE+encodeURIComponent('Your new life begins here-hero.jpg.jpg')
+};
+function episodeImage(key){return EPISODE_IMAGES[key]||null;}
+
+var IMAGE_BASE='https://supportimmigrationadviceserviceorg.github.io/assessment/images/cities/';
+
+/* המרת שם עיר לסלאג קובץ: אותיות קטנות, מקפים, בלי תווים מיוחדים */
+function citySlug(name){
+  return name.toLowerCase()
+    .replace(/[–—]/g,'-')       /* מקף ארוך -> מקף רגיל */
+    .replace(/[^a-z0-9]+/g,'-') /* כל תו לא-חוקי -> מקף */
+    .replace(/^-+|-+$/g,'');    /* ניקוי מקפים בקצוות */
+}
+
+/* מיפוי שכונה/פרבר -> מטרו-אב (כדי שישתמשו בתמונת המטרו) */
+var METRO_PARENT={
+'Cary':'Raleigh–Durham','Durham':'Raleigh–Durham',
+'Santa Monica':'Los Angeles','Pasadena':'Los Angeles',
+'Palo Alto':'San Francisco Bay Area','Marina District':'San Francisco Bay Area','San Jose':'San Francisco Bay Area',
+'Plano':'Dallas–Fort Worth','Plano (Haggard Park)':'Dallas–Fort Worth',
+'The Woodlands':'Houston','Alamo Heights':'San Antonio',
+'Coral Gables':'Miami','Brickell':'Miami',
+'Winter Park':'Orlando','Decatur':'Atlanta'
+};
+/* רשימת הערים שכבר יש להן תמונות (מופעל בהדרגה) */
+var CITY_HAS_IMAGES={
+'Austin':1,'Dallas–Fort Worth':1,'Houston':1,'San Antonio':1,'Miami':1,
+'Orlando':1,'Tampa':1,'Jacksonville':1,'Atlanta':1,'Charlotte':1
+};
+
+/* מחזיר URL של תמונת העיר (תמונה אחת לכל עיר, משמשת בכל המקומות);
+   null אם לעיר אין תמונה מופעלת -> הדף מציג את העיצוב הקיים */
+function cityImage(cityName,kind){
+  /* אם זו שכונה עם מטרו-אב — משתמשים בשם המטרו */
+  var resolved=METRO_PARENT[cityName]||cityName;
+  if(!CITY_HAS_IMAGES[resolved])return null;
+  /* תמונה אחת לכל עיר: <slug>-hero.jpg — משמשת ל-hero, שכונה וסופ"ש כאחד */
+  return IMAGE_BASE+citySlug(resolved)+'-hero.jpg';
 }
 
 /* ---------- מאגר שכונות ----------
@@ -1287,8 +1529,8 @@ function walkAt(lat,lng,label){
   ov.className='sv-overlay';
   ov.id='sv-overlay';
   ov.innerHTML='<div class="sv-box" role="dialog" aria-label="Street view of '+label+'">'
-    +'<div class="sv-head"><div><h3>Walking in '+label+'</h3>'
-    +'<div class="hint2">Drag to look around &middot; Click the arrows on the street to walk &middot; <a href="'+fallback+'" target="_blank" rel="noopener" style="color:#B08D3E;">Open full view</a></div></div>'
+    +'<div class="sv-head"><div><h3>This could be your street in America</h3>'
+    +'<div class="hint2" style="margin-top:2px;"><b style="color:var(--ink);font-size:13px;">'+label+'</b> &middot; Drag to look around &middot; Click the arrows on the street to walk &middot; <a href="'+fallback+'" target="_blank" rel="noopener" style="color:#B08D3E;">Open full view</a></div></div>'
     +'<button class="sv-close" onclick="closeWalk()">Close &times;</button></div>'
     +'<iframe src="'+src+'" allow="accelerometer; gyroscope" loading="lazy" title="Street view of '+label+'"></iframe>'
     +'</div>';
@@ -1309,6 +1551,13 @@ function closeWalk(){
 /* הטסת המפה אל העיר — זום מדורג: לחיצה ראשונה לרמת העיר,
    כל לחיצה נוספת מתקרבת יותר עד רמת הרחוב */
 function exploreCity(idx){
+  if(!mapBuilt){
+    var mapEl=document.getElementById('map');
+    if(mapEl)mapEl.style.display='';
+    buildMap();mapBuilt=true;
+    setTimeout(function(){exploreCity(idx);},800);
+    return;
+  }
   var t=state.results[idx];if(!t||!mapObj)return;
   document.getElementById('map').scrollIntoView({behavior:'smooth',block:'center'});
   var cur=mapObj.getZoom();
@@ -1342,6 +1591,16 @@ hospitality:'["tourism"="hotel"]'
 var WORK_ICON_LABEL={tech:'Tech offices nearby',health:'Hospitals & clinics nearby',business:'Company offices nearby',engineering:'Engineering & construction firms nearby',education:'Schools & universities nearby',trades:'Workshops & trade businesses nearby',creative:'Studios & agencies nearby',hospitality:'Hotels & venues nearby'};
 
 function showNeighborhood(idx){
+  /* אם המפה עוד לא נבנתה — חושפים ובונים אותה עכשיו (רק אחרי לחיצת הלקוח) */
+  if(!mapBuilt){
+    var mapEl=document.getElementById('map');
+    if(mapEl)mapEl.style.display='';
+    buildMap();
+    mapBuilt=true;
+    /* בונים את המפה, ואז נכנסים לשכונה אחרי שהיא מוכנה */
+    setTimeout(function(){showNeighborhood(idx);},700);
+    return;
+  }
   var t=state.results[idx];if(!t||!mapObj)return;
   var nb=pickNeighborhood(t.city.n);if(!nb)return;
   var a=state.answers;
@@ -1361,7 +1620,7 @@ function showNeighborhood(idx){
   var homeIcon=L.divIcon({className:'',html:'<div style="width:54px;height:54px;border-radius:50%;background:#B08D3E;border:3.5px solid #FCFAF4;box-shadow:0 3px 14px rgba(31,58,95,.55);display:flex;align-items:center;justify-content:center;font-size:28px;">&#127968;</div>',iconSize:[54,54],iconAnchor:[27,27]});
   var homeMk=L.marker([nb.lat,nb.lng],{icon:homeIcon,zIndexOffset:1000}).addTo(nbLayer);
   homeMk.bindTooltip('Your next home',{permanent:true,direction:'bottom',offset:[0,26],className:'poi-label home-label'});
-  homeMk.bindPopup('<b>'+nb.n+'</b><br>You could live right here.<br><a href="#" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\');return false;" style="color:#B08D3E;">&#128694; Walk this street &raquo;</a>');
+  homeMk.bindPopup('<b>'+nb.n+'</b><br>Imagine starting your mornings here.<br><a href="#" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\');return false;" style="color:#B08D3E;">&#128694; Walk this street &raquo;</a>');
 
   mapObj.flyTo([nb.lat,nb.lng],14,{duration:1.6});
   setTimeout(function(){homeMk.openPopup();},1700);
@@ -1375,17 +1634,17 @@ function showNeighborhood(idx){
   }
   hint.innerHTML='<b style="font-size:14px;">Your life in '+nb.n+'</b><span style="color:var(--text-muted);"> — see it step by step:</span>'
     +'<div class="start-here">Start here <span class="arrow-dn">&#8595;</span></div>'
-    +'<button class="jbtn j-home pulse" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\')"><span class="jnum">1</span><span class="walker">&#128694;</span> See your street</button>'
+    +'<button class="jbtn j-home pulse" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\')"><span class="jnum">1</span><span class="walker">&#128694;</span> This could be your street in America</button>'
     +'<button class="jbtn j-work dim" id="jbtn-work" onclick="goPOI(\'work\')"><span class="jnum">2</span>&#128188; Finding jobs near you&hellip;</button>'
     +(hasKids?'<button class="jbtn j-school dim" id="jbtn-school" onclick="goPOI(\'school\')"><span class="jnum">3</span>&#127979; Searching the kids\' schools&hellip;</button>':'')
     +'<button class="jbtn j-fun dim" id="jbtn-fun" onclick="goPOI(\'fun\')"><span class="jnum">'+(hasKids?'4':'3')+'</span>&#11088; Finding your weekend spots&hellip;</button>'
     +employersHTML(t.city.n,a.profession);
 
-  /* טעינה אוטומטית של המקומות — והכפתורים נותנים שליטה גלויה */
+  /* טעינה מדורגת — לא שולחים את שלוש הבקשות בו-זמנית (מונע חסימת קצב) */
   currentNb={nb:nb,prof:a.profession,hasKids:hasKids,weekend:a.weekend||[]};
   loadPOI('work');
-  if(hasKids)loadPOI('school');
-  loadPOI('fun');
+  if(hasKids){setTimeout(function(){loadPOI('school');},900);}
+  setTimeout(function(){loadPOI('fun');},hasKids?1800:900);
 }
 
 /* ---------- שליפת מקומות אמיתיים מ-OpenStreetMap ----------
@@ -1451,7 +1710,7 @@ function goPOI(kind){
   document.getElementById('map').scrollIntoView({behavior:'smooth',block:'center'});
   mapObj.flyTo([m.lat,m.lng],15,{duration:1.1});
   setTimeout(function(){m.marker.openPopup();},1200);
-  var label=(kind==='work'?'&#128188; Your job: ':(kind==='fun'?'&#11088; Your weekend: ':(currentNb.hasKids?'&#127979; The kids\' schools: ':'&#127979; Schools nearby: ')));
+  var label=(kind==='work'?'&#128188; Your career: ':(kind==='fun'?'&#11088; Your weekend: ':(currentNb.hasKids?'&#127979; The kids\' schools: ':'&#127979; Schools nearby: ')));
   setJBtn(kind,label+m.name+' <span style="opacity:.75;font-size:12px;">('+(i+1)+'/'+list.length+' — tap for next)</span>',false);
 }
 
@@ -1460,7 +1719,7 @@ function employersHTML(cityName,prof){
   var cityList=(EMPLOYERS_CITY[cityName]&&EMPLOYERS_CITY[cityName][prof])||null;
   var list=cityList||EMPLOYERS_GENERAL[prof]||[];
   if(!list.length)return '';
-  var lbl=cityList?('Top places to work in '+cityName):'Top places to work in the U.S.';
+  var lbl=cityList?('Career opportunities in '+cityName):'Career opportunities across the U.S.';
   var chips=list.slice(0,8).map(function(n){return '<span class="emp-chip">'+n+'</span>';}).join('');
   return '<div class="emp-box"><div class="emp-lbl">&#128188; '+lbl+':</div>'+chips+'</div>';
 }
@@ -1505,9 +1764,9 @@ function loadPOI(kind,goAfter){
   poiWatchdog[kind]=setTimeout(function(){
     if(poiState[kind]==='loading'){
       poiState[kind]='idle';
-      setJBtn(kind,(kind==='work'?'&#128188; Show jobs near you':(kind==='fun'?'&#11088; Show weekend places':'&#127979; Show schools near you')),true);
+      setJBtn(kind,(kind==='work'?'&#128188; Companies hiring people like you':(kind==='fun'?'&#11088; See weekend places':(currentNb&&currentNb.hasKids?'&#127979; Schools your children could attend':'&#127979; Top schools near your neighborhood'))),true);
     }
-  },14000);
+  },26000);
 
   var nb=currentNb.nb;
 
@@ -1536,7 +1795,7 @@ function loadPOI(kind,goAfter){
       items=items.slice(0,6);
 
       var colors={work:'#1F3A5F',school:'#2E7D4F',fun:'#B08D3E'};
-      var popTexts={work:'A job near your home',school:'A school near your home',fun:'A weekend place for you'};
+      var popTexts={work:'A career opportunity near home',school:'A future school near home',fun:'A weekend place for you'};
       items.forEach(function(it){
         var emoji=(kind==='school')?'&#127979;':(kind==='work'?'&#128188;':funEmoji(it.tags));
         var icon=L.divIcon({className:'',html:'<div style="width:34px;height:34px;border-radius:50%;background:'+colors[kind]+';border:2.5px solid #FCFAF4;box-shadow:0 2px 7px rgba(31,58,95,.4);display:flex;align-items:center;justify-content:center;font-size:16px;">'+emoji+'</div>',iconSize:[34,34],iconAnchor:[17,17]});
@@ -1552,16 +1811,16 @@ function loadPOI(kind,goAfter){
       poiState[kind]='loaded';
 
       if(poiData[kind].length>0){
-        var doneTxt=(kind==='work')?'&#128188; See your jobs'
+        var doneTxt=(kind==='work')?'&#128188; Companies hiring people like you'
           :(kind==='fun'?'&#11088; See weekend places'
-          :'&#127979; See your schools');
+          :(currentNb&&currentNb.hasKids?'&#127979; Schools your children could attend':'&#127979; Top schools near your neighborhood'));
         setJBtn(kind,doneTxt+' <span style="opacity:.75;font-size:12px;">('+poiData[kind].length+' found)</span>',false);
         fitAllPOIs();
         if(goAfter)goPOI(kind);
       }else{
         /* אין תוצאות — משאירים את הכפתור לחיץ לניסיון חוזר */
         poiState[kind]='idle';
-        setJBtn(kind,(kind==='work'?'&#128188; Show jobs near you':(kind==='fun'?'&#11088; Show weekend places':'&#127979; Show schools near you')),true);
+        setJBtn(kind,(kind==='work'?'&#128188; Companies hiring people like you':(kind==='fun'?'&#11088; See weekend places':(currentNb&&currentNb.hasKids?'&#127979; Schools your children could attend':'&#127979; Top schools near your neighborhood'))),true);
       }
     },function(){
       if(poiWatchdog[kind]){clearTimeout(poiWatchdog[kind]);poiWatchdog[kind]=null;}
@@ -1586,9 +1845,9 @@ function fitAllPOIs(){
 /* ניסיון מול שרתי Overpass לפי הסדר */
 function tryOverpass(q,mirrorIdx,onOk,onFail){
   if(mirrorIdx>=OVERPASS_MIRRORS.length){onFail();return;}
-  /* טיימאאוט לכל שרת — אם לא ענה תוך 4.5 שניות, עוברים מיד לשרת הבא במקום לחכות */
+  /* טיימאאוט לכל שרת — אם לא ענה תוך 8 שניות, עוברים מיד לשרת הבא */
   var ctrl=(typeof AbortController!=='undefined')?new AbortController():null;
-  var timer=setTimeout(function(){if(ctrl)ctrl.abort();},4500);
+  var timer=setTimeout(function(){if(ctrl)ctrl.abort();},8000);
   var opts=ctrl?{signal:ctrl.signal}:{};
   fetch(OVERPASS_MIRRORS[mirrorIdx]+'?data='+encodeURIComponent(q),opts)
   .then(function(r){if(!r.ok)throw new Error('bad status');return r.json();})
@@ -1601,6 +1860,26 @@ function gcBtnText(){
   return state.leadName
     ?(state.leadName+', start my Green Card &mdash; $29')
     :'Open my Green Card file &mdash; $29';
+}
+
+/* תמונת נוף של העיר שנבחרה — נטענת לפי שם העיר (Unsplash Source, ללא מפתח).
+   אם התמונה לא נטענת, הקונטיינר נשאר ריק ולא שובר את העמוד. */
+function renderCityPhoto(t){
+  var box=document.getElementById('city-photo');
+  if(!box)return;
+  var c=t.city;
+  /* תמונה כללית (אותה תמונת "בית" של הפרקים) — עובדת לכל עיר */
+  var url=episodeImage('home');
+  if(!url){box.innerHTML='';return;}
+  var img=new Image();
+  img.onload=function(){
+    box.innerHTML='<div class="photo-wrap">'
+      +'<img src="'+url+'" alt="'+c.n+', '+c.s+'">'
+      +'<div class="photo-cap">'+c.n+'<small>Your future could begin here</small></div>'
+      +'</div>';
+  };
+  img.onerror=function(){box.innerHTML='';};
+  img.src=url;
 }
 
 function showResults(){
@@ -1619,11 +1898,15 @@ function showResults(){
   for(var i=1;i<state.results.length;i++){othersHTML+=cityCardHTML(state.results[i],i);}
   document.getElementById('other-cities').innerHTML=othersHTML;
 
-  buildMap();
+  /* תמונת נוף גדולה של העיר שנבחרה */
+  renderCityPhoto(state.results[0]);
+
+  /* המפה נבנית רק כשהלקוח לוחץ "Show me living in..." — לא מיד */
   saveToCRM();
   buildChatWidget();
   window.scrollTo({top:0,behavior:'smooth'});
 }
+var mapBuilt=false;
 
 /* ---------- חלונית תשלום בסגנון צ'אט ----------
    בועת שיחה צפה בפינה; נפתחת אוטומטית כמה שניות אחרי התוצאות,
@@ -1724,6 +2007,8 @@ function buildMap(){
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
     attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:18,minZoom:3
   }).addTo(mapObj);
+  /* אחרי חשיפה מ-display:none — Leaflet צריך לחשב מחדש את הגודל */
+  setTimeout(function(){if(mapObj)mapObj.invalidateSize();},200);
 
   /* כפתור חזרה לתצוגה כללית של ארה"ב */
   var backCtl=L.control({position:'topright'});
@@ -1759,9 +2044,8 @@ function buildMap(){
     },delay);
   });
 
-  /* אחרי ששלושת הסימונים נחתו — נכנסים אוטומטית לשכונה של העיר המובילה:
-     הבית (הכי גדול), מקומות העבודה ובתי הספר מופיעים בלי שום לחיצה */
-  setTimeout(function(){showNeighborhood(0);},reduced?600:lastDelay+1400);
+  /* אין כניסה אוטומטית לשכונה — המפה נבנית רק כשהלקוח לוחץ "Show me living in...",
+     ואז showNeighborhood נקרא ישירות מהלחיצה */
 }
 
 /* ---------- שמירה ל-Bitrix24 ----------
@@ -1881,6 +2165,187 @@ function goToPayment(){
   var url=PAYMENT_URL;
   if(state.leadId&&state.leadType==='lead'){url+='&lead_id='+encodeURIComponent(state.leadId);}
   window.location.href=url;
+}
+
+/* ============================================================
+   Day 1 — מסע 6 הפרקים. שכבה עצמאית מעל התוצאות.
+   משתמש בנתונים ובפונקציות הקיימים (walkAt, pickNeighborhood, whyPicked וכו').
+   לא נוגע בשום דבר קיים.
+   ============================================================ */
+var epIndex=0;
+var EP_TOTAL=6;
+
+/* בוחר תמונה לפרק לפי הסוג; אם אין — מחזיר null וההירו יציג רקע כח‑ol בלבד */
+function epPhoto(cityName,kind){
+  return cityImage(cityName,kind);
+}
+/* בונה בלוק הירו: אם יש תמונה — מציג אותה עם fallback; אחרת רקע צבע בלבד */
+function epHero(url,emoji,badge){
+  var imgTag=url
+    ? '<img src="'+url+'" alt="" onerror="this.style.display=\'none\';">'
+    : '';
+  return '<div class="ep-hero">'+imgTag
+    +'<div class="ep-emoji">'+emoji+'</div>'
+    +'<div class="ep-badge">'+badge+'</div></div>';
+}
+
+function startEpisodes(){
+  epIndex=0;
+  document.getElementById('ep-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  renderEpisode();
+}
+function closeEpisodes(){
+  document.getElementById('ep-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+function nextEpisode(){
+  if(epIndex<EP_TOTAL-1){epIndex++;renderEpisode();
+    document.getElementById('ep-overlay').scrollTop=0;}
+}
+function epDotsHTML(){
+  var h='';
+  for(var i=0;i<EP_TOTAL;i++){
+    var cls='ep-dot'+(i<epIndex?' done':'')+(i===epIndex?' active':'');
+    h+='<div class="'+cls+'"></div>';
+  }
+  return h;
+}
+
+function renderEpisode(){
+  var t=state.results[0];if(!t)return;
+  document.getElementById('ep-dots').innerHTML=epDotsHTML();
+  document.getElementById('ep-count').textContent='Episode '+(epIndex+1)+' of '+EP_TOTAL;
+  var builders=[epHome,epCommute,epCareer,epFamily,epWeekend,epFinal];
+  document.getElementById('ep-content').innerHTML=builders[epIndex](t);
+  /* טעינת תמונות הירו עם fallback לרקע כח‑ol */
+  var heroImg=document.querySelector('#ep-content .ep-hero img');
+  if(heroImg){heroImg.onerror=function(){this.style.display='none';};}
+}
+
+/* פרק 1 — הבית */
+function epHome(t){
+  var nb=pickNeighborhood(t.city.n);
+  var name=nb?nb.n:t.city.n;
+  var lat=nb?nb.lat:t.city.lat,lng=nb?nb.lng:t.city.lng;
+  return '<div class="ep-card">'
+    +epHero(episodeImage('home'),'&#127968;','Your Home')
+    +'<div class="ep-body">'
+    +'<h2>Welcome home to '+name+'</h2>'
+    +'<p>Imagine waking up here every morning. Quiet, tree-lined streets, a coffee in hand, the day ahead full of possibility. This could become your new neighborhood.</p>'
+    +(nb?'<button class="ep-sv-btn" onclick="walkAt('+lat+','+lng+',\''+name.replace(/'/g,"\\'")+'\')">&#128065;&#65039; Take a look around your street</button><div style="font-family:Arial,sans-serif;font-size:12px;color:#8A8578;text-align:center;margin:8px 0 2px;">Optional &mdash; or tap Continue below</div>':'')
+    +'<button class="ep-next" onclick="nextEpisode()">Continue &rarr; Your Commute</button>'
+    +'</div></div>';
+}
+
+/* פרק 2 — הנסיעה לעבודה (בלי להמציא זמנים מדויקים) */
+function epCommute(t){
+  var c=t.city,a=state.answers;
+  var vibe=(c.vibes.urban>=7)
+    ?'a short ride through the city &mdash; maybe a train, maybe a walk past cafés already busy with the morning crowd'
+    :(c.vibes.suburban>=7
+      ?'an easy drive along calm, leafy roads, the kind of commute that lets you breathe before the day begins'
+      :'a gentle journey past open spaces and quiet streets on your way to work');
+  return '<div class="ep-card">'
+    +epHero(episodeImage('commute'),'&#128663;','Your Commute')
+    +'<div class="ep-body">'
+    +'<h2>The road to your day</h2>'
+    +'<p>From your front door to work is '+vibe+'.</p>'
+    +'<p>In '+c.n+', getting to work becomes part of the life you\'re building &mdash; not just a distance, but a rhythm you\'ll come to know.</p>'
+    +'<button class="ep-next" onclick="nextEpisode()">Continue &rarr; Your Career</button>'
+    +'</div></div>';
+}
+
+/* פרק 3 — הקריירה */
+function epCareer(t){
+  var c=t.city,a=state.answers;
+  var prof=PROF_LABEL[a.profession];
+  var sal=c.sal[a.profession];
+  var employers=(EMPLOYERS_CITY[c.n]&&EMPLOYERS_CITY[c.n][a.profession])||EMPLOYERS_GENERAL[a.profession]||[];
+  var chips=employers.slice(0,8).map(function(n){return '<span class="ep-chip">'+n+'</span>';}).join('');
+  return '<div class="ep-card">'
+    +epHero(episodeImage('career'),'&#128188;','Your Career')
+    +'<div class="ep-body">'
+    +'<h2>Your career could begin here</h2>'
+    +'<p>'+c.n+' is home to employers looking for people in '+prof+' &mdash; and your skills are in demand.</p>'
+    +'<div class="ep-facts">'
+    +'<div class="ep-fact"><div class="k">Typical salary</div><div class="v">'+fmtMoney(sal)+'</div></div>'
+    +'<div class="ep-fact"><div class="k">Your field</div><div class="v" style="font-size:15px;">'+prof+'</div></div>'
+    +'</div>'
+    +(chips?'<p style="margin-bottom:6px;">Companies hiring people like you:</p><div class="ep-chips">'+chips+'</div>':'')
+    +'<button class="ep-next" onclick="nextEpisode()">Continue &rarr; '+((a.family==='kids'||a.family==='kids_teen')?'Your Family':'Your Lifestyle')+'</button>'
+    +'</div></div>';
+}
+
+/* פרק 4 — משפחה או סגנון חיים */
+function epFamily(t){
+  var c=t.city,a=state.answers;
+  var hasKids=(a.family==='kids'||a.family==='kids_teen');
+  if(hasKids){
+    return '<div class="ep-card">'
+      +epHero(episodeImage('lifestyle'),'&#128106;','Your Family')
+      +'<div class="ep-body">'
+      +'<h2>A place for your family to grow</h2>'
+      +'<p>Picture weekend mornings at the park, good schools within reach, and neighborhoods built for family life.</p>'
+      +'<ul class="ep-list">'
+      +'<li>Highly rated schools nearby</li>'
+      +'<li>Parks and green spaces for the kids</li>'
+      +'<li>Safe, welcoming family neighborhoods</li>'
+      +'</ul>'
+      +'<button class="ep-next" onclick="nextEpisode()">Continue &rarr; Your Weekend</button>'
+      +'</div></div>';
+  }
+  return '<div class="ep-card">'
+    +epHero(episodeImage('lifestyle'),'&#10024;','Your Lifestyle')
+    +'<div class="ep-body">'
+    +'<h2>A lifestyle that fits you</h2>'
+    +'<p>Evenings out, favorite cafés, a gym around the corner, restaurants worth returning to. '+c.n+' has a rhythm you\'ll want to be part of.</p>'
+    +'<ul class="ep-list">'
+    +'<li>Cafés and restaurants to make your own</li>'
+    +'<li>Fitness studios and gyms nearby</li>'
+    +'<li>Nightlife, culture and entertainment</li>'
+    +'</ul>'
+    +'<button class="ep-next" onclick="nextEpisode()">Continue &rarr; Your Weekend</button>'
+    +'</div></div>';
+}
+
+/* פרק 5 — סוף השבוע (חוויה רגשית לפי העיר וההעדפות) */
+function epWeekend(t){
+  var c=t.city,a=state.answers;
+  var wk=(a.weekend&&a.weekend.length)?a.weekend:[];
+  var story,photoKw;
+  if(wk.indexOf('beach')>-1&&c.coast){story='Salt air and slow mornings by the water. Your weekends could start with the sound of the waves.';photoKw='beach ocean coast';}
+  else if(wk.indexOf('outdoors')>-1&&c.vibes.nature>=6){story='Trails, fresh air and open skies. The outdoors could become your weekend escape.';photoKw='mountains hiking nature trail';}
+  else if(wk.indexOf('arts')>-1){story='Galleries, live music and city culture. Your weekends could be full of things to see and hear.';photoKw='art gallery live music downtown';}
+  else if(wk.indexOf('food')>-1){story='Farmers markets, new restaurants, long lunches with friends. Your weekends could revolve around good food.';photoKw='restaurant food market';}
+  else if(wk.indexOf('golf')>-1){story='Early tee times and green fairways. Your weekends could be spent out on the course.';photoKw='golf course green';}
+  else if(wk.indexOf('fitness')>-1){story='Morning runs, gyms and active weekends. Your city could keep you moving.';photoKw='fitness running park';}
+  else if(c.coast){story='With the coast nearby, your weekends could drift toward the water whenever you like.';photoKw='beach coast';}
+  else if(c.vibes.nature>=6){story='With nature close by, weekends could mean trails, parks and open air.';photoKw='nature park trail';}
+  else{story='Downtown strolls, markets and easy afternoons. '+c.n+' knows how to spend a weekend.';photoKw='downtown weekend park';}
+  return '<div class="ep-card">'
+    +epHero(episodeImage('weekend'),'&#127749;','Your Weekend')
+    +'<div class="ep-body">'
+    +'<h2>Weekends worth waking up for</h2>'
+    +'<p>'+story+'</p>'
+    +'<p>This is the life waiting for you in '+c.n+' &mdash; not just a place to work, but a place to truly live.</p>'
+    +'<button class="ep-next" onclick="nextEpisode()">Continue &rarr; See where this leads</button>'
+    +'</div></div>';
+}
+
+/* פרק 6 — החיים החדשים מתחילים (סיכום + CTA לתשלום) */
+function epFinal(t){
+  var c=t.city;
+  var nm=state.leadName?(', '+state.leadName):'';
+  return '<div class="ep-card ep-final">'
+    +epHero(episodeImage('final'),'&#127482;&#127480;','Your New Life')
+    +'<div class="ep-body">'
+    +'<h2>Your new life begins here</h2>'
+    +'<p>You\'ve just experienced what your future in '+c.n+' could look like &mdash; your home, your career, your weekends, your everyday life.</p>'
+    +'<p>The next step is opening your official Green Card file, so our immigration team can review your profile and build your personal immigration strategy.</p>'
+    +'<button class="ep-pay" onclick="goToPayment()">Open Your Green Card File'+nm+'</button>'
+    +'<button class="ep-skip" onclick="closeEpisodes()">I\'ll explore the map first</button>'
+    +'</div></div>';
 }
 </script>
 </body>
