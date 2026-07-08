@@ -1540,7 +1540,14 @@ function walkAt(lat,lng,label){
     +'</div>';
   /* סגירה בלחיצה על הרקע */
   ov.addEventListener('click',function(e){if(e.target===ov)closeWalk();});
-  document.body.appendChild(ov);
+  /* אם מסך הפרקים פתוח — מוסיפים את חלון ה-Street View בתוכו כדי שיופיע מעליו;
+     אחרת מוסיפים ל-body כרגיל */
+  var epOv=document.getElementById('ep-overlay');
+  if(epOv&&epOv.classList.contains('open')){
+    epOv.appendChild(ov);
+  }else{
+    document.body.appendChild(ov);
+  }
   document.body.style.overflow='hidden';
   document.addEventListener('keydown',escWalk);
 }
@@ -1548,7 +1555,11 @@ function escWalk(e){if(e.key==='Escape')closeWalk();}
 function closeWalk(){
   var ov=document.getElementById('sv-overlay');
   if(ov)ov.remove();
-  document.body.style.overflow='';
+  /* אם מסך הפרקים עדיין פתוח — משאירים את נעילת הגלילה; אחרת משחררים */
+  var epOv=document.getElementById('ep-overlay');
+  if(!(epOv&&epOv.classList.contains('open'))){
+    document.body.style.overflow='';
+  }
   document.removeEventListener('keydown',escWalk);
 }
 
