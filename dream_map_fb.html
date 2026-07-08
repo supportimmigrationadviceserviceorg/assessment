@@ -1187,12 +1187,16 @@ document.addEventListener('click',function(ev){
     state.answers[q]=Array.prototype.map.call(grid.querySelectorAll('.opt.sel'),function(o){return o.getAttribute('data-v');});
     if(stepNum){document.getElementById('n'+stepNum).disabled=(state.answers[q].length===0);}
   }else{
-    /* בחירה יחידה — מעבר אוטומטי לשאלה הבאה */
+    /* בחירה יחידה — מעבר אוטומטי לשאלה הבאה, עם השהיה שמאפשרת לתקן טעות */
     Array.prototype.forEach.call(grid.querySelectorAll('.opt'),function(o){o.classList.remove('sel');});
     opt.classList.add('sel');
     state.answers[q]=opt.getAttribute('data-v');
     if(stepNum){document.getElementById('n'+stepNum).disabled=false;}
-    if(stepNum&&stepNum<5){setTimeout(function(){nextStep(stepNum+1);},280);}
+    /* אם כבר יש מעבר ממתין (הלקוח שינה דעתו) — מבטלים ומתחילים ספירה מחדש */
+    if(window._advanceTimer){clearTimeout(window._advanceTimer);}
+    if(stepNum&&stepNum<5){
+      window._advanceTimer=setTimeout(function(){nextStep(stepNum+1);},1000);
+    }
   }
 });
 
