@@ -439,7 +439,7 @@
 
   /* ===== חלון שיטוט ברחוב (Street View) ===== */
   .sv-overlay{
-    position:fixed;inset:0;background:rgba(31,58,95,.55);z-index:2000;
+    position:fixed;inset:0;background:rgba(31,58,95,.55);z-index:10001;
     display:flex;align-items:center;justify-content:center;padding:16px;
   }
   .sv-box{
@@ -580,6 +580,10 @@
 
   <!-- ===== כותרת ===== -->
   <div class="letterhead">
+    <img src="https://supportimmigrationadviceserviceorg.github.io/assessment/logo-hero.png"
+         alt="Immigration Advice Service"
+         style="max-width:180px;max-height:70px;width:auto;height:auto;margin:0 auto 14px;display:block;"
+         onerror="this.style.display='none';">
     <svg class="compass" viewBox="0 0 48 48" aria-hidden="true">
       <circle cx="24" cy="24" r="21" fill="none" stroke="#F0C868" stroke-width="1.5"/>
       <circle cx="24" cy="24" r="16" fill="none" stroke="#F0C868" stroke-width=".7" opacity=".5"/>
@@ -2233,8 +2237,8 @@ function epHome(t){
     +'<div class="ep-body">'
     +'<h2>Welcome home to '+name+'</h2>'
     +'<p>Imagine waking up here every morning. Quiet, tree-lined streets, a coffee in hand, the day ahead full of possibility. This could become your new neighborhood.</p>'
-    +(nb?'<button class="ep-sv-btn" onclick="walkAt('+lat+','+lng+',\''+name.replace(/'/g,"\\'")+'\')">&#128694; Walk your street in 360&deg;</button>':'')
-    +'<button class="ep-next" onclick="nextEpisode()">Next: Your Commute &rarr;</button>'
+    +(nb?'<button class="ep-sv-btn" onclick="walkAt('+lat+','+lng+',\''+name.replace(/'/g,"\\'")+'\')">&#128065;&#65039; Take a look around your street</button><div style="font-family:Arial,sans-serif;font-size:12px;color:#8A8578;text-align:center;margin:8px 0 2px;">Optional &mdash; or tap Continue below</div>':'')
+    +'<button class="ep-next" onclick="nextEpisode()">Continue &rarr; Your Commute</button>'
     +'</div></div>';
 }
 
@@ -2252,7 +2256,7 @@ function epCommute(t){
     +'<h2>The road to your day</h2>'
     +'<p>From your front door to work is '+vibe+'.</p>'
     +'<p>In '+c.n+', getting to work becomes part of the life you\'re building &mdash; not just a distance, but a rhythm you\'ll come to know.</p>'
-    +'<button class="ep-next" onclick="nextEpisode()">Next: Your Career &rarr;</button>'
+    +'<button class="ep-next" onclick="nextEpisode()">Continue &rarr; Your Career</button>'
     +'</div></div>';
 }
 
@@ -2273,7 +2277,7 @@ function epCareer(t){
     +'<div class="ep-fact"><div class="k">Your field</div><div class="v" style="font-size:15px;">'+prof+'</div></div>'
     +'</div>'
     +(chips?'<p style="margin-bottom:6px;">Companies hiring people like you:</p><div class="ep-chips">'+chips+'</div>':'')
-    +'<button class="ep-next" onclick="nextEpisode()">Next: '+((a.family==='kids'||a.family==='kids_teen')?'Your Family':'Your Lifestyle')+' &rarr;</button>'
+    +'<button class="ep-next" onclick="nextEpisode()">Continue &rarr; '+((a.family==='kids'||a.family==='kids_teen')?'Your Family':'Your Lifestyle')+'</button>'
     +'</div></div>';
 }
 
@@ -2292,7 +2296,7 @@ function epFamily(t){
       +'<li>Parks and green spaces for the kids</li>'
       +'<li>Safe, welcoming family neighborhoods</li>'
       +'</ul>'
-      +'<button class="ep-next" onclick="nextEpisode()">Next: Your Weekend &rarr;</button>'
+      +'<button class="ep-next" onclick="nextEpisode()">Continue &rarr; Your Weekend</button>'
       +'</div></div>';
   }
   return '<div class="ep-card">'
@@ -2305,7 +2309,7 @@ function epFamily(t){
     +'<li>Fitness studios and gyms nearby</li>'
     +'<li>Nightlife, culture and entertainment</li>'
     +'</ul>'
-    +'<button class="ep-next" onclick="nextEpisode()">Next: Your Weekend &rarr;</button>'
+    +'<button class="ep-next" onclick="nextEpisode()">Continue &rarr; Your Weekend</button>'
     +'</div></div>';
 }
 
@@ -2329,7 +2333,7 @@ function epWeekend(t){
     +'<h2>Weekends worth waking up for</h2>'
     +'<p>'+story+'</p>'
     +'<p>This is the life waiting for you in '+c.n+' &mdash; not just a place to work, but a place to truly live.</p>'
-    +'<button class="ep-next" onclick="nextEpisode()">See where this leads &rarr;</button>'
+    +'<button class="ep-next" onclick="nextEpisode()">Continue &rarr; See where this leads</button>'
     +'</div></div>';
 }
 
