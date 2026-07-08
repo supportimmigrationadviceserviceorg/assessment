@@ -1367,13 +1367,29 @@ function cityCardHTML(t,idx){
 
 /* ---------- תמונות ערים — מתארחות ב-GitHub שלנו (יציב, ללא מקור חיצוני) ----------
    התמונות נמצאות בתיקיית images/cities/ באתר ה-GitHub Pages.
-   לכל עיר עד 3 תמונות לפי סלאג:  <slug>-hero.jpg | <slug>-neighborhood.jpg | <slug>-weekend.jpg
+   תמונה אחת לכל עיר:  <slug>-hero.jpg  (משמשת בכל המקומות).
    אם תמונה חסרה או לא נטענת — הדף ממשיך כרגיל עם העיצוב/גרדיאנט הקיים (fallback).
 
    כרגע 10 הערים הראשונות מופעלות (CITY_HAS_IMAGES). להוספת עיר:
-   1) מעלים את הקבצים ל-images/cities/ ב-GitHub
+   1) מעלים את הקובץ <slug>-hero.jpg ל-images/cities/ ב-GitHub
    2) מוסיפים את שם העיר ל-CITY_HAS_IMAGES
 */
+/* ---------- תמונות ל-6 הפרקים (כלליות, מתארחות ב-GitHub שלנו) ----------
+   תמונה אחת קבועה לכל פרק — עובדת לכל עיר. הקבצים בשורש ה-repo.
+   אם תמונה חסרה/לא נטענת — הפרק ממשיך עם הרקע/גרדיאנט הקיים (fallback).
+   שמות הקבצים תואמים בדיוק למה שהועלה ל-GitHub (כולל .jpg.jpg והרווחים).
+*/
+var REPO_BASE='https://supportimmigrationadviceserviceorg.github.io/assessment/';
+var EPISODE_IMAGES={
+  home:      REPO_BASE+encodeURIComponent('home-hero.jpg.jpg'),
+  commute:   REPO_BASE+encodeURIComponent('road to your day-hero.jpg.jpg'),
+  career:    REPO_BASE+encodeURIComponent('career-hero.jpg.jpg'),
+  lifestyle: REPO_BASE+encodeURIComponent('lifestyle-hero.jpg.jpg'),
+  weekend:   REPO_BASE+encodeURIComponent('Weekends-hero.jpg.jpg'),
+  final:     REPO_BASE+encodeURIComponent('Your new life begins here-hero.jpg.jpg')
+};
+function episodeImage(key){return EPISODE_IMAGES[key]||null;}
+
 var IMAGE_BASE='https://supportimmigrationadviceserviceorg.github.io/assessment/images/cities/';
 
 /* המרת שם עיר לסלאג קובץ: אותיות קטנות, מקפים, בלי תווים מיוחדים */
@@ -1400,13 +1416,14 @@ var CITY_HAS_IMAGES={
 'Orlando':1,'Tampa':1,'Jacksonville':1,'Atlanta':1,'Charlotte':1
 };
 
-/* מחזיר URL של תמונה לעיר לפי סוג (hero/neighborhood/weekend);
-   null אם לעיר אין תמונות מופעלות -> הדף מציג את העיצוב הקיים */
+/* מחזיר URL של תמונת העיר (תמונה אחת לכל עיר, משמשת בכל המקומות);
+   null אם לעיר אין תמונה מופעלת -> הדף מציג את העיצוב הקיים */
 function cityImage(cityName,kind){
   /* אם זו שכונה עם מטרו-אב — משתמשים בשם המטרו */
   var resolved=METRO_PARENT[cityName]||cityName;
   if(!CITY_HAS_IMAGES[resolved])return null;
-  return IMAGE_BASE+citySlug(resolved)+'-'+(kind||'hero')+'.jpg';
+  /* תמונה אחת לכל עיר: <slug>-hero.jpg — משמשת ל-hero, שכונה וסופ"ש כאחד */
+  return IMAGE_BASE+citySlug(resolved)+'-hero.jpg';
 }
 
 /* ---------- מאגר שכונות ----------
@@ -1851,8 +1868,9 @@ function renderCityPhoto(t){
   var box=document.getElementById('city-photo');
   if(!box)return;
   var c=t.city;
-  var url=cityImage(c.n,'hero');
-  if(!url){box.innerHTML='';return;}  /* אין תמונה לעיר — לא מציגים כלום */
+  /* תמונה כללית (אותה תמונת "בית" של הפרקים) — עובדת לכל עיר */
+  var url=episodeImage('home');
+  if(!url){box.innerHTML='';return;}
   var img=new Image();
   img.onload=function(){
     box.innerHTML='<div class="photo-wrap">'
@@ -1860,7 +1878,7 @@ function renderCityPhoto(t){
       +'<div class="photo-cap">'+c.n+'<small>Your future could begin here</small></div>'
       +'</div>';
   };
-  img.onerror=function(){box.innerHTML='';};  /* תמונה נכשלה — הדף ממשיך כרגיל */
+  img.onerror=function(){box.innerHTML='';};
   img.src=url;
 }
 
@@ -2211,7 +2229,7 @@ function epHome(t){
   var name=nb?nb.n:t.city.n;
   var lat=nb?nb.lat:t.city.lat,lng=nb?nb.lng:t.city.lng;
   return '<div class="ep-card">'
-    +epHero(epPhoto(t.city.n,'neighborhood'),'&#127968;','Your Home')
+    +epHero(episodeImage('home'),'&#127968;','Your Home')
     +'<div class="ep-body">'
     +'<h2>Welcome home to '+name+'</h2>'
     +'<p>Imagine waking up here every morning. Quiet, tree-lined streets, a coffee in hand, the day ahead full of possibility. This could become your new neighborhood.</p>'
@@ -2229,7 +2247,7 @@ function epCommute(t){
       ?'an easy drive along calm, leafy roads, the kind of commute that lets you breathe before the day begins'
       :'a gentle journey past open spaces and quiet streets on your way to work');
   return '<div class="ep-card">'
-    +epHero(epPhoto(c.n,'hero'),'&#128663;','Your Commute')
+    +epHero(episodeImage('commute'),'&#128663;','Your Commute')
     +'<div class="ep-body">'
     +'<h2>The road to your day</h2>'
     +'<p>From your front door to work is '+vibe+'.</p>'
@@ -2246,7 +2264,7 @@ function epCareer(t){
   var employers=(EMPLOYERS_CITY[c.n]&&EMPLOYERS_CITY[c.n][a.profession])||EMPLOYERS_GENERAL[a.profession]||[];
   var chips=employers.slice(0,8).map(function(n){return '<span class="ep-chip">'+n+'</span>';}).join('');
   return '<div class="ep-card">'
-    +epHero(epPhoto(c.n,'hero'),'&#128188;','Your Career')
+    +epHero(episodeImage('career'),'&#128188;','Your Career')
     +'<div class="ep-body">'
     +'<h2>Your career could begin here</h2>'
     +'<p>'+c.n+' is home to employers looking for people in '+prof+' &mdash; and your skills are in demand.</p>'
@@ -2265,7 +2283,7 @@ function epFamily(t){
   var hasKids=(a.family==='kids'||a.family==='kids_teen');
   if(hasKids){
     return '<div class="ep-card">'
-      +epHero(epPhoto(c.n,'neighborhood'),'&#128106;','Your Family')
+      +epHero(episodeImage('lifestyle'),'&#128106;','Your Family')
       +'<div class="ep-body">'
       +'<h2>A place for your family to grow</h2>'
       +'<p>Picture weekend mornings at the park, good schools within reach, and neighborhoods built for family life.</p>'
@@ -2278,7 +2296,7 @@ function epFamily(t){
       +'</div></div>';
   }
   return '<div class="ep-card">'
-    +epHero(epPhoto(c.n,'weekend'),'&#10024;','Your Lifestyle')
+    +epHero(episodeImage('lifestyle'),'&#10024;','Your Lifestyle')
     +'<div class="ep-body">'
     +'<h2>A lifestyle that fits you</h2>'
     +'<p>Evenings out, favorite cafés, a gym around the corner, restaurants worth returning to. '+c.n+' has a rhythm you\'ll want to be part of.</p>'
@@ -2306,7 +2324,7 @@ function epWeekend(t){
   else if(c.vibes.nature>=6){story='With nature close by, weekends could mean trails, parks and open air.';photoKw='nature park trail';}
   else{story='Downtown strolls, markets and easy afternoons. '+c.n+' knows how to spend a weekend.';photoKw='downtown weekend park';}
   return '<div class="ep-card">'
-    +epHero(epPhoto(c.n,'weekend'),'&#127749;','Your Weekend')
+    +epHero(episodeImage('weekend'),'&#127749;','Your Weekend')
     +'<div class="ep-body">'
     +'<h2>Weekends worth waking up for</h2>'
     +'<p>'+story+'</p>'
@@ -2320,8 +2338,8 @@ function epFinal(t){
   var c=t.city;
   var nm=state.leadName?(', '+state.leadName):'';
   return '<div class="ep-card ep-final">'
+    +epHero(episodeImage('final'),'&#127482;&#127480;','Your New Life')
     +'<div class="ep-body">'
-    +'<div class="ep-flag">&#127482;&#127480;</div>'
     +'<h2>Your new life begins here</h2>'
     +'<p>You\'ve just experienced what your future in '+c.n+' could look like &mdash; your home, your career, your weekends, your everyday life.</p>'
     +'<p>The next step is opening your official Green Card file, so our immigration team can review your profile and build your personal immigration strategy.</p>'
