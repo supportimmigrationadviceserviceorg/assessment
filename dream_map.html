@@ -156,6 +156,8 @@
   .city-card.top .state{color:var(--brass-light);}
   .city-card.top .fact{color:#C7D2E2;}
   .city-card.top .fact b{color:#fff;}
+  .city-card.top .why-list li{color:#EAF1F8;}
+  .city-card.top .why-box{border-top-color:rgba(255,255,255,.18);}
   .city-card.top .tag{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.25);color:#E8DFC8;}
   .city-card.top .match.g{color:#8FDCAC;}
   .city-card.top .match.y{color:#F0C868;}
@@ -359,8 +361,8 @@
   /* ===== מסע מודרך — "היום שלך בשכונה" ===== */
   .jbtn{
     display:block;width:100%;margin:8px 0 0;cursor:pointer;text-align:left;
-    font-family:Georgia,serif;font-size:15.5px;border-radius:2px;padding:14px 16px;
-    border:1.5px solid;transition:filter .15s;
+    font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;letter-spacing:.2px;
+    border-radius:2px;padding:15px 16px;border:1.5px solid;transition:filter .15s;
   }
   .jbtn:hover{filter:brightness(1.08);}
   .jbtn:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
@@ -373,7 +375,7 @@
   }
   .j-school .jnum{background:var(--green);color:#fff;}
   .j-fun{background:var(--brass);border-color:var(--brass);color:#fff;}
-  .jbtn.dim{opacity:.75;font-style:italic;}
+  .jbtn.dim{opacity:.9;}
   @media(max-width:520px){.jbtn{font-size:16px;padding:16px;}}
 
   /* ===== חץ מונפש + הבהוב שמכוון ללחוץ על הכפתור הראשון ===== */
@@ -409,8 +411,8 @@
   /* ===== מסע מודרך — "היום שלך בשכונה" ===== */
   .jbtn{
     display:block;width:100%;margin:8px 0 0;cursor:pointer;text-align:left;
-    font-family:Georgia,serif;font-size:15.5px;border-radius:2px;padding:14px 16px;
-    border:1.5px solid;transition:filter .15s;
+    font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:700;letter-spacing:.2px;
+    border-radius:2px;padding:15px 16px;border:1.5px solid;transition:filter .15s;
   }
   .jbtn:hover{filter:brightness(1.08);}
   .jbtn:focus-visible{outline:3px solid var(--brass);outline-offset:2px;}
@@ -422,7 +424,7 @@
     text-align:center;line-height:22px;font-family:Arial,sans-serif;font-size:12px;font-weight:bold;margin-right:8px;
   }
   .j-school .jnum{background:var(--green);color:#fff;}
-  .jbtn.dim{opacity:.75;font-style:italic;}
+  .jbtn.dim{opacity:.9;}
   @media(max-width:520px){.jbtn{font-size:16px;padding:16px;}}
 
   /* תוויות שם קבועות על סימוני המפה */
@@ -672,7 +674,7 @@
     </div>
 
 
-    <div id="map" role="img" aria-label="Map of the United States showing your matched cities"></div>
+    <div id="map" role="img" aria-label="Map of the United States showing your matched cities" style="display:none;"></div>
 
     <!-- ===== תמונת נוף גדולה של העיר שנבחרה ===== -->
     <div id="city-photo"></div>
@@ -1386,6 +1388,13 @@ function closeWalk(){
 /* הטסת המפה אל העיר — זום מדורג: לחיצה ראשונה לרמת העיר,
    כל לחיצה נוספת מתקרבת יותר עד רמת הרחוב */
 function exploreCity(idx){
+  if(!mapBuilt){
+    var mapEl=document.getElementById('map');
+    if(mapEl)mapEl.style.display='';
+    buildMap();mapBuilt=true;
+    setTimeout(function(){exploreCity(idx);},800);
+    return;
+  }
   var t=state.results[idx];if(!t||!mapObj)return;
   document.getElementById('map').scrollIntoView({behavior:'smooth',block:'center'});
   var cur=mapObj.getZoom();
@@ -1419,6 +1428,16 @@ hospitality:'["tourism"="hotel"]'
 var WORK_ICON_LABEL={tech:'Tech offices nearby',health:'Hospitals & clinics nearby',business:'Company offices nearby',engineering:'Engineering & construction firms nearby',education:'Schools & universities nearby',trades:'Workshops & trade businesses nearby',creative:'Studios & agencies nearby',hospitality:'Hotels & venues nearby'};
 
 function showNeighborhood(idx){
+  /* אם המפה עוד לא נבנתה — חושפים ובונים אותה עכשיו (רק אחרי לחיצת הלקוח) */
+  if(!mapBuilt){
+    var mapEl=document.getElementById('map');
+    if(mapEl)mapEl.style.display='';
+    buildMap();
+    mapBuilt=true;
+    /* בונים את המפה, ואז נכנסים לשכונה אחרי שהיא מוכנה */
+    setTimeout(function(){showNeighborhood(idx);},700);
+    return;
+  }
   var t=state.results[idx];if(!t||!mapObj)return;
   var nb=pickNeighborhood(t.city.n);if(!nb)return;
   var a=state.answers;
@@ -1458,11 +1477,11 @@ function showNeighborhood(idx){
     +'<button class="jbtn j-fun dim" id="jbtn-fun" onclick="goPOI(\'fun\')"><span class="jnum">'+(hasKids?'4':'3')+'</span>&#11088; Finding your weekend spots&hellip;</button>'
     +employersHTML(t.city.n,a.profession);
 
-  /* טעינה אוטומטית של המקומות — והכפתורים נותנים שליטה גלויה */
+  /* טעינה מדורגת — לא שולחים את שלוש הבקשות בו-זמנית (מונע חסימת קצב) */
   currentNb={nb:nb,prof:a.profession,hasKids:hasKids,weekend:a.weekend||[]};
   loadPOI('work');
-  if(hasKids)loadPOI('school');
-  loadPOI('fun');
+  if(hasKids){setTimeout(function(){loadPOI('school');},900);}
+  setTimeout(function(){loadPOI('fun');},hasKids?1800:900);
 }
 
 /* ---------- שליפת מקומות אמיתיים מ-OpenStreetMap ----------
@@ -1584,7 +1603,7 @@ function loadPOI(kind,goAfter){
       poiState[kind]='idle';
       setJBtn(kind,(kind==='work'?'&#128188; Companies hiring people like you':(kind==='fun'?'&#11088; See weekend places':(currentNb&&currentNb.hasKids?'&#127979; Schools your children could attend':'&#127979; Top schools near your neighborhood'))),true);
     }
-  },14000);
+  },26000);
 
   var nb=currentNb.nb;
 
@@ -1663,9 +1682,9 @@ function fitAllPOIs(){
 /* ניסיון מול שרתי Overpass לפי הסדר */
 function tryOverpass(q,mirrorIdx,onOk,onFail){
   if(mirrorIdx>=OVERPASS_MIRRORS.length){onFail();return;}
-  /* טיימאאוט לכל שרת — אם לא ענה תוך 4.5 שניות, עוברים מיד לשרת הבא במקום לחכות */
+  /* טיימאאוט לכל שרת — אם לא ענה תוך 8 שניות, עוברים מיד לשרת הבא */
   var ctrl=(typeof AbortController!=='undefined')?new AbortController():null;
-  var timer=setTimeout(function(){if(ctrl)ctrl.abort();},4500);
+  var timer=setTimeout(function(){if(ctrl)ctrl.abort();},8000);
   var opts=ctrl?{signal:ctrl.signal}:{};
   fetch(OVERPASS_MIRRORS[mirrorIdx]+'?data='+encodeURIComponent(q),opts)
   .then(function(r){if(!r.ok)throw new Error('bad status');return r.json();})
@@ -1720,11 +1739,12 @@ function showResults(){
   /* תמונת נוף גדולה של העיר שנבחרה */
   renderCityPhoto(state.results[0]);
 
-  buildMap();
+  /* המפה נבנית רק כשהלקוח לוחץ "Show me living in..." — לא מיד */
   saveToCRM();
   buildChatWidget();
   window.scrollTo({top:0,behavior:'smooth'});
 }
+var mapBuilt=false;
 
 /* ---------- חלונית תשלום בסגנון צ'אט ----------
    בועת שיחה צפה בפינה; נפתחת אוטומטית כמה שניות אחרי התוצאות,
@@ -1825,6 +1845,8 @@ function buildMap(){
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
     attribution:'&copy; OpenStreetMap &copy; CARTO',maxZoom:18,minZoom:3
   }).addTo(mapObj);
+  /* אחרי חשיפה מ-display:none — Leaflet צריך לחשב מחדש את הגודל */
+  setTimeout(function(){if(mapObj)mapObj.invalidateSize();},200);
 
   /* כפתור חזרה לתצוגה כללית של ארה"ב */
   var backCtl=L.control({position:'topright'});
@@ -1860,9 +1882,8 @@ function buildMap(){
     },delay);
   });
 
-  /* אחרי ששלושת הסימונים נחתו — נכנסים אוטומטית לשכונה של העיר המובילה:
-     הבית (הכי גדול), מקומות העבודה ובתי הספר מופיעים בלי שום לחיצה */
-  setTimeout(function(){showNeighborhood(0);},reduced?600:lastDelay+1400);
+  /* אין כניסה אוטומטית לשכונה — המפה נבנית רק כשהלקוח לוחץ "Show me living in...",
+     ואז showNeighborhood נקרא ישירות מהלחיצה */
 }
 
 /* ---------- שמירה ל-Bitrix24 ----------
