@@ -283,6 +283,33 @@
   .nb-box{
     margin-top:16px;background:#F8F1DE;border:1px solid var(--brass-light);border-radius:2px;padding:14px 16px;
   }
+  /* תמונת נוף של העיר — רחבה, פינות מעוגלות, סגנון פרימיום */
+  #city-photo{margin:18px 4px 0;}
+  #city-photo .photo-wrap{
+    position:relative;width:100%;border-radius:10px;overflow:hidden;
+    box-shadow:0 4px 18px rgba(31,58,95,.18);border:1px solid var(--brass-light);
+    background:#EDE7DA;
+  }
+  #city-photo img{display:block;width:100%;height:auto;max-height:360px;object-fit:cover;}
+  #city-photo .photo-cap{
+    position:absolute;left:0;bottom:0;width:100%;
+    background:linear-gradient(to top,rgba(31,58,95,.82),rgba(31,58,95,0));
+    color:#fff;font-family:var(--font-head);font-weight:700;font-size:22px;
+    padding:34px 18px 14px;box-sizing:border-box;
+  }
+  #city-photo .photo-cap small{display:block;font-family:Georgia,serif;font-weight:normal;font-style:italic;font-size:13px;color:#EAD9A8;margin-top:2px;}
+  @media(max-width:520px){#city-photo img{max-height:240px;}#city-photo .photo-cap{font-size:18px;}}
+  .why-box{margin:14px 0 4px;padding:2px 0 0;border-top:1px solid var(--line);}
+  .why-box .why-title{font-family:Arial,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--brass);margin:12px 0 8px;}
+  .why-list{list-style:none;margin:0;padding:0;}
+  .why-list li{
+    font-family:Georgia,serif;font-size:14px;color:var(--ink);line-height:1.5;
+    padding:4px 0 4px 26px;position:relative;
+  }
+  .why-list li:before{
+    content:"\2713";position:absolute;left:2px;top:4px;
+    color:var(--brass);font-weight:bold;font-size:14px;
+  }
   .nb-box .nb-label{font-family:Arial,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--brass);}
   .nb-box .nb-name{font-size:18px;color:var(--ink);margin:3px 0 2px;}
   .nb-box .nb-blurb{font-family:Arial,sans-serif;font-size:12.5px;color:var(--text-muted);line-height:1.5;}
@@ -646,6 +673,9 @@
 
 
     <div id="map" role="img" aria-label="Map of the United States showing your matched cities"></div>
+
+    <!-- ===== תמונת נוף גדולה של העיר שנבחרה ===== -->
+    <div id="city-photo"></div>
 
     <div id="top-city"></div>
     <div id="other-cities"></div>
@@ -1153,6 +1183,52 @@ function cityTags(c){
   return tags.slice(0,4);
 }
 
+/* ---------- "למה בחרנו את העיר הזו" — נקודות מתוך התשובות והנתונים הקיימים ----------
+   לא ממציא נתונים חדשים ולא משנה את אלגוריתם ההתאמה — רק מנסח את מה שכבר קיים. */
+function whyPicked(t){
+  var c=t.city,a=state.answers,reasons=[];
+  var hasKids=(a.family==='kids'||a.family==='kids_teen');
+  var sal=c.sal[a.profession];
+
+  /* שכר במקצוע */
+  if(sal){
+    if(sal>=95000)reasons.push('Excellent salaries in '+PROF_LABEL[a.profession]);
+    else if(sal>=70000)reasons.push('Strong pay in '+PROF_LABEL[a.profession]);
+    else reasons.push('Real career opportunities in '+PROF_LABEL[a.profession]);
+  }
+  /* תקציב דיור מול שכר דירה — הערכים הם מספרים (1000/1600/2500/3600) */
+  var budgetCap=parseInt(a.budget,10);
+  if(budgetCap&&c.rent<=budgetCap*1.05)reasons.push('Fits your monthly housing budget');
+  /* עלות מחיה */
+  if(c.col<=100)reasons.push('Affordable cost of living');
+  /* בתי ספר — למשפחות עם ילדים */
+  if(hasKids&&parseFloat(schoolDisp(c))>=8.5)reasons.push('Highly rated schools for your children');
+  /* סגנון חיים */
+  var lifeTxt={urban:'Matches your big-city lifestyle',suburban:'Quiet suburbs, just as you wanted',nature:'Close to nature and open space',coastal:'Near the water, as you hoped'}[a.lifestyle];
+  if(lifeTxt)reasons.push(lifeTxt);
+  /* עדיפויות שהלקוח בחר */
+  var pri=a.priorities||[];
+  if(pri.indexOf('warm')>-1&&c.climate==='warm')reasons.push('Warm, sunny weather year-round');
+  if(pri.indexOf('ocean')>-1&&c.coast)reasons.push('Right by the ocean');
+  if(pri.indexOf('community')>-1&&c.comm>=8)reasons.push('A strong, welcoming community');
+
+  /* לכל היותר 5, לפחות 3 */
+  reasons=reasons.slice(0,5);
+  if(reasons.length<3){
+    if(reasons.indexOf('Real career opportunities in '+PROF_LABEL[a.profession])<0&&sal)reasons.push('Growing job market in your field');
+  }
+  return reasons;
+}
+function whyPickedHTML(t){
+  var r=whyPicked(t);
+  if(!r.length)return '';
+  var items=r.map(function(x){return '<li>'+x+'</li>';}).join('');
+  return '<div class="why-box">'
+    +'<div class="why-title">Why we picked this city for you</div>'
+    +'<ul class="why-list">'+items+'</ul>'
+    +'</div>';
+}
+
 function cityCardHTML(t,idx){
   var c=t.city,a=state.answers,isTop=(idx===0);
   var tags=cityTags(c).map(function(x){return '<span class="tag">'+x+'</span>';}).join('');
@@ -1161,10 +1237,10 @@ function cityCardHTML(t,idx){
   var nbHTML='';
   if(nb){
     nbHTML='<div class="nb-box">'
-      +'<div class="nb-label">The neighborhood for you</div>'
+      +'<div class="nb-label">Your future neighborhood</div>'
       +'<div class="nb-name">'+nb.n+'</div>'
       +'<div class="nb-blurb">'+nb.b+'</div>'
-      +(isTop?'<div class="coach">See your street, your work'+(hasKids?', your kids\' schools':'')+' <span class="c-arrow">&#128071;</span></div>':'')
+      +(isTop?'<div class="coach">Walk your street, see your career'+(hasKids?', your future schools':'')+' <span class="c-arrow">&#128071;</span></div>':'')
       +'<button class="nb-btn" onclick="showNeighborhood('+idx+')">&#127968;&nbsp; Show me living in '+nb.n+'</button>'
       +'</div>';
   }
@@ -1172,6 +1248,7 @@ function cityCardHTML(t,idx){
     +(isTop?'<div class="rank-seal">Your No. 1 Match</div>':'<div class="rank-num">'+(idx+1)+'</div>')
     +'<div class="city-head"><div><h3>'+c.n+'</h3><span class="state">'+c.s+'</span></div>'
     +'<div class="match '+matchClass(t.match)+'">'+t.match+'%<small>match</small></div></div>'
+    +whyPickedHTML(t)
     +'<div class="facts">'
     +'<div class="fact">Typical salary in '+PROF_LABEL[a.profession]+'<b>'+fmtMoney(c.sal[a.profession])+' / year</b></div>'
     +'<div class="fact">Average monthly rent<b>$'+c.rent.toLocaleString('en-US')+'</b></div>'
@@ -1287,8 +1364,8 @@ function walkAt(lat,lng,label){
   ov.className='sv-overlay';
   ov.id='sv-overlay';
   ov.innerHTML='<div class="sv-box" role="dialog" aria-label="Street view of '+label+'">'
-    +'<div class="sv-head"><div><h3>Walking in '+label+'</h3>'
-    +'<div class="hint2">Drag to look around &middot; Click the arrows on the street to walk &middot; <a href="'+fallback+'" target="_blank" rel="noopener" style="color:#B08D3E;">Open full view</a></div></div>'
+    +'<div class="sv-head"><div><h3>This could be your street in America</h3>'
+    +'<div class="hint2" style="margin-top:2px;"><b style="color:var(--ink);font-size:13px;">'+label+'</b> &middot; Drag to look around &middot; Click the arrows on the street to walk &middot; <a href="'+fallback+'" target="_blank" rel="noopener" style="color:#B08D3E;">Open full view</a></div></div>'
     +'<button class="sv-close" onclick="closeWalk()">Close &times;</button></div>'
     +'<iframe src="'+src+'" allow="accelerometer; gyroscope" loading="lazy" title="Street view of '+label+'"></iframe>'
     +'</div>';
@@ -1361,7 +1438,7 @@ function showNeighborhood(idx){
   var homeIcon=L.divIcon({className:'',html:'<div style="width:54px;height:54px;border-radius:50%;background:#B08D3E;border:3.5px solid #FCFAF4;box-shadow:0 3px 14px rgba(31,58,95,.55);display:flex;align-items:center;justify-content:center;font-size:28px;">&#127968;</div>',iconSize:[54,54],iconAnchor:[27,27]});
   var homeMk=L.marker([nb.lat,nb.lng],{icon:homeIcon,zIndexOffset:1000}).addTo(nbLayer);
   homeMk.bindTooltip('Your next home',{permanent:true,direction:'bottom',offset:[0,26],className:'poi-label home-label'});
-  homeMk.bindPopup('<b>'+nb.n+'</b><br>You could live right here.<br><a href="#" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\');return false;" style="color:#B08D3E;">&#128694; Walk this street &raquo;</a>');
+  homeMk.bindPopup('<b>'+nb.n+'</b><br>Imagine starting your mornings here.<br><a href="#" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\');return false;" style="color:#B08D3E;">&#128694; Walk this street &raquo;</a>');
 
   mapObj.flyTo([nb.lat,nb.lng],14,{duration:1.6});
   setTimeout(function(){homeMk.openPopup();},1700);
@@ -1375,7 +1452,7 @@ function showNeighborhood(idx){
   }
   hint.innerHTML='<b style="font-size:14px;">Your life in '+nb.n+'</b><span style="color:var(--text-muted);"> — see it step by step:</span>'
     +'<div class="start-here">Start here <span class="arrow-dn">&#8595;</span></div>'
-    +'<button class="jbtn j-home pulse" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\')"><span class="jnum">1</span><span class="walker">&#128694;</span> See your street</button>'
+    +'<button class="jbtn j-home pulse" onclick="walkAt('+nb.lat+','+nb.lng+',\''+nb.n.replace(/'/g,"\\'")+'\')"><span class="jnum">1</span><span class="walker">&#128694;</span> This could be your street in America</button>'
     +'<button class="jbtn j-work dim" id="jbtn-work" onclick="goPOI(\'work\')"><span class="jnum">2</span>&#128188; Finding jobs near you&hellip;</button>'
     +(hasKids?'<button class="jbtn j-school dim" id="jbtn-school" onclick="goPOI(\'school\')"><span class="jnum">3</span>&#127979; Searching the kids\' schools&hellip;</button>':'')
     +'<button class="jbtn j-fun dim" id="jbtn-fun" onclick="goPOI(\'fun\')"><span class="jnum">'+(hasKids?'4':'3')+'</span>&#11088; Finding your weekend spots&hellip;</button>'
@@ -1451,7 +1528,7 @@ function goPOI(kind){
   document.getElementById('map').scrollIntoView({behavior:'smooth',block:'center'});
   mapObj.flyTo([m.lat,m.lng],15,{duration:1.1});
   setTimeout(function(){m.marker.openPopup();},1200);
-  var label=(kind==='work'?'&#128188; Your job: ':(kind==='fun'?'&#11088; Your weekend: ':(currentNb.hasKids?'&#127979; The kids\' schools: ':'&#127979; Schools nearby: ')));
+  var label=(kind==='work'?'&#128188; Your career: ':(kind==='fun'?'&#11088; Your weekend: ':(currentNb.hasKids?'&#127979; The kids\' schools: ':'&#127979; Schools nearby: ')));
   setJBtn(kind,label+m.name+' <span style="opacity:.75;font-size:12px;">('+(i+1)+'/'+list.length+' — tap for next)</span>',false);
 }
 
@@ -1460,7 +1537,7 @@ function employersHTML(cityName,prof){
   var cityList=(EMPLOYERS_CITY[cityName]&&EMPLOYERS_CITY[cityName][prof])||null;
   var list=cityList||EMPLOYERS_GENERAL[prof]||[];
   if(!list.length)return '';
-  var lbl=cityList?('Top places to work in '+cityName):'Top places to work in the U.S.';
+  var lbl=cityList?('Career opportunities in '+cityName):'Career opportunities across the U.S.';
   var chips=list.slice(0,8).map(function(n){return '<span class="emp-chip">'+n+'</span>';}).join('');
   return '<div class="emp-box"><div class="emp-lbl">&#128188; '+lbl+':</div>'+chips+'</div>';
 }
@@ -1505,7 +1582,7 @@ function loadPOI(kind,goAfter){
   poiWatchdog[kind]=setTimeout(function(){
     if(poiState[kind]==='loading'){
       poiState[kind]='idle';
-      setJBtn(kind,(kind==='work'?'&#128188; Show jobs near you':(kind==='fun'?'&#11088; Show weekend places':'&#127979; Show schools near you')),true);
+      setJBtn(kind,(kind==='work'?'&#128188; Companies hiring people like you':(kind==='fun'?'&#11088; See weekend places':(currentNb&&currentNb.hasKids?'&#127979; Schools your children could attend':'&#127979; Top schools near your neighborhood'))),true);
     }
   },14000);
 
@@ -1536,7 +1613,7 @@ function loadPOI(kind,goAfter){
       items=items.slice(0,6);
 
       var colors={work:'#1F3A5F',school:'#2E7D4F',fun:'#B08D3E'};
-      var popTexts={work:'A job near your home',school:'A school near your home',fun:'A weekend place for you'};
+      var popTexts={work:'A career opportunity near home',school:'A future school near home',fun:'A weekend place for you'};
       items.forEach(function(it){
         var emoji=(kind==='school')?'&#127979;':(kind==='work'?'&#128188;':funEmoji(it.tags));
         var icon=L.divIcon({className:'',html:'<div style="width:34px;height:34px;border-radius:50%;background:'+colors[kind]+';border:2.5px solid #FCFAF4;box-shadow:0 2px 7px rgba(31,58,95,.4);display:flex;align-items:center;justify-content:center;font-size:16px;">'+emoji+'</div>',iconSize:[34,34],iconAnchor:[17,17]});
@@ -1552,16 +1629,16 @@ function loadPOI(kind,goAfter){
       poiState[kind]='loaded';
 
       if(poiData[kind].length>0){
-        var doneTxt=(kind==='work')?'&#128188; See your jobs'
+        var doneTxt=(kind==='work')?'&#128188; Companies hiring people like you'
           :(kind==='fun'?'&#11088; See weekend places'
-          :'&#127979; See your schools');
+          :(currentNb&&currentNb.hasKids?'&#127979; Schools your children could attend':'&#127979; Top schools near your neighborhood'));
         setJBtn(kind,doneTxt+' <span style="opacity:.75;font-size:12px;">('+poiData[kind].length+' found)</span>',false);
         fitAllPOIs();
         if(goAfter)goPOI(kind);
       }else{
         /* אין תוצאות — משאירים את הכפתור לחיץ לניסיון חוזר */
         poiState[kind]='idle';
-        setJBtn(kind,(kind==='work'?'&#128188; Show jobs near you':(kind==='fun'?'&#11088; Show weekend places':'&#127979; Show schools near you')),true);
+        setJBtn(kind,(kind==='work'?'&#128188; Companies hiring people like you':(kind==='fun'?'&#11088; See weekend places':(currentNb&&currentNb.hasKids?'&#127979; Schools your children could attend':'&#127979; Top schools near your neighborhood'))),true);
       }
     },function(){
       if(poiWatchdog[kind]){clearTimeout(poiWatchdog[kind]);poiWatchdog[kind]=null;}
@@ -1603,6 +1680,27 @@ function gcBtnText(){
     :'Open my Green Card file &mdash; $29';
 }
 
+/* תמונת נוף של העיר שנבחרה — נטענת לפי שם העיר (Unsplash Source, ללא מפתח).
+   אם התמונה לא נטענת, הקונטיינר נשאר ריק ולא שובר את העמוד. */
+function renderCityPhoto(t){
+  var box=document.getElementById('city-photo');
+  if(!box)return;
+  var c=t.city;
+  /* מילת חיפוש נקייה: שם עיר + skyline/cityscape לתוצאה יפה */
+  var q=c.n.replace(/[–—].*$/,'').replace(/\s+Area$/,'').trim();
+  var kw=encodeURIComponent(q+' city skyline');
+  var url='https://source.unsplash.com/1200x600/?'+kw;
+  var img=new Image();
+  img.onload=function(){
+    box.innerHTML='<div class="photo-wrap">'
+      +'<img src="'+url+'" alt="'+q+', '+c.s+'">'
+      +'<div class="photo-cap">'+c.n+'<small>Your future could begin here</small></div>'
+      +'</div>';
+  };
+  img.onerror=function(){box.innerHTML='';};
+  img.src=url;
+}
+
 function showResults(){
   var res=document.getElementById('screen-results');
   res.classList.remove('hidden');
@@ -1618,6 +1716,9 @@ function showResults(){
   var othersHTML='';
   for(var i=1;i<state.results.length;i++){othersHTML+=cityCardHTML(state.results[i],i);}
   document.getElementById('other-cities').innerHTML=othersHTML;
+
+  /* תמונת נוף גדולה של העיר שנבחרה */
+  renderCityPhoto(state.results[0]);
 
   buildMap();
   saveToCRM();
