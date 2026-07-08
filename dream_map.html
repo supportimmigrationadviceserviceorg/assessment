@@ -1074,26 +1074,27 @@ function doLookup(){
   btn.disabled=true;btn.textContent='Checking...';
   state.email=email;
 
-  /* חיפוש ליד לפי אימייל */
-  fetch(WEBHOOK+'crm.lead.list?filter[EMAIL]='+encodeURIComponent(email)+'&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=COMMENTS&select[]=STATUS_ID')
+  /* חיפוש איש קשר תחילה — אם קיים איש קשר, זה הרשומה האמיתית (לקוח קיים/משלם),
+     ומעדכנים אותו ולא ליד ישן/לא רלוונטי. רק אם אין איש קשר — נחפש ליד. */
+  fetch(WEBHOOK+'crm.contact.list?filter[EMAIL]='+encodeURIComponent(email)+'&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=COMMENTS')
   .then(function(r){return r.json();})
   .then(function(d){
     if(d.result&&d.result.length>0){
-      var L=d.result[0];
-      state.leadId=L.ID;state.leadType='lead';
-      state.leadName=(L.NAME||'').trim();
-      state.existingComments=L.COMMENTS||'';
+      var C=d.result[0];
+      state.leadId=C.ID;state.leadType='contact';
+      state.leadName=(C.NAME||'').trim();
+      state.existingComments=C.COMMENTS||'';
       showWelcome();
     }else{
-      /* אם אין ליד — חיפוש איש קשר */
-      return fetch(WEBHOOK+'crm.contact.list?filter[EMAIL]='+encodeURIComponent(email)+'&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=COMMENTS')
+      /* אם אין איש קשר — חיפוש ליד */
+      return fetch(WEBHOOK+'crm.lead.list?filter[EMAIL]='+encodeURIComponent(email)+'&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=COMMENTS&select[]=STATUS_ID')
       .then(function(r2){return r2.json();})
       .then(function(d2){
         if(d2.result&&d2.result.length>0){
-          var C=d2.result[0];
-          state.leadId=C.ID;state.leadType='contact';
-          state.leadName=(C.NAME||'').trim();
-          state.existingComments=C.COMMENTS||'';
+          var L=d2.result[0];
+          state.leadId=L.ID;state.leadType='lead';
+          state.leadName=(L.NAME||'').trim();
+          state.existingComments=L.COMMENTS||'';
           showWelcome();
         }else{
           /* לא נמצא — מציגים שדות פרטים כדי שניצור ליד חדש בסיום */
