@@ -490,6 +490,66 @@
     /* האווטאר קטן יותר במובייל */
     .avatar{width:52px;height:52px;font-size:20px;}
   }
+  /* ============================================================
+     Day 1 — מסע 6 הפרקים (שכבה חדשה מעל התוצאות, לא מחליפה כלום)
+     ============================================================ */
+  .ep-overlay{
+    position:fixed;inset:0;z-index:9999;background:#12233B;
+    display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  }
+  .ep-overlay.open{display:block;}
+  .ep-stage{max-width:640px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding:0 0 40px;}
+  .ep-progress{position:sticky;top:0;z-index:5;background:#12233B;padding:16px 20px 12px;}
+  .ep-dots{display:flex;gap:6px;justify-content:center;margin-bottom:6px;}
+  .ep-dot{width:34px;height:4px;border-radius:2px;background:rgba(255,255,255,.18);transition:background .3s;}
+  .ep-dot.done{background:#B08D3E;}
+  .ep-dot.active{background:#F0C868;}
+  .ep-count{text-align:center;font-family:Arial,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#8FA6C4;}
+  .ep-exit{position:absolute;right:16px;top:14px;background:rgba(255,255,255,.1);border:none;color:#EAF1F8;font-size:20px;width:36px;height:36px;border-radius:50%;cursor:pointer;line-height:1;}
+  .ep-exit:hover{background:rgba(255,255,255,.2);}
+  .ep-card{
+    background:#FFFDF7;margin:16px;border-radius:14px;overflow:hidden;
+    box-shadow:0 10px 40px rgba(0,0,0,.4);border-top:4px solid #B08D3E;
+    animation:epIn .55s cubic-bezier(.2,.7,.3,1);
+  }
+  @keyframes epIn{from{opacity:0;transform:translateY(30px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+  .ep-hero{position:relative;width:100%;height:210px;background:#22405f;overflow:hidden;}
+  .ep-hero img{width:100%;height:100%;object-fit:cover;display:block;}
+  .ep-hero .ep-emoji{position:absolute;top:14px;left:16px;font-size:34px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));}
+  .ep-hero .ep-badge{position:absolute;bottom:0;left:0;width:100%;padding:26px 18px 12px;
+    background:linear-gradient(to top,rgba(18,35,59,.9),rgba(18,35,59,0));
+    color:#F0C868;font-family:Arial,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;}
+  .ep-body{padding:20px 24px 24px;}
+  .ep-body h2{font-family:var(--font-head);font-size:26px;font-weight:700;color:#1F3A5F;margin:0 0 10px;line-height:1.2;}
+  .ep-body p{font-family:Georgia,serif;font-size:16px;color:#3D3A33;line-height:1.65;margin:0 0 14px;}
+  .ep-facts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0;}
+  .ep-fact{background:#F8F1DE;border:1px solid var(--brass-light);border-radius:8px;padding:12px 14px;}
+  .ep-fact .k{font-family:Arial,sans-serif;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;}
+  .ep-fact .v{font-family:var(--font-head);font-size:19px;font-weight:700;color:#1F3A5F;margin-top:2px;}
+  .ep-chips{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0;}
+  .ep-chip{background:#1F3A5F;color:#fff;font-family:Arial,sans-serif;font-size:12px;padding:6px 12px;border-radius:20px;}
+  .ep-list{list-style:none;margin:8px 0;padding:0;}
+  .ep-list li{font-family:Georgia,serif;font-size:15px;color:#1F3A5F;padding:5px 0 5px 26px;position:relative;line-height:1.5;}
+  .ep-list li:before{content:"\2713";position:absolute;left:2px;color:var(--brass);font-weight:bold;}
+  .ep-sv-btn{display:block;width:100%;cursor:pointer;text-align:center;margin:6px 0 0;
+    font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#1F3A5F;
+    background:#F0C868;border:1.5px solid #B08D3E;border-radius:8px;padding:14px;}
+  .ep-sv-btn:hover{background:#EAD48A;}
+  .ep-next{display:block;width:100%;cursor:pointer;text-align:center;margin:18px 0 0;
+    font-family:Arial,sans-serif;font-size:17px;font-weight:700;color:#fff;
+    background:#1F3A5F;border:2px solid #14273F;border-radius:10px;padding:16px;
+    box-shadow:0 4px 14px rgba(31,58,95,.4);transition:filter .15s;}
+  .ep-next:hover{filter:brightness(1.12);}
+  .ep-final .ep-body{text-align:center;}
+  .ep-final .ep-flag{font-size:52px;margin-bottom:6px;}
+  .ep-pay{display:block;width:100%;cursor:pointer;text-align:center;margin:18px 0 0;
+    font-family:var(--font-head);font-size:20px;font-weight:700;color:#fff;
+    background:#1F3A5F;border:3px solid #14273F;border-radius:12px;padding:20px;
+    box-shadow:0 6px 20px rgba(31,58,95,.5);animation:payPulse 1.6s ease-in-out infinite;}
+  .ep-skip{display:block;width:100%;background:none;border:none;cursor:pointer;margin-top:12px;
+    font-family:Arial,sans-serif;font-size:13px;color:#8FA6C4;text-decoration:underline;}
+  @media(max-width:520px){.ep-hero{height:170px;}.ep-body h2{font-size:22px;}}
+
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 </head>
@@ -676,6 +736,14 @@
 
     <div id="map" role="img" aria-label="Map of the United States showing your matched cities" style="display:none;"></div>
 
+    <!-- ===== הזמנה למסע Day 1 — שכבה חדשה מעל התוצאות ===== -->
+    <div id="day1-invite" style="text-align:center;margin:0 4px 22px;">
+      <button onclick="startEpisodes()" style="font-family:var(--font-head);font-size:20px;font-weight:700;color:#fff;cursor:pointer;background:linear-gradient(135deg,#B08D3E,#C9A34E);border:none;border-radius:12px;padding:20px 32px;width:100%;max-width:460px;box-shadow:0 6px 20px rgba(176,141,62,.45);">
+        &#127775; Experience Day 1 of Your New Life
+      </button>
+      <div style="font-family:Arial,sans-serif;font-size:12px;color:var(--text-muted);margin-top:8px;">A guided walk through your future &mdash; home, work, weekends and more</div>
+    </div>
+
     <!-- ===== תמונת נוף גדולה של העיר שנבחרה ===== -->
     <div id="city-photo"></div>
 
@@ -691,6 +759,18 @@
     </div>
 
     <p class="disclaimer">Salary, rent and cost-of-living figures are estimates based on publicly available data and are provided for general guidance only. They do not constitute financial or legal advice. Immigration Advice Service &middot; All rights reserved.</p>
+  </div>
+
+  <!-- ===== שכבת מסע Day 1 (6 פרקים) — נבנית דינמית ב-JS ===== -->
+  <div id="ep-overlay" class="ep-overlay" role="dialog" aria-label="Your Day 1 journey">
+    <div class="ep-stage">
+      <div class="ep-progress">
+        <button class="ep-exit" onclick="closeEpisodes()" aria-label="Close">&times;</button>
+        <div class="ep-dots" id="ep-dots"></div>
+        <div class="ep-count" id="ep-count"></div>
+      </div>
+      <div id="ep-content"></div>
+    </div>
   </div>
 
 </div>
@@ -2003,6 +2083,178 @@ function goToPayment(){
   var url=PAYMENT_URL;
   if(state.leadId&&state.leadType==='lead'){url+='&lead_id='+encodeURIComponent(state.leadId);}
   window.location.href=url;
+}
+
+/* ============================================================
+   Day 1 — מסע 6 הפרקים. שכבה עצמאית מעל התוצאות.
+   משתמש בנתונים ובפונקציות הקיימים (walkAt, pickNeighborhood, whyPicked וכו').
+   לא נוגע בשום דבר קיים.
+   ============================================================ */
+var epIndex=0;
+var EP_TOTAL=6;
+
+function cityPhotoURL(cityName,extra){
+  var q=cityName.replace(/[–—].*$/,'').replace(/\s+Area$/,'').trim();
+  return 'https://source.unsplash.com/900x500/?'+encodeURIComponent(q+' '+(extra||'city'));
+}
+
+function startEpisodes(){
+  epIndex=0;
+  document.getElementById('ep-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  renderEpisode();
+}
+function closeEpisodes(){
+  document.getElementById('ep-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+function nextEpisode(){
+  if(epIndex<EP_TOTAL-1){epIndex++;renderEpisode();
+    document.getElementById('ep-overlay').scrollTop=0;}
+}
+function epDotsHTML(){
+  var h='';
+  for(var i=0;i<EP_TOTAL;i++){
+    var cls='ep-dot'+(i<epIndex?' done':'')+(i===epIndex?' active':'');
+    h+='<div class="'+cls+'"></div>';
+  }
+  return h;
+}
+
+function renderEpisode(){
+  var t=state.results[0];if(!t)return;
+  document.getElementById('ep-dots').innerHTML=epDotsHTML();
+  document.getElementById('ep-count').textContent='Episode '+(epIndex+1)+' of '+EP_TOTAL;
+  var builders=[epHome,epCommute,epCareer,epFamily,epWeekend,epFinal];
+  document.getElementById('ep-content').innerHTML=builders[epIndex](t);
+  /* טעינת תמונות הירו עם fallback לרקע כח‑ol */
+  var heroImg=document.querySelector('#ep-content .ep-hero img');
+  if(heroImg){heroImg.onerror=function(){this.style.display='none';};}
+}
+
+/* פרק 1 — הבית */
+function epHome(t){
+  var nb=pickNeighborhood(t.city.n);
+  var name=nb?nb.n:t.city.n;
+  var lat=nb?nb.lat:t.city.lat,lng=nb?nb.lng:t.city.lng;
+  return '<div class="ep-card">'
+    +'<div class="ep-hero"><img src="'+cityPhotoURL(t.city.n,'neighborhood homes street')+'" alt=""><div class="ep-emoji">&#127968;</div><div class="ep-badge">Your Home</div></div>'
+    +'<div class="ep-body">'
+    +'<h2>Welcome home to '+name+'</h2>'
+    +'<p>Imagine waking up here every morning. Quiet, tree-lined streets, a coffee in hand, the day ahead full of possibility. This could become your new neighborhood.</p>'
+    +(nb?'<button class="ep-sv-btn" onclick="walkAt('+lat+','+lng+',\''+name.replace(/'/g,"\\'")+'\')">&#128694; Walk your street in 360&deg;</button>':'')
+    +'<button class="ep-next" onclick="nextEpisode()">Next: Your Commute &rarr;</button>'
+    +'</div></div>';
+}
+
+/* פרק 2 — הנסיעה לעבודה (בלי להמציא זמנים מדויקים) */
+function epCommute(t){
+  var c=t.city,a=state.answers;
+  var vibe=(c.vibes.urban>=7)
+    ?'a short ride through the city &mdash; maybe a train, maybe a walk past cafés already busy with the morning crowd'
+    :(c.vibes.suburban>=7
+      ?'an easy drive along calm, leafy roads, the kind of commute that lets you breathe before the day begins'
+      :'a gentle journey past open spaces and quiet streets on your way to work');
+  return '<div class="ep-card">'
+    +'<div class="ep-hero"><img src="'+cityPhotoURL(c.n,'street traffic morning commute')+'" alt=""><div class="ep-emoji">&#128663;</div><div class="ep-badge">Your Commute</div></div>'
+    +'<div class="ep-body">'
+    +'<h2>The road to your day</h2>'
+    +'<p>From your front door to work is '+vibe+'.</p>'
+    +'<p>In '+c.n+', getting to work becomes part of the life you\'re building &mdash; not just a distance, but a rhythm you\'ll come to know.</p>'
+    +'<button class="ep-next" onclick="nextEpisode()">Next: Your Career &rarr;</button>'
+    +'</div></div>';
+}
+
+/* פרק 3 — הקריירה */
+function epCareer(t){
+  var c=t.city,a=state.answers;
+  var prof=PROF_LABEL[a.profession];
+  var sal=c.sal[a.profession];
+  var employers=(EMPLOYERS_CITY[c.n]&&EMPLOYERS_CITY[c.n][a.profession])||EMPLOYERS_GENERAL[a.profession]||[];
+  var chips=employers.slice(0,8).map(function(n){return '<span class="ep-chip">'+n+'</span>';}).join('');
+  return '<div class="ep-card">'
+    +'<div class="ep-hero"><img src="'+cityPhotoURL(c.n,'downtown business office skyline')+'" alt=""><div class="ep-emoji">&#128188;</div><div class="ep-badge">Your Career</div></div>'
+    +'<div class="ep-body">'
+    +'<h2>Your career could begin here</h2>'
+    +'<p>'+c.n+' is home to employers looking for people in '+prof+' &mdash; and your skills are in demand.</p>'
+    +'<div class="ep-facts">'
+    +'<div class="ep-fact"><div class="k">Typical salary</div><div class="v">'+fmtMoney(sal)+'</div></div>'
+    +'<div class="ep-fact"><div class="k">Your field</div><div class="v" style="font-size:15px;">'+prof+'</div></div>'
+    +'</div>'
+    +(chips?'<p style="margin-bottom:6px;">Companies hiring people like you:</p><div class="ep-chips">'+chips+'</div>':'')
+    +'<button class="ep-next" onclick="nextEpisode()">Next: '+((a.family==='kids'||a.family==='kids_teen')?'Your Family':'Your Lifestyle')+' &rarr;</button>'
+    +'</div></div>';
+}
+
+/* פרק 4 — משפחה או סגנון חיים */
+function epFamily(t){
+  var c=t.city,a=state.answers;
+  var hasKids=(a.family==='kids'||a.family==='kids_teen');
+  if(hasKids){
+    return '<div class="ep-card">'
+      +'<div class="ep-hero"><img src="'+cityPhotoURL(c.n,'park family playground')+'" alt=""><div class="ep-emoji">&#128106;</div><div class="ep-badge">Your Family</div></div>'
+      +'<div class="ep-body">'
+      +'<h2>A place for your family to grow</h2>'
+      +'<p>Picture weekend mornings at the park, good schools within reach, and neighborhoods built for family life.</p>'
+      +'<ul class="ep-list">'
+      +'<li>Highly rated schools nearby</li>'
+      +'<li>Parks and green spaces for the kids</li>'
+      +'<li>Safe, welcoming family neighborhoods</li>'
+      +'</ul>'
+      +'<button class="ep-next" onclick="nextEpisode()">Next: Your Weekend &rarr;</button>'
+      +'</div></div>';
+  }
+  return '<div class="ep-card">'
+    +'<div class="ep-hero"><img src="'+cityPhotoURL(c.n,'cafe restaurant nightlife')+'" alt=""><div class="ep-emoji">&#10024;</div><div class="ep-badge">Your Lifestyle</div></div>'
+    +'<div class="ep-body">'
+    +'<h2>A lifestyle that fits you</h2>'
+    +'<p>Evenings out, favorite cafés, a gym around the corner, restaurants worth returning to. '+c.n+' has a rhythm you\'ll want to be part of.</p>'
+    +'<ul class="ep-list">'
+    +'<li>Cafés and restaurants to make your own</li>'
+    +'<li>Fitness studios and gyms nearby</li>'
+    +'<li>Nightlife, culture and entertainment</li>'
+    +'</ul>'
+    +'<button class="ep-next" onclick="nextEpisode()">Next: Your Weekend &rarr;</button>'
+    +'</div></div>';
+}
+
+/* פרק 5 — סוף השבוע (חוויה רגשית לפי העיר וההעדפות) */
+function epWeekend(t){
+  var c=t.city,a=state.answers;
+  var wk=(a.weekend&&a.weekend.length)?a.weekend:[];
+  var story,photoKw;
+  if(wk.indexOf('beach')>-1&&c.coast){story='Salt air and slow mornings by the water. Your weekends could start with the sound of the waves.';photoKw='beach ocean coast';}
+  else if(wk.indexOf('outdoors')>-1&&c.vibes.nature>=6){story='Trails, fresh air and open skies. The outdoors could become your weekend escape.';photoKw='mountains hiking nature trail';}
+  else if(wk.indexOf('arts')>-1){story='Galleries, live music and city culture. Your weekends could be full of things to see and hear.';photoKw='art gallery live music downtown';}
+  else if(wk.indexOf('food')>-1){story='Farmers markets, new restaurants, long lunches with friends. Your weekends could revolve around good food.';photoKw='restaurant food market';}
+  else if(wk.indexOf('golf')>-1){story='Early tee times and green fairways. Your weekends could be spent out on the course.';photoKw='golf course green';}
+  else if(wk.indexOf('fitness')>-1){story='Morning runs, gyms and active weekends. Your city could keep you moving.';photoKw='fitness running park';}
+  else if(c.coast){story='With the coast nearby, your weekends could drift toward the water whenever you like.';photoKw='beach coast';}
+  else if(c.vibes.nature>=6){story='With nature close by, weekends could mean trails, parks and open air.';photoKw='nature park trail';}
+  else{story='Downtown strolls, markets and easy afternoons. '+c.n+' knows how to spend a weekend.';photoKw='downtown weekend park';}
+  return '<div class="ep-card">'
+    +'<div class="ep-hero"><img src="'+cityPhotoURL(c.n,photoKw)+'" alt=""><div class="ep-emoji">&#127749;</div><div class="ep-badge">Your Weekend</div></div>'
+    +'<div class="ep-body">'
+    +'<h2>Weekends worth waking up for</h2>'
+    +'<p>'+story+'</p>'
+    +'<p>This is the life waiting for you in '+c.n+' &mdash; not just a place to work, but a place to truly live.</p>'
+    +'<button class="ep-next" onclick="nextEpisode()">See where this leads &rarr;</button>'
+    +'</div></div>';
+}
+
+/* פרק 6 — החיים החדשים מתחילים (סיכום + CTA לתשלום) */
+function epFinal(t){
+  var c=t.city;
+  var nm=state.leadName?(', '+state.leadName):'';
+  return '<div class="ep-card ep-final">'
+    +'<div class="ep-body">'
+    +'<div class="ep-flag">&#127482;&#127480;</div>'
+    +'<h2>Your new life begins here</h2>'
+    +'<p>You\'ve just experienced what your future in '+c.n+' could look like &mdash; your home, your career, your weekends, your everyday life.</p>'
+    +'<p>The next step is opening your official Green Card file, so our immigration team can review your profile and build your personal immigration strategy.</p>'
+    +'<button class="ep-pay" onclick="goToPayment()">Open Your Green Card File'+nm+'</button>'
+    +'<button class="ep-skip" onclick="closeEpisodes()">I\'ll explore the map first</button>'
+    +'</div></div>';
 }
 </script>
 </body>
