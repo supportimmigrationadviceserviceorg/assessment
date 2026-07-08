@@ -1343,6 +1343,61 @@ function cityCardHTML(t,idx){
     +'</div>';
 }
 
+/* ---------- תמונות ערים אמיתיות (נבחרו ידנית, URL יציב) ----------
+   כרגע 10 הערים הראשונות. אם תמונה נכשלת — הדף ממשיך כרגיל (fallback).
+   מקור: Wikimedia Commons (Special:FilePath מחזיר קישור ישיר ויציב).
+   שדות: hero (נוף עיר), neighborhood (שכונה/רחוב), weekend (סגנון חיים).
+*/
+function wm(f){return 'https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(f)+'?width=1000';}
+var CITY_IMAGES={
+'Austin':{
+  hero:wm('Austin_Skyline_2019.jpg'),
+  neighborhood:wm('South_Congress_Avenue_Austin_2013.jpg'),
+  weekend:wm('Lady_Bird_Lake_Austin.jpg')},
+'Dallas–Fort Worth':{
+  hero:wm('Dallas_skyline_daytime.jpg'),
+  neighborhood:wm('Bishop_Arts_District_Dallas.jpg'),
+  weekend:wm('Klyde_Warren_Park_Dallas.jpg')},
+'Houston':{
+  hero:wm('Houston_skyline_from_Sabine_Street_Bridge.jpg'),
+  neighborhood:wm('Montrose_Houston.jpg'),
+  weekend:wm('Buffalo_Bayou_Park_Houston.jpg')},
+'San Antonio':{
+  hero:wm('Skyline_of_San_Antonio,_Texas,_USA.jpg'),
+  neighborhood:wm('Pearl_District_San_Antonio.jpg'),
+  weekend:wm('San_Antonio_River_Walk_2017.jpg')},
+'Miami':{
+  hero:wm('Miami_skyline_2015.jpg'),
+  neighborhood:wm('Brickell_Miami_skyline.jpg'),
+  weekend:wm('South_Beach_Miami_FL.jpg')},
+'Orlando':{
+  hero:wm('Downtown_Orlando_skyline.jpg'),
+  neighborhood:wm('Thornton_Park_Orlando.jpg'),
+  weekend:wm('Lake_Eola_Park_Orlando.jpg')},
+'Tampa':{
+  hero:wm('Tampa_Skyline_from_Bayshore.jpg'),
+  neighborhood:wm('Hyde_Park_Tampa.jpg'),
+  weekend:wm('Tampa_Riverwalk.jpg')},
+'Jacksonville':{
+  hero:wm('Jacksonville_skyline_2019.jpg'),
+  neighborhood:wm('Riverside_Jacksonville.jpg'),
+  weekend:wm('Jacksonville_Beach_Florida.jpg')},
+'Atlanta':{
+  hero:wm('Atlanta_Skyline_from_Buckhead.jpg'),
+  neighborhood:wm('Midtown_Atlanta_skyline.jpg'),
+  weekend:wm('Piedmont_Park_Atlanta.jpg')},
+'Charlotte':{
+  hero:wm('Charlotte_skyline_2020.jpg'),
+  neighborhood:wm('South_End_Charlotte.jpg'),
+  weekend:wm('Freedom_Park_Charlotte.jpg')}
+};
+/* מחזיר URL של תמונה לעיר לפי סוג; null אם אין (ואז fallback לעיצוב הקיים) */
+function cityImage(cityName,kind){
+  var rec=CITY_IMAGES[cityName];
+  if(!rec)return null;
+  return rec[kind]||rec.hero||null;
+}
+
 /* ---------- מאגר שכונות ----------
    לכל עיר: שכונה עירונית (u) ושכונה משפחתית/פרברית (f) — שם, קואורדינטות, תיאור.
    הבחירה נעשית לפי תשובות הלקוח: ילדים/פרברים -> f, עירוני/חוף -> u.
@@ -1785,18 +1840,16 @@ function renderCityPhoto(t){
   var box=document.getElementById('city-photo');
   if(!box)return;
   var c=t.city;
-  /* מילת חיפוש נקייה: שם עיר + skyline/cityscape לתוצאה יפה */
-  var q=c.n.replace(/[–—].*$/,'').replace(/\s+Area$/,'').trim();
-  var kw=encodeURIComponent(q+' city skyline');
-  var url='https://source.unsplash.com/1200x600/?'+kw;
+  var url=cityImage(c.n,'hero');
+  if(!url){box.innerHTML='';return;}  /* אין תמונה לעיר — לא מציגים כלום */
   var img=new Image();
   img.onload=function(){
     box.innerHTML='<div class="photo-wrap">'
-      +'<img src="'+url+'" alt="'+q+', '+c.s+'">'
+      +'<img src="'+url+'" alt="'+c.n+', '+c.s+'">'
       +'<div class="photo-cap">'+c.n+'<small>Your future could begin here</small></div>'
       +'</div>';
   };
-  img.onerror=function(){box.innerHTML='';};
+  img.onerror=function(){box.innerHTML='';};  /* תמונה נכשלה — הדף ממשיך כרגיל */
   img.src=url;
 }
 
@@ -2093,9 +2146,18 @@ function goToPayment(){
 var epIndex=0;
 var EP_TOTAL=6;
 
-function cityPhotoURL(cityName,extra){
-  var q=cityName.replace(/[–—].*$/,'').replace(/\s+Area$/,'').trim();
-  return 'https://source.unsplash.com/900x500/?'+encodeURIComponent(q+' '+(extra||'city'));
+/* בוחר תמונה לפרק לפי הסוג; אם אין — מחזיר null וההירו יציג רקע כח‑ol בלבד */
+function epPhoto(cityName,kind){
+  return cityImage(cityName,kind);
+}
+/* בונה בלוק הירו: אם יש תמונה — מציג אותה עם fallback; אחרת רקע צבע בלבד */
+function epHero(url,emoji,badge){
+  var imgTag=url
+    ? '<img src="'+url+'" alt="" onerror="this.style.display=\'none\';">'
+    : '';
+  return '<div class="ep-hero">'+imgTag
+    +'<div class="ep-emoji">'+emoji+'</div>'
+    +'<div class="ep-badge">'+badge+'</div></div>';
 }
 
 function startEpisodes(){
@@ -2138,7 +2200,7 @@ function epHome(t){
   var name=nb?nb.n:t.city.n;
   var lat=nb?nb.lat:t.city.lat,lng=nb?nb.lng:t.city.lng;
   return '<div class="ep-card">'
-    +'<div class="ep-hero"><img src="'+cityPhotoURL(t.city.n,'neighborhood homes street')+'" alt=""><div class="ep-emoji">&#127968;</div><div class="ep-badge">Your Home</div></div>'
+    +epHero(epPhoto(t.city.n,'neighborhood'),'&#127968;','Your Home')
     +'<div class="ep-body">'
     +'<h2>Welcome home to '+name+'</h2>'
     +'<p>Imagine waking up here every morning. Quiet, tree-lined streets, a coffee in hand, the day ahead full of possibility. This could become your new neighborhood.</p>'
@@ -2156,7 +2218,7 @@ function epCommute(t){
       ?'an easy drive along calm, leafy roads, the kind of commute that lets you breathe before the day begins'
       :'a gentle journey past open spaces and quiet streets on your way to work');
   return '<div class="ep-card">'
-    +'<div class="ep-hero"><img src="'+cityPhotoURL(c.n,'street traffic morning commute')+'" alt=""><div class="ep-emoji">&#128663;</div><div class="ep-badge">Your Commute</div></div>'
+    +epHero(epPhoto(c.n,'hero'),'&#128663;','Your Commute')
     +'<div class="ep-body">'
     +'<h2>The road to your day</h2>'
     +'<p>From your front door to work is '+vibe+'.</p>'
@@ -2173,7 +2235,7 @@ function epCareer(t){
   var employers=(EMPLOYERS_CITY[c.n]&&EMPLOYERS_CITY[c.n][a.profession])||EMPLOYERS_GENERAL[a.profession]||[];
   var chips=employers.slice(0,8).map(function(n){return '<span class="ep-chip">'+n+'</span>';}).join('');
   return '<div class="ep-card">'
-    +'<div class="ep-hero"><img src="'+cityPhotoURL(c.n,'downtown business office skyline')+'" alt=""><div class="ep-emoji">&#128188;</div><div class="ep-badge">Your Career</div></div>'
+    +epHero(epPhoto(c.n,'hero'),'&#128188;','Your Career')
     +'<div class="ep-body">'
     +'<h2>Your career could begin here</h2>'
     +'<p>'+c.n+' is home to employers looking for people in '+prof+' &mdash; and your skills are in demand.</p>'
@@ -2192,7 +2254,7 @@ function epFamily(t){
   var hasKids=(a.family==='kids'||a.family==='kids_teen');
   if(hasKids){
     return '<div class="ep-card">'
-      +'<div class="ep-hero"><img src="'+cityPhotoURL(c.n,'park family playground')+'" alt=""><div class="ep-emoji">&#128106;</div><div class="ep-badge">Your Family</div></div>'
+      +epHero(epPhoto(c.n,'neighborhood'),'&#128106;','Your Family')
       +'<div class="ep-body">'
       +'<h2>A place for your family to grow</h2>'
       +'<p>Picture weekend mornings at the park, good schools within reach, and neighborhoods built for family life.</p>'
@@ -2205,7 +2267,7 @@ function epFamily(t){
       +'</div></div>';
   }
   return '<div class="ep-card">'
-    +'<div class="ep-hero"><img src="'+cityPhotoURL(c.n,'cafe restaurant nightlife')+'" alt=""><div class="ep-emoji">&#10024;</div><div class="ep-badge">Your Lifestyle</div></div>'
+    +epHero(epPhoto(c.n,'weekend'),'&#10024;','Your Lifestyle')
     +'<div class="ep-body">'
     +'<h2>A lifestyle that fits you</h2>'
     +'<p>Evenings out, favorite cafés, a gym around the corner, restaurants worth returning to. '+c.n+' has a rhythm you\'ll want to be part of.</p>'
@@ -2233,7 +2295,7 @@ function epWeekend(t){
   else if(c.vibes.nature>=6){story='With nature close by, weekends could mean trails, parks and open air.';photoKw='nature park trail';}
   else{story='Downtown strolls, markets and easy afternoons. '+c.n+' knows how to spend a weekend.';photoKw='downtown weekend park';}
   return '<div class="ep-card">'
-    +'<div class="ep-hero"><img src="'+cityPhotoURL(c.n,photoKw)+'" alt=""><div class="ep-emoji">&#127749;</div><div class="ep-badge">Your Weekend</div></div>'
+    +epHero(epPhoto(c.n,'weekend'),'&#127749;','Your Weekend')
     +'<div class="ep-body">'
     +'<h2>Weekends worth waking up for</h2>'
     +'<p>'+story+'</p>'
