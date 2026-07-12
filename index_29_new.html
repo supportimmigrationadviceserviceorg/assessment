@@ -2069,6 +2069,9 @@ async function submitAndShowResults() {
 
     } else {
       // CREATE new lead
+      const pNew = new URLSearchParams(window.location.search);
+      const utmCampaignNew = pNew.get('utm_campaign') || 'XXXX';
+      fields['SOURCE_DESCRIPTION'] = 'utm_campaign=' + utmCampaignNew + ' | ' + window.location.href;
       const createFields = {
         ...fields,
         TITLE: 'Self-Assessment: ' + name,
