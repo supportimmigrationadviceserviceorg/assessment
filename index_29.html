@@ -1073,7 +1073,7 @@ let emailLookupTimer = null;
   const utmKeys = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'];
   const parts = [];
   // Default campaign tag so every payment is identifiable
-  if(!p.get('utm_campaign')) parts.push('utm_campaign=attorneypayment');
+  if(!p.get('utm_campaign')) parts.push('utm_campaign=XXXX');
   if(!p.get('utm_source'))   parts.push('utm_source=assessment');
   utmKeys.forEach(k => { if(p.get(k)) parts.push(k+'='+encodeURIComponent(p.get(k))); });
   if(leadId) parts.push('lead_id='+leadId);
