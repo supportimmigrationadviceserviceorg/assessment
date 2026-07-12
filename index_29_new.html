@@ -2052,6 +2052,10 @@ async function submitAndShowResults() {
   try {
     // ── 1. LEAD: update or create ─────────────────────
     if(leadId) {
+      // Add SOURCE_DESCRIPTION with utm_campaign so we can track which campaign this came from
+      const p = new URLSearchParams(window.location.search);
+      const utmCampaign = p.get('utm_campaign') || 'XXXX';
+      fields['SOURCE_DESCRIPTION'] = 'utm_campaign=' + utmCampaign + ' | ' + window.location.href;
       const updateUrl = WEBHOOK + 'crm.lead.update?ID=' + leadId + '&' +
         Object.entries(fields).map(([k,v]) => `fields[${k}]=${encodeURIComponent(v)}`).join('&');
       await fetch(updateUrl);
