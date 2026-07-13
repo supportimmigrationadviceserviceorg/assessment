@@ -232,8 +232,24 @@
 const WEBHOOK = "https://immiworld.org/rest/147/47yrflms2cje1cbe/";
 const FIELD_ID = "UF_CRM_1547484113";
 const FIELD_ID_CONTACT = "UF_CRM_1547484113";
-const PAYMENT_URL = "https://immigrationadviceservice.org/new-va-payment-29/?utm_campaign=XXXX";
+const PAYMENT_BASE = "https://immigrationadviceservice.org/new-va-payment-29/";
 const PROTECTED_STATUSES = ["CONVERTED", "26", "27", "31", "DETAILS"];
+
+const params = new URLSearchParams(window.location.search);
+const answer = (params.get("answer") || "").toLowerCase();
+
+// UTM passthrough — carry existing UTM from URL into payment link
+let utmParams = '';
+(function(){
+  const utmKeys = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'];
+  const parts = [];
+  if(!params.get('utm_campaign')) parts.push('utm_campaign=reengagement');
+  if(!params.get('utm_source'))   parts.push('utm_source=email_marketing');
+  utmKeys.forEach(k => { if(params.get(k)) parts.push(k+'='+encodeURIComponent(params.get(k))); });
+  utmParams = parts.length ? '?' + parts.join('&') : '';
+})();
+
+const PAYMENT_URL = PAYMENT_BASE + utmParams;
 
 const params = new URLSearchParams(window.location.search);
 const answer = (params.get("answer") || "").toLowerCase();
@@ -372,7 +388,7 @@ async function confirmDetails() {
       await fetch(WEBHOOK + "crm.lead.update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ID: lastEntityId, FIELDS: { ...updateFields, COMMENTS: commentText, ASSIGNED_BY_ID: 902 } })
+        body: JSON.stringify({ ID: lastEntityId, FIELDS: { ...updateFields, COMMENTS: commentText, ASSIGNED_BY_ID: 902, SOURCE_ID: "4" } })
       });
     } else {
       const contactFields = { [FIELD_ID_CONTACT]: value, COMMENTS: commentText };
@@ -398,7 +414,8 @@ async function confirmDetails() {
     if (answer === "yes") {
       const displayCaseId = lastClientId || ("#" + lastEntityId);
       document.getElementById("caseNumberLine").textContent = "Client ID: " + displayCaseId;
-      document.getElementById("pay-link").href = PAYMENT_URL + "&lead_id=" + (lastEntityType === "lead" ? lastEntityId : "");
+      const payUrl = PAYMENT_URL + (PAYMENT_URL.includes('?') ? '&' : '?') + 'lead_id=' + (lastEntityType === "lead" ? lastEntityId : "");
+      document.getElementById("pay-link").href = payUrl;
       show("state-yes");
     } else {
       show("state-no");
