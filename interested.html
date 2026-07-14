@@ -525,6 +525,8 @@ async function submitNoReason() {
     document.getElementById("verifySubtitle") && (document.getElementById("verifySubtitle").textContent = "");
   }
 
+})();
+
 async function submitNoReasonFromVerify() {
   const selected = document.querySelector('input[name="noReason"]:checked');
   if (!selected) {
@@ -554,7 +556,6 @@ async function submitNoReasonFromVerify() {
     show("state-no");
   } catch(e) { console.error(e); show("state-error"); }
 }
-})();
 </script>
 </body>
 </html>
