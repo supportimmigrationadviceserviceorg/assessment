@@ -289,7 +289,7 @@
 <script>
 const WEBHOOK = "https://immiworld.org/rest/147/47yrflms2cje1cbe/";
 const FIELD_ID = "UF_CRM_1547484113";
-const FIELD_ID_CONTACT = "UF_CRM_1547484113";
+const FIELD_ID_CONTACT = "UF_CRM_5C5843FC11F1D";
 const PAYMENT_BASE = "https://immigrationadviceservice.org/new-gc-payment-29/";
 const PROTECTED_STATUSES = ["CONVERTED", "26", "27", "31", "DETAILS"];
 
@@ -539,15 +539,28 @@ async function submitNoReasonFromVerify() {
     if (otherText) reasonValue = "No - Other: " + otherText;
   }
 
+  // Visual feedback
+  const btn = document.querySelector('#verifyNoContent .btn-confirm');
+  btn.textContent = "Updating...";
+  btn.disabled = true;
+  btn.style.background = "#4b5563";
+
   show("state-loading");
 
   try {
-    const updateFields = { [FIELD_ID]: reasonValue };
-    await fetch(WEBHOOK + "crm.lead.update", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ID: lastEntityId, FIELDS: { ...updateFields, COMMENTS: reasonValue, ASSIGNED_BY_ID: 902, SOURCE_ID: "4" } })
-    });
+    if (lastEntityType === "lead") {
+      await fetch(WEBHOOK + "crm.lead.update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ID: lastEntityId, FIELDS: { [FIELD_ID]: reasonValue, COMMENTS: reasonValue, ASSIGNED_BY_ID: 902, SOURCE_ID: "4" } })
+      });
+    } else {
+      await fetch(WEBHOOK + "crm.contact.update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ID: lastEntityId, FIELDS: { [FIELD_ID_CONTACT]: reasonValue, COMMENTS: reasonValue } })
+      });
+    }
     await fetch(WEBHOOK + "crm.timeline.comment.add", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
