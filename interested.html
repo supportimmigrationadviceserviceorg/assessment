@@ -185,7 +185,9 @@
       <div class="success-icon">📋</div>
       <h2>Are you sure you want to close your file?</h2>
       <div id="noClientName" style="background:#f0f7ff;border:1px solid #c2daf5;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:14px;color:#1a3a6b;text-align:left;display:none;">
-        📁 &nbsp;File found for: <strong id="noClientNameText"></strong>
+        📁 &nbsp;File found for: <strong id="noClientNameText"></strong><br>
+        <span style="font-size:12px;color:#6b7280;">Client ID: <span id="noClientIdText"></span></span><br>
+        <span style="font-size:12px;color:#6b7280;">Phone: <span id="noClientPhoneText"></span></span>
       </div>
       <p style="margin-bottom:20px">Before we update your records, please let us know which option best describes your situation.</p>
       <div style="text-align:left;margin-bottom:20px">
@@ -405,6 +407,10 @@ async function findLead() {
       if (fullName && fullName !== "—") {
         nameEl.textContent = fullName;
         nameBox.style.display = "block";
+        const clientIdEl = document.getElementById("noClientIdText");
+        if (clientIdEl) clientIdEl.textContent = lastClientId || ("#" + lastEntityId);
+        const phoneEl = document.getElementById("noClientPhoneText");
+        if (phoneEl) phoneEl.textContent = originalPhone || "—";
       }
     }
 
@@ -574,7 +580,7 @@ async function submitNoReasonFromVerify() {
     await fetch(WEBHOOK + "crm.timeline.comment.add", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fields: { ENTITY_TYPE: lastEntityType, ENTITY_ID: lastEntityId, COMMENT: "Client selected reason for not proceeding: " + reasonValue } })
+      body: JSON.stringify({ fields: { ENTITY_TYPE: lastEntityType, ENTITY_ID: lastEntityId, COMMENT: 'Client received the re-engagement email and selected: ' + reasonValue } })
     });
     show("state-no");
   } catch(e) { console.error(e); show("state-error"); }
