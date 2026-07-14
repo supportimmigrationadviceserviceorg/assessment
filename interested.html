@@ -251,9 +251,6 @@ let utmParams = '';
 
 const PAYMENT_URL = PAYMENT_BASE + utmParams;
 
-const params = new URLSearchParams(window.location.search);
-const answer = (params.get("answer") || "").toLowerCase();
-
 let lastEntityType = null;
 let lastEntityId = null;
 let lastClientId = null;
@@ -457,9 +454,9 @@ async function submitNoReason() {
   }
   // If email is passed in URL (from Bitrix24 #EMAIL_TO#), skip email entry step
   const urlEmail = params.get("email");
-  if (urlEmail && urlEmail !== "#EMAIL_TO#") {
+  if (urlEmail && urlEmail !== "#EMAIL_TO#" && urlEmail.includes("@")) {
     document.getElementById("emailField").value = decodeURIComponent(urlEmail);
-    findLead();
+    setTimeout(findLead, 100);
   }
 })();
 </script>
