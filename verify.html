@@ -613,7 +613,7 @@ async function submitNoReasonVerify() {
 
   try {
     await updateContact(
-      { [INTERESTED_FIELD]: reasonValue },
+      { [INTERESTED_FIELD]: reasonValue, TYPE_ID: "46" },
       "Client received the verification email and selected: " + reasonValue
     );
     show("state-no");
