@@ -375,6 +375,12 @@ async function submitNoReason() {
     document.getElementById("entryTitle").textContent = "Confirm your details";
     document.getElementById("entrySub").textContent = "Please enter your email so we can update your file.";
   }
+  // Auto-fill email from URL if passed via #EMAIL_TO#
+  const urlEmail = params.get("email");
+  if (urlEmail && urlEmail !== "#EMAIL_TO#" && urlEmail.includes("@")) {
+    document.getElementById("emailField").value = decodeURIComponent(urlEmail);
+    setTimeout(findContact, 100);
+  }
 })();
 
 async function submitNoReasonVerify() {
