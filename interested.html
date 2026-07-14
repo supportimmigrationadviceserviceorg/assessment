@@ -164,20 +164,53 @@
 
   <!-- STEP 2: Verify details -->
   <div id="state-verify" class="hidden">
-    <div class="success-icon">👤</div>
-    <h2>Please verify your details</h2>
-    <p style="margin-bottom:20px">We found your immigration file. Please confirm the details below to continue to the secure $29 case-opening step.</p>
 
-    <div style="text-align:left">
-      <div class="field-label">Full Name</div>
-      <div class="field-static" id="verifyName">—</div>
-
-      <div class="field-label">Phone Number</div>
-      <input type="tel" id="verifyPhone" class="field-input" placeholder="Enter your phone number" />
-      <p class="verify-note">If your phone number is incorrect or missing, please update it above — we may need to reach you regarding your case.</p>
+    <!-- YES content -->
+    <div id="verifyYesContent">
+      <div class="success-icon">👤</div>
+      <h2>Verify Your Details</h2>
+      <p id="verifySubtitle" style="margin-bottom:20px">We found your immigration file. Please confirm the details below to continue to the secure $29 case-opening step.</p>
+      <div style="text-align:left">
+        <div class="field-label">Full Name</div>
+        <div class="field-static" id="verifyName">—</div>
+        <div class="field-label">Phone Number</div>
+        <input type="tel" id="verifyPhone" class="field-input" placeholder="Enter your phone number" />
+        <p class="verify-note">If your phone number is incorrect or missing, please update it above — we may need to reach you regarding your case.</p>
+      </div>
+      <button id="confirmDetailsBtn" class="btn-confirm" onclick="confirmDetails()">Continue to Secure Case Opening — $29</button>
     </div>
 
-    <button class="btn-confirm" onclick="confirmDetails()">Continue to Secure Case Opening — $29</button>
+    <!-- NO content: reason selection -->
+    <div id="verifyNoContent" class="hidden">
+      <div class="success-icon">📋</div>
+      <h2>Are you sure you want to close your file?</h2>
+      <p style="margin-bottom:20px">Before we update your records, please let us know which option best describes your situation.</p>
+      <div style="text-align:left;margin-bottom:20px">
+        <label style="display:block;padding:10px 12px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:8px;cursor:pointer;font-size:14px;color:#333">
+          <input type="radio" name="noReason" value="No - I'm no longer interested in immigrating to the United States." style="margin-right:8px">
+          I'm no longer interested in immigrating to the United States.
+        </label>
+        <label style="display:block;padding:10px 12px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:8px;cursor:pointer;font-size:14px;color:#333">
+          <input type="radio" name="noReason" value="No - Not right now — I may be interested again in the future." style="margin-right:8px">
+          Not right now — I may be interested again in the future if opportunities are still available.
+        </label>
+        <label style="display:block;padding:10px 12px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:8px;cursor:pointer;font-size:14px;color:#333">
+          <input type="radio" name="noReason" value="No - I'm already working with another immigration provider." style="margin-right:8px">
+          I'm already working with another immigration provider.
+        </label>
+        <label style="display:block;padding:10px 12px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:8px;cursor:pointer;font-size:14px;color:#333">
+          <input type="radio" name="noReason" value="No - The timing isn't right for me financially." style="margin-right:8px">
+          The timing isn't right for me financially.
+        </label>
+        <label style="display:block;padding:10px 12px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:8px;cursor:pointer;font-size:14px;color:#333">
+          <input type="radio" name="noReason" value="No - Other" id="otherRadio" style="margin-right:8px" onclick="document.getElementById('otherReasonText').classList.remove('hidden')">
+          Other (please tell us)
+        </label>
+        <textarea id="otherReasonText" class="field-input hidden" placeholder="Please tell us more..." style="min-height:70px;margin-top:4px"></textarea>
+      </div>
+      <button class="btn-confirm" onclick="submitNoReasonFromVerify()" style="background:#6b7280">Update My File</button>
+    </div>
+
   </div>
 
   <!-- YES state: show payment info -->
@@ -257,7 +290,7 @@
 const WEBHOOK = "https://immiworld.org/rest/147/47yrflms2cje1cbe/";
 const FIELD_ID = "UF_CRM_1547484113";
 const FIELD_ID_CONTACT = "UF_CRM_1547484113";
-const PAYMENT_BASE = "https://immigrationadviceservice.org/new-va-payment-29/";
+const PAYMENT_BASE = "https://immigrationadviceservice.org/new-gc-payment-29/";
 const PROTECTED_STATUSES = ["CONVERTED", "26", "27", "31", "DETAILS"];
 
 const params = new URLSearchParams(window.location.search);
@@ -354,13 +387,16 @@ async function findLead() {
     lastClientId = targetRecord.UF_CRM_1449131692;
     lastLeadStatus = targetRecord.STATUS_ID || null;
 
-    // Build display name
+    // Show verify form with correct content
     const fullName = [targetRecord.NAME, targetRecord.LAST_NAME].filter(Boolean).join(" ") || "—";
     document.getElementById("verifyName").textContent = fullName;
-
-    // Pre-fill phone if exists
     originalPhone = (targetRecord.PHONE && targetRecord.PHONE[0] && targetRecord.PHONE[0].VALUE) || "";
     document.getElementById("verifyPhone").value = originalPhone;
+
+    if (answer === "no") {
+      document.getElementById("verifyYesContent").classList.add("hidden");
+      document.getElementById("verifyNoContent").classList.remove("hidden");
+    }
 
     show("state-verify");
 
@@ -483,6 +519,41 @@ async function submitNoReason() {
     document.getElementById("emailField").value = decodeURIComponent(urlEmail);
     setTimeout(findLead, 100);
   }
+
+  // Update verify screen text based on answer
+  if (answer === "no") {
+    document.getElementById("verifySubtitle") && (document.getElementById("verifySubtitle").textContent = "");
+  }
+
+async function submitNoReasonFromVerify() {
+  const selected = document.querySelector('input[name="noReason"]:checked');
+  if (!selected) {
+    alert("Please select an option before continuing.");
+    return;
+  }
+  let reasonValue = selected.value;
+  if (reasonValue === "No - Other") {
+    const otherText = document.getElementById("otherReasonText").value.trim();
+    if (otherText) reasonValue = "No - Other: " + otherText;
+  }
+
+  show("state-loading");
+
+  try {
+    const updateFields = { [FIELD_ID]: reasonValue };
+    await fetch(WEBHOOK + "crm.lead.update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ID: lastEntityId, FIELDS: { ...updateFields, COMMENTS: reasonValue, ASSIGNED_BY_ID: 902, SOURCE_ID: "4" } })
+    });
+    await fetch(WEBHOOK + "crm.timeline.comment.add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fields: { ENTITY_TYPE: lastEntityType, ENTITY_ID: lastEntityId, COMMENT: "Client selected reason for not proceeding: " + reasonValue } })
+    });
+    show("state-no");
+  } catch(e) { console.error(e); show("state-error"); }
+}
 })();
 </script>
 </body>
