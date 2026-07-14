@@ -262,12 +262,20 @@
     <div class="success-icon">👍</div>
     <h2>Thank you for letting us know.</h2>
     <p>We've updated your file. If you change your mind in the future, you're always welcome to reach out to us.</p>
-    <div style="text-align:left;margin-bottom:20px">
-      <label style="font-size:13px;color:#555;font-weight:bold;display:block;margin-bottom:6px">Would you like to share why? (optional)</label>
-      <textarea id="noReasonField" placeholder="Let us know if you'd like..." style="width:100%;min-height:80px;padding:12px 14px;border:2px solid #e0e0e0;border-radius:8px;font-size:14px;font-family:Arial,sans-serif;resize:vertical;margin-bottom:10px"></textarea>
-      <button class="btn-confirm" onclick="submitNoReason()" style="background:#1a6bb5">Send Feedback</button>
+
+    <div id="noExtraSection" style="margin-bottom:16px">
+      <button class="btn-confirm" onclick="document.getElementById('noExtraSection').classList.add('hidden');document.getElementById('noExtraForm').classList.remove('hidden')" style="background:#e5e7eb;color:#374151;font-size:14px;margin-bottom:8px">
+        I'd like to share something else
+      </button>
     </div>
-    <p id="noReasonThanks" class="hidden" style="color:#1a6bb5;font-weight:bold">Thank you for your feedback!</p>
+
+    <div id="noExtraForm" class="hidden" style="text-align:left;margin-bottom:16px">
+      <label style="font-size:13px;color:#555;font-weight:bold;display:block;margin-bottom:6px">Anything else you'd like to share?</label>
+      <textarea id="noReasonField" class="field-input" placeholder="Let us know..." style="min-height:70px"></textarea>
+      <button class="btn-confirm" onclick="submitNoReason()" style="margin-top:6px">Send</button>
+    </div>
+
+    <p id="noReasonThanks" class="hidden" style="color:#1a6bb5;font-weight:bold;margin-bottom:12px">Thank you for your feedback!</p>
     <p style="font-size:13px;color:#888;border-top:1px solid #eee;padding-top:16px;margin-top:8px">
       Questions or concerns? Reach us directly at<br>
       <a href="mailto:support@immigrationadviceservice.org" style="color:#1a6bb5;font-weight:bold;text-decoration:none">support@immigrationadviceservice.org</a>
