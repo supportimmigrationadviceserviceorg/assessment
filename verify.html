@@ -157,15 +157,57 @@
     </p>
   </div>
 
+  <!-- REASON state -->
+  <div id="state-reason" class="hidden">
+    <div class="success-icon">📋</div>
+    <h2>Are you sure you want to close your file?</h2>
+    <div id="noClientInfo" style="background:#f0f7ff;border:1px solid #c2daf5;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:14px;color:#1a3a6b;text-align:left;display:none;">
+      📁 &nbsp;File found for: <strong id="noClientNameText"></strong><br>
+      <span style="font-size:12px;color:#6b7280;">Client ID: <span id="noClientIdText"></span></span><br>
+      <span style="font-size:12px;color:#6b7280;">Phone: <span id="noClientPhoneText"></span></span>
+    </div>
+    <p style="margin-bottom:20px">Before we update your records, please let us know which option best describes your situation.</p>
+    <div style="text-align:left;margin-bottom:20px">
+      <label style="display:block;padding:10px 12px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:8px;cursor:pointer;font-size:14px;color:#333">
+        <input type="radio" name="noReason" value="No - I'm no longer interested in immigrating to the United States." style="margin-right:8px">
+        I'm no longer interested in immigrating to the United States.
+      </label>
+      <label style="display:block;padding:10px 12px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:8px;cursor:pointer;font-size:14px;color:#333">
+        <input type="radio" name="noReason" value="No - Not right now — I may be interested again in the future." style="margin-right:8px">
+        Not right now — I may be interested again in the future if opportunities are still available.
+      </label>
+      <label style="display:block;padding:10px 12px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:8px;cursor:pointer;font-size:14px;color:#333">
+        <input type="radio" name="noReason" value="No - I'm already working with another immigration provider." style="margin-right:8px">
+        I'm already working with another immigration provider.
+      </label>
+      <label style="display:block;padding:10px 12px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:8px;cursor:pointer;font-size:14px;color:#333">
+        <input type="radio" name="noReason" value="No - The timing isn't right for me financially." style="margin-right:8px">
+        The timing isn't right for me financially.
+      </label>
+      <label style="display:block;padding:10px 12px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:8px;cursor:pointer;font-size:14px;color:#333">
+        <input type="radio" name="noReason" value="No - Other" onclick="document.getElementById('otherReasonText').classList.remove('hidden')" style="margin-right:8px">
+        Other (please tell us)
+      </label>
+      <textarea id="otherReasonText" class="field-input hidden" placeholder="Please tell us more..." style="min-height:70px;margin-top:4px"></textarea>
+    </div>
+    <button class="btn-primary" onclick="submitNoReasonVerify()" style="background:#6b7280">Update My File</button>
+  </div>
+
   <!-- NO state -->
   <div id="state-no" class="hidden">
     <div class="success-icon">👍</div>
     <h2>Thank you for letting us know.</h2>
     <p>We've updated your file. If you change your mind in the future, you're always welcome to reach out to us.</p>
-    <div style="text-align:left;margin-bottom:16px">
-      <label style="font-size:13px;color:#555;font-weight:bold;display:block;margin-bottom:6px">Would you like to share why? (optional)</label>
-      <textarea id="noReasonField" class="field-input" placeholder="Let us know if you'd like..."></textarea>
-      <button class="btn-primary" onclick="submitNoReason()" style="margin-top:4px">Send Feedback</button>
+
+    <div id="noExtraSection" style="margin-bottom:16px">
+      <button class="btn-secondary" onclick="document.getElementById('noExtraSection').classList.add('hidden');document.getElementById('noExtraForm').classList.remove('hidden')">
+        I'd like to share something else
+      </button>
+    </div>
+    <div id="noExtraForm" class="hidden" style="text-align:left;margin-bottom:16px">
+      <label style="font-size:13px;color:#555;font-weight:bold;display:block;margin-bottom:6px">Anything else you'd like to share?</label>
+      <textarea id="noReasonField" class="field-input" placeholder="Let us know..."></textarea>
+      <button class="btn-primary" onclick="submitNoReason()" style="margin-top:6px">Send</button>
     </div>
     <p id="noReasonThanks" class="hidden" style="color:#1a3a6b;font-weight:bold;margin-bottom:12px">Thank you for your feedback!</p>
     <p style="font-size:13px;color:#888;border-top:1px solid #eee;padding-top:14px;">
@@ -201,7 +243,7 @@ const answer = (params.get("answer") || "").toLowerCase();
 let lastContactId = null;
 let originalPhone = "";
 
-const STATES = ["state-email-entry","state-loading","state-verify","state-success","state-no","state-notfound","state-error"];
+const STATES = ["state-email-entry","state-loading","state-verify","state-success","state-no","state-reason","state-notfound","state-error"];
 function show(id) { STATES.forEach(s => document.getElementById(s).classList.toggle("hidden", s !== id)); }
 function resetForm() { document.getElementById("emailField").value = ""; document.getElementById("errorBox").innerHTML = ""; show("state-email-entry"); }
 function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
@@ -221,7 +263,7 @@ async function findContact() {
 
   try {
     const res = await fetch(WEBHOOK + "crm.contact.list?filter[EMAIL]=" + encodeURIComponent(email) +
-      "&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&order[DATE_CREATE]=DESC");
+      "&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=UF_CRM_1449131692&order[DATE_CREATE]=DESC");
     const data = await res.json();
     const contacts = data.result || [];
 
@@ -232,9 +274,16 @@ async function findContact() {
     originalPhone = (contact.PHONE && contact.PHONE[0] && contact.PHONE[0].VALUE) || "";
 
     if (answer === "no") {
-      // Skip verify form — go straight to update + no screen
-      await updateContact({ [INTERESTED_FIELD]: "No" }, "Client received the verification email and indicated they are no longer interested in proceeding.");
-      show("state-no");
+      // Show reason selection screen instead of direct update
+      const fullName = [contact.NAME, contact.LAST_NAME].filter(Boolean).join(" ") || "—";
+      const clientId = contact.UF_CRM_1449131692 || ("#" + contact.ID);
+      document.getElementById("noClientNameText").textContent = fullName;
+      document.getElementById("noClientIdText").textContent = clientId;
+      document.getElementById("noClientPhoneText").textContent = originalPhone || "—";
+      if (fullName && fullName !== "—") {
+        document.getElementById("noClientInfo").style.display = "block";
+      }
+      show("state-reason");
       return;
     }
 
@@ -327,6 +376,32 @@ async function submitNoReason() {
     document.getElementById("entrySub").textContent = "Please enter your email so we can update your file.";
   }
 })();
+
+async function submitNoReasonVerify() {
+  const selected = document.querySelector('input[name="noReason"]:checked');
+  if (!selected) { alert("Please select an option before continuing."); return; }
+
+  let reasonValue = selected.value;
+  if (reasonValue === "No - Other") {
+    const otherText = document.getElementById("otherReasonText").value.trim();
+    if (otherText) reasonValue = "No - Other: " + otherText;
+  }
+
+  const btn = document.querySelector('#state-reason .btn-primary');
+  btn.textContent = "Updating...";
+  btn.disabled = true;
+  btn.style.background = "#4b5563";
+
+  show("state-loading");
+
+  try {
+    await updateContact(
+      { [INTERESTED_FIELD]: reasonValue },
+      "Client received the verification email and selected: " + reasonValue
+    );
+    show("state-no");
+  } catch(e) { console.error(e); show("state-error"); }
+}
 </script>
 </body>
 </html>
