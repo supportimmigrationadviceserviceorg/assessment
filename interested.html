@@ -455,6 +455,12 @@ async function submitNoReason() {
     document.getElementById("entryTitle").textContent = "Confirm your details";
     document.getElementById("entrySub").textContent = "Please enter your email address to confirm — we'll update your file accordingly.";
   }
+  // If email is passed in URL (from Bitrix24 #EMAIL_TO#), skip email entry step
+  const urlEmail = params.get("email");
+  if (urlEmail && urlEmail !== "#EMAIL_TO#") {
+    document.getElementById("emailField").value = decodeURIComponent(urlEmail);
+    findLead();
+  }
 })();
 </script>
 </body>
