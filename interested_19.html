@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Immigration Advice Service</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 48px 40px;
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  }
+  h2 { font-size: 22px; color: #1a1a1a; margin-bottom: 12px; }
+  p { color: #555; font-size: 15px; line-height: 1.6; margin-bottom: 24px; }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 4px solid #e0e0e0;
+    border-top-color: #1a6bb5;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .payment-box {
+    background: #f0f7ff;
+    border: 1px solid #c2daf5;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .payment-box h3 { color: #1a6bb5; font-size: 17px; margin-bottom: 8px; }
+  .payment-box p { color: #444; font-size: 14px; margin-bottom: 0; }
+  .btn-pay {
+    display: inline-block;
+    background: #1a6bb5;
+    color: #fff;
+    padding: 14px 36px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    margin-top: 16px;
+  }
+  .btn-pay:hover { background: #155a99; }
+  .success-icon { font-size: 48px; margin-bottom: 16px; }
+  .hidden { display: none; }
+  .cta-arrow {
+    font-size: 28px;
+    color: #1a6bb5;
+    animation: bounce 1.2s infinite;
+    margin-bottom: 4px;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); opacity: 0.6; }
+    50% { transform: translateY(8px); opacity: 1; }
+  }
+  .field-label {
+    font-size: 12px;
+    color: #888;
+    text-align: left;
+    margin-bottom: 4px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .field-static {
+    width: 100%;
+    padding: 12px 14px;
+    background: #f3f4f6;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 15px;
+    color: #374151;
+    text-align: left;
+    margin-bottom: 16px;
+  }
+  .field-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: Arial, sans-serif;
+    margin-bottom: 16px;
+    box-sizing: border-box;
+  }
+  .field-input:focus { outline: none; border-color: #1a6bb5; }
+  .email-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    margin-bottom: 16px;
+    font-family: Arial, sans-serif;
+  }
+  .email-input:focus { outline: none; border-color: #1a6bb5; }
+  .btn-confirm {
+    display: block;
+    width: 100%;
+    background: #1a6bb5;
+    color: #fff;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+  }
+  .btn-confirm:hover { background: #155a99; }
+  .btn-confirm:disabled { background: #ccc; cursor: not-allowed; }
+  .error-msg {
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: #991b1b;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    margin-bottom: 16px;
+    text-align: left;
+  }
+  .verify-note {
+    font-size: 12px;
+    color: #6b7280;
+    text-align: left;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- STEP 1: Email entry -->
+  <div id="state-email-entry">
+    <div class="success-icon">📧</div>
+    <h2 id="entryTitle">Confirm your details</h2>
+    <p id="entrySub">Please enter the email address you used when you registered, so we can find your file.</p>
+    <div id="errorBox"></div>
+    <input type="email" id="emailField" class="email-input" placeholder="your@email.com" />
+    <button id="confirmBtn" class="btn-confirm" onclick="findLead()">Continue</button>
+  </div>
+
+  <!-- Loading state -->
+  <div id="state-loading" class="hidden">
+    <div class="spinner"></div>
+    <p>Please wait...</p>
+  </div>
+
+  <!-- STEP 2: Verify details -->
+  <div id="state-verify" class="hidden">
+
+    <!-- YES content -->
+    <div id="verifyYesContent">
+      <div class="success-icon">👤</div>
+      <h2>Verify Your Details</h2>
+      <p id="verifySubtitle" style="margin-bottom:20px">We found your immigration file. Please confirm the details below to continue to the secure <s style="color:#999;">$29</s> $19 case-opening step.</p>
+      <div style="text-align:left">
+        <div class="field-label">Full Name</div>
+        <div class="field-static" id="verifyName">—</div>
+        <div class="field-label">Phone Number</div>
+        <input type="tel" id="verifyPhone" class="field-input" placeholder="Enter your phone number" />
+        <p class="verify-note">If your phone number is incorrect or missing, please update it above — we may need to reach you regarding your case.</p>
+      </div>
+      <button id="confirmDetailsBtn" class="btn-confirm" onclick="confirmDetails()">Continue to Secure Case Opening — <s style="color:#999;">$29</s> $19</button>
+    </div>
+
+    <!-- NO content: reason selection -->
+    <div id="verifyNoContent" class="hidden">
+      <div class="success-icon">📋</div>
+      <h2>Are you sure you want to close your file?</h2>
+      <div id="noClientName" style="background:#f0f7ff;border:1px solid #c2daf5;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:14px;color:#1a3a6b;text-align:left;display:none;">
+        📁 &nbsp;File found for: <strong id="noClientNameText"></strong><br>
+        <span style="font-size:12px;color:#6b7280;">Client ID: <span id="noClientIdText"></span></span><br>
+        <span style="font-size:12px;color:#6b7280;">Phone: <span id="noClientPhoneText"></span></span>
+      </div>
+      <p style="margin-bottom:20px">Before we update your records, please let us know which option best describes your situation.</p>
+      <div style="text-align:left;margin-bottom:20px">
+        <label style="display:block;padding:10px 12px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:8px;cursor:pointer;font-size:14px;color:#333">
+          <input type="radio" name="noReason" value="No - I'm no longer interested in immigrating to the United States." style="margin-right:8px">
+          I'm no longer interested in immigrating to the United States.
+        </label>
+        <label style="display:block;padding:10px 12px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:8px;cursor:pointer;font-size:14px;color:#333">
+          <input type="radio" name="noReason" value="No - Not right now — I may be interested again in the future." style="margin-right:8px">
+          Not right now — I may be interested again in the future if opportunities are still available.
+        </label>
+        <label style="display:block;padding:10px 12px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:8px;cursor:pointer;font-size:14px;color:#333">
+          <input type="radio" name="noReason" value="No - I'm already working with another immigration provider." style="margin-right:8px">
+          I'm already working with another immigration provider.
+        </label>
+        <label style="display:block;padding:10px 12px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:8px;cursor:pointer;font-size:14px;color:#333">
+          <input type="radio" name="noReason" value="No - The timing isn't right for me financially." style="margin-right:8px">
+          The timing isn't right for me financially.
+        </label>
+        <label style="display:block;padding:10px 12px;border:1px solid #e0e0e0;border-radius:8px;margin-bottom:8px;cursor:pointer;font-size:14px;color:#333">
+          <input type="radio" name="noReason" value="No - Other" id="otherRadio" style="margin-right:8px" onclick="document.getElementById('otherReasonText').classList.remove('hidden')">
+          Other (please tell us)
+        </label>
+        <textarea id="otherReasonText" class="field-input hidden" placeholder="Please tell us more..." style="min-height:70px;margin-top:4px"></textarea>
+      </div>
+      <button class="btn-confirm" onclick="submitNoReasonFromVerify()" style="background:#6b7280">Update My File</button>
+    </div>
+
+  </div>
+
+  <!-- YES state: show payment info -->
+  <div id="state-yes" class="hidden">
+    <div class="success-icon">✅</div>
+    <h2>Thank You for Confirming Your Interest</h2>
+    <p style="margin-bottom:6px">Your immigration file has been located successfully.</p>
+    <p id="caseNumberLine" style="font-size:14px;color:#1a6bb5;font-weight:bold;margin-top:0;margin-bottom:16px"></p>
+    <p>The next step is to officially open your immigration file so it can be assigned to a licensed U.S. immigration attorney for review.</p>
+
+    <!-- WHAT HAPPENS NEXT -->
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;background:#f0f7ff;border-radius:8px;">
+      <tr>
+        <td style="padding:16px 20px;text-align:left;">
+          <p style="margin:0 0 10px;font-size:14px;font-weight:bold;color:#1a3a6b;">What happens next?</p>
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr><td style="padding:4px 0;font-size:13px;color:#333;">✓ &nbsp;Your immigration file is officially opened</td></tr>
+            <tr><td style="padding:4px 0;font-size:13px;color:#333;">✓ &nbsp;Your case is assigned to a licensed U.S. immigration attorney</td></tr>
+            <tr><td style="padding:4px 0;font-size:13px;color:#333;">✓ &nbsp;Your eligibility is reviewed under the latest policy updates</td></tr>
+            <tr><td style="padding:4px 0;font-size:13px;color:#333;">✓ &nbsp;You'll receive your personalized immigration assessment</td></tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+
+    <div class="payment-box">
+      <h3>Official Case Opening Fee</h3>
+      <p style="margin-bottom:10px">Your one-time <s style="color:#999;">$29</s> $19 case opening fee includes:</p>
+      <p style="text-align:left;margin:0">
+        ✓ Official immigration file opening<br>
+        ✓ Assignment to a licensed U.S. immigration attorney<br>
+        ✓ Initial eligibility review<br>
+        ✓ Personal Client ID<br>
+        ✓ Priority processing
+      </p>
+    </div>
+    <div class="cta-arrow">⬇</div>
+    <a id="pay-link" href="#" class="btn-pay">Begin My Attorney Review — <s style="color:#999;">$29</s> $19</a>
+    <p style="font-size:12px;color:#888;margin-top:14px;margin-bottom:0">After your file is opened, your attorney will begin reviewing your case under the latest immigration policy updates.</p>
+  </div>
+
+  <!-- NO state -->
+  <div id="state-no" class="hidden">
+    <div class="success-icon">👍</div>
+    <h2>Thank you for letting us know.</h2>
+    <p>We've updated your file. If you change your mind in the future, you're always welcome to reach out to us.</p>
+
+    <div id="noExtraSection" style="margin-bottom:16px">
+      <button class="btn-confirm" onclick="document.getElementById('noExtraSection').classList.add('hidden');document.getElementById('noExtraForm').classList.remove('hidden')" style="background:#e5e7eb;color:#374151;font-size:14px;margin-bottom:8px">
+        I'd like to share something else
+      </button>
+    </div>
+
+    <div id="noExtraForm" class="hidden" style="text-align:left;margin-bottom:16px">
+      <label style="font-size:13px;color:#555;font-weight:bold;display:block;margin-bottom:6px">Anything else you'd like to share?</label>
+      <textarea id="noReasonField" class="field-input" placeholder="Let us know..." style="min-height:70px"></textarea>
+      <button class="btn-confirm" onclick="submitNoReason()" style="margin-top:6px">Send</button>
+    </div>
+
+    <p id="noReasonThanks" class="hidden" style="color:#1a6bb5;font-weight:bold;margin-bottom:12px">Thank you for your feedback!</p>
+    <p style="font-size:13px;color:#888;border-top:1px solid #eee;padding-top:16px;margin-top:8px">
+      Questions or concerns? Reach us directly at<br>
+      <a href="mailto:support@immigrationadviceservice.org" style="color:#1a6bb5;font-weight:bold;text-decoration:none">support@immigrationadviceservice.org</a>
+    </p>
+  </div>
+
+  <!-- Not found state -->
+  <div id="state-notfound" class="hidden">
+    <div class="success-icon">🔍</div>
+    <h2>We couldn't find your file</h2>
+    <p>We couldn't locate a record with that email address. Please double check the email, or contact us directly and we'll be happy to assist you.</p>
+    <button class="btn-confirm" onclick="resetForm()">Try Again</button>
+  </div>
+
+  <!-- Error state -->
+  <div id="state-error" class="hidden">
+    <div class="success-icon">⚠️</div>
+    <h2>Something went wrong.</h2>
+    <p>Please contact us directly and we'll be happy to assist you.</p>
+  </div>
+
+</div>
+
+<script>
+const WEBHOOK = "https://immiworld.org/rest/147/47yrflms2cje1cbe/";
+const FIELD_ID = "UF_CRM_1547484113";
+const FIELD_ID_CONTACT = "UF_CRM_5C5843FC11F1D";
+const PAYMENT_BASE = "https://immigrationadviceservice.org/new-gc-payment-19/";
+const PROTECTED_STATUSES = ["CONVERTED", "26", "27", "31", "DETAILS"];
+
+const params = new URLSearchParams(window.location.search);
+const answer = (params.get("answer") || "").toLowerCase();
+
+// UTM passthrough — carry existing UTM from URL into payment link
+let utmParams = '';
+(function(){
+  const utmKeys = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'];
+  const parts = [];
+  if(!params.get('utm_campaign')) parts.push('utm_campaign=reengagement');
+  if(!params.get('utm_source'))   parts.push('utm_source=email_marketing');
+  utmKeys.forEach(k => { if(params.get(k)) parts.push(k+'='+encodeURIComponent(params.get(k))); });
+  utmParams = parts.length ? '?' + parts.join('&') : '';
+})();
+
+const PAYMENT_URL = PAYMENT_BASE + utmParams;
+
+let lastEntityType = null;
+let lastEntityId = null;
+let lastClientId = null;
+let lastLeadStatus = null;
+let originalPhone = null;
+
+const STATES = ["state-email-entry","state-loading","state-verify","state-yes","state-no","state-notfound","state-error"];
+
+function show(id) {
+  STATES.forEach(s => document.getElementById(s).classList.toggle("hidden", s !== id));
+}
+
+function resetForm() {
+  document.getElementById("emailField").value = "";
+  document.getElementById("errorBox").innerHTML = "";
+  show("state-email-entry");
+}
+
+function isValidEmail(e) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+}
+
+async function findLead() {
+  const email = document.getElementById("emailField").value.trim();
+  const errorBox = document.getElementById("errorBox");
+  errorBox.innerHTML = "";
+
+  if (!isValidEmail(email)) {
+    errorBox.innerHTML = '<div class="error-msg">Please enter a valid email address.</div>';
+    return;
+  }
+
+  if (!["yes","no"].includes(answer)) { show("state-error"); return; }
+
+  show("state-loading");
+
+  try {
+    // 1. Fetch leads
+    const leadsRes = await fetch(WEBHOOK + "crm.lead.list?filter[EMAIL]=" + encodeURIComponent(email) +
+      "&select[]=ID&select[]=STATUS_ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=UF_CRM_1449131692&order[DATE_CREATE]=DESC");
+    const leadsData = await leadsRes.json();
+    const leads = leadsData.result || [];
+
+    // 2. Fetch contacts
+    const contactRes = await fetch(WEBHOOK + "crm.contact.list?filter[EMAIL]=" + encodeURIComponent(email) +
+      "&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=UF_CRM_1449131692&order[DATE_CREATE]=DESC");
+    const contactData = await contactRes.json();
+    const contacts = contactData.result || [];
+
+    if (!leads.length && !contacts.length) { show("state-notfound"); return; }
+
+    const newestLead = leads.length ? leads[0] : null;
+    const isProtected = newestLead && PROTECTED_STATUSES.includes(newestLead.STATUS_ID);
+
+    let targetRecord = null;
+
+    if (isProtected || (!newestLead && contacts.length)) {
+      if (contacts.length) {
+        lastEntityType = "contact";
+        targetRecord = contacts[0];
+      } else if (newestLead) {
+        lastEntityType = "lead";
+        targetRecord = newestLead;
+      }
+    } else if (newestLead) {
+      lastEntityType = "lead";
+      targetRecord = newestLead;
+    } else if (contacts.length) {
+      lastEntityType = "contact";
+      targetRecord = contacts[0];
+    }
+
+    if (!targetRecord) { show("state-notfound"); return; }
+
+    lastEntityId = targetRecord.ID;
+    lastClientId = targetRecord.UF_CRM_1449131692;
+    lastLeadStatus = targetRecord.STATUS_ID || null;
+
+    // Show verify form with correct content
+    const fullName = [targetRecord.NAME, targetRecord.LAST_NAME].filter(Boolean).join(" ") || "—";
+    document.getElementById("verifyName").textContent = fullName;
+    originalPhone = (targetRecord.PHONE && targetRecord.PHONE[0] && targetRecord.PHONE[0].VALUE) || "";
+    document.getElementById("verifyPhone").value = originalPhone;
+
+    if (answer === "no") {
+      document.getElementById("verifyYesContent").classList.add("hidden");
+      document.getElementById("verifyNoContent").classList.remove("hidden");
+      // Show client name so they recognize their file
+      const nameEl = document.getElementById("noClientNameText");
+      const nameBox = document.getElementById("noClientName");
+      if (fullName && fullName !== "—") {
+        nameEl.textContent = fullName;
+        nameBox.style.display = "block";
+        const clientIdEl = document.getElementById("noClientIdText");
+        if (clientIdEl) clientIdEl.textContent = lastClientId || ("#" + lastEntityId);
+        const phoneEl = document.getElementById("noClientPhoneText");
+        if (phoneEl) phoneEl.textContent = originalPhone || "—";
+      }
+    }
+
+    show("state-verify");
+
+  } catch(e) {
+    console.error(e);
+    show("state-error");
+  }
+}
+
+async function confirmDetails() {
+  show("state-loading");
+
+  const newPhone = document.getElementById("verifyPhone").value.trim();
+  const value = answer === "yes" ? "Yes" : "No";
+  const isProtected = false; // already filtered above
+
+  try {
+    // Update fields
+    const updateFields = { [FIELD_ID]: value };
+
+    // Update status to NEW if Yes, lead, and not protected
+    const currentStatus = lastEntityType === "lead" ? lastLeadStatus : null;
+    const isCurrentlyProtected = currentStatus && PROTECTED_STATUSES.includes(currentStatus);
+    if (answer === "yes" && lastEntityType === "lead" && !isCurrentlyProtected) {
+      updateFields["STATUS_ID"] = "NEW";
+    }
+
+    // Update phone if changed
+    if (newPhone && newPhone !== originalPhone) {
+      if (lastEntityType === "lead") {
+        updateFields["PHONE"] = [{ VALUE: newPhone, VALUE_TYPE: "WORK" }];
+      } else {
+        updateFields["PHONE"] = [{ VALUE: newPhone, VALUE_TYPE: "WORK" }];
+      }
+    }
+
+    // Timeline comment
+    let commentText = answer === "yes"
+      ? "Client received the re-engagement email (\"Notice: New Immigration Pathways May Affect Your Eligibility\") and confirmed they are still interested in proceeding (answered Yes). Field 'Interested in Visa' updated to Yes."
+      : "Client received the re-engagement email (\"Notice: New Immigration Pathways May Affect Your Eligibility\") and indicated they are no longer interested in proceeding (answered No). Field 'Interested in Visa' updated to No.";
+
+    if (newPhone && newPhone !== originalPhone) {
+      commentText += " Phone number updated to: " + newPhone;
+    }
+
+    if (lastEntityType === "lead") {
+      await fetch(WEBHOOK + "crm.lead.update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ID: lastEntityId, FIELDS: { ...updateFields, COMMENTS: commentText, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", UTM_CAMPAIGN: params.get("utm_campaign") || "" } })
+      });
+    } else {
+      const contactFields = { [FIELD_ID_CONTACT]: value, COMMENTS: commentText };
+      if (newPhone && newPhone !== originalPhone) {
+        contactFields["PHONE"] = [{ VALUE: newPhone, VALUE_TYPE: "WORK" }];
+      }
+      await fetch(WEBHOOK + "crm.contact.update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ID: lastEntityId, FIELDS: contactFields })
+      });
+    }
+
+    await fetch(WEBHOOK + "crm.timeline.comment.add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fields: { ENTITY_TYPE: lastEntityType, ENTITY_ID: lastEntityId, COMMENT: commentText }
+      })
+    });
+
+    // Show result
+    if (answer === "yes") {
+      const displayCaseId = lastClientId || ("#" + lastEntityId);
+      document.getElementById("caseNumberLine").textContent = "Client ID: " + displayCaseId;
+      const payUrl = PAYMENT_URL + (PAYMENT_URL.includes('?') ? '&' : '?') + 'lead_id=' + (lastEntityType === "lead" ? lastEntityId : "");
+      document.getElementById("pay-link").href = payUrl;
+      show("state-yes");
+    } else {
+      show("state-no");
+    }
+
+  } catch(e) {
+    console.error(e);
+    show("state-error");
+  }
+}
+
+async function submitNoReason() {
+  const reason = document.getElementById("noReasonField").value.trim();
+  if (!reason || !lastEntityType || !lastEntityId) {
+    document.getElementById("noReasonThanks").classList.remove("hidden");
+    return;
+  }
+  try {
+    await fetch(WEBHOOK + "crm.timeline.comment.add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fields: {
+          ENTITY_TYPE: lastEntityType,
+          ENTITY_ID: lastEntityId,
+          COMMENT: "Client's reason for not proceeding: " + reason
+        }
+      })
+    });
+  } catch(e) { console.error(e); }
+  document.getElementById("noReasonThanks").classList.remove("hidden");
+}
+
+(function init() {
+  if (!["yes","no"].includes(answer)) { show("state-error"); return; }
+  if (answer === "no") {
+    document.getElementById("entryTitle").textContent = "Confirm your details";
+    document.getElementById("entrySub").textContent = "Please enter your email address to confirm — we'll update your file accordingly.";
+  }
+  // If email is passed in URL (from Bitrix24 #EMAIL_TO#), skip email entry step
+  const urlEmail = params.get("email");
+  if (urlEmail && urlEmail !== "#EMAIL_TO#" && urlEmail.includes("@")) {
+    document.getElementById("emailField").value = decodeURIComponent(urlEmail);
+    setTimeout(findLead, 100);
+  }
+
+  // Update verify screen text based on answer
+  if (answer === "no") {
+    document.getElementById("verifySubtitle") && (document.getElementById("verifySubtitle").textContent = "");
+  }
+
+})();
+
+async function submitNoReasonFromVerify() {
+  const selected = document.querySelector('input[name="noReason"]:checked');
+  if (!selected) {
+    alert("Please select an option before continuing.");
+    return;
+  }
+  let reasonValue = selected.value;
+  if (reasonValue === "No - Other") {
+    const otherText = document.getElementById("otherReasonText").value.trim();
+    if (otherText) reasonValue = "No - Other: " + otherText;
+  }
+
+  // Visual feedback
+  const btn = document.querySelector('#verifyNoContent .btn-confirm');
+  btn.textContent = "Updating...";
+  btn.disabled = true;
+  btn.style.background = "#4b5563";
+
+  show("state-loading");
+
+  try {
+    if (lastEntityType === "lead") {
+      await fetch(WEBHOOK + "crm.lead.update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ID: lastEntityId, FIELDS: { [FIELD_ID]: reasonValue, COMMENTS: reasonValue, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", UTM_CAMPAIGN: params.get("utm_campaign") || "" } })
+      });
+    } else {
+      await fetch(WEBHOOK + "crm.contact.update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ID: lastEntityId, FIELDS: { [FIELD_ID_CONTACT]: reasonValue, COMMENTS: reasonValue } })
+      });
+    }
+    await fetch(WEBHOOK + "crm.timeline.comment.add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fields: { ENTITY_TYPE: lastEntityType, ENTITY_ID: lastEntityId, COMMENT: 'Client received the re-engagement email and selected: ' + reasonValue } })
+    });
+    show("state-no");
+  } catch(e) { console.error(e); show("state-error"); }
+}
+</script>
+</body>
+</html>
