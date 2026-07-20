@@ -470,7 +470,7 @@ async function confirmDetails() {
       await fetch(WEBHOOK + "crm.lead.update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ID: lastEntityId, FIELDS: { ...updateFields, COMMENTS: commentText, ASSIGNED_BY_ID: 902, SOURCE_ID: "4" } })
+        body: JSON.stringify({ ID: lastEntityId, FIELDS: { ...updateFields, COMMENTS: commentText, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", UTM_CAMPAIGN: params.get("utm_campaign") || "" } })
       });
     } else {
       const contactFields = { [FIELD_ID_CONTACT]: value, COMMENTS: commentText };
@@ -576,7 +576,7 @@ async function submitNoReasonFromVerify() {
       await fetch(WEBHOOK + "crm.lead.update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ID: lastEntityId, FIELDS: { [FIELD_ID]: reasonValue, COMMENTS: reasonValue, ASSIGNED_BY_ID: 902, SOURCE_ID: "4" } })
+        body: JSON.stringify({ ID: lastEntityId, FIELDS: { [FIELD_ID]: reasonValue, COMMENTS: reasonValue, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", UTM_CAMPAIGN: params.get("utm_campaign") || "" } })
       });
     } else {
       await fetch(WEBHOOK + "crm.contact.update", {
