@@ -496,7 +496,8 @@ async function confirmDetails() {
     if (answer === "yes") {
       const displayCaseId = lastClientId || ("#" + lastEntityId);
       document.getElementById("caseNumberLine").textContent = "Client ID: " + displayCaseId;
-      const payUrl = PAYMENT_URL + (PAYMENT_URL.includes('?') ? '&' : '?') + 'lead_id=' + (lastEntityType === "lead" ? lastEntityId : "");
+      const entityParam = lastEntityType === "lead" ? "lead_id=" + lastEntityId : "contact_id=" + lastEntityId;
+      const payUrl = PAYMENT_URL + (PAYMENT_URL.includes('?') ? '&' : '?') + entityParam;
       document.getElementById("pay-link").href = payUrl;
       show("state-yes");
     } else {
