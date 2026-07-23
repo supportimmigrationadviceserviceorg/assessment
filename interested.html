@@ -480,7 +480,7 @@ async function confirmDetails() {
         body: JSON.stringify({ ID: lastEntityId, FIELDS: { ...updateFields, COMMENTS: commentText, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", UTM_CAMPAIGN: campaignId, SOURCE_DESCRIPTION: campaignId } })
       });
     } else {
-      const contactFields = { [FIELD_ID_CONTACT]: value, COMMENTS: commentText };
+      const contactFields = { [FIELD_ID_CONTACT]: value, COMMENTS: commentText, SOURCE_DESCRIPTION: campaignId };
       if (newPhone && newPhone !== originalPhone) {
         contactFields["PHONE"] = [{ VALUE: newPhone, VALUE_TYPE: "WORK" }];
       }
