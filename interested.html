@@ -308,6 +308,9 @@ const PROTECTED_STATUSES = ["CONVERTED", "26", "27", "31", "DETAILS"];
 
 const params = new URLSearchParams(window.location.search);
 const answer = (params.get("answer") || "").toLowerCase();
+const bxId = params.get("bx_sender_conversion_id");
+const utmCampaign = params.get("utm_campaign") || "";
+const campaignId = utmCampaign.match(/(\d{4,})/) ? utmCampaign.match(/(\d{4,})/)[1] : utmCampaign;
 
 // UTM passthrough — carry existing UTM from URL into payment link
 let utmParams = '';
@@ -470,7 +473,7 @@ async function confirmDetails() {
       await fetch(WEBHOOK + "crm.lead.update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ID: lastEntityId, FIELDS: { ...updateFields, COMMENTS: commentText, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", UTM_CAMPAIGN: params.get("bx_sender_conversion_id") || params.get("utm_campaign") || "", SOURCE_DESCRIPTION: params.get("bx_sender_conversion_id") || params.get("utm_campaign") || "" } })
+        body: JSON.stringify({ ID: lastEntityId, FIELDS: { ...updateFields, COMMENTS: commentText, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", UTM_CAMPAIGN: campaignId, SOURCE_DESCRIPTION: campaignId } })
       });
     } else {
       const contactFields = { [FIELD_ID_CONTACT]: value, COMMENTS: commentText };
@@ -577,7 +580,7 @@ async function submitNoReasonFromVerify() {
       await fetch(WEBHOOK + "crm.lead.update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ID: lastEntityId, FIELDS: { [FIELD_ID]: reasonValue, COMMENTS: reasonValue, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", UTM_CAMPAIGN: params.get("bx_sender_conversion_id") || params.get("utm_campaign") || "", SOURCE_DESCRIPTION: params.get("bx_sender_conversion_id") || params.get("utm_campaign") || "" } })
+        body: JSON.stringify({ ID: lastEntityId, FIELDS: { [FIELD_ID]: reasonValue, COMMENTS: reasonValue, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", UTM_CAMPAIGN: campaignId, SOURCE_DESCRIPTION: campaignId } })
       });
     } else {
       await fetch(WEBHOOK + "crm.contact.update", {
