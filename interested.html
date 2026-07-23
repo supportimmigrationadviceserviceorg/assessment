@@ -450,6 +450,10 @@ async function confirmDetails() {
     if (answer === "yes" && lastEntityType === "lead" && !isCurrentlyProtected) {
       updateFields["STATUS_ID"] = "NEW";
     }
+    // Update status to 31 (Not interested - support email request) if No
+    if (answer === "no" && lastEntityType === "lead" && !isCurrentlyProtected) {
+      updateFields["STATUS_ID"] = "31";
+    }
 
     // Update phone if changed
     if (newPhone && newPhone !== originalPhone) {
@@ -580,7 +584,7 @@ async function submitNoReasonFromVerify() {
       await fetch(WEBHOOK + "crm.lead.update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ID: lastEntityId, FIELDS: { [FIELD_ID]: reasonValue, COMMENTS: reasonValue, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", UTM_CAMPAIGN: campaignId, SOURCE_DESCRIPTION: campaignId } })
+        body: JSON.stringify({ ID: lastEntityId, FIELDS: { [FIELD_ID]: reasonValue, STATUS_ID: "31", COMMENTS: reasonValue, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", UTM_CAMPAIGN: campaignId, SOURCE_DESCRIPTION: campaignId } })
       });
     } else {
       await fetch(WEBHOOK + "crm.contact.update", {
