@@ -580,9 +580,9 @@ async function confirmDetails() {
       document.getElementById("caseNumberLine").textContent = "Client ID: " + displayCaseId;
       const entityParam = lastEntityType === "lead" ? "lead_id=" + lastEntityId : "contact_id=" + lastEntityId;
       let payUrl = PAYMENT_URL + (PAYMENT_URL.includes('?') ? '&' : '?') + entityParam;
-      // Cache-buster: forces the payment page to be fetched fresh so a cached
-      // copy of another visitor's page (with their UTMs / lead_id) is never served.
-      payUrl += "&_t=" + Date.now();
+      // Cache-buster: every visitor gets a unique payment URL, so no cached
+      // or frozen copy of another visitor's page can be served to them.
+      payUrl += "&_t=" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
       document.getElementById("pay-link").href = payUrl;
       show("state-yes");
     } else {
