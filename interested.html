@@ -320,9 +320,13 @@ const campaignId = utmCampaign.match(/(\d{4,})/) ? utmCampaign.match(/(\d{4,})/)
    - Empty values are never sent, so a visit without UTMs can't blank
      out good existing data.
    - utm_source / utm_medium fall back to sensible defaults, because
-     this page is only ever reached from an email. If Bitrix appended
-     its own values, those win (URLSearchParams returns the first
-     occurrence, and Bitrix appends after our manual ones).
+     this page is only ever reached from an email.
+
+   Note on duplicates: Bitrix appends its own UTM set after the manual
+   ones already in the link. URLSearchParams.get() returns the FIRST
+   occurrence, so a manually placed utm_campaign wins over the value
+   Bitrix appends. Keys not supplied manually are filled from Bitrix's
+   set. The defaults below fire only when neither supplied anything.
 
    To disable the defaults, delete the two DEFAULT_ lines below.
 ------------------------------------------------------------------- */
