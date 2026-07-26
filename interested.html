@@ -356,8 +356,9 @@ const utmFields = {};
 // Only send SOURCE_DESCRIPTION when we actually have a campaign ID.
 const sourceDescFields = campaignId ? { SOURCE_DESCRIPTION: campaignId } : {};
 
-console.log("[IAS] UTM fields to be written:", utmFields);
-console.log("[IAS] SOURCE_DESCRIPTION:", sourceDescFields);
+console.log("[IAS] answer param:", answer || "(MISSING — page will show error)");
+console.log("[IAS] UTM fields to be written:", JSON.stringify(utmFields));
+console.log("[IAS] SOURCE_DESCRIPTION:", JSON.stringify(sourceDescFields));
 
 // UTM passthrough — carry existing UTM from URL into payment link
 let utmParams = '';
@@ -544,25 +545,25 @@ async function confirmDetails() {
 
     if (lastEntityType === "lead") {
       const leadPayload = { ID: lastEntityId, FIELDS: { ...updateFields, COMMENTS: commentText, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", ...utmFields, ...sourceDescFields } };
-      console.log("[IAS] crm.lead.update payload:", leadPayload);
+      console.log("[IAS] crm.lead.update payload:", JSON.stringify(leadPayload));
       const r = await fetch(WEBHOOK + "crm.lead.update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(leadPayload)
       });
-      console.log("[IAS] crm.lead.update response:", await r.clone().json());
+      console.log("[IAS] crm.lead.update response:", JSON.stringify(await r.clone().json()));
     } else {
       const contactFields = { [FIELD_ID_CONTACT]: value, COMMENTS: commentText, ...sourceDescFields };
       if (newPhone && newPhone !== originalPhone) {
         contactFields["PHONE"] = buildPhoneField(newPhone);
       }
-      console.log("[IAS] crm.contact.update payload:", contactFields);
+      console.log("[IAS] crm.contact.update payload:", JSON.stringify(contactFields));
       const r = await fetch(WEBHOOK + "crm.contact.update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ID: lastEntityId, FIELDS: contactFields })
       });
-      console.log("[IAS] crm.contact.update response:", await r.clone().json());
+      console.log("[IAS] crm.contact.update response:", JSON.stringify(await r.clone().json()));
     }
 
     await fetch(WEBHOOK + "crm.timeline.comment.add", {
@@ -659,13 +660,13 @@ async function submitNoReasonFromVerify() {
   try {
     if (lastEntityType === "lead") {
       const p = { ID: lastEntityId, FIELDS: { [FIELD_ID]: reasonValue, STATUS_ID: "31", COMMENTS: reasonValue, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", ...utmFields, ...sourceDescFields } };
-      console.log("[IAS] crm.lead.update (No) payload:", p);
+      console.log("[IAS] crm.lead.update (No) payload:", JSON.stringify(p));
       const r = await fetch(WEBHOOK + "crm.lead.update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(p)
       });
-      console.log("[IAS] crm.lead.update (No) response:", await r.clone().json());
+      console.log("[IAS] crm.lead.update (No) response:", JSON.stringify(await r.clone().json()));
     } else {
       await fetch(WEBHOOK + "crm.contact.update", {
         method: "POST",
