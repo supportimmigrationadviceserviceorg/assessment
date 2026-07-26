@@ -312,6 +312,35 @@ const bxId = params.get("bx_sender_conversion_id");
 const utmCampaign = params.get("utm_campaign") || "";
 const campaignId = utmCampaign.match(/(\d{4,})/) ? utmCampaign.match(/(\d{4,})/)[1] : utmCampaign;
 
+/* ------------------------------------------------------------------
+   FIX (a) + (b): build the full UTM set for the CRM update.
+   - All five UTM fields are written, not just UTM_CAMPAIGN, so the
+     deal created from this lead inherits the correct attribution
+     instead of keeping stale values from an older campaign.
+   - Keys are only included when the value is non-empty, so a visitor
+     arriving without UTMs can never blank out good existing data.
+   UTM_CAMPAIGN keeps the existing behaviour (numeric campaign ID).
+------------------------------------------------------------------- */
+const utmFields = {};
+(function buildUtmFields() {
+  const map = {
+    utm_source:   "UTM_SOURCE",
+    utm_medium:   "UTM_MEDIUM",
+    utm_campaign: "UTM_CAMPAIGN",
+    utm_content:  "UTM_CONTENT",
+    utm_term:     "UTM_TERM"
+  };
+  Object.keys(map).forEach(function (key) {
+    const val = (params.get(key) || "").trim();
+    if (val) utmFields[map[key]] = val;
+  });
+  // Preserve previous behaviour: UTM_CAMPAIGN stores the numeric ID only.
+  if (campaignId) utmFields["UTM_CAMPAIGN"] = campaignId;
+})();
+
+// Only send SOURCE_DESCRIPTION when we actually have a campaign ID.
+const sourceDescFields = campaignId ? { SOURCE_DESCRIPTION: campaignId } : {};
+
 // UTM passthrough — carry existing UTM from URL into payment link
 let utmParams = '';
 (function(){
@@ -347,6 +376,20 @@ function isValidEmail(e) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 }
 
+/* ------------------------------------------------------------------
+   FIX (c): confirm the record Bitrix returned really belongs to the
+   email that was entered. If the record carries no EMAIL data at all
+   we do NOT block it — that keeps legitimate edge cases working.
+------------------------------------------------------------------- */
+function recordMatchesEmail(rec, email) {
+  if (!rec) return false;
+  if (!Array.isArray(rec.EMAIL) || !rec.EMAIL.length) return true; // no email data returned — don't block
+  const target = String(email).trim().toLowerCase();
+  return rec.EMAIL.some(function (e) {
+    return String((e && e.VALUE) || "").trim().toLowerCase() === target;
+  });
+}
+
 async function findLead() {
   const email = document.getElementById("emailField").value.trim();
   const errorBox = document.getElementById("errorBox");
@@ -364,15 +407,15 @@ async function findLead() {
   try {
     // 1. Fetch leads
     const leadsRes = await fetch(WEBHOOK + "crm.lead.list?filter[EMAIL]=" + encodeURIComponent(email) +
-      "&select[]=ID&select[]=STATUS_ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=UF_CRM_1449131692&order[DATE_CREATE]=DESC");
+      "&select[]=ID&select[]=STATUS_ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=EMAIL&select[]=UF_CRM_1449131692&order[DATE_CREATE]=DESC");
     const leadsData = await leadsRes.json();
-    const leads = leadsData.result || [];
+    const leads = (leadsData.result || []).filter(function (r) { return recordMatchesEmail(r, email); });
 
     // 2. Fetch contacts
     const contactRes = await fetch(WEBHOOK + "crm.contact.list?filter[EMAIL]=" + encodeURIComponent(email) +
-      "&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=UF_CRM_1449131692&order[DATE_CREATE]=DESC");
+      "&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=EMAIL&select[]=UF_CRM_1449131692&order[DATE_CREATE]=DESC");
     const contactData = await contactRes.json();
-    const contacts = contactData.result || [];
+    const contacts = (contactData.result || []).filter(function (r) { return recordMatchesEmail(r, email); });
 
     if (!leads.length && !contacts.length) { show("state-notfound"); return; }
 
@@ -398,6 +441,9 @@ async function findLead() {
     }
 
     if (!targetRecord) { show("state-notfound"); return; }
+
+    // Final guard before we write anything to this record.
+    if (!recordMatchesEmail(targetRecord, email)) { show("state-notfound"); return; }
 
     lastEntityId = targetRecord.ID;
     lastClientId = targetRecord.UF_CRM_1449131692;
@@ -477,10 +523,10 @@ async function confirmDetails() {
       await fetch(WEBHOOK + "crm.lead.update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ID: lastEntityId, FIELDS: { ...updateFields, COMMENTS: commentText, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", UTM_CAMPAIGN: campaignId, SOURCE_DESCRIPTION: campaignId } })
+        body: JSON.stringify({ ID: lastEntityId, FIELDS: { ...updateFields, COMMENTS: commentText, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", ...utmFields, ...sourceDescFields } })
       });
     } else {
-      const contactFields = { [FIELD_ID_CONTACT]: value, COMMENTS: commentText, SOURCE_DESCRIPTION: campaignId };
+      const contactFields = { [FIELD_ID_CONTACT]: value, COMMENTS: commentText, ...sourceDescFields };
       if (newPhone && newPhone !== originalPhone) {
         contactFields["PHONE"] = [{ VALUE: newPhone, VALUE_TYPE: "WORK" }];
       }
@@ -504,7 +550,10 @@ async function confirmDetails() {
       const displayCaseId = lastClientId || ("#" + lastEntityId);
       document.getElementById("caseNumberLine").textContent = "Client ID: " + displayCaseId;
       const entityParam = lastEntityType === "lead" ? "lead_id=" + lastEntityId : "contact_id=" + lastEntityId;
-      const payUrl = PAYMENT_URL + (PAYMENT_URL.includes('?') ? '&' : '?') + entityParam;
+      let payUrl = PAYMENT_URL + (PAYMENT_URL.includes('?') ? '&' : '?') + entityParam;
+      // Cache-buster: forces the payment page to be fetched fresh so a cached
+      // copy of another visitor's page (with their UTMs / lead_id) is never served.
+      payUrl += "&_t=" + Date.now();
       document.getElementById("pay-link").href = payUrl;
       show("state-yes");
     } else {
@@ -584,7 +633,7 @@ async function submitNoReasonFromVerify() {
       await fetch(WEBHOOK + "crm.lead.update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ID: lastEntityId, FIELDS: { [FIELD_ID]: reasonValue, STATUS_ID: "31", COMMENTS: reasonValue, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", UTM_CAMPAIGN: campaignId, SOURCE_DESCRIPTION: campaignId } })
+        body: JSON.stringify({ ID: lastEntityId, FIELDS: { [FIELD_ID]: reasonValue, STATUS_ID: "31", COMMENTS: reasonValue, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", ...utmFields, ...sourceDescFields } })
       });
     } else {
       await fetch(WEBHOOK + "crm.contact.update", {
