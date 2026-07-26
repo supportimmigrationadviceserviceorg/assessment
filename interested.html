@@ -313,14 +313,22 @@ const utmCampaign = params.get("utm_campaign") || "";
 const campaignId = utmCampaign.match(/(\d{4,})/) ? utmCampaign.match(/(\d{4,})/)[1] : utmCampaign;
 
 /* ------------------------------------------------------------------
-   FIX (a) + (b): build the full UTM set for the CRM update.
-   - All five UTM fields are written, not just UTM_CAMPAIGN, so the
-     deal created from this lead inherits the correct attribution
-     instead of keeping stale values from an older campaign.
-   - Keys are only included when the value is non-empty, so a visitor
-     arriving without UTMs can never blank out good existing data.
-   UTM_CAMPAIGN keeps the existing behaviour (numeric campaign ID).
+   UTM fields written to the CRM.
+
+   - All five are written, not just UTM_CAMPAIGN, so the deal created
+     from this lead inherits the correct attribution.
+   - Empty values are never sent, so a visit without UTMs can't blank
+     out good existing data.
+   - utm_source / utm_medium fall back to sensible defaults, because
+     this page is only ever reached from an email. If Bitrix appended
+     its own values, those win (URLSearchParams returns the first
+     occurrence, and Bitrix appends after our manual ones).
+
+   To disable the defaults, delete the two DEFAULT_ lines below.
 ------------------------------------------------------------------- */
+const DEFAULT_UTM_SOURCE = "email";
+const DEFAULT_UTM_MEDIUM = "bitrix";
+
 const utmFields = {};
 (function buildUtmFields() {
   const map = {
@@ -336,10 +344,16 @@ const utmFields = {};
   });
   // Preserve previous behaviour: UTM_CAMPAIGN stores the numeric ID only.
   if (campaignId) utmFields["UTM_CAMPAIGN"] = campaignId;
+  // Defaults only fire when the URL carried nothing for these keys.
+  if (!utmFields["UTM_SOURCE"] && DEFAULT_UTM_SOURCE) utmFields["UTM_SOURCE"] = DEFAULT_UTM_SOURCE;
+  if (!utmFields["UTM_MEDIUM"] && DEFAULT_UTM_MEDIUM) utmFields["UTM_MEDIUM"] = DEFAULT_UTM_MEDIUM;
 })();
 
 // Only send SOURCE_DESCRIPTION when we actually have a campaign ID.
 const sourceDescFields = campaignId ? { SOURCE_DESCRIPTION: campaignId } : {};
+
+console.log("[IAS] UTM fields to be written:", utmFields);
+console.log("[IAS] SOURCE_DESCRIPTION:", sourceDescFields);
 
 // UTM passthrough — carry existing UTM from URL into payment link
 let utmParams = '';
@@ -359,6 +373,7 @@ let lastEntityId = null;
 let lastClientId = null;
 let lastLeadStatus = null;
 let originalPhone = null;
+let originalPhoneId = null;
 
 const STATES = ["state-email-entry","state-loading","state-verify","state-yes","state-no","state-notfound","state-error"];
 
@@ -376,18 +391,23 @@ function isValidEmail(e) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 }
 
-/* ------------------------------------------------------------------
-   FIX (c): confirm the record Bitrix returned really belongs to the
-   email that was entered. If the record carries no EMAIL data at all
-   we do NOT block it — that keeps legitimate edge cases working.
-------------------------------------------------------------------- */
+/* Confirm the record Bitrix returned really belongs to the entered email.
+   If the record carries no EMAIL data we do NOT block it. */
 function recordMatchesEmail(rec, email) {
   if (!rec) return false;
-  if (!Array.isArray(rec.EMAIL) || !rec.EMAIL.length) return true; // no email data returned — don't block
+  if (!Array.isArray(rec.EMAIL) || !rec.EMAIL.length) return true;
   const target = String(email).trim().toLowerCase();
   return rec.EMAIL.some(function (e) {
     return String((e && e.VALUE) || "").trim().toLowerCase() === target;
   });
+}
+
+/* Build the PHONE multifield.
+   No ID is supplied, so Bitrix ADDS the new number alongside any existing
+   ones rather than replacing them. This is intentional — the record keeps
+   the full history of every number the client has given. */
+function buildPhoneField(newPhone) {
+  return [{ VALUE: newPhone, VALUE_TYPE: "WORK" }];
 }
 
 async function findLead() {
@@ -449,10 +469,13 @@ async function findLead() {
     lastClientId = targetRecord.UF_CRM_1449131692;
     lastLeadStatus = targetRecord.STATUS_ID || null;
 
+    console.log("[IAS] Matched", lastEntityType, "ID", lastEntityId);
+
     // Show verify form with correct content
     const fullName = [targetRecord.NAME, targetRecord.LAST_NAME].filter(Boolean).join(" ") || "—";
     document.getElementById("verifyName").textContent = fullName;
     originalPhone = (targetRecord.PHONE && targetRecord.PHONE[0] && targetRecord.PHONE[0].VALUE) || "";
+    originalPhoneId = (targetRecord.PHONE && targetRecord.PHONE[0] && targetRecord.PHONE[0].ID) || null;
     document.getElementById("verifyPhone").value = originalPhone;
 
     if (answer === "no") {
@@ -501,13 +524,9 @@ async function confirmDetails() {
       updateFields["STATUS_ID"] = "31";
     }
 
-    // Update phone if changed
+    // Add phone if changed — kept alongside existing numbers
     if (newPhone && newPhone !== originalPhone) {
-      if (lastEntityType === "lead") {
-        updateFields["PHONE"] = [{ VALUE: newPhone, VALUE_TYPE: "WORK" }];
-      } else {
-        updateFields["PHONE"] = [{ VALUE: newPhone, VALUE_TYPE: "WORK" }];
-      }
+      updateFields["PHONE"] = buildPhoneField(newPhone);
     }
 
     // Timeline comment
@@ -520,21 +539,26 @@ async function confirmDetails() {
     }
 
     if (lastEntityType === "lead") {
-      await fetch(WEBHOOK + "crm.lead.update", {
+      const leadPayload = { ID: lastEntityId, FIELDS: { ...updateFields, COMMENTS: commentText, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", ...utmFields, ...sourceDescFields } };
+      console.log("[IAS] crm.lead.update payload:", leadPayload);
+      const r = await fetch(WEBHOOK + "crm.lead.update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ID: lastEntityId, FIELDS: { ...updateFields, COMMENTS: commentText, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", ...utmFields, ...sourceDescFields } })
+        body: JSON.stringify(leadPayload)
       });
+      console.log("[IAS] crm.lead.update response:", await r.clone().json());
     } else {
       const contactFields = { [FIELD_ID_CONTACT]: value, COMMENTS: commentText, ...sourceDescFields };
       if (newPhone && newPhone !== originalPhone) {
-        contactFields["PHONE"] = [{ VALUE: newPhone, VALUE_TYPE: "WORK" }];
+        contactFields["PHONE"] = buildPhoneField(newPhone);
       }
-      await fetch(WEBHOOK + "crm.contact.update", {
+      console.log("[IAS] crm.contact.update payload:", contactFields);
+      const r = await fetch(WEBHOOK + "crm.contact.update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ID: lastEntityId, FIELDS: contactFields })
       });
+      console.log("[IAS] crm.contact.update response:", await r.clone().json());
     }
 
     await fetch(WEBHOOK + "crm.timeline.comment.add", {
@@ -630,11 +654,14 @@ async function submitNoReasonFromVerify() {
 
   try {
     if (lastEntityType === "lead") {
-      await fetch(WEBHOOK + "crm.lead.update", {
+      const p = { ID: lastEntityId, FIELDS: { [FIELD_ID]: reasonValue, STATUS_ID: "31", COMMENTS: reasonValue, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", ...utmFields, ...sourceDescFields } };
+      console.log("[IAS] crm.lead.update (No) payload:", p);
+      const r = await fetch(WEBHOOK + "crm.lead.update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ID: lastEntityId, FIELDS: { [FIELD_ID]: reasonValue, STATUS_ID: "31", COMMENTS: reasonValue, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", ...utmFields, ...sourceDescFields } })
+        body: JSON.stringify(p)
       });
+      console.log("[IAS] crm.lead.update (No) response:", await r.clone().json());
     } else {
       await fetch(WEBHOOK + "crm.contact.update", {
         method: "POST",
