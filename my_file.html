@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Immigration File — Immigration Advice Service</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: Georgia, 'Times New Roman', serif;
+    background:#dde3ec;
+    padding:28px 16px;
+    color:#2a2a28;
+  }
+  .card {
+    max-width:620px; margin:0 auto;
+    background:#f4f1ea; border:1px solid #c7bfa8; border-radius:2px;
+  }
+  .head {
+    border-bottom:3px double #1a3a6b; padding:22px 32px 18px; text-align:center;
+  }
+  .head .eyebrow {
+    font-size:11px; letter-spacing:4px; color:#7a6f52;
+    text-transform:uppercase; margin-bottom:6px;
+  }
+  .head .brand {
+    font-size:19px; font-weight:bold; color:#1a3a6b; letter-spacing:1px;
+  }
+  .inner { padding:30px 32px 28px; }
+
+  /* Client header */
+  .who { display:flex; align-items:center; gap:18px; margin-bottom:24px; }
+  .photo {
+    width:78px; height:78px; border-radius:50%; object-fit:cover;
+    border:2px solid #c7bfa8; background:#e7e2d4; flex-shrink:0;
+  }
+  .initials {
+    width:78px; height:78px; border-radius:50%; flex-shrink:0;
+    background:#1a3a6b; color:#f4f1ea;
+    display:flex; align-items:center; justify-content:center;
+    font-size:28px; letter-spacing:1px;
+  }
+  .who h1 { font-size:21px; color:#1a3a6b; font-weight:bold; margin-bottom:4px; }
+  .who .cid { font-size:13px; color:#7a6f52; }
+
+  .note {
+    background:#eef2f8; border-left:3px solid #1a3a6b;
+    padding:15px 18px; font-size:14px; line-height:1.75;
+    color:#1a2e4a; margin-bottom:24px;
+  }
+
+  .section-title {
+    font-size:11px; letter-spacing:3px; text-transform:uppercase;
+    color:#7a6f52; margin:0 0 10px; padding-bottom:6px;
+    border-bottom:1px solid #d8d2c0;
+  }
+  table.rows { width:100%; border-collapse:collapse; margin-bottom:24px; }
+  table.rows td { padding:9px 0; font-size:14px; vertical-align:top; }
+  table.rows td.k { color:#7a6f52; width:46%; }
+  table.rows td.v { color:#2a2a28; }
+  table.rows tr + tr td { border-top:1px solid #e4dfd0; }
+
+  .cta { text-align:center; margin-top:8px; }
+  .btn {
+    display:inline-block; background:#1a3a6b; color:#f4f1ea;
+    font-family:Arial, sans-serif; font-size:15px; font-weight:bold;
+    padding:14px 40px; border-radius:3px; text-decoration:none;
+  }
+  .cta .sub { font-size:12px; color:#9a917c; margin-top:10px; }
+
+  /* Email gate */
+  .gate { text-align:center; padding:8px 0 4px; }
+  .gate p { font-size:14px; color:#3a3a36; line-height:1.7; margin-bottom:18px; }
+  .gate input {
+    width:100%; padding:12px 14px; font-size:15px;
+    border:1px solid #c7bfa8; border-radius:3px;
+    font-family:Georgia,serif; margin-bottom:12px;
+  }
+  .gate button {
+    width:100%; background:#1a3a6b; color:#f4f1ea; border:none;
+    padding:13px; font-size:15px; border-radius:3px; cursor:pointer;
+    font-family:Arial, sans-serif; font-weight:bold;
+  }
+  .err {
+    background:#fdf2f2; border:1px solid #e6c3c3; color:#8a3232;
+    padding:11px 14px; font-size:13px; border-radius:3px;
+    margin-bottom:14px; text-align:left;
+  }
+
+  .spin {
+    width:34px; height:34px; margin:26px auto;
+    border:3px solid #ddd7c6; border-top-color:#1a3a6b;
+    border-radius:50%; animation:sp .8s linear infinite;
+  }
+  @keyframes sp { to { transform:rotate(360deg); } }
+
+  .foot {
+    background:#eceae2; border-top:1px solid #c7bfa8;
+    padding:15px 32px; text-align:center;
+    font-size:11px; color:#9a917c; line-height:1.7;
+  }
+  .foot a { color:#9a917c; text-decoration:none; }
+  .hidden { display:none; }
+
+  @media (max-width:520px) {
+    .who { flex-direction:column; text-align:center; gap:12px; }
+    table.rows td { display:block; width:100%; }
+    table.rows td.k { padding-bottom:2px; }
+    table.rows td.v { padding-top:0; font-weight:bold; }
+    table.rows tr + tr td.k { border-top:1px solid #e4dfd0; padding-top:10px; }
+    table.rows tr + tr td.v { border-top:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <div class="head">
+    <div class="eyebrow">Immigration Advice Service</div>
+    <div class="brand">Your Immigration File</div>
+  </div>
+
+  <!-- STATE: email gate -->
+  <div class="inner" id="state-gate">
+    <div class="gate">
+      <p>Please enter the email address you registered with, so we can bring up your file.</p>
+      <div id="errBox"></div>
+      <input type="email" id="emailField" placeholder="your@email.com">
+      <button onclick="lookup()">View My File</button>
+    </div>
+  </div>
+
+  <!-- STATE: loading -->
+  <div class="inner hidden" id="state-loading">
+    <div class="spin"></div>
+    <p style="text-align:center;font-size:14px;color:#7a6f52;">Retrieving your file…</p>
+  </div>
+
+  <!-- STATE: file -->
+  <div class="inner hidden" id="state-file">
+
+    <div class="who">
+      <div id="avatar"></div>
+      <div>
+        <h1 id="fullName">—</h1>
+        <div class="cid">Client ID: <span id="clientId">—</span></div>
+      </div>
+    </div>
+
+    <div class="note" id="statusNote">
+      Your file is open with our office and ready for the next step.
+    </div>
+
+    <div class="section-title">File Details</div>
+    <table class="rows" id="detailRows"></table>
+
+    <div class="cta">
+      <a href="#" class="btn" id="ctaBtn">Continue to My Case</a>
+      <div class="sub">Takes less than two minutes</div>
+    </div>
+
+  </div>
+
+  <!-- STATE: not found -->
+  <div class="inner hidden" id="state-notfound">
+    <div class="gate">
+      <p>We could not locate a file for that email address. Please check the spelling, or contact our office and we will be glad to help.</p>
+      <button onclick="reset()">Try Again</button>
+    </div>
+  </div>
+
+  <!-- STATE: error -->
+  <div class="inner hidden" id="state-error">
+    <div class="gate">
+      <p>Something went wrong on our side. Please contact our office and we will assist you directly.</p>
+    </div>
+  </div>
+
+  <div class="foot">
+    IMMIGRATION ADVICE SERVICE &nbsp;·&nbsp;
+    <a href="https://immigrationadviceservice.org">immigrationadviceservice.org</a><br>
+    2 N Central Ave, Phoenix, AZ 85004, United States<br>
+    <a href="mailto:support@immigrationadviceservice.org">support@immigrationadviceservice.org</a>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   CONFIG
+   ============================================================ */
+const WEBHOOK = "https://immiworld.org/rest/147/47yrflms2cje1cbe/";
+
+// Where the "Continue" button goes. utm_campaign is carried from the URL.
+const CTA_BASE = "https://supportimmigrationadviceserviceorg.github.io/assessment/interested.html?answer=yes";
+
+/* Fields shown on the page.
+   Deliberately excludes passport numbers, card details, internal
+   comments and anything else that shouldn't appear on a link that
+   could be forwarded. Add or remove rows here. */
+const LEAD_FIELDS = [
+  { code: "UF_CRM_1449131599",         label: "Country of birth" },
+  { code: "UF_CRM_1449131669",         label: "Country of residence" },
+  { code: "UF_CRM_LEAD_1691057729888", label: "Country" },
+  { code: "UF_CRM_1484914608",         label: "Education level" },
+  { code: "UF_CRM_LEAD_1691057977682", label: "Education level" },
+  { code: "UF_CRM_1484914403",         label: "English level" },
+  { code: "UF_CRM_LEAD_1691057942374", label: "English level" },
+  { code: "UF_CRM_1500181612",         label: "Marital status" },
+  { code: "UF_CRM_LEAD_1691057391286", label: "Marital status" },
+  { code: "UF_CRM_1484912429",         label: "Profession" }
+];
+
+const CONTACT_PHOTO_FIELD = "UF_CRM_697089EB2FDD1";
+const LEAD_PHOTO_FIELD    = "UF_CRM_1768833329744";
+const CLIENT_ID_LEAD      = "UF_CRM_1449131692";
+const CLIENT_ID_CONTACT   = "UF_CRM_566016C1CC16A";
+
+/* ============================================================ */
+
+const params = new URLSearchParams(location.search);
+const utmCampaign = params.get("utm_campaign") || "";
+
+const STATES = ["state-gate","state-loading","state-file","state-notfound","state-error"];
+function show(id){ STATES.forEach(s => document.getElementById(s).classList.toggle("hidden", s !== id)); }
+function reset(){ document.getElementById("emailField").value=""; document.getElementById("errBox").innerHTML=""; show("state-gate"); }
+function validEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+async function bx(path){
+  const r = await fetch(WEBHOOK + path);
+  return await r.json();
+}
+
+/* Resolve a Bitrix enumeration ID to its readable text. */
+let fieldDefs = null;
+async function enumText(entity, code, value){
+  if (!value) return "";
+  if (!fieldDefs) {
+    try { fieldDefs = (await bx("crm." + entity + ".fields")).result || {}; }
+    catch(e){ fieldDefs = {}; }
+  }
+  const def = fieldDefs[code];
+  if (!def || def.type !== "enumeration" || !Array.isArray(def.items)) return String(value);
+  const hit = def.items.filter(i => String(i.ID) === String(value))[0];
+  return hit ? hit.VALUE : "";
+}
+
+function photoUrl(v){
+  if (!v) return "";
+  if (typeof v === "string") return v;
+  return v.downloadUrl || v.url || v.URL || "";
+}
+
+function initials(name){
+  const p = String(name||"").trim().split(/\s+/).filter(Boolean);
+  if (!p.length) return "?";
+  return (p[0][0] + (p.length>1 ? p[p.length-1][0] : "")).toUpperCase();
+}
+
+async function lookup(){
+  const email = document.getElementById("emailField").value.trim();
+  const errBox = document.getElementById("errBox");
+  errBox.innerHTML = "";
+
+  if (!validEmail(email)) {
+    errBox.innerHTML = '<div class="err">Please enter a valid email address.</div>';
+    return;
+  }
+
+  show("state-loading");
+
+  try {
+    const sel = "&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=EMAIL&select[]=DATE_CREATE";
+
+    const leadRes = await bx("crm.lead.list?filter[EMAIL]=" + encodeURIComponent(email) +
+      sel + "&select[]=*&select[]=UF_*&order[DATE_CREATE]=DESC");
+    const leads = (leadRes.result || []).filter(r => matches(r, email));
+
+    let record = leads[0] || null;
+    let entity = "lead";
+
+    if (!record) {
+      const cRes = await bx("crm.contact.list?filter[EMAIL]=" + encodeURIComponent(email) +
+        sel + "&select[]=*&select[]=UF_*&order[DATE_CREATE]=DESC");
+      const contacts = (cRes.result || []).filter(r => matches(r, email));
+      if (contacts.length) { record = contacts[0]; entity = "contact"; }
+    }
+
+    if (!record) { show("state-notfound"); return; }
+
+    await render(record, entity, email);
+    show("state-file");
+
+  } catch(e) {
+    console.error(e);
+    show("state-error");
+  }
+}
+
+/* Only show a record whose own email really matches what was typed. */
+function matches(rec, email){
+  if (!Array.isArray(rec.EMAIL) || !rec.EMAIL.length) return false;
+  const t = email.trim().toLowerCase();
+  return rec.EMAIL.some(e => String(e.VALUE||"").trim().toLowerCase() === t);
+}
+
+async function render(rec, entity, email){
+  const name = [rec.NAME, rec.LAST_NAME].filter(Boolean).join(" ") || "Client";
+  document.getElementById("fullName").textContent = name;
+
+  const cid = rec[entity === "lead" ? CLIENT_ID_LEAD : CLIENT_ID_CONTACT] || ("#" + rec.ID);
+  document.getElementById("clientId").textContent = cid;
+
+  // Photo, or initials as a fallback
+  const pf  = entity === "lead" ? LEAD_PHOTO_FIELD : CONTACT_PHOTO_FIELD;
+  const url = photoUrl(rec[pf]);
+  const av  = document.getElementById("avatar");
+  if (url) {
+    const img = document.createElement("img");
+    img.className = "photo";
+    img.src = url;
+    img.alt = name;
+    img.onerror = function(){ av.innerHTML = '<div class="initials">' + initials(name) + '</div>'; };
+    av.innerHTML = "";
+    av.appendChild(img);
+  } else {
+    av.innerHTML = '<div class="initials">' + initials(name) + '</div>';
+  }
+
+  // Detail rows — only fields that actually hold a value
+  const tbl = document.getElementById("detailRows");
+  tbl.innerHTML = "";
+  const seen = {};
+
+  for (const f of LEAD_FIELDS) {
+    const raw = rec[f.code];
+    if (raw === undefined || raw === null || String(raw).trim() === "") continue;
+    if (seen[f.label]) continue;
+
+    let text = String(raw);
+    if (/^\d+$/.test(text)) {
+      const t = await enumText(entity, f.code, text);
+      if (!t) continue;
+      text = t;
+    }
+
+    seen[f.label] = true;
+    const tr = document.createElement("tr");
+    tr.innerHTML = '<td class="k"></td><td class="v"></td>';
+    tr.children[0].textContent = f.label;
+    tr.children[1].textContent = text;
+    tbl.appendChild(tr);
+  }
+
+  if (rec.DATE_CREATE) {
+    const d = new Date(rec.DATE_CREATE);
+    if (!isNaN(d)) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = '<td class="k">File opened</td><td class="v"></td>';
+      tr.children[1].textContent = d.toLocaleDateString("en-US",
+        { year:"numeric", month:"long", day:"numeric" });
+      tbl.appendChild(tr);
+    }
+  }
+
+  if (!tbl.children.length) {
+    document.getElementById("detailRows").previousElementSibling.style.display = "none";
+  }
+
+  // CTA carries the email and campaign through
+  let cta = CTA_BASE + "&email=" + encodeURIComponent(email);
+  if (utmCampaign) cta += "&utm_campaign=" + encodeURIComponent(utmCampaign);
+  document.getElementById("ctaBtn").href = cta;
+}
+
+/* If the email arrives in the URL from a mail merge, skip the gate. */
+(function init(){
+  const e = params.get("email");
+  if (e && e.indexOf("@") !== -1 && e !== "#EMAIL_TO#") {
+    document.getElementById("emailField").value = decodeURIComponent(e);
+    setTimeout(lookup, 80);
+  }
+})();
+</script>
+
+</body>
+</html>
