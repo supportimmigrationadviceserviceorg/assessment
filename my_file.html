@@ -253,7 +253,8 @@ function photoUrl(v){
   if (!v) return "";
   let u = "";
   if (typeof v === "string") u = v;
-  else u = v.downloadUrl || v.showUrl || v.url || v.URL || "";
+  // showUrl is meant for inline display; downloadUrl forces a file download.
+  else u = v.showUrl || v.downloadUrl || v.url || v.URL || "";
   if (!u) return "";
   // Bitrix returns paths like /bitrix/components/... — make them absolute.
   if (u.charAt(0) === "/") u = PORTAL + u;
