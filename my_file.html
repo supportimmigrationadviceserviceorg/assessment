@@ -217,6 +217,9 @@ const LEAD_PHOTO_FIELD    = "UF_CRM_1768833329744";
 const CLIENT_ID_LEAD      = "UF_CRM_1449131692";
 const CLIENT_ID_CONTACT   = "UF_CRM_566016C1CC16A";
 
+// Bitrix returns file URLs relative to the portal root.
+const PORTAL = "https://immiworld.org";
+
 /* ============================================================ */
 
 const params = new URLSearchParams(location.search);
@@ -248,8 +251,13 @@ async function enumText(entity, code, value){
 
 function photoUrl(v){
   if (!v) return "";
-  if (typeof v === "string") return v;
-  return v.downloadUrl || v.url || v.URL || "";
+  let u = "";
+  if (typeof v === "string") u = v;
+  else u = v.downloadUrl || v.showUrl || v.url || v.URL || "";
+  if (!u) return "";
+  // Bitrix returns paths like /bitrix/components/... — make them absolute.
+  if (u.charAt(0) === "/") u = PORTAL + u;
+  return u;
 }
 
 function initials(name){
@@ -312,9 +320,9 @@ async function render(rec, entity, email){
   const cid = rec[entity === "lead" ? CLIENT_ID_LEAD : CLIENT_ID_CONTACT] || ("#" + rec.ID);
   document.getElementById("clientId").textContent = cid;
 
-  // Photo, or initials as a fallback
+  // Photo: standard PHOTO field first, then the custom one, then initials.
   const pf  = entity === "lead" ? LEAD_PHOTO_FIELD : CONTACT_PHOTO_FIELD;
-  const url = photoUrl(rec[pf]);
+  const url = photoUrl(rec.PHOTO) || photoUrl(rec[pf]);
   const av  = document.getElementById("avatar");
   if (url) {
     const img = document.createElement("img");
