@@ -282,30 +282,34 @@ async function lookup(){
   try {
     const sel = "&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=EMAIL&select[]=DATE_CREATE";
 
+    // Look up both — details usually live on the lead, the photo on the contact.
     const leadRes = await bx("crm.lead.list?filter[EMAIL]=" + encodeURIComponent(email) +
-      sel + "&select[]=*&select[]=UF_*&order[DATE_CREATE]=DESC");
+      sel + "&order[DATE_CREATE]=DESC");
     const leads = (leadRes.result || []).filter(r => matches(r, email));
 
-    let record = leads[0] || null;
-    let entity = "lead";
+    const cRes = await bx("crm.contact.list?filter[EMAIL]=" + encodeURIComponent(email) +
+      sel + "&order[DATE_CREATE]=DESC");
+    const contacts = (cRes.result || []).filter(r => matches(r, email));
 
-    if (!record) {
-      const cRes = await bx("crm.contact.list?filter[EMAIL]=" + encodeURIComponent(email) +
-        sel + "&select[]=*&select[]=UF_*&order[DATE_CREATE]=DESC");
-      const contacts = (cRes.result || []).filter(r => matches(r, email));
-      if (contacts.length) { record = contacts[0]; entity = "contact"; }
+    if (!leads.length && !contacts.length) { show("state-notfound"); return; }
+
+    // Fetch full records — crm.*.list omits file fields such as PHOTO.
+    let leadFull = null, contactFull = null;
+    if (leads.length) {
+      try { leadFull = (await bx("crm.lead.get?id=" + encodeURIComponent(leads[0].ID))).result || null; }
+      catch(e){ leadFull = leads[0]; }
+    }
+    if (contacts.length) {
+      try { contactFull = (await bx("crm.contact.get?id=" + encodeURIComponent(contacts[0].ID))).result || null; }
+      catch(e){ contactFull = contacts[0]; }
     }
 
-    if (!record) { show("state-notfound"); return; }
+    const record = leadFull || contactFull;
+    const entity = leadFull ? "lead" : "contact";
 
-    // crm.*.list does not return file fields such as PHOTO.
-    // Re-fetch the full record so the photo is available.
-    try {
-      const full = await bx("crm." + entity + ".get?id=" + encodeURIComponent(record.ID));
-      if (full && full.result) record = full.result;
-    } catch(e) { console.warn("full fetch failed, using list record", e); }
+    console.log("[IAS] lead:", leadFull && leadFull.ID, "contact:", contactFull && contactFull.ID);
 
-    await render(record, entity, email);
+    await render(record, entity, email, contactFull);
     show("state-file");
 
   } catch(e) {
@@ -321,18 +325,20 @@ function matches(rec, email){
   return rec.EMAIL.some(e => String(e.VALUE||"").trim().toLowerCase() === t);
 }
 
-async function render(rec, entity, email){
+async function render(rec, entity, email, contactRec){
   const name = [rec.NAME, rec.LAST_NAME].filter(Boolean).join(" ") || "Client";
   document.getElementById("fullName").textContent = name;
 
   const cid = rec[entity === "lead" ? CLIENT_ID_LEAD : CLIENT_ID_CONTACT] || ("#" + rec.ID);
   document.getElementById("clientId").textContent = cid;
 
-  // Photo: standard PHOTO field first, then the custom one, then initials.
-  const pf  = entity === "lead" ? LEAD_PHOTO_FIELD : CONTACT_PHOTO_FIELD;
-  console.log("[IAS] PHOTO raw:", rec.PHOTO);
-  console.log("[IAS] custom photo raw:", rec[pf]);
-  const url = photoUrl(rec.PHOTO) || photoUrl(rec[pf]);
+  // Photo: this record first, then the linked contact, then initials.
+  const pf = entity === "lead" ? LEAD_PHOTO_FIELD : CONTACT_PHOTO_FIELD;
+  const url =
+        photoUrl(rec.PHOTO)
+     || photoUrl(rec[pf])
+     || (contactRec ? photoUrl(contactRec.PHOTO) : "")
+     || (contactRec ? photoUrl(contactRec[CONTACT_PHOTO_FIELD]) : "");
   console.log("[IAS] resolved photo url:", url || "(none)");
   const av  = document.getElementById("avatar");
   if (url) {
