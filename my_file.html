@@ -298,6 +298,13 @@ async function lookup(){
 
     if (!record) { show("state-notfound"); return; }
 
+    // crm.*.list does not return file fields such as PHOTO.
+    // Re-fetch the full record so the photo is available.
+    try {
+      const full = await bx("crm." + entity + ".get?id=" + encodeURIComponent(record.ID));
+      if (full && full.result) record = full.result;
+    } catch(e) { console.warn("full fetch failed, using list record", e); }
+
     await render(record, entity, email);
     show("state-file");
 
@@ -323,7 +330,10 @@ async function render(rec, entity, email){
 
   // Photo: standard PHOTO field first, then the custom one, then initials.
   const pf  = entity === "lead" ? LEAD_PHOTO_FIELD : CONTACT_PHOTO_FIELD;
+  console.log("[IAS] PHOTO raw:", rec.PHOTO);
+  console.log("[IAS] custom photo raw:", rec[pf]);
   const url = photoUrl(rec.PHOTO) || photoUrl(rec[pf]);
+  console.log("[IAS] resolved photo url:", url || "(none)");
   const av  = document.getElementById("avatar");
   if (url) {
     const img = document.createElement("img");
