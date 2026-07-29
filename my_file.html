@@ -275,7 +275,9 @@
         <a href="#" id="updateLink">Update my details</a></span>
 
         <div id="updatePanel" class="hidden">
-          <p class="upIntro">Add anything that's missing or out of date. Nothing already on your file will be removed.</p>
+          <p class="upIntro">Add anything you'd like to correct or complete. Every field is optional, and nothing already on your file will be removed.</p>
+
+          <div id="upMissing"></div>
 
           <label class="upLabel">Add a phone number</label>
           <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:14px;">
@@ -543,6 +545,30 @@ function buildDialSelect(){
   });
 }
 
+/* Fields the client is missing, so the update form can ask for exactly
+   those rather than leaving them to guess where to write. */
+const MISSING = { list: [] };
+
+function buildMissingInputs(){
+  const box = document.getElementById("upMissing");
+  if (!box) return;
+  box.innerHTML = "";
+  MISSING.list.forEach(function(label, i){
+    // "your profession" -> "Your profession"
+    const nice = label.charAt(0).toUpperCase() + label.slice(1);
+    const lab = document.createElement("label");
+    lab.className = "upLabel";
+    lab.textContent = nice + " (optional)";
+    const inp = document.createElement("input");
+    inp.type = "text";
+    inp.className = "upInput missingInput";
+    inp.dataset.label = nice;
+    inp.placeholder = "Only if you'd like to";
+    box.appendChild(lab);
+    box.appendChild(inp);
+  });
+}
+
 /* Holds the record currently on screen, for the update form. */
 const CURRENT = { entity:null, id:null, name:"", cid:"", phones:[], emails:[] };
 
@@ -591,7 +617,14 @@ async function submitUpdate(){
     phone = "+" + dial + digits.replace(/^0+/, "");
   }
 
-  if (!phone && !email && !note) {
+  // Anything the client filled into the missing-detail inputs
+  const filled = [];
+  document.querySelectorAll(".missingInput").forEach(function(inp){
+    const v = inp.value.trim();
+    if (v) filled.push(inp.dataset.label + ": " + v);
+  });
+
+  if (!phone && !email && !note && !filled.length) {
     err.innerHTML = '<div class="err">Please fill in at least one field.</div>';
     return;
   }
@@ -636,8 +669,9 @@ async function submitUpdate(){
 
     // Timeline note — always written, so the office sees the request
     let comment = "Client updated their own details via My Immigration File.";
-    if (added.length) comment += "\n" + added.join("\n");
-    if (note) comment += "\nClient note: " + note;
+    if (added.length)  comment += "\n" + added.join("\n");
+    if (filled.length) comment += "\n" + filled.join("\n");
+    if (note)          comment += "\nClient note: " + note;
 
     await bxPost("crm.timeline.comment.add", {
       fields: {
@@ -715,6 +749,9 @@ function renderCompleteness(rec, c, phone){
   }
 
   const missing = checks.filter(x => !x.ok).map(x => x.label);
+  // Only profession gets its own input — it is free text, so a client
+  // can answer it without needing to match one of our list values.
+  MISSING.list = missing.filter(l => l === "your profession");
   const hint = document.getElementById("scoreHint");
 
   if (!missing.length) {
@@ -723,7 +760,7 @@ function renderCompleteness(rec, c, phone){
     const list = missing.length === 1
       ? missing[0]
       : missing.slice(0, -1).join(", ") + " and " + missing[missing.length - 1];
-    hint.textContent = "Still missing: " + list + ". You can add these below.";
+    hint.textContent = "Not yet on file: " + list + ". You are welcome to add these below, though there is no need to do so now.";
   }
 }
 
@@ -953,6 +990,7 @@ async function render(rec, entity, email, contactRec){
   document.getElementById("updateLink").onclick = function(ev){
     ev.preventDefault();
     buildDialSelect();
+    buildMissingInputs();
     document.getElementById("updatePanel").classList.remove("hidden");
     document.getElementById("updatePrompt").style.display = "none";
   };
