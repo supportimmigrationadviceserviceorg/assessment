@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
 <title>My Immigration File — Immigration Advice Service</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -371,6 +372,10 @@ async function render(rec, entity, email, contactRec){
   if (url) {
     const img = document.createElement("img");
     img.className = "photo";
+    // Bitrix blocks image requests carrying a Referer from another domain.
+    // Sending none makes the request behave like opening the URL directly.
+    img.referrerPolicy = "no-referrer";
+    img.setAttribute("referrerpolicy", "no-referrer");
     img.src = url;
     img.alt = name;
     let triedAlt = false;
