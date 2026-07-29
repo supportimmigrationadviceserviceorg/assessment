@@ -480,6 +480,7 @@
     <div class="success-icon">⚠️</div>
     <h2>Something went wrong.</h2>
     <p>Please contact us directly and we'll be happy to assist you.</p>
+    <pre id="errDetail" style="display:none;text-align:left;background:#f7f7f7;border:1px solid #ddd;padding:10px;font-size:11px;white-space:pre-wrap;word-break:break-all;margin-top:14px;font-family:monospace;color:#933;"></pre>
   </div>
 
 </div>
@@ -538,6 +539,16 @@ let lastLeadId = null;
 let originalPhone = "";
 
 const STATES = ["state-email-entry","state-loading","state-verify","state-success","state-no","state-reason","state-notfound","state-error"];
+function failWith(reason, detail){
+  const box = document.getElementById("errDetail");
+  if (box) {
+    box.style.display = "block";
+    box.textContent = "reason: " + reason + "\n" + (detail || "");
+  }
+  console.error("[IAS]", reason, detail);
+  show("state-error");
+}
+
 function show(id) {
   STATES.forEach(s => document.getElementById(s).classList.toggle("hidden", s !== id));
   // Restart the entrance animation on whichever state just became visible
@@ -556,7 +567,7 @@ async function findLead() {
     errorBox.innerHTML = '<div class="error-msg">Please enter a valid email address.</div>';
     return;
   }
-  if (!["verify","no"].includes(answer)) { show("state-error"); return; }
+  if (!["verify","no"].includes(answer)) { failWith("bad answer param", "answer=" + answer); return; }
 
   show("state-loading");
 
@@ -593,7 +604,7 @@ async function findLead() {
     document.getElementById("verifyPhone").value = originalPhone;
     show("state-verify");
 
-  } catch(e) { console.error(e); show("state-error"); }
+  } catch(e) { failWith("exception", (e && e.message) + "\n" + (e && e.stack || "")); }
 }
 
 async function updateLead(fields, commentText) {
@@ -658,7 +669,7 @@ async function submitVerify() {
   try {
     await updateLead(fields, commentParts.join(" | "));
     show("state-success");
-  } catch(e) { console.error(e); show("state-error"); }
+  } catch(e) { failWith("exception", (e && e.message) + "\n" + (e && e.stack || "")); }
 }
 
 async function submitNoChange() {
@@ -669,7 +680,7 @@ async function submitNoChange() {
   try {
     await updateLead({ [INTERESTED_FIELD]: "Yes" }, commentParts.join(" | "));
     show("state-success");
-  } catch(e) { console.error(e); show("state-error"); }
+  } catch(e) { failWith("exception", (e && e.message) + "\n" + (e && e.stack || "")); }
 }
 
 async function submitNoReason() {
@@ -686,7 +697,7 @@ async function submitNoReason() {
 }
 
 (function init() {
-  if (!["verify","no"].includes(answer)) { show("state-error"); return; }
+  if (!["verify","no"].includes(answer)) { failWith("bad answer param", "answer=" + answer); return; }
   if (answer === "no") {
     document.getElementById("entryTitle").textContent = "Confirm your details";
     document.getElementById("entrySub").textContent = "Please enter your email so we can update your file.";
@@ -722,7 +733,7 @@ async function submitNoReasonVerify() {
       "Client received the verification email and selected: " + reasonValue
     );
     show("state-no");
-  } catch(e) { console.error(e); show("state-error"); }
+  } catch(e) { failWith("exception", (e && e.message) + "\n" + (e && e.stack || "")); }
 }
 </script>
 </body>
