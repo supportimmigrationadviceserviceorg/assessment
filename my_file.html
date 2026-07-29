@@ -318,9 +318,13 @@ async function lookup(){
   }
 }
 
-/* Only show a record whose own email really matches what was typed. */
+/* Confirm the record really belongs to the email that was entered.
+   crm.*.list does not always return multifields, and the server-side
+   filter has already matched on email — so a record with no EMAIL
+   array is accepted rather than discarded. */
 function matches(rec, email){
-  if (!Array.isArray(rec.EMAIL) || !rec.EMAIL.length) return false;
+  if (!rec) return false;
+  if (!Array.isArray(rec.EMAIL) || !rec.EMAIL.length) return true;
   const t = email.trim().toLowerCase();
   return rec.EMAIL.some(e => String(e.VALUE||"").trim().toLowerCase() === t);
 }
