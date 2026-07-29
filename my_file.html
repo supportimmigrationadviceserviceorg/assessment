@@ -101,6 +101,9 @@
     font-size:13px; color:#7a6f52;
   }
   .cta .update a { color:#1a3a6b; }
+  /* The success button sits inside .update, so it needs to win
+     against the link colour rule above. */
+  .cta .update a.btn { color:#f4f1ea; }
   .cta .update #updatePanel {
     margin-top:14px; background:#eef2f8; border:1px solid #d3ddea;
     border-radius:3px; padding:16px 16px 18px; text-align:left;
@@ -238,8 +241,8 @@
       <a href="#" class="btn" id="ctaBtn">Continue My 2026 Application</a>
       <div class="sub">Takes less than two minutes</div>
       <div class="update">
-        Something not correct?
-        <a href="#" id="updateLink">Update my details</a>
+        <span id="updatePrompt">Something not correct?
+        <a href="#" id="updateLink">Update my details</a></span>
 
         <div id="updatePanel" class="hidden">
           <p class="upIntro">Add anything that's missing or out of date. Nothing already on your file will be removed.</p>
@@ -896,7 +899,7 @@ async function render(rec, entity, email, contactRec){
     ev.preventDefault();
     buildDialSelect();
     document.getElementById("updatePanel").classList.remove("hidden");
-    this.style.display = "none";
+    document.getElementById("updatePrompt").style.display = "none";
   };
 }
 
