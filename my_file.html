@@ -73,6 +73,33 @@
     font-size:13px; color:#7a6f52;
   }
   .cta .update a { color:#1a3a6b; }
+  .cta .update #updatePanel {
+    margin-top:14px; background:#eef2f8; border:1px solid #d3ddea;
+    border-radius:3px; padding:16px 16px 18px; text-align:left;
+  }
+  .upIntro { font-size:13px; color:#1a2e4a; line-height:1.6; margin-bottom:14px; }
+  .upLabel {
+    display:block; font-size:11px; letter-spacing:1.5px;
+    text-transform:uppercase; color:#7a6f52; margin-bottom:5px;
+  }
+  .upInput {
+    width:100%; padding:10px 12px; font-size:14px;
+    border:1px solid #c7bfa8; border-radius:3px;
+    font-family:Georgia,serif; margin-bottom:14px;
+    background:#fff; color:#2a2a28;
+  }
+  .upInput:focus { outline:none; border-color:#1a3a6b; }
+  .upBtn {
+    width:100%; background:#1a3a6b; color:#f4f1ea; border:none;
+    padding:12px; font-size:14px; border-radius:3px; cursor:pointer;
+    font-family:Arial,sans-serif; font-weight:bold;
+  }
+  .upBtn:disabled { background:#9aa5b5; cursor:not-allowed; }
+  .upDone {
+    margin-top:14px; background:#eef5ec; border:1px solid #c3d9bd;
+    border-radius:3px; padding:14px 16px;
+    font-size:13px; line-height:1.6; color:#2c4a26; text-align:left;
+  }
 
   /* Email gate */
   .gate { text-align:center; padding:8px 0 4px; }
@@ -170,7 +197,28 @@
       <a href="#" class="btn" id="ctaBtn">Continue My 2026 Application</a>
       <div class="sub">Takes less than two minutes</div>
       <div class="update">
-        Something not correct? <a href="#" id="updateLink">Update my details</a>
+        Something not correct?
+        <a href="#" id="updateLink">Update my details</a>
+
+        <div id="updatePanel" class="hidden">
+          <p class="upIntro">Add anything that's missing or out of date. Nothing already on your file will be removed.</p>
+
+          <label class="upLabel">Add a phone number</label>
+          <input type="tel" id="upPhone" class="upInput" placeholder="e.g. +27 64 651 9668">
+
+          <label class="upLabel">Add an email address</label>
+          <input type="email" id="upEmail" class="upInput" placeholder="e.g. name@example.com">
+
+          <label class="upLabel">Anything else we should know</label>
+          <textarea id="upNote" class="upInput" rows="3" placeholder="Address, marital status, education, or anything else that has changed"></textarea>
+
+          <div id="upError"></div>
+          <button id="upSubmit" class="upBtn" onclick="submitUpdate()">Send Update</button>
+        </div>
+
+        <div id="updateDone" class="hidden upDone">
+          Thank you — your file has been updated. Our office will review the changes.
+        </div>
       </div>
     </div>
 
@@ -390,6 +438,97 @@ function isDisplayable(text){
   return !NON_LATIN.test(String(text));
 }
 
+/* Holds the record currently on screen, for the update form. */
+const CURRENT = { entity:null, id:null, name:"", cid:"", phones:[], emails:[] };
+
+async function bxPost(method, payload){
+  const r = await fetch(WEBHOOK + method, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  return await r.json();
+}
+
+/* Client-submitted updates.
+   Phones and emails are APPENDED to what is already on the record —
+   nothing existing is replaced or removed. Free-text notes go to the
+   timeline so the office can action them without anything being lost. */
+async function submitUpdate(){
+  const phone = document.getElementById("upPhone").value.trim();
+  const email = document.getElementById("upEmail").value.trim();
+  const note  = document.getElementById("upNote").value.trim();
+  const err   = document.getElementById("upError");
+  const btn   = document.getElementById("upSubmit");
+  err.innerHTML = "";
+
+  if (!phone && !email && !note) {
+    err.innerHTML = '<div class="err">Please fill in at least one field.</div>';
+    return;
+  }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    err.innerHTML = '<div class="err">That email address does not look right.</div>';
+    return;
+  }
+  if (!CURRENT.id) {
+    err.innerHTML = '<div class="err">We could not identify your file. Please reload the page.</div>';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "Sending…";
+
+  try {
+    const fields = {};
+    const added  = [];
+
+    // Append — existing entries are kept exactly as they are
+    if (phone) {
+      const exists = CURRENT.phones.some(p =>
+        String(p.VALUE||"").replace(/\D/g,"") === phone.replace(/\D/g,""));
+      if (!exists) {
+        fields.PHONE = CURRENT.phones.concat([{ VALUE: phone, VALUE_TYPE: "MOBILE" }]);
+        added.push("Phone added: " + phone);
+      }
+    }
+    if (email) {
+      const exists = CURRENT.emails.some(e =>
+        String(e.VALUE||"").toLowerCase().trim() === email.toLowerCase());
+      if (!exists) {
+        fields.EMAIL = CURRENT.emails.concat([{ VALUE: email, VALUE_TYPE: "WORK" }]);
+        added.push("Email added: " + email);
+      }
+    }
+
+    if (Object.keys(fields).length) {
+      await bxPost("crm." + CURRENT.entity + ".update",
+        { ID: CURRENT.id, FIELDS: fields });
+    }
+
+    // Timeline note — always written, so the office sees the request
+    let comment = "Client updated their own details via My Immigration File.";
+    if (added.length) comment += "\n" + added.join("\n");
+    if (note) comment += "\nClient note: " + note;
+
+    await bxPost("crm.timeline.comment.add", {
+      fields: {
+        ENTITY_TYPE: CURRENT.entity,
+        ENTITY_ID: CURRENT.id,
+        COMMENT: comment
+      }
+    });
+
+    document.getElementById("updatePanel").classList.add("hidden");
+    document.getElementById("updateDone").classList.remove("hidden");
+
+  } catch(e) {
+    console.error(e);
+    err.innerHTML = '<div class="err">We could not save that just now. Please try again shortly.</div>';
+    btn.disabled = false;
+    btn.textContent = "Send Update";
+  }
+}
+
 function initials(name){
   const p = String(name||"").trim().split(/\s+/).filter(Boolean);
   if (!p.length) return "?";
@@ -518,8 +657,14 @@ async function render(rec, entity, email, contactRec){
   const seen = {};
 
   function fmtDate(v){
-    const d = new Date(v);
-    if (isNaN(d)) return String(v);
+    let s = String(v).trim();
+    // Plain YYYY-MM-DD is parsed as UTC, which can shift the day.
+    // Read it as a local date instead.
+    const plain = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const d = plain
+      ? new Date(+plain[1], +plain[2] - 1, +plain[3])
+      : new Date(s);
+    if (isNaN(d)) return s;
     return d.toLocaleDateString("en-US", { year:"numeric", month:"long", day:"numeric" });
   }
 
@@ -548,8 +693,8 @@ async function render(rec, entity, email, contactRec){
 
     let text = String(raw);
 
-    // ISO dates
-    if (/^\d{4}-\d{2}-\d{2}T/.test(text)) {
+    // Dates — full ISO timestamps and plain YYYY-MM-DD
+    if (/^\d{4}-\d{2}-\d{2}(T|$)/.test(text)) {
       text = fmtDate(text);
     }
     // Numeric values may be enumeration IDs — resolve to their label
@@ -590,14 +735,19 @@ async function render(rec, entity, email, contactRec){
   if (utmCampaign) cta += "&utm_campaign=" + encodeURIComponent(utmCampaign);
   document.getElementById("ctaBtn").href = cta;
 
-  // Update-details link: prefilled email to the office
-  const subj = "Update my details — Client ID " + cid;
-  const body = "Hello,\n\nPlease update the following on my file:\n\n\n"
-             + "-- \nName: " + name + "\nClient ID: " + cid + "\n";
-  document.getElementById("updateLink").href =
-    "mailto:support@immigrationadviceservice.org"
-    + "?subject=" + encodeURIComponent(subj)
-    + "&body=" + encodeURIComponent(body);
+  // Remember what we're updating
+  CURRENT.entity  = entity;
+  CURRENT.id      = rec.ID;
+  CURRENT.name    = name;
+  CURRENT.cid     = cid;
+  CURRENT.phones  = (rec.PHONE || []).slice();
+  CURRENT.emails  = (rec.EMAIL || []).slice();
+
+  document.getElementById("updateLink").onclick = function(ev){
+    ev.preventDefault();
+    document.getElementById("updatePanel").classList.remove("hidden");
+    this.style.display = "none";
+  };
 }
 
 /* If the email arrives in the URL from a mail merge, skip the gate. */
