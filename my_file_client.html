@@ -1037,15 +1037,12 @@ async function render(rec, entity, email, contactRec){
     document.getElementById("detailRows").previousElementSibling.style.display = "none";
   }
 
-  // Who is this?
-  //   A contact record means they are already a client, even if a lead
-  //   also exists — so they are never asked to pay again.
-  //   ?mode=client or ?mode=lead overrides the detection when a campaign
-  //   is sent to one segment only.
+  // This page is dedicated to one segment; the routing is fixed below
+  // rather than derived from the URL, so it cannot be sent astray.
   const isClient = true;    // this file is for existing clients only
 
   const btn = document.getElementById("ctaBtn");
-  console.log("[IAS] mode:", mode || "auto", "| treated as:", isClient ? "client" : "lead");
+  console.log("[IAS] this page serves: client");
 
   if (isClient) {
     let url = CLIENT_BASE + "&email=" + encodeURIComponent(email);
