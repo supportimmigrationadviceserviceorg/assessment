@@ -68,6 +68,11 @@
     padding:14px 40px; border-radius:3px; text-decoration:none;
   }
   .cta .sub { font-size:12px; color:#9a917c; margin-top:10px; }
+  .cta .update {
+    margin-top:16px; padding-top:14px; border-top:1px solid #e4dfd0;
+    font-size:13px; color:#7a6f52;
+  }
+  .cta .update a { color:#1a3a6b; }
 
   /* Email gate */
   .gate { text-align:center; padding:8px 0 4px; }
@@ -156,9 +161,17 @@
     <div class="section-title">File Details</div>
     <table class="rows" id="detailRows"></table>
 
+    <div id="familyBlock" class="hidden">
+      <div class="section-title">Family on File</div>
+      <table class="rows" id="familyRows"></table>
+    </div>
+
     <div class="cta">
-      <a href="#" class="btn" id="ctaBtn">Continue to My Case</a>
+      <a href="#" class="btn" id="ctaBtn">Continue My 2026 Application</a>
       <div class="sub">Takes less than two minutes</div>
+      <div class="update">
+        Something not correct? <a href="#" id="updateLink">Update my details</a>
+      </div>
     </div>
 
   </div>
@@ -196,22 +209,53 @@ const WEBHOOK = "https://immiworld.org/rest/147/47yrflms2cje1cbe/";
 // Where the "Continue" button goes. utm_campaign is carried from the URL.
 const CTA_BASE = "https://supportimmigrationadviceserviceorg.github.io/assessment/interested.html?answer=yes";
 
-/* Fields shown on the page.
+/* Fields shown on the page. Each row is looked up on the lead first,
+   then on the contact — whichever holds a value wins.
+
    Deliberately excludes passport numbers, card details, internal
-   comments and anything else that shouldn't appear on a link that
-   could be forwarded. Add or remove rows here. */
-const LEAD_FIELDS = [
-  { code: "UF_CRM_1449131599",         label: "Country of birth" },
-  { code: "UF_CRM_1449131669",         label: "Country of residence" },
-  { code: "UF_CRM_LEAD_1691057729888", label: "Country" },
-  { code: "UF_CRM_1484914608",         label: "Education level" },
-  { code: "UF_CRM_LEAD_1691057977682", label: "Education level" },
-  { code: "UF_CRM_1484914403",         label: "English level" },
-  { code: "UF_CRM_LEAD_1691057942374", label: "English level" },
-  { code: "UF_CRM_1500181612",         label: "Marital status" },
-  { code: "UF_CRM_LEAD_1691057391286", label: "Marital status" },
-  { code: "UF_CRM_1484912429",         label: "Profession" }
+   agent ratings, financial status and comments. Nothing appears on
+   this page unless it is listed here. */
+const FIELDS = [
+  { label: "Date of birth",        lead: "UF_CRM_LEAD_1691057358096", contact: "UF_CRM_64CF8809BDEAC" },
+  { label: "Date of birth",        std:  "BIRTHDATE" },
+  { label: "Country of birth",     lead: "UF_CRM_1449131599",         contact: "UF_CRM_566016C18B2CC" },
+  { label: "Country of residence", lead: "UF_CRM_1449131669" },
+  { label: "Country",              lead: "UF_CRM_LEAD_1691057729888", contact: "UF_CRM_64CF88148972E" },
+  { label: "Education level",      lead: "UF_CRM_1484914608",         contact: "UF_CRM_1465285867" },
+  { label: "Education level",      lead: "UF_CRM_LEAD_1691057977682", contact: "UF_CRM_64CF881B8596B" },
+  { label: "English level",        lead: "UF_CRM_1484914403",         contact: "UF_CRM_1484918172" },
+  { label: "English level",        lead: "UF_CRM_LEAD_1691057942374", contact: "UF_CRM_64CF88181B4AE" },
+  { label: "Marital status",       lead: "UF_CRM_1500181612",         contact: "UF_CRM_5F6380072B880" },
+  { label: "Marital status",       lead: "UF_CRM_LEAD_1691057391286", contact: "UF_CRM_64CF880D8027E" },
+  { label: "Profession",           lead: "UF_CRM_1484912429",         contact: "UF_CRM_1484918121" },
+  { label: "Children registered",  contact: "UF_CRM_5663EF24DD8A5" },
+  { label: "Confirmation number",  contact: "UF_CRM_1664979593" },
+  { label: "Confirmation number",  contact: "UF_CRM_1633378017" }
 ];
+
+/* Spouse and children — these live on the contact record and are what
+   the Paperwork tab groups together. Names and dates only; passport
+   and document fields are deliberately left out. */
+const SPOUSE = {
+  first:   "UF_CRM_5663EF2587EEC",
+  last:    "UF_CRM_1465296342",
+  dob:     "UF_CRM_1462453575",
+  country: "UF_CRM_1462453236",
+  country2:"UF_CRM_1596458290"
+};
+
+const CHILDREN_NUMBERED = [
+  { first:"UF_CRM_5663EF24E7D06", last:"UF_CRM_1465297403", dob:"UF_CRM_1462452635" },
+  { first:"UF_CRM_1462452141",    last:"UF_CRM_1465297456", dob:"UF_CRM_1462452670" },
+  { first:"UF_CRM_1462452161",    last:"UF_CRM_1465297490", dob:"UF_CRM_1462452689" }
+];
+
+// Multi-value versions of the same thing, used on newer records
+const CHILDREN_MULTI = {
+  first: "UF_CRM_1508227656",
+  last:  "UF_CRM_1508227818",
+  dob:   "UF_CRM_1508227972"
+};
 
 const CONTACT_PHOTO_FIELD = "UF_CRM_697089EB2FDD1";
 const LEAD_PHOTO_FIELD    = "UF_CRM_1768833329744";
@@ -269,6 +313,81 @@ function photoUrlAlt(v){
   if (!u) return "";
   if (u.charAt(0) === "/") u = PORTAL + u;
   return u;
+}
+
+/* Spouse and children, shown only when the contact actually holds them. */
+function renderFamily(c, fmtDate){
+  const block = document.getElementById("familyBlock");
+  const tbl   = document.getElementById("familyRows");
+  if (!c) return;
+  tbl.innerHTML = "";
+
+  const val = k => {
+    const v = c[k];
+    if (v === undefined || v === null) return "";
+    const s = String(v).trim();
+    return isDisplayable(s) ? s : "";
+  };
+
+  const row = (label, value) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = '<td class="k"></td><td class="v"></td>';
+    tr.children[0].textContent = label;
+    tr.children[1].textContent = value;
+    tbl.appendChild(tr);
+  };
+
+  const nameOf = (f, l) => [val(f), val(l)].filter(Boolean).join(" ").trim();
+
+  // Spouse
+  const spouseName = nameOf(SPOUSE.first, SPOUSE.last);
+  if (spouseName) {
+    let extra = [];
+    const dob = val(SPOUSE.dob);
+    if (dob) extra.push(fmtDate(dob));
+    const cty = val(SPOUSE.country) || val(SPOUSE.country2);
+    if (cty && !/^\d+$/.test(cty)) extra.push(cty);
+    row("Spouse", spouseName + (extra.length ? "  ·  " + extra.join("  ·  ") : ""));
+  }
+
+  // Children — numbered fields
+  let n = 0;
+  CHILDREN_NUMBERED.forEach(ch => {
+    const nm = nameOf(ch.first, ch.last);
+    if (!nm) return;
+    n++;
+    const dob = val(ch.dob);
+    row("Child " + n, nm + (dob ? "  ·  " + fmtDate(dob) : ""));
+  });
+
+  // Children — multi-value fields
+  const mf = c[CHILDREN_MULTI.first];
+  if (Array.isArray(mf)) {
+    const ml = Array.isArray(c[CHILDREN_MULTI.last]) ? c[CHILDREN_MULTI.last] : [];
+    const md = Array.isArray(c[CHILDREN_MULTI.dob])  ? c[CHILDREN_MULTI.dob]  : [];
+    mf.forEach((first, i) => {
+      const a = String(first||"").trim();
+      const b = String(ml[i]||"").trim();
+      if (!isDisplayable(a) || (b && !isDisplayable(b))) return;
+      const nm = [a, b].filter(Boolean).join(" ");
+      if (!nm) return;
+      n++;
+      const dob = md[i] ? fmtDate(md[i]) : "";
+      row("Child " + n, nm + (dob ? "  ·  " + dob : ""));
+    });
+  }
+
+  if (tbl.children.length) block.classList.remove("hidden");
+}
+
+/* Some records hold values in Russian, Hebrew, Arabic and other scripts.
+   Those are skipped so the page stays in one language.
+   Latin letters with diacritics (José, Wojciech, Müller) are kept. */
+const NON_LATIN = /[\u0370-\u03FF\u0400-\u04FF\u0530-\u058F\u0590-\u05FF\u0600-\u06FF\u0700-\u074F\u0900-\u097F\u0E00-\u0E7F\u3040-\u30FF\u3400-\u4DBF\u4E00-\u9FFF\uAC00-\uD7AF]/;
+
+function isDisplayable(text){
+  if (!text) return false;
+  return !NON_LATIN.test(String(text));
 }
 
 function initials(name){
@@ -398,36 +517,69 @@ async function render(rec, entity, email, contactRec){
   tbl.innerHTML = "";
   const seen = {};
 
-  for (const f of LEAD_FIELDS) {
-    const raw = rec[f.code];
-    if (raw === undefined || raw === null || String(raw).trim() === "") continue;
-    if (seen[f.label]) continue;
+  function fmtDate(v){
+    const d = new Date(v);
+    if (isNaN(d)) return String(v);
+    return d.toLocaleDateString("en-US", { year:"numeric", month:"long", day:"numeric" });
+  }
 
-    let text = String(raw);
-    if (/^\d+$/.test(text)) {
-      const t = await enumText(entity, f.code, text);
-      if (!t) continue;
-      text = t;
-    }
-
-    seen[f.label] = true;
+  function addRow(label, value){
     const tr = document.createElement("tr");
     tr.innerHTML = '<td class="k"></td><td class="v"></td>';
-    tr.children[0].textContent = f.label;
-    tr.children[1].textContent = text;
+    tr.children[0].textContent = label;
+    tr.children[1].textContent = value;
     tbl.appendChild(tr);
   }
 
+  for (const f of FIELDS) {
+    if (seen[f.label]) continue;
+
+    // Standard field, lead custom field, then contact custom field
+    let raw = null, src = null;
+    if (f.std && rec[f.std] !== undefined && String(rec[f.std]).trim() !== "") {
+      raw = rec[f.std]; src = "std";
+    } else if (f.lead && rec[f.lead] !== undefined && String(rec[f.lead]).trim() !== "") {
+      raw = rec[f.lead]; src = "lead";
+    } else if (f.contact && contactRec && contactRec[f.contact] !== undefined
+               && String(contactRec[f.contact]).trim() !== "") {
+      raw = contactRec[f.contact]; src = "contact";
+    }
+    if (raw === null || raw === undefined || String(raw).trim() === "") continue;
+
+    let text = String(raw);
+
+    // ISO dates
+    if (/^\d{4}-\d{2}-\d{2}T/.test(text)) {
+      text = fmtDate(text);
+    }
+    // Numeric values may be enumeration IDs — resolve to their label
+    else if (/^\d+$/.test(text) && src !== "std") {
+      const entityForEnum = src === "contact" ? "contact" : "lead";
+      const code = src === "contact" ? f.contact : f.lead;
+      const t = await enumText(entityForEnum, code, text);
+      // A plain number that isn't an enum (e.g. number of children) stays as-is
+      if (t) text = t;
+      else if (!/^\d{1,3}$/.test(text)) continue;
+    }
+
+    seen[f.label] = true;
+    if (!isDisplayable(text)) continue;
+    addRow(f.label, text);
+  }
+
+  // Phone, so the client can spot an outdated number
+  const ph = (rec.PHONE && rec.PHONE[0] && rec.PHONE[0].VALUE)
+          || (contactRec && contactRec.PHONE && contactRec.PHONE[0] && contactRec.PHONE[0].VALUE)
+          || "";
+  if (ph && isDisplayable(ph)) addRow("Phone on file", ph);
+
   if (rec.DATE_CREATE) {
     const d = new Date(rec.DATE_CREATE);
-    if (!isNaN(d)) {
-      const tr = document.createElement("tr");
-      tr.innerHTML = '<td class="k">File opened</td><td class="v"></td>';
-      tr.children[1].textContent = d.toLocaleDateString("en-US",
-        { year:"numeric", month:"long", day:"numeric" });
-      tbl.appendChild(tr);
-    }
+    if (!isNaN(d)) addRow("File opened", fmtDate(rec.DATE_CREATE));
   }
+
+  // ---- Family on file (spouse and children, from the contact) ----
+  renderFamily(contactRec, fmtDate);
 
   if (!tbl.children.length) {
     document.getElementById("detailRows").previousElementSibling.style.display = "none";
@@ -437,6 +589,15 @@ async function render(rec, entity, email, contactRec){
   let cta = CTA_BASE + "&email=" + encodeURIComponent(email);
   if (utmCampaign) cta += "&utm_campaign=" + encodeURIComponent(utmCampaign);
   document.getElementById("ctaBtn").href = cta;
+
+  // Update-details link: prefilled email to the office
+  const subj = "Update my details — Client ID " + cid;
+  const body = "Hello,\n\nPlease update the following on my file:\n\n\n"
+             + "-- \nName: " + name + "\nClient ID: " + cid + "\n";
+  document.getElementById("updateLink").href =
+    "mailto:support@immigrationadviceservice.org"
+    + "?subject=" + encodeURIComponent(subj)
+    + "&body=" + encodeURIComponent(body);
 }
 
 /* If the email arrives in the URL from a mail merge, skip the gate. */
