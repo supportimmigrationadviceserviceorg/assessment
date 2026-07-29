@@ -357,7 +357,10 @@
 const WEBHOOK = "https://immiworld.org/rest/147/47yrflms2cje1cbe/";
 
 // Where the "Continue" button goes. utm_campaign is carried from the URL.
-const CTA_BASE = "https://supportimmigrationadviceserviceorg.github.io/assessment/interested.html?answer=yes";
+// Leads have not opened a case yet, so they go to the case-opening page.
+// Existing clients go to the verification page, which ends with booking.
+const CTA_BASE    = "https://supportimmigrationadviceserviceorg.github.io/assessment/interested.html?answer=yes";
+const CLIENT_BASE = "https://supportimmigrationadviceserviceorg.github.io/assessment/verify.html?answer=verify";
 
 /* Fields shown on the page. Each row is looked up on the lead first,
    then on the contact — whichever holds a value wins.
@@ -698,7 +701,7 @@ async function submitUpdate(){
     const done = document.getElementById("updateDone");
     const cta  = document.getElementById("ctaBtn");
     const dcta = document.getElementById("doneCta");
-    if (dcta && cta) dcta.href = cta.href;
+    if (dcta && cta) { dcta.href = cta.href; dcta.textContent = cta.textContent; }
     done.classList.remove("hidden");
     done.scrollIntoView({ behavior: "smooth", block: "center" });
 
@@ -1034,10 +1037,32 @@ async function render(rec, entity, email, contactRec){
     document.getElementById("detailRows").previousElementSibling.style.display = "none";
   }
 
-  // CTA carries the email and campaign through
-  let cta = CTA_BASE + "&email=" + encodeURIComponent(email);
-  if (utmCampaign) cta += "&utm_campaign=" + encodeURIComponent(utmCampaign);
-  document.getElementById("ctaBtn").href = cta;
+  // Who is this?
+  //   A contact record means they are already a client, even if a lead
+  //   also exists — so they are never asked to pay again.
+  //   ?mode=client or ?mode=lead overrides the detection when a campaign
+  //   is sent to one segment only.
+  const mode = (params.get("mode") || "").toLowerCase();
+  const isClient = mode === "client" ? true
+                 : mode === "lead"   ? false
+                 : !!contactRec;
+
+  const btn = document.getElementById("ctaBtn");
+  console.log("[IAS] mode:", mode || "auto", "| treated as:", isClient ? "client" : "lead");
+
+  if (isClient) {
+    let url = CLIENT_BASE + "&email=" + encodeURIComponent(email);
+    if (utmCampaign) url += "&utm_campaign=" + encodeURIComponent(utmCampaign);
+    btn.href = url;
+    btn.textContent = "Confirm My Details";
+    document.querySelector(".cta .sub").textContent = "Takes less than two minutes";
+    document.getElementById("statusNote").textContent =
+      "Your file is open with our office. Please check the details below, then confirm them.";
+  } else {
+    let cta = CTA_BASE + "&email=" + encodeURIComponent(email);
+    if (utmCampaign) cta += "&utm_campaign=" + encodeURIComponent(utmCampaign);
+    btn.href = cta;
+  }
 
   // Remember what we're updating
   CURRENT.entity  = entity;
