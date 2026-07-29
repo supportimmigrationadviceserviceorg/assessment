@@ -204,7 +204,16 @@
           <p class="upIntro">Add anything that's missing or out of date. Nothing already on your file will be removed.</p>
 
           <label class="upLabel">Add a phone number</label>
-          <input type="tel" id="upPhone" class="upInput" placeholder="e.g. +27 64 651 9668">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:14px;">
+            <tr>
+              <td style="width:52%;padding-right:8px;vertical-align:top;">
+                <select id="upDial" class="upInput" style="margin-bottom:0;"></select>
+              </td>
+              <td style="vertical-align:top;">
+                <input type="tel" id="upPhone" class="upInput" style="margin-bottom:0;" placeholder="646 519 668" inputmode="numeric">
+              </td>
+            </tr>
+          </table>
 
           <label class="upLabel">Add an email address</label>
           <input type="email" id="upEmail" class="upInput" placeholder="e.g. name@example.com">
@@ -217,7 +226,11 @@
         </div>
 
         <div id="updateDone" class="hidden upDone">
-          Thank you — your file has been updated. Our office will review the changes.
+          <strong>Thank you — your file has been updated.</strong><br>
+          Your details are now with our office. You can carry on with your application below.
+          <div style="text-align:center;margin-top:14px;">
+            <a href="#" class="btn" id="doneCta">Continue My 2026 Application</a>
+          </div>
         </div>
       </div>
     </div>
@@ -438,6 +451,24 @@ function isDisplayable(text){
   return !NON_LATIN.test(String(text));
 }
 
+/* Country dial codes for the phone field. */
+const DIAL_CODES = "Afghanistan|93,Albania|355,Algeria|213,Andorra|376,Angola|244,Antigua and Barbuda|1268,Argentina|54,Armenia|374,Aruba|297,Australia|61,Austria|43,Azerbaijan|994,Bahamas|1242,Bahrain|973,Bangladesh|880,Barbados|1246,Belarus|375,Belgium|32,Belize|501,Benin|229,Bermuda|1441,Bhutan|975,Bolivia|591,Bosnia and Herzegovina|387,Botswana|267,Brazil|55,Brunei|673,Bulgaria|359,Burkina Faso|226,Burundi|257,Cambodia|855,Cameroon|237,Canada|1,Cape Verde|238,Cayman Islands|1345,Central African Republic|236,Chad|235,Chile|56,China|86,Colombia|57,Comoros|269,Congo|242,Congo (DRC)|243,Costa Rica|506,Croatia|385,Cuba|53,Curacao|599,Cyprus|357,Czech Republic|420,Denmark|45,Djibouti|253,Dominica|1767,Dominican Republic|1809,Ecuador|593,Egypt|20,El Salvador|503,Equatorial Guinea|240,Eritrea|291,Estonia|372,Eswatini|268,Ethiopia|251,Fiji|679,Finland|358,France|33,French Guiana|594,French Polynesia|689,Gabon|241,Gambia|220,Georgia|995,Germany|49,Ghana|233,Gibraltar|350,Greece|30,Greenland|299,Grenada|1473,Guadeloupe|590,Guam|1671,Guatemala|502,Guinea|224,Guinea-Bissau|245,Guyana|592,Haiti|509,Honduras|504,Hong Kong|852,Hungary|36,Iceland|354,India|91,Indonesia|62,Iran|98,Iraq|964,Ireland|353,Israel|972,Italy|39,Ivory Coast|225,Jamaica|1876,Japan|81,Jordan|962,Kazakhstan|7,Kenya|254,Kiribati|686,Kosovo|383,Kuwait|965,Kyrgyzstan|996,Laos|856,Latvia|371,Lebanon|961,Lesotho|266,Liberia|231,Libya|218,Liechtenstein|423,Lithuania|370,Luxembourg|352,Macau|853,Madagascar|261,Malawi|265,Malaysia|60,Maldives|960,Mali|223,Malta|356,Marshall Islands|692,Martinique|596,Mauritania|222,Mauritius|230,Mexico|52,Micronesia|691,Moldova|373,Monaco|377,Mongolia|976,Montenegro|382,Morocco|212,Mozambique|258,Myanmar|95,Namibia|264,Nepal|977,Netherlands|31,New Caledonia|687,New Zealand|64,Nicaragua|505,Niger|227,Nigeria|234,North Macedonia|389,Norway|47,Oman|968,Pakistan|92,Palau|680,Palestine|970,Panama|507,Papua New Guinea|675,Paraguay|595,Peru|51,Philippines|63,Poland|48,Portugal|351,Puerto Rico|1787,Qatar|974,Reunion|262,Romania|40,Russia|7,Rwanda|250,Saint Kitts and Nevis|1869,Saint Lucia|1758,Saint Vincent and the Grenadines|1784,Samoa|685,San Marino|378,Sao Tome and Principe|239,Saudi Arabia|966,Senegal|221,Serbia|381,Seychelles|248,Sierra Leone|232,Singapore|65,Sint Maarten|1721,Slovakia|421,Slovenia|386,Solomon Islands|677,Somalia|252,South Africa|27,South Korea|82,South Sudan|211,Spain|34,Sri Lanka|94,Sudan|249,Suriname|597,Sweden|46,Switzerland|41,Syria|963,Taiwan|886,Tajikistan|992,Tanzania|255,Thailand|66,Timor-Leste|670,Togo|228,Tonga|676,Trinidad and Tobago|1868,Tunisia|216,Turkey|90,Turkmenistan|993,Turks and Caicos Islands|1649,Tuvalu|688,US Virgin Islands|1340,Uganda|256,Ukraine|380,United Arab Emirates|971,United Kingdom|44,United States|1,Uruguay|598,Uzbekistan|998,Vanuatu|678,Vatican City|39,Venezuela|58,Vietnam|84,Wallis and Futuna|681,Western Sahara|212,Yemen|967,Zambia|260,Zimbabwe|263";
+
+function buildDialSelect(){
+  const sel = document.getElementById("upDial");
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Country code…</option>';
+  DIAL_CODES.split(",").forEach(function(pair){
+    const i = pair.lastIndexOf("|");
+    const name = pair.substring(0, i);
+    const code = pair.substring(i + 1);
+    const o = document.createElement("option");
+    o.value = code;
+    o.textContent = name + "  +" + code;
+    sel.appendChild(o);
+  });
+}
+
 /* Holds the record currently on screen, for the update form. */
 const CURRENT = { entity:null, id:null, name:"", cid:"", phones:[], emails:[] };
 
@@ -455,12 +486,36 @@ async function bxPost(method, payload){
    nothing existing is replaced or removed. Free-text notes go to the
    timeline so the office can action them without anything being lost. */
 async function submitUpdate(){
-  const phone = document.getElementById("upPhone").value.trim();
+  const dial  = document.getElementById("upDial").value;
+  const rawNo = document.getElementById("upPhone").value.trim();
+  const digits = rawNo.replace(/\D/g, "");
   const email = document.getElementById("upEmail").value.trim();
   const note  = document.getElementById("upNote").value.trim();
   const err   = document.getElementById("upError");
   const btn   = document.getElementById("upSubmit");
   err.innerHTML = "";
+
+  // Phone must be a country code plus digits — letters are rejected.
+  let phone = "";
+  if (dial || rawNo) {
+    if (!dial) {
+      err.innerHTML = '<div class="err">Please choose your country code.</div>';
+      return;
+    }
+    if (!rawNo) {
+      err.innerHTML = '<div class="err">Please enter your phone number.</div>';
+      return;
+    }
+    if (/[A-Za-z]/.test(rawNo)) {
+      err.innerHTML = '<div class="err">A phone number can only contain digits.</div>';
+      return;
+    }
+    if (digits.length < 6 || digits.length > 14) {
+      err.innerHTML = '<div class="err">That phone number does not look complete.</div>';
+      return;
+    }
+    phone = "+" + dial + digits.replace(/^0+/, "");
+  }
 
   if (!phone && !email && !note) {
     err.innerHTML = '<div class="err">Please fill in at least one field.</div>';
@@ -519,7 +574,12 @@ async function submitUpdate(){
     });
 
     document.getElementById("updatePanel").classList.add("hidden");
-    document.getElementById("updateDone").classList.remove("hidden");
+    const done = document.getElementById("updateDone");
+    const cta  = document.getElementById("ctaBtn");
+    const dcta = document.getElementById("doneCta");
+    if (dcta && cta) dcta.href = cta.href;
+    done.classList.remove("hidden");
+    done.scrollIntoView({ behavior: "smooth", block: "center" });
 
   } catch(e) {
     console.error(e);
@@ -745,6 +805,7 @@ async function render(rec, entity, email, contactRec){
 
   document.getElementById("updateLink").onclick = function(ev){
     ev.preventDefault();
+    buildDialSelect();
     document.getElementById("updatePanel").classList.remove("hidden");
     this.style.display = "none";
   };
