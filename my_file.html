@@ -357,9 +357,9 @@
 const WEBHOOK = "https://immiworld.org/rest/147/47yrflms2cje1cbe/";
 
 // Where the "Continue" button goes. utm_campaign is carried from the URL.
-// Leads have not opened a case yet, so they go to the case-opening page.
-// Existing clients go to the verification page, which ends with booking.
-const CTA_BASE    = "https://supportimmigrationadviceserviceorg.github.io/assessment/interested.html?answer=yes";
+// Each segment confirms their details on the page built for their record
+// type; the verification page then leads on to payment or to booking.
+const CTA_BASE    = "https://supportimmigrationadviceserviceorg.github.io/assessment/verify_leads.html?answer=verify";
 const CLIENT_BASE = "https://supportimmigrationadviceserviceorg.github.io/assessment/verify.html?answer=verify";
 
 /* Fields shown on the page. Each row is looked up on the lead first,
