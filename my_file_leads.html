@@ -338,6 +338,7 @@
   <div class="inner hidden" id="state-error">
     <div class="gate">
       <p>Something went wrong on our side. Please contact our office and we will assist you directly.</p>
+      <pre id="errDetail" style="display:none;text-align:left;background:#fff;border:1px solid #c7bfa8;padding:10px;font-size:11px;white-space:pre-wrap;word-break:break-all;font-family:monospace;color:#933;"></pre>
     </div>
   </div>
 
@@ -833,6 +834,11 @@ async function lookup(){
 
   } catch(e) {
     console.error(e);
+    const box = document.getElementById("errDetail");
+    if (box) {
+      box.style.display = "block";
+      box.textContent = (e && e.message ? e.message : String(e)) + "\n\n" + (e && e.stack ? e.stack : "");
+    }
     show("state-error");
   }
 }
