@@ -188,6 +188,19 @@
     .barFill { transition: none !important; }
   }
 
+  .inlineAdd { display:flex; align-items:center; gap:8px; }
+  .inlineInput {
+    flex:1; min-width:0; padding:6px 9px; font-size:13px;
+    border:1px solid #d8d2c0; border-radius:3px;
+    font-family:Georgia,serif; background:#fff; color:#2a2a28;
+  }
+  .inlineInput:focus { outline:none; border-color:#1a3a6b; }
+  .inlineSave {
+    font-size:12px; color:#1a3a6b; text-decoration:underline;
+    white-space:nowrap; cursor:pointer;
+  }
+  .inlineDone { font-size:14px; color:#2a2a28; }
+
   .foot {
     background:#eceae2; border-top:1px solid #c7bfa8;
     padding:15px 32px; text-align:center;
@@ -760,7 +773,7 @@ function renderCompleteness(rec, c, phone){
     const list = missing.length === 1
       ? missing[0]
       : missing.slice(0, -1).join(", ") + " and " + missing[missing.length - 1];
-    hint.textContent = "Not yet on file: " + list + ". You are welcome to add these below, though there is no need to do so now.";
+    hint.textContent = "Not yet on file: " + list + ". You are welcome to add these below.";
   }
 }
 
@@ -957,9 +970,56 @@ async function render(rec, entity, email, contactRec){
           || "";
   if (ph && isDisplayable(ph)) addRow("Phone on file", ph);
 
+  // Profession — offered inline, right where it would sit, so it can be
+  // added in context or simply left alone.
+  const hasProf = ["UF_CRM_1484912429"].some(k => rec[k] && String(rec[k]).trim())
+               || (contactRec && contactRec["UF_CRM_1484918121"]
+                   && String(contactRec["UF_CRM_1484918121"]).trim());
+  if (!hasProf) addProfessionRow();
+
   if (rec.DATE_CREATE) {
     const d = new Date(rec.DATE_CREATE);
     if (!isNaN(d)) addRow("File opened", fmtDate(rec.DATE_CREATE));
+  }
+
+  function addProfessionRow(){
+    const tr = document.createElement("tr");
+    tr.className = "reveal";
+    tr.style.animationDelay = (0.40 + rowIndex * 0.055) + "s";
+    rowIndex++;
+    tr.innerHTML =
+      '<td class="k">Profession</td>' +
+      '<td class="v">' +
+        '<span class="inlineAdd">' +
+          '<input type="text" id="profInline" class="inlineInput" placeholder="Add if you wish">' +
+          '<a href="#" id="profSave" class="inlineSave">Save</a>' +
+        '</span>' +
+        '<span id="profDone" class="inlineDone hidden"></span>' +
+      '</td>';
+    tbl.appendChild(tr);
+
+    tr.querySelector("#profSave").onclick = async function(ev){
+      ev.preventDefault();
+      const input = document.getElementById("profInline");
+      const v = input.value.trim();
+      if (!v) { input.focus(); return; }
+      this.textContent = "Saving…";
+      try {
+        await bxPost("crm.timeline.comment.add", {
+          fields: {
+            ENTITY_TYPE: CURRENT.entity,
+            ENTITY_ID: CURRENT.id,
+            COMMENT: "Client added via My Immigration File —\nProfession: " + v
+          }
+        });
+        tr.querySelector(".inlineAdd").classList.add("hidden");
+        const done = document.getElementById("profDone");
+        done.textContent = v + "  ·  saved";
+        done.classList.remove("hidden");
+      } catch(e) {
+        this.textContent = "Try again";
+      }
+    };
   }
 
   // ---- Family on file (spouse and children, from the contact) ----
