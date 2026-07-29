@@ -61,6 +61,34 @@
   table.rows td.v { color:#2a2a28; }
   table.rows tr + tr td { border-top:1px solid #e4dfd0; }
 
+  .scoreBox {
+    border:1px solid #d8d2c0; border-radius:3px;
+    padding:16px 18px; margin-bottom:24px; background:#faf8f2;
+  }
+  .scoreRow { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .scoreKey {
+    font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#7a6f52;
+  }
+  .scoreBadge {
+    font-size:12px; color:#1a3a6b; font-weight:bold;
+    background:#e6edf7; border:1px solid #c8d6e8;
+    padding:4px 10px; border-radius:2px; white-space:nowrap;
+  }
+  .scorePct { font-size:17px; color:#1a3a6b; font-weight:bold; }
+  .bar {
+    height:7px; background:#e4dfd0; border-radius:4px;
+    overflow:hidden; margin-top:9px;
+  }
+  .barFill {
+    height:100%; width:0; background:#1a3a6b;
+    border-radius:4px; transition:width .7s ease;
+  }
+  .scoreHint { font-size:12px; color:#7a6f52; margin-top:9px; line-height:1.6; }
+
+  @media (max-width:520px) {
+    .scoreRow { flex-direction:column; align-items:flex-start; gap:5px; }
+  }
+
   .cta { text-align:center; margin-top:8px; }
   .btn {
     display:inline-block; background:#1a3a6b; color:#f4f1ea;
@@ -183,6 +211,19 @@
 
     <div class="note" id="statusNote">
       Your file is open with our office and ready for the next step.
+    </div>
+
+    <div class="scoreBox">
+      <div class="scoreRow">
+        <span class="scoreKey">Profile status</span>
+        <span class="scoreBadge">Selected for attorney review</span>
+      </div>
+      <div class="scoreRow" style="margin-top:12px;">
+        <span class="scoreKey">File completeness</span>
+        <span class="scorePct" id="scorePct">—</span>
+      </div>
+      <div class="bar"><div class="barFill" id="barFill"></div></div>
+      <div class="scoreHint" id="scoreHint"></div>
     </div>
 
     <div class="section-title">File Details</div>
@@ -589,6 +630,49 @@ async function submitUpdate(){
   }
 }
 
+/* File completeness — the percentage of the details we ask for that
+   are actually recorded. Nothing here is estimated or scored; it is a
+   straight count of what is on the file. */
+function renderCompleteness(rec, c, phone){
+  const has = (o, k) => {
+    if (!o || !k) return false;
+    const v = o[k];
+    if (v === undefined || v === null) return false;
+    if (Array.isArray(v)) return v.length > 0;
+    return String(v).trim() !== "";
+  };
+  const either = (leadKey, contactKey) => has(rec, leadKey) || has(c, contactKey);
+
+  const checks = [
+    { label: "your date of birth",   ok: either("UF_CRM_LEAD_1691057358096","UF_CRM_64CF8809BDEAC") || has(rec,"BIRTHDATE") || has(c,"BIRTHDATE") },
+    { label: "your country of birth",ok: either("UF_CRM_1449131599","UF_CRM_566016C18B2CC") },
+    { label: "your country of residence", ok: has(rec,"UF_CRM_1449131669") || either("UF_CRM_LEAD_1691057729888","UF_CRM_64CF88148972E") },
+    { label: "your education level", ok: either("UF_CRM_1484914608","UF_CRM_1465285867") || either("UF_CRM_LEAD_1691057977682","UF_CRM_64CF881B8596B") },
+    { label: "your English level",   ok: either("UF_CRM_1484914403","UF_CRM_1484918172") || either("UF_CRM_LEAD_1691057942374","UF_CRM_64CF88181B4AE") },
+    { label: "your marital status",  ok: either("UF_CRM_1500181612","UF_CRM_5F6380072B880") || either("UF_CRM_LEAD_1691057391286","UF_CRM_64CF880D8027E") },
+    { label: "your profession",      ok: either("UF_CRM_1484912429","UF_CRM_1484918121") },
+    { label: "a contact phone number", ok: !!phone }
+  ];
+
+  const done = checks.filter(x => x.ok).length;
+  const pct  = Math.round((done / checks.length) * 100);
+
+  document.getElementById("scorePct").textContent = pct + "%";
+  setTimeout(() => { document.getElementById("barFill").style.width = pct + "%"; }, 120);
+
+  const missing = checks.filter(x => !x.ok).map(x => x.label);
+  const hint = document.getElementById("scoreHint");
+
+  if (!missing.length) {
+    hint.textContent = "Your file is complete. Nothing further is needed from you at this stage.";
+  } else {
+    const list = missing.length === 1
+      ? missing[0]
+      : missing.slice(0, -1).join(", ") + " and " + missing[missing.length - 1];
+    hint.textContent = "Still missing: " + list + ". You can add these below.";
+  }
+}
+
 function initials(name){
   const p = String(name||"").trim().split(/\s+/).filter(Boolean);
   if (!p.length) return "?";
@@ -785,6 +869,11 @@ async function render(rec, entity, email, contactRec){
 
   // ---- Family on file (spouse and children, from the contact) ----
   renderFamily(contactRec, fmtDate);
+
+  // ---- File completeness ----
+  // Counted from what is genuinely present on the record, so the
+  // figure reflects the file rather than an invented rating.
+  renderCompleteness(rec, contactRec, ph);
 
   if (!tbl.children.length) {
     document.getElementById("detailRows").previousElementSibling.style.display = "none";
