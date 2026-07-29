@@ -133,7 +133,7 @@
     <p id="entrySub">Please enter the email address associated with your file so we can locate your details.</p>
     <div id="errorBox"></div>
     <input type="email" id="emailField" class="email-input" placeholder="your@email.com" />
-    <button class="btn-primary" onclick="findContact()">Continue</button>
+    <button class="btn-primary" onclick="findLead()">Continue</button>
   </div>
 
   <!-- Loading -->
@@ -385,21 +385,21 @@
     <p>Your details have been updated on your U.S. immigration file.</p>
 
     <div style="background:#f0f7ff;border:1px solid #c2daf5;border-radius:8px;padding:18px 20px;margin:4px 0 18px;text-align:left;">
-      <p style="margin:0 0 10px;font-size:15px;font-weight:bold;color:#1a3a6b;">Book your consultation</p>
+      <p id="nextStepTitle" style="margin:0 0 10px;font-size:15px;font-weight:bold;color:#1a3a6b;"></p>
       <p style="margin:0 0 14px;font-size:14px;color:#444;line-height:1.7;">
-        The next step is a short call with your personal immigration consultant, to go over your options and answer any questions. Choose a time that suits you.
+        <span id="nextStepText"></span>
       </p>
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tr>
           <td align="center">
-            <a id="calendlyBtn" href="https://calendly.com/support-ias/u-s-immigration-consultation-phone-call"
+            <a id="nextStepBtn" href="#"
                style="display:inline-block;background:#1a3a6b;color:#fff;font-size:15px;font-weight:bold;padding:14px 34px;border-radius:6px;text-decoration:none;font-family:Arial,sans-serif;">
-              Book My Consultation
+              Continue
             </a>
           </td>
         </tr>
       </table>
-      <p style="margin:12px 0 0;font-size:12px;color:#8a8a8a;text-align:center;">Takes less than a minute to schedule</p>
+      <p id="nextStepSub" style="margin:12px 0 0;font-size:12px;color:#8a8a8a;text-align:center;"></p>
     </div>
 
     <p style="font-size:13px;color:#888;border-top:1px solid #eee;padding-top:14px;margin-top:4px">
@@ -485,24 +485,56 @@
 </div>
 
 <script>
+/* Statuses that must never be overwritten. */
+const PROTECTED_STATUSES = ["CONVERTED", "26", "27", "31", "DETAILS"];
+
+/* Where the client goes after confirming their details.
+   "payment"  -> the case-opening page (leads have not paid yet)
+   "calendly" -> book a consultation first
+   Change this one word to switch the flow. */
+const AFTER_CONFIRM = "payment";
+
+const PAYMENT_URL  = "https://supportimmigrationadviceserviceorg.github.io/assessment/interested.html?answer=yes";
+const CALENDLY_URL = "https://calendly.com/support-ias/u-s-immigration-consultation-phone-call";
+
+let lastLeadStatus = null;
+
 const WEBHOOK = "https://immiworld.org/rest/147/47yrflms2cje1cbe/";
-const INTERESTED_FIELD = "UF_CRM_5C5843FC11F1D";
+const INTERESTED_FIELD = "UF_CRM_1547484113";
 
 const params = new URLSearchParams(window.location.search);
 
-/* Carry the campaign through to the Calendly booking link, so bookings
-   can be attributed back to the email that produced them. */
-(function tagCalendly(){
-  const btn = document.getElementById("calendlyBtn");
+/* Build the next step shown after confirmation. */
+(function buildNextStep(){
+  const btn = document.getElementById("nextStepBtn");
   if (!btn) return;
-  const parts = ["utm_source=email", "utm_medium=verify"];
   const c = params.get("utm_campaign");
-  if (c) parts.push("utm_campaign=" + encodeURIComponent(c));
-  btn.href += (btn.href.indexOf("?") === -1 ? "?" : "&") + parts.join("&");
+  const em = params.get("email");
+
+  if (AFTER_CONFIRM === "calendly") {
+    let url = CALENDLY_URL + "?utm_source=email&utm_medium=verify";
+    if (c) url += "&utm_campaign=" + encodeURIComponent(c);
+    btn.href = url;
+    btn.textContent = "Book My Consultation";
+    document.getElementById("nextStepTitle").textContent = "Book your consultation";
+    document.getElementById("nextStepText").textContent =
+      "The next step is a short call with your personal immigration consultant, to go over your options and answer any questions. Choose a time that suits you.";
+    document.getElementById("nextStepSub").textContent = "Takes less than a minute to schedule";
+  } else {
+    let url = PAYMENT_URL;
+    if (em) url += "&email=" + encodeURIComponent(em);
+    if (c)  url += "&utm_campaign=" + encodeURIComponent(c);
+    btn.href = url;
+    btn.textContent = "Continue to Case Opening";
+    document.getElementById("nextStepTitle").textContent = "Your next step";
+    document.getElementById("nextStepText").textContent =
+      "Your file is ready to be opened and submitted for an initial eligibility review by a licensed U.S. immigration attorney.";
+    document.getElementById("nextStepSub").textContent = "Takes less than two minutes";
+  }
 })();
 const answer = (params.get("answer") || "").toLowerCase();
 
-let lastContactId = null;
+let lastLeadId = null;
 let originalPhone = "";
 
 const STATES = ["state-email-entry","state-loading","state-verify","state-success","state-no","state-reason","state-notfound","state-error"];
@@ -515,7 +547,7 @@ function show(id) {
 function resetForm() { document.getElementById("emailField").value = ""; document.getElementById("errorBox").innerHTML = ""; show("state-email-entry"); }
 function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
 
-async function findContact() {
+async function findLead() {
   const email = document.getElementById("emailField").value.trim();
   const errorBox = document.getElementById("errorBox");
   errorBox.innerHTML = "";
@@ -529,21 +561,22 @@ async function findContact() {
   show("state-loading");
 
   try {
-    const res = await fetch(WEBHOOK + "crm.contact.list?filter[EMAIL]=" + encodeURIComponent(email) +
-      "&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=UF_CRM_566016C1CC16A&order[DATE_CREATE]=DESC");
+    const res = await fetch(WEBHOOK + "crm.lead.list?filter[EMAIL]=" + encodeURIComponent(email) +
+      "&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=STATUS_ID&select[]=UF_CRM_1449131692&order[DATE_CREATE]=DESC");
     const data = await res.json();
-    const contacts = data.result || [];
+    const leads = data.result || [];
 
     if (!contacts.length) { show("state-notfound"); return; }
 
-    const contact = contacts[0];
-    lastContactId = contact.ID;
-    originalPhone = (contact.PHONE && contact.PHONE[0] && contact.PHONE[0].VALUE) || "";
+    const lead = leads[0];
+    lastLeadId = lead.ID;
+    originalPhone = (lead.PHONE && lead.PHONE[0] && lead.PHONE[0].VALUE) || "";
 
     if (answer === "no") {
       // Show reason selection screen instead of direct update
-      const fullName = [contact.NAME, contact.LAST_NAME].filter(Boolean).join(" ") || "—";
-      const clientId = contact.UF_CRM_566016C1CC16A || ("#" + contact.ID);
+      lastLeadStatus = lead.STATUS_ID || null;
+    const fullName = [lead.NAME, lead.LAST_NAME].filter(Boolean).join(" ") || "—";
+      const clientId = lead.UF_CRM_1449131692 || ("#" + lead.ID);
       document.getElementById("noClientNameText").textContent = fullName;
       document.getElementById("noClientIdText").textContent = clientId;
       document.getElementById("noClientPhoneText").textContent = originalPhone || "—";
@@ -555,7 +588,7 @@ async function findContact() {
     }
 
     // Show verify form
-    const fullName = [contact.NAME, contact.LAST_NAME].filter(Boolean).join(" ") || "—";
+    const fullName = [lead.NAME, lead.LAST_NAME].filter(Boolean).join(" ") || "—";
     document.getElementById("verifyName").textContent = fullName;
     document.getElementById("verifyPhone").value = originalPhone;
     show("state-verify");
@@ -563,19 +596,25 @@ async function findContact() {
   } catch(e) { console.error(e); show("state-error"); }
 }
 
-async function updateContact(fields, commentText) {
+async function updateLead(fields, commentText) {
   // Add comment to the card field (left side) as well as timeline (right side)
   fields["COMMENTS"] = commentText;
   fields["ASSIGNED_BY_ID"] = 907;
-  await fetch(WEBHOOK + "crm.contact.update", {
+
+  // Leads carry a pipeline status. Never move a lead that is already
+  // paid, closed or marked not-relevant.
+  if (!PROTECTED_STATUSES.includes(String(lastLeadStatus))) {
+    fields["STATUS_ID"] = (answer === "no") ? "31" : "NEW";
+  }
+  await fetch(WEBHOOK + "crm.lead.update", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ID: lastContactId, FIELDS: fields })
+    body: JSON.stringify({ ID: lastLeadId, FIELDS: fields })
   });
   await fetch(WEBHOOK + "crm.timeline.comment.add", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ fields: { ENTITY_TYPE: "contact", ENTITY_ID: lastContactId, COMMENT: commentText } })
+    body: JSON.stringify({ fields: { ENTITY_TYPE: "lead", ENTITY_ID: lastLeadId, COMMENT: commentText } })
   });
 }
 
@@ -617,7 +656,7 @@ async function submitVerify() {
   if (notes) commentParts.push("Additional information from client: " + notes);
 
   try {
-    await updateContact(fields, commentParts.join(" | "));
+    await updateLead(fields, commentParts.join(" | "));
     show("state-success");
   } catch(e) { console.error(e); show("state-error"); }
 }
@@ -628,19 +667,19 @@ async function submitNoChange() {
   const commentParts = ["Client confirmed their details are correct — no changes needed."];
   if (phone) commentParts.push("Phone on file: " + phone);
   try {
-    await updateContact({ [INTERESTED_FIELD]: "Yes" }, commentParts.join(" | "));
+    await updateLead({ [INTERESTED_FIELD]: "Yes" }, commentParts.join(" | "));
     show("state-success");
   } catch(e) { console.error(e); show("state-error"); }
 }
 
 async function submitNoReason() {
   const reason = document.getElementById("noReasonField").value.trim();
-  if (!reason || !lastContactId) { document.getElementById("noReasonThanks").classList.remove("hidden"); return; }
+  if (!reason || !lastLeadId) { document.getElementById("noReasonThanks").classList.remove("hidden"); return; }
   try {
     await fetch(WEBHOOK + "crm.timeline.comment.add", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fields: { ENTITY_TYPE: "contact", ENTITY_ID: lastContactId, COMMENT: "Client's reason for no longer being interested: " + reason } })
+      body: JSON.stringify({ fields: { ENTITY_TYPE: "lead", ENTITY_ID: lastLeadId, COMMENT: "Client's reason for no longer being interested: " + reason } })
     });
   } catch(e) { console.error(e); }
   document.getElementById("noReasonThanks").classList.remove("hidden");
@@ -656,7 +695,7 @@ async function submitNoReason() {
   const urlEmail = params.get("email");
   if (urlEmail && urlEmail !== "#EMAIL_TO#" && urlEmail.includes("@")) {
     document.getElementById("emailField").value = decodeURIComponent(urlEmail);
-    setTimeout(findContact, 100);
+    setTimeout(findLead, 100);
   }
 })();
 
@@ -678,7 +717,7 @@ async function submitNoReasonVerify() {
   show("state-loading");
 
   try {
-    await updateContact(
+    await updateLead(
       { [INTERESTED_FIELD]: reasonValue, TYPE_ID: "46" },
       "Client received the verification email and selected: " + reasonValue
     );
