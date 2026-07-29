@@ -34,7 +34,38 @@
     animation: spin 0.8s linear infinite;
     margin: 0 auto 16px;
   }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  /* ---- Motion ------------------------------------------------------
+   Matches the file page: a settling entrance rather than anything
+   bouncy, and each state fades in as it is shown. */
+@keyframes riseIn {
+  from { opacity:0; transform:translateY(14px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+.card { animation: riseIn .55s cubic-bezier(.22,.61,.36,1) both; }
+
+/* Applied by script whenever a state becomes visible */
+.stateIn { animation: riseIn .42s cubic-bezier(.22,.61,.36,1) both; }
+
+.success-icon { animation: fadeIn .6s .18s both; }
+
+/* Confirmation tick draws itself in */
+#state-success svg polyline {
+  stroke-dasharray: 30;
+  stroke-dashoffset: 30;
+  animation: drawTick .5s .35s forwards ease-out;
+}
+#state-success svg circle { animation: fadeIn .4s .2s both; }
+@keyframes drawTick { to { stroke-dashoffset: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .card, .stateIn, .success-icon,
+  #state-success svg circle { animation: none !important; }
+  #state-success svg polyline { stroke-dashoffset: 0; animation: none !important; }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
   .success-icon { font-size: 44px; margin-bottom: 14px; }
   .hidden { display: none; }
   .field-label {
@@ -475,7 +506,12 @@ let lastContactId = null;
 let originalPhone = "";
 
 const STATES = ["state-email-entry","state-loading","state-verify","state-success","state-no","state-reason","state-notfound","state-error"];
-function show(id) { STATES.forEach(s => document.getElementById(s).classList.toggle("hidden", s !== id)); }
+function show(id) {
+  STATES.forEach(s => document.getElementById(s).classList.toggle("hidden", s !== id));
+  // Restart the entrance animation on whichever state just became visible
+  const el = document.getElementById(id);
+  if (el) { el.classList.remove("stateIn"); void el.offsetWidth; el.classList.add("stateIn"); }
+}
 function resetForm() { document.getElementById("emailField").value = ""; document.getElementById("errorBox").innerHTML = ""; show("state-email-entry"); }
 function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
 
