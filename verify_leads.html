@@ -566,16 +566,16 @@ async function findLead() {
     const data = await res.json();
     const leads = data.result || [];
 
-    if (!contacts.length) { show("state-notfound"); return; }
+    if (!leads.length) { show("state-notfound"); return; }
 
     const lead = leads[0];
     lastLeadId = lead.ID;
+    lastLeadStatus = lead.STATUS_ID || null;
     originalPhone = (lead.PHONE && lead.PHONE[0] && lead.PHONE[0].VALUE) || "";
 
     if (answer === "no") {
       // Show reason selection screen instead of direct update
-      lastLeadStatus = lead.STATUS_ID || null;
-    const fullName = [lead.NAME, lead.LAST_NAME].filter(Boolean).join(" ") || "—";
+      const fullName = [lead.NAME, lead.LAST_NAME].filter(Boolean).join(" ") || "—";
       const clientId = lead.UF_CRM_1449131692 || ("#" + lead.ID);
       document.getElementById("noClientNameText").textContent = fullName;
       document.getElementById("noClientIdText").textContent = clientId;
