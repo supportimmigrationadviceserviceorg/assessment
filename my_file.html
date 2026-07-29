@@ -158,6 +158,36 @@
   }
   @keyframes sp { to { transform:rotate(360deg); } }
 
+  /* ---- Motion ----------------------------------------------------
+     Kept subtle: a settling entrance, rows arriving in sequence, and
+     the completeness figure counting up. Anything bouncier would read
+     as a gimmick rather than as a considered document. */
+  @keyframes riseIn {
+    from { opacity:0; transform:translateY(14px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+  .card { animation: riseIn .55s cubic-bezier(.22,.61,.36,1) both; }
+  .head { animation: fadeIn .5s .12s both; }
+
+  .who      { animation: riseIn .5s .18s both; }
+  .note     { animation: riseIn .5s .26s both; }
+  .scoreBox { animation: riseIn .5s .34s both; }
+
+  /* Each detail row is given its delay in script as it is created. */
+  tr.reveal { animation: riseIn .42s both; }
+
+  .cta { animation: fadeIn .6s .5s both; }
+
+  .photo, .initials { animation: fadeIn .6s .3s both; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card, .head, .who, .note, .scoreBox, tr.reveal, .cta,
+    .photo, .initials { animation: none !important; }
+    .barFill { transition: none !important; }
+  }
+
   .foot {
     background:#eceae2; border-top:1px solid #c7bfa8;
     padding:15px 32px; text-align:center;
@@ -660,8 +690,29 @@ function renderCompleteness(rec, c, phone){
   const done = checks.filter(x => x.ok).length;
   const pct  = Math.round((done / checks.length) * 100);
 
-  document.getElementById("scorePct").textContent = pct + "%";
-  setTimeout(() => { document.getElementById("barFill").style.width = pct + "%"; }, 120);
+  // Count the figure up so the eye follows it to the bar.
+  const el = document.getElementById("scorePct");
+  const reduce = window.matchMedia &&
+                 window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (reduce) {
+    el.textContent = pct + "%";
+    document.getElementById("barFill").style.width = pct + "%";
+  } else {
+    el.textContent = "0%";
+    const start = performance.now();
+    const dur = 1100, delay = 480;
+    function tick(now){
+      const t = Math.min(Math.max(now - start - delay, 0) / dur, 1);
+      const eased = 1 - Math.pow(1 - t, 3);      // ease-out
+      el.textContent = Math.round(pct * eased) + "%";
+      if (t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+    setTimeout(() => {
+      document.getElementById("barFill").style.width = pct + "%";
+    }, delay);
+  }
 
   const missing = checks.filter(x => !x.ok).map(x => x.label);
   const hint = document.getElementById("scoreHint");
@@ -815,8 +866,12 @@ async function render(rec, entity, email, contactRec){
     return d.toLocaleDateString("en-US", { year:"numeric", month:"long", day:"numeric" });
   }
 
+  let rowIndex = 0;
   function addRow(label, value){
     const tr = document.createElement("tr");
+    tr.className = "reveal";
+    tr.style.animationDelay = (0.40 + rowIndex * 0.055) + "s";
+    rowIndex++;
     tr.innerHTML = '<td class="k"></td><td class="v"></td>';
     tr.children[0].textContent = label;
     tr.children[1].textContent = value;
