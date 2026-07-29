@@ -159,8 +159,8 @@
     <table class="rows" id="detailRows"></table>
 
     <div class="cta">
-      <a href="#" class="btn" id="ctaBtn">Book My Consultation</a>
-      <div class="sub" id="ctaSub">Takes less than a minute to schedule</div>
+      <a href="#" class="btn" id="ctaBtn">Confirm My Details</a>
+      <div class="sub" id="ctaSub">Takes less than two minutes</div>
 
       <div class="update">
         <span id="updatePrompt">Something not correct?
@@ -196,9 +196,9 @@
 
         <div id="updateDone" class="hidden upDone">
           <strong>Thank you — your file has been updated.</strong><br>
-          Your details are now with our office. You can book your consultation below.
+          Your details are now with our office. You can continue below.
           <div style="text-align:center;margin-top:14px">
-            <a href="#" class="btn" id="doneCta">Book My Consultation</a>
+            <a href="#" class="btn" id="doneCta">Confirm My Details</a>
           </div>
         </div>
       </div>
@@ -239,8 +239,8 @@ var WEBHOOK = "https://immiworld.org/rest/147/47yrflms2cje1cbe/";
 var ENTITY  = "contact";
 
 /* Where the button goes. */
-var NEXT_URL   = "https://calendly.com/support-ias/u-s-immigration-consultation-phone-call";
-var NEXT_LABEL = "Book My Consultation";
+var NEXT_URL   = "https://supportimmigrationadviceserviceorg.github.io/assessment/verify.html?answer=verify";
+var NEXT_LABEL = "Confirm My Details";
 
 var CLIENT_ID_FIELD = "UF_CRM_566016C1CC16A";
 var PHOTO_FIELD     = "UF_CRM_697089EB2FDD1";
@@ -321,9 +321,12 @@ function displayable(t){ return !!t && !NON_LATIN.test(String(t)); }
 function hasVal(rec, code){
   if(!rec || !code) return false;
   var v = rec[code];
-  if(v === undefined || v === null) return false;
+  if(v === undefined || v === null || v === false) return false;
   if(Object.prototype.toString.call(v) === "[object Array]") return v.length > 0;
-  return String(v).trim() !== "";
+  var s = String(v).trim();
+  // Bitrix returns "0" / 0 / false for unset boolean and list fields.
+  if(s === "" || s === "0" || s === "false") return false;
+  return true;
 }
 
 function fmtDate(v){

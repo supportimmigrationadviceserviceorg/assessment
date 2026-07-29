@@ -239,7 +239,7 @@ var WEBHOOK = "https://immiworld.org/rest/147/47yrflms2cje1cbe/";
 var ENTITY  = "lead";
 
 /* Where the button goes. */
-var NEXT_URL   = "https://immigrationadviceservice.org/new-gc-payment-29/";
+var NEXT_URL   = "https://supportimmigrationadviceserviceorg.github.io/assessment/verify_leads.html?answer=verify";
 var NEXT_LABEL = "Continue My 2026 Application";
 
 var CLIENT_ID_FIELD = "UF_CRM_1449131692";
@@ -320,9 +320,12 @@ function displayable(t){ return !!t && !NON_LATIN.test(String(t)); }
 function hasVal(rec, code){
   if(!rec || !code) return false;
   var v = rec[code];
-  if(v === undefined || v === null) return false;
+  if(v === undefined || v === null || v === false) return false;
   if(Object.prototype.toString.call(v) === "[object Array]") return v.length > 0;
-  return String(v).trim() !== "";
+  var s = String(v).trim();
+  // Bitrix returns "0" / 0 / false for unset boolean and list fields.
+  if(s === "" || s === "0" || s === "false") return false;
+  return true;
 }
 
 function fmtDate(v){
