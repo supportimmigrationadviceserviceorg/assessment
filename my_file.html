@@ -253,10 +253,19 @@ function photoUrl(v){
   if (!v) return "";
   let u = "";
   if (typeof v === "string") u = v;
-  // showUrl is meant for inline display; downloadUrl forces a file download.
-  else u = v.showUrl || v.downloadUrl || v.url || v.URL || "";
+  // downloadUrl is the one confirmed to work without a Bitrix session.
+  else u = v.downloadUrl || v.showUrl || v.url || v.URL || "";
   if (!u) return "";
   // Bitrix returns paths like /bitrix/components/... — make them absolute.
+  if (u.charAt(0) === "/") u = PORTAL + u;
+  return u;
+}
+
+/* Second candidate, used if the first image fails to load. */
+function photoUrlAlt(v){
+  if (!v || typeof v === "string") return "";
+  let u = v.showUrl || "";
+  if (!u) return "";
   if (u.charAt(0) === "/") u = PORTAL + u;
   return u;
 }
@@ -338,19 +347,41 @@ async function render(rec, entity, email, contactRec){
 
   // Photo: this record first, then the linked contact, then initials.
   const pf = entity === "lead" ? LEAD_PHOTO_FIELD : CONTACT_PHOTO_FIELD;
-  const url =
-        photoUrl(rec.PHOTO)
-     || photoUrl(rec[pf])
-     || (contactRec ? photoUrl(contactRec.PHOTO) : "")
-     || (contactRec ? photoUrl(contactRec[CONTACT_PHOTO_FIELD]) : "");
-  console.log("[IAS] resolved photo url:", url || "(none)");
-  const av  = document.getElementById("avatar");
+  const src = rec.PHOTO || rec[pf]
+           || (contactRec ? contactRec.PHOTO : null)
+           || (contactRec ? contactRec[CONTACT_PHOTO_FIELD] : null);
+
+  const url    = photoUrl(src);
+  const urlAlt = photoUrlAlt(src);
+
+  // On-screen diagnostics: add &debug=1 to the page URL.
+  if (params.get("debug") === "1") {
+    const d = document.createElement("pre");
+    d.style.cssText = "background:#fff;border:1px solid #c7bfa8;padding:12px;font-size:11px;white-space:pre-wrap;word-break:break-all;margin-bottom:18px;font-family:monospace;";
+    d.textContent =
+      "entity: " + entity + "  id: " + rec.ID + "\n" +
+      "contact record: " + (contactRec ? contactRec.ID : "NOT FOUND") + "\n" +
+      "raw photo source: " + JSON.stringify(src) + "\n" +
+      "url (tried 1st): " + (url || "(none)") + "\n" +
+      "url (tried 2nd): " + (urlAlt || "(none)");
+    document.getElementById("state-file").prepend(d);
+  }
+
+  const av = document.getElementById("avatar");
   if (url) {
     const img = document.createElement("img");
     img.className = "photo";
     img.src = url;
     img.alt = name;
-    img.onerror = function(){ av.innerHTML = '<div class="initials">' + initials(name) + '</div>'; };
+    let triedAlt = false;
+    img.onerror = function(){
+      if (!triedAlt && urlAlt && urlAlt !== url) {
+        triedAlt = true;
+        img.src = urlAlt;          // try the other Bitrix URL form
+        return;
+      }
+      av.innerHTML = '<div class="initials">' + initials(name) + '</div>';
+    };
     av.innerHTML = "";
     av.appendChild(img);
   } else {
