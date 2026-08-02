@@ -6,216 +6,103 @@
 <meta name="referrer" content="no-referrer">
 <title>My Immigration File — Immigration Advice Service</title>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body {
-    font-family: Georgia, 'Times New Roman', serif;
-    background:#dde3ec;
-    padding:28px 16px;
-    color:#2a2a28;
-  }
-  .card {
-    max-width:620px; margin:0 auto;
-    background:#f4f1ea; border:1px solid #c7bfa8; border-radius:2px;
-  }
-  .head {
-    border-bottom:3px double #1a3a6b; padding:22px 32px 18px; text-align:center;
-  }
-  .head .eyebrow {
-    font-size:11px; letter-spacing:4px; color:#7a6f52;
-    text-transform:uppercase; margin-bottom:6px;
-  }
-  .head .brand {
-    font-size:19px; font-weight:bold; color:#1a3a6b; letter-spacing:1px;
-  }
-  .inner { padding:30px 32px 28px; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:Georgia,'Times New Roman',serif;background:#dde3ec;padding:28px 16px;color:#2a2a28}
+  .card{max-width:620px;margin:0 auto;background:#f4f1ea;border:1px solid #c7bfa8;border-radius:2px}
+  .head{border-bottom:3px double #1a3a6b;padding:22px 32px 18px;text-align:center}
+  .head .eyebrow{font-size:11px;letter-spacing:4px;color:#7a6f52;text-transform:uppercase;margin-bottom:6px}
+  .head .brand{font-size:19px;font-weight:bold;color:#1a3a6b;letter-spacing:1px}
+  .inner{padding:30px 32px 28px}
+  .hidden{display:none}
 
-  /* Client header */
-  .who { display:flex; align-items:center; gap:18px; margin-bottom:24px; }
-  .photo {
-    width:78px; height:78px; border-radius:50%; object-fit:cover;
-    border:2px solid #c7bfa8; background:#e7e2d4; flex-shrink:0;
-  }
-  .initials {
-    width:78px; height:78px; border-radius:50%; flex-shrink:0;
-    background:#1a3a6b; color:#f4f1ea;
-    display:flex; align-items:center; justify-content:center;
-    font-size:28px; letter-spacing:1px;
-  }
-  .who h1 { font-size:21px; color:#1a3a6b; font-weight:bold; margin-bottom:4px; }
-  .who .cid { font-size:13px; color:#7a6f52; }
+  .who{display:flex;align-items:center;gap:18px;margin-bottom:24px}
+  .avatar{width:78px;height:78px;border-radius:50%;flex-shrink:0;background:#1a3a6b;color:#f4f1ea;
+          display:flex;align-items:center;justify-content:center;font-size:28px;letter-spacing:1px;overflow:hidden}
+  .avatar img{width:100%;height:100%;object-fit:cover}
+  .who h1{font-size:21px;color:#1a3a6b;font-weight:bold;margin-bottom:4px}
+  .who .cid{font-size:13px;color:#7a6f52}
 
-  .note {
-    background:#eef2f8; border-left:3px solid #1a3a6b;
-    padding:15px 18px; font-size:14px; line-height:1.75;
-    color:#1a2e4a; margin-bottom:24px;
-  }
+  .note{background:#eef2f8;border-left:3px solid #1a3a6b;padding:15px 18px;font-size:14px;
+        line-height:1.75;color:#1a2e4a;margin-bottom:24px}
 
-  .section-title {
-    font-size:11px; letter-spacing:3px; text-transform:uppercase;
-    color:#7a6f52; margin:0 0 10px; padding-bottom:6px;
-    border-bottom:1px solid #d8d2c0;
-  }
-  table.rows { width:100%; border-collapse:collapse; margin-bottom:24px; }
-  table.rows td { padding:9px 0; font-size:14px; vertical-align:top; }
-  table.rows td.k { color:#7a6f52; width:46%; }
-  table.rows td.v { color:#2a2a28; }
-  table.rows tr + tr td { border-top:1px solid #e4dfd0; }
+  .scoreBox{border:1px solid #d8d2c0;border-radius:3px;padding:16px 18px;margin-bottom:24px;background:#faf8f2}
+  .scoreRow{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .scoreKey{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7a6f52}
+  .scoreBadge{font-size:12px;color:#1a3a6b;font-weight:bold;background:#e6edf7;border:1px solid #c8d6e8;
+              padding:4px 10px;border-radius:2px;white-space:nowrap}
+  .scorePct{font-size:17px;color:#1a3a6b;font-weight:bold}
+  .bar{height:7px;background:#e4dfd0;border-radius:4px;overflow:hidden;margin-top:9px}
+  .barFill{height:100%;width:0;background:#1a3a6b;border-radius:4px;transition:width .7s ease}
+  .scoreHint{font-size:12px;color:#7a6f52;margin-top:9px;line-height:1.6}
 
-  .scoreBox {
-    border:1px solid #d8d2c0; border-radius:3px;
-    padding:16px 18px; margin-bottom:24px; background:#faf8f2;
-  }
-  .scoreRow { display:flex; align-items:center; justify-content:space-between; gap:12px; }
-  .scoreKey {
-    font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#7a6f52;
-  }
-  .scoreBadge {
-    font-size:12px; color:#1a3a6b; font-weight:bold;
-    background:#e6edf7; border:1px solid #c8d6e8;
-    padding:4px 10px; border-radius:2px; white-space:nowrap;
-  }
-  .scorePct { font-size:17px; color:#1a3a6b; font-weight:bold; }
-  .bar {
-    height:7px; background:#e4dfd0; border-radius:4px;
-    overflow:hidden; margin-top:9px;
-  }
-  .barFill {
-    height:100%; width:0; background:#1a3a6b;
-    border-radius:4px; transition:width .7s ease;
-  }
-  .scoreHint { font-size:12px; color:#7a6f52; margin-top:9px; line-height:1.6; }
+  .section-title{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#7a6f52;
+                 margin:0 0 10px;padding-bottom:6px;border-bottom:1px solid #d8d2c0}
+  table.rows{width:100%;border-collapse:collapse;margin-bottom:24px}
+  table.rows td{padding:9px 0;font-size:14px;vertical-align:top}
+  table.rows td.k{color:#7a6f52;width:46%}
+  table.rows td.v{color:#2a2a28}
+  table.rows tr+tr td{border-top:1px solid #e4dfd0}
 
-  @media (max-width:520px) {
-    .scoreRow { flex-direction:column; align-items:flex-start; gap:5px; }
-  }
+  .cta{text-align:center;margin-top:8px}
+  .btn{display:inline-block;background:#1a3a6b;color:#f4f1ea!important;font-family:Arial,sans-serif;
+       font-size:15px;font-weight:bold;padding:14px 40px;border-radius:3px;text-decoration:none}
+  .cta .sub{font-size:12px;color:#9a917c;margin-top:10px}
+  .cta .update{margin-top:16px;padding-top:14px;border-top:1px solid #e4dfd0;font-size:13px;color:#7a6f52}
+  .cta .update a{color:#1a3a6b}
 
-  .cta { text-align:center; margin-top:8px; }
-  .btn {
-    display:inline-block; background:#1a3a6b; color:#f4f1ea;
-    font-family:Arial, sans-serif; font-size:15px; font-weight:bold;
-    padding:14px 40px; border-radius:3px; text-decoration:none;
-  }
-  .cta .sub { font-size:12px; color:#9a917c; margin-top:10px; }
-  .cta .update {
-    margin-top:16px; padding-top:14px; border-top:1px solid #e4dfd0;
-    font-size:13px; color:#7a6f52;
-  }
-  .cta .update a { color:#1a3a6b; }
-  /* The success button sits inside .update, so it needs to win
-     against the link colour rule above. */
-  .cta .update a.btn { color:#f4f1ea; }
-  .cta .update #updatePanel {
-    margin-top:14px; background:#eef2f8; border:1px solid #d3ddea;
-    border-radius:3px; padding:16px 16px 18px; text-align:left;
-  }
-  .upIntro { font-size:13px; color:#1a2e4a; line-height:1.6; margin-bottom:14px; }
-  .upLabel {
-    display:block; font-size:11px; letter-spacing:1.5px;
-    text-transform:uppercase; color:#7a6f52; margin-bottom:5px;
-  }
-  .upInput {
-    width:100%; padding:10px 12px; font-size:14px;
-    border:1px solid #c7bfa8; border-radius:3px;
-    font-family:Georgia,serif; margin-bottom:14px;
-    background:#fff; color:#2a2a28;
-  }
-  .upInput:focus { outline:none; border-color:#1a3a6b; }
-  .upBtn {
-    width:100%; background:#1a3a6b; color:#f4f1ea; border:none;
-    padding:12px; font-size:14px; border-radius:3px; cursor:pointer;
-    font-family:Arial,sans-serif; font-weight:bold;
-  }
-  .upBtn:disabled { background:#9aa5b5; cursor:not-allowed; }
-  .upDone {
-    margin-top:14px; background:#eef5ec; border:1px solid #c3d9bd;
-    border-radius:3px; padding:14px 16px;
-    font-size:13px; line-height:1.6; color:#2c4a26; text-align:left;
+  #updatePanel{margin-top:14px;background:#eef2f8;border:1px solid #d3ddea;border-radius:3px;
+               padding:16px 16px 18px;text-align:left}
+  .upIntro{font-size:13px;color:#1a2e4a;line-height:1.6;margin-bottom:14px}
+  .upLabel{display:block;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#7a6f52;margin-bottom:5px}
+  .upInput{width:100%;padding:10px 12px;font-size:14px;border:1px solid #c7bfa8;border-radius:3px;
+           font-family:Georgia,serif;margin-bottom:14px;background:#fff;color:#2a2a28}
+  .upInput:focus{outline:none;border-color:#1a3a6b}
+  .upBtn{width:100%;background:#1a3a6b;color:#f4f1ea;border:none;padding:12px;font-size:14px;
+         border-radius:3px;cursor:pointer;font-family:Arial,sans-serif;font-weight:bold}
+  .upBtn:disabled{background:#9aa5b5;cursor:not-allowed}
+  .upDone{margin-top:14px;background:#eef5ec;border:1px solid #c3d9bd;border-radius:3px;
+          padding:14px 16px;font-size:13px;line-height:1.6;color:#2c4a26;text-align:left}
+
+  .gate{text-align:center}
+  .gate p{font-size:14px;color:#3a3a36;line-height:1.7;margin-bottom:18px}
+  .gate input{width:100%;padding:12px 14px;font-size:15px;border:1px solid #c7bfa8;border-radius:3px;
+              font-family:Georgia,serif;margin-bottom:12px}
+  .gate button{width:100%;background:#1a3a6b;color:#f4f1ea;border:none;padding:13px;font-size:15px;
+               border-radius:3px;cursor:pointer;font-family:Arial,sans-serif;font-weight:bold}
+  .err{background:#fdf2f2;border:1px solid #e6c3c3;color:#8a3232;padding:11px 14px;font-size:13px;
+       border-radius:3px;margin-bottom:14px;text-align:left}
+  #errDetail{display:none;text-align:left;background:#fff;border:1px solid #c7bfa8;padding:10px;
+             font-size:11px;white-space:pre-wrap;word-break:break-all;font-family:monospace;color:#933;margin-top:12px}
+
+  .spin{width:34px;height:34px;margin:26px auto;border:3px solid #ddd7c6;border-top-color:#1a3a6b;
+        border-radius:50%;animation:sp .8s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  .foot{background:#eceae2;border-top:1px solid #c7bfa8;padding:15px 32px;text-align:center;
+        font-size:11px;color:#9a917c;line-height:1.7}
+  .foot a{color:#9a917c;text-decoration:none}
+
+  @keyframes riseIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .card{animation:riseIn .55s cubic-bezier(.22,.61,.36,1) both}
+  .who{animation:riseIn .5s .18s both}
+  .note{animation:riseIn .5s .26s both}
+  .scoreBox{animation:riseIn .5s .34s both}
+  tr.reveal{animation:riseIn .42s both}
+  .cta{animation:fadeIn .6s .5s both}
+  @media(prefers-reduced-motion:reduce){
+    .card,.who,.note,.scoreBox,tr.reveal,.cta{animation:none!important}
+    .barFill{transition:none!important}
   }
 
-  /* Email gate */
-  .gate { text-align:center; padding:8px 0 4px; }
-  .gate p { font-size:14px; color:#3a3a36; line-height:1.7; margin-bottom:18px; }
-  .gate input {
-    width:100%; padding:12px 14px; font-size:15px;
-    border:1px solid #c7bfa8; border-radius:3px;
-    font-family:Georgia,serif; margin-bottom:12px;
-  }
-  .gate button {
-    width:100%; background:#1a3a6b; color:#f4f1ea; border:none;
-    padding:13px; font-size:15px; border-radius:3px; cursor:pointer;
-    font-family:Arial, sans-serif; font-weight:bold;
-  }
-  .err {
-    background:#fdf2f2; border:1px solid #e6c3c3; color:#8a3232;
-    padding:11px 14px; font-size:13px; border-radius:3px;
-    margin-bottom:14px; text-align:left;
-  }
-
-  .spin {
-    width:34px; height:34px; margin:26px auto;
-    border:3px solid #ddd7c6; border-top-color:#1a3a6b;
-    border-radius:50%; animation:sp .8s linear infinite;
-  }
-  @keyframes sp { to { transform:rotate(360deg); } }
-
-  /* ---- Motion ----------------------------------------------------
-     Kept subtle: a settling entrance, rows arriving in sequence, and
-     the completeness figure counting up. Anything bouncier would read
-     as a gimmick rather than as a considered document. */
-  @keyframes riseIn {
-    from { opacity:0; transform:translateY(14px); }
-    to   { opacity:1; transform:translateY(0); }
-  }
-  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
-
-  .card { animation: riseIn .55s cubic-bezier(.22,.61,.36,1) both; }
-  .head { animation: fadeIn .5s .12s both; }
-
-  .who      { animation: riseIn .5s .18s both; }
-  .note     { animation: riseIn .5s .26s both; }
-  .scoreBox { animation: riseIn .5s .34s both; }
-
-  /* Each detail row is given its delay in script as it is created. */
-  tr.reveal { animation: riseIn .42s both; }
-
-  .cta { animation: fadeIn .6s .5s both; }
-
-  .photo, .initials { animation: fadeIn .6s .3s both; }
-
-  @media (prefers-reduced-motion: reduce) {
-    .card, .head, .who, .note, .scoreBox, tr.reveal, .cta,
-    .photo, .initials { animation: none !important; }
-    .barFill { transition: none !important; }
-  }
-
-  .inlineAdd { display:flex; align-items:center; gap:8px; }
-  .inlineInput {
-    flex:1; min-width:0; padding:6px 9px; font-size:13px;
-    border:1px solid #d8d2c0; border-radius:3px;
-    font-family:Georgia,serif; background:#fff; color:#2a2a28;
-  }
-  .inlineInput:focus { outline:none; border-color:#1a3a6b; }
-  .inlineSave {
-    font-size:12px; color:#1a3a6b; text-decoration:underline;
-    white-space:nowrap; cursor:pointer;
-  }
-  .inlineDone { font-size:14px; color:#2a2a28; }
-
-  .foot {
-    background:#eceae2; border-top:1px solid #c7bfa8;
-    padding:15px 32px; text-align:center;
-    font-size:11px; color:#9a917c; line-height:1.7;
-  }
-  .foot a { color:#9a917c; text-decoration:none; }
-  .hidden { display:none; }
-
-  @media (max-width:520px) {
-    .who { flex-direction:column; text-align:center; gap:12px; }
-    table.rows td { display:block; width:100%; }
-    table.rows td.k { padding-bottom:2px; }
-    table.rows td.v { padding-top:0; font-weight:bold; }
-    table.rows tr + tr td.k { border-top:1px solid #e4dfd0; padding-top:10px; }
-    table.rows tr + tr td.v { border-top:none; }
+  @media(max-width:520px){
+    .who{flex-direction:column;text-align:center;gap:12px}
+    .scoreRow{flex-direction:column;align-items:flex-start;gap:5px}
+    table.rows td{display:block;width:100%}
+    table.rows td.k{padding-bottom:2px}
+    table.rows td.v{padding-top:0;font-weight:bold}
+    table.rows tr+tr td.k{border-top:1px solid #e4dfd0;padding-top:10px}
+    table.rows tr+tr td.v{border-top:none}
   }
 </style>
 </head>
@@ -228,27 +115,23 @@
     <div class="brand">Your Immigration File</div>
   </div>
 
-  <!-- STATE: email gate -->
   <div class="inner" id="state-gate">
     <div class="gate">
       <p>Please enter the email address you registered with, so we can bring up your file.</p>
-      <div id="errBox"></div>
+      <div id="gateErr"></div>
       <input type="email" id="emailField" placeholder="your@email.com">
       <button onclick="lookup()">View My File</button>
     </div>
   </div>
 
-  <!-- STATE: loading -->
   <div class="inner hidden" id="state-loading">
     <div class="spin"></div>
-    <p style="text-align:center;font-size:14px;color:#7a6f52;">Retrieving your file…</p>
+    <p style="text-align:center;font-size:14px;color:#7a6f52">Retrieving your file…</p>
   </div>
 
-  <!-- STATE: file -->
   <div class="inner hidden" id="state-file">
-
     <div class="who">
-      <div id="avatar"></div>
+      <div class="avatar" id="avatar"></div>
       <div>
         <h1 id="fullName">—</h1>
         <div class="cid">Client ID: <span id="clientId">—</span></div>
@@ -264,7 +147,7 @@
         <span class="scoreKey">Profile status</span>
         <span class="scoreBadge">Selected for attorney review</span>
       </div>
-      <div class="scoreRow" style="margin-top:12px;">
+      <div class="scoreRow" style="margin-top:12px">
         <span class="scoreKey">File completeness</span>
         <span class="scorePct" id="scorePct">—</span>
       </div>
@@ -275,37 +158,34 @@
     <div class="section-title">File Details</div>
     <table class="rows" id="detailRows"></table>
 
-    <div id="familyBlock" class="hidden">
-      <div class="section-title">Family on File</div>
-      <table class="rows" id="familyRows"></table>
-    </div>
-
     <div class="cta">
       <a href="#" class="btn" id="ctaBtn">Continue My 2026 Application</a>
-      <div class="sub">Takes less than two minutes</div>
+      <div class="sub" id="ctaSub">Takes less than two minutes</div>
+
       <div class="update">
         <span id="updatePrompt">Something not correct?
-        <a href="#" id="updateLink">Update my details</a></span>
+          <a href="#" id="updateLink">Update my details</a></span>
 
         <div id="updatePanel" class="hidden">
           <p class="upIntro">Add anything you'd like to correct or complete. Every field is optional, and nothing already on your file will be removed.</p>
 
-          <div id="upMissing"></div>
+          <label class="upLabel">Your profession (optional)</label>
+          <input type="text" id="upProfession" class="upInput" placeholder="Only if you'd like to">
 
           <label class="upLabel">Add a phone number</label>
-          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:14px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:14px">
             <tr>
-              <td style="width:52%;padding-right:8px;vertical-align:top;">
-                <select id="upDial" class="upInput" style="margin-bottom:0;"></select>
+              <td style="width:52%;padding-right:8px;vertical-align:top">
+                <select id="upDial" class="upInput" style="margin-bottom:0"></select>
               </td>
-              <td style="vertical-align:top;">
-                <input type="tel" id="upPhone" class="upInput" style="margin-bottom:0;" placeholder="646 519 668" inputmode="numeric">
+              <td style="vertical-align:top">
+                <input type="tel" id="upPhone" class="upInput" style="margin-bottom:0" placeholder="646 519 668" inputmode="numeric">
               </td>
             </tr>
           </table>
 
           <label class="upLabel">Add an email address</label>
-          <input type="email" id="upEmail" class="upInput" placeholder="e.g. name@example.com">
+          <input type="email" id="upEmail" class="upInput" placeholder="name@example.com">
 
           <label class="upLabel">Anything else we should know</label>
           <textarea id="upNote" class="upInput" rows="3" placeholder="Address, marital status, education, or anything else that has changed"></textarea>
@@ -317,27 +197,25 @@
         <div id="updateDone" class="hidden upDone">
           <strong>Thank you — your file has been updated.</strong><br>
           Your details are now with our office. You can carry on with your application below.
-          <div style="text-align:center;margin-top:14px;">
+          <div style="text-align:center;margin-top:14px">
             <a href="#" class="btn" id="doneCta">Continue My 2026 Application</a>
           </div>
         </div>
       </div>
     </div>
-
   </div>
 
-  <!-- STATE: not found -->
   <div class="inner hidden" id="state-notfound">
     <div class="gate">
       <p>We could not locate a file for that email address. Please check the spelling, or contact our office and we will be glad to help.</p>
-      <button onclick="reset()">Try Again</button>
+      <button onclick="resetForm()">Try Again</button>
     </div>
   </div>
 
-  <!-- STATE: error -->
   <div class="inner hidden" id="state-error">
     <div class="gate">
       <p>Something went wrong on our side. Please contact our office and we will assist you directly.</p>
+      <pre id="errDetail"></pre>
     </div>
   </div>
 
@@ -352,740 +230,509 @@
 
 <script>
 /* ============================================================
-   CONFIG
+   THIS PAGE SERVES LEADS ONLY.
+   It reads and writes crm.lead.* and nothing else. Contacts are
+   handled by my_file_client.html.
    ============================================================ */
-const WEBHOOK = "https://immiworld.org/rest/147/47yrflms2cje1cbe/";
 
-// Where the "Continue" button goes. utm_campaign is carried from the URL.
-// Each segment confirms their details on the page built for their record
-// type; the verification page then leads on to payment or to booking.
-const CTA_BASE    = "https://supportimmigrationadviceserviceorg.github.io/assessment/verify_leads.html?answer=verify";
-const CLIENT_BASE = "https://supportimmigrationadviceserviceorg.github.io/assessment/verify.html?answer=verify";
+var WEBHOOK = "https://immiworld.org/rest/147/47yrflms2cje1cbe/";
 
-/* Fields shown on the page. Each row is looked up on the lead first,
-   then on the contact — whichever holds a value wins.
+/* ============================================================
+   THIS PAGE SERVES BOTH.
+   It looks the person up as a lead first; if there is no lead it
+   looks them up as a contact. Everything below — field codes, the
+   button, the wording — follows whichever record was found, so the
+   same link can go to a whole list without knowing who has paid.
+   ============================================================ */
 
-   Deliberately excludes passport numbers, card details, internal
-   agent ratings, financial status and comments. Nothing appears on
-   this page unless it is listed here. */
-const FIELDS = [
-  { label: "Date of birth",        lead: "UF_CRM_LEAD_1691057358096", contact: "UF_CRM_64CF8809BDEAC" },
-  { label: "Date of birth",        std:  "BIRTHDATE" },
-  { label: "Country of birth",     lead: "UF_CRM_1449131599",         contact: "UF_CRM_566016C18B2CC" },
-  { label: "Country of residence", lead: "UF_CRM_1449131669" },
-  { label: "Country",              lead: "UF_CRM_LEAD_1691057729888", contact: "UF_CRM_64CF88148972E" },
-  { label: "Education level",      lead: "UF_CRM_1484914608",         contact: "UF_CRM_1465285867" },
-  { label: "Education level",      lead: "UF_CRM_LEAD_1691057977682", contact: "UF_CRM_64CF881B8596B" },
-  { label: "English level",        lead: "UF_CRM_1484914403",         contact: "UF_CRM_1484918172" },
-  { label: "English level",        lead: "UF_CRM_LEAD_1691057942374", contact: "UF_CRM_64CF88181B4AE" },
-  { label: "Marital status",       lead: "UF_CRM_1500181612",         contact: "UF_CRM_5F6380072B880" },
-  { label: "Marital status",       lead: "UF_CRM_LEAD_1691057391286", contact: "UF_CRM_64CF880D8027E" },
-  { label: "Profession",           lead: "UF_CRM_1484912429",         contact: "UF_CRM_1484918121" },
-  { label: "Children registered",  contact: "UF_CRM_5663EF24DD8A5" },
-  { label: "Confirmation number",  contact: "UF_CRM_1664979593" },
-  { label: "Confirmation number",  contact: "UF_CRM_1633378017" }
-];
+var PROFILES = {
+  lead: {
+    entity:     "lead",
+    nextUrl:    "https://supportimmigrationadviceserviceorg.github.io/assessment/verify_leads.html?answer=verify",
+    nextLabel:  "Continue My 2026 Application",
+    nextSub:    "Takes less than two minutes",
+    statusNote: "Your file is open with our office and ready for the next step.",
+    badge:      "Selected for attorney review",
+    clientId:   "UF_CRM_1449131692",
+    photo:      "UF_CRM_1768833329744",
+    fields: [
+  { label:"Date of birth",        code:"UF_CRM_LEAD_1691057358096" },
+  { label:"Date of birth",        code:"BIRTHDATE" },
+  { label:"Country of birth",     code:"UF_CRM_1449131599" },
+  { label:"Country of residence", code:"UF_CRM_1449131669" },
+  { label:"Country",              code:"UF_CRM_LEAD_1691057729888" },
+  { label:"Education level",      code:"UF_CRM_1484914608" },
+  { label:"Education level",      code:"UF_CRM_LEAD_1691057977682" },
+  { label:"English level",        code:"UF_CRM_1484914403" },
+  { label:"English level",        code:"UF_CRM_LEAD_1691057942374" },
+  { label:"Marital status",       code:"UF_CRM_1500181612" },
+  { label:"Marital status",       code:"UF_CRM_LEAD_1691057391286" },
+  { label:"Profession",           code:"UF_CRM_1484912429" }
+    ],
+    completeness: [
+  { label:"your date of birth",        codes:["UF_CRM_LEAD_1691057358096","BIRTHDATE"] },
+  { label:"your country of birth",     codes:["UF_CRM_1449131599"] },
+  { label:"your country of residence", codes:["UF_CRM_1449131669","UF_CRM_LEAD_1691057729888"] },
+  { label:"your education level",      codes:["UF_CRM_1484914608","UF_CRM_LEAD_1691057977682"] },
+  { label:"your English level",        codes:["UF_CRM_1484914403","UF_CRM_LEAD_1691057942374"] },
+  { label:"your marital status",       codes:["UF_CRM_1500181612","UF_CRM_LEAD_1691057391286"] },
+  { label:"your profession",           codes:["UF_CRM_1484912429"] }
+    ]
+  },
 
-/* Spouse and children — these live on the contact record and are what
-   the Paperwork tab groups together. Names and dates only; passport
-   and document fields are deliberately left out. */
-const SPOUSE = {
-  first:   "UF_CRM_5663EF2587EEC",
-  last:    "UF_CRM_1465296342",
-  dob:     "UF_CRM_1462453575",
-  country: "UF_CRM_1462453236",
-  country2:"UF_CRM_1596458290"
+  contact: {
+    entity:     "contact",
+    nextUrl:    "https://supportimmigrationadviceserviceorg.github.io/assessment/verify.html?answer=verify",
+    nextLabel:  "Confirm My Details",
+    nextSub:    "Takes less than two minutes",
+    statusNote: "Your file is open with our office. Please check the details below, then confirm them.",
+    badge:      "Active client file",
+    clientId:   "UF_CRM_566016C1CC16A",
+    photo:      "UF_CRM_697089EB2FDD1",
+    fields: [
+  { label:"Date of birth",        code:"UF_CRM_64CF8809BDEAC" },
+  { label:"Date of birth",        code:"BIRTHDATE" },
+  { label:"Country of birth",     code:"UF_CRM_566016C18B2CC" },
+  { label:"Country",              code:"UF_CRM_64CF88148972E" },
+  { label:"Education level",      code:"UF_CRM_1465285867" },
+  { label:"Education level",      code:"UF_CRM_64CF881B8596B" },
+  { label:"English level",        code:"UF_CRM_1484918172" },
+  { label:"English level",        code:"UF_CRM_64CF88181B4AE" },
+  { label:"Marital status",       code:"UF_CRM_5F6380072B880" },
+  { label:"Marital status",       code:"UF_CRM_64CF880D8027E" },
+  { label:"Profession",           code:"UF_CRM_1484918121" },
+  { label:"Children registered",  code:"UF_CRM_5663EF24DD8A5" },
+  { label:"Confirmation number",  code:"UF_CRM_1664979593" },
+  { label:"Confirmation number",  code:"UF_CRM_1633378017" }
+    ],
+    completeness: [
+  { label:"your date of birth",    codes:["UF_CRM_64CF8809BDEAC","BIRTHDATE"] },
+  { label:"your country of birth", codes:["UF_CRM_566016C18B2CC","UF_CRM_64CF88148972E"] },
+  { label:"your education level",  codes:["UF_CRM_1465285867","UF_CRM_64CF881B8596B"] },
+  { label:"your English level",    codes:["UF_CRM_1484918172","UF_CRM_64CF88181B4AE"] },
+  { label:"your marital status",   codes:["UF_CRM_5F6380072B880","UF_CRM_64CF880D8027E"] },
+  { label:"your profession",       codes:["UF_CRM_1484918121"] }
+    ]
+  }
 };
 
-const CHILDREN_NUMBERED = [
-  { first:"UF_CRM_5663EF24E7D06", last:"UF_CRM_1465297403", dob:"UF_CRM_1462452635" },
-  { first:"UF_CRM_1462452141",    last:"UF_CRM_1465297456", dob:"UF_CRM_1462452670" },
-  { first:"UF_CRM_1462452161",    last:"UF_CRM_1465297490", dob:"UF_CRM_1462452689" }
-];
+/* Filled in once we know which record the person has. */
+var P = null;
+var ENTITY = null, NEXT_URL = null, NEXT_LABEL = null;
+var CLIENT_ID_FIELD = null, PHOTO_FIELD = null;
+var FIELDS = [], COMPLETENESS = [];
 
-// Multi-value versions of the same thing, used on newer records
-const CHILDREN_MULTI = {
-  first: "UF_CRM_1508227656",
-  last:  "UF_CRM_1508227818",
-  dob:   "UF_CRM_1508227972"
-};
+function useProfile(which) {
+  P = PROFILES[which];
+  ENTITY          = P.entity;
+  NEXT_URL        = P.nextUrl;
+  NEXT_LABEL      = P.nextLabel;
+  CLIENT_ID_FIELD = P.clientId;
+  PHOTO_FIELD     = P.photo;
+  FIELDS          = P.fields;
+  COMPLETENESS    = P.completeness;
 
-const CONTACT_PHOTO_FIELD = "UF_CRM_697089EB2FDD1";
-const LEAD_PHOTO_FIELD    = "UF_CRM_1768833329744";
-const CLIENT_ID_LEAD      = "UF_CRM_1449131692";
-const CLIENT_ID_CONTACT   = "UF_CRM_566016C1CC16A";
+  var note = $("statusNote");  if (note) note.textContent = P.statusNote;
+  var sub  = $("ctaSub");      if (sub)  sub.textContent  = P.nextSub;
+  var badge = document.getElementsByClassName("scoreBadge")[0];
+  if (badge) badge.textContent = P.badge;
+}
 
-// Bitrix returns file URLs relative to the portal root.
-const PORTAL = "https://immiworld.org";
+/* ------------------------------------------------------------ */
 
-/* ============================================================ */
+var params = new URLSearchParams(location.search);
+var utmCampaign = params.get("utm_campaign") || "";
+var REC = { id:null, phones:[], emails:[] };
 
-const params = new URLSearchParams(location.search);
-const utmCampaign = params.get("utm_campaign") || "";
-
-const STATES = ["state-gate","state-loading","state-file","state-notfound","state-error"];
-function show(id){ STATES.forEach(s => document.getElementById(s).classList.toggle("hidden", s !== id)); }
-function reset(){ document.getElementById("emailField").value=""; document.getElementById("errBox").innerHTML=""; show("state-gate"); }
+var STATES = ["state-gate","state-loading","state-file","state-notfound","state-error"];
+function $(id){ return document.getElementById(id); }
+function show(id){
+  for(var i=0;i<STATES.length;i++){
+    var e = $(STATES[i]);
+    if(e) e.classList.toggle("hidden", STATES[i] !== id);
+  }
+}
+function resetForm(){
+  var f=$("emailField"); if(f) f.value="";
+  var g=$("gateErr"); if(g) g.innerHTML="";
+  show("state-gate");
+}
 function validEmail(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
 
-async function bx(path){
-  const r = await fetch(WEBHOOK + path);
-  return await r.json();
+function fail(e){
+  var box = $("errDetail");
+  if(box){
+    box.style.display = "block";
+    box.textContent = (e && e.message ? e.message : String(e)) + "\n\n" + (e && e.stack ? e.stack : "");
+  }
+  if(window.console && console.error) console.error("[IAS]", e);
+  show("state-error");
 }
 
-/* Resolve a Bitrix enumeration ID to its readable text. */
-let fieldDefs = null;
-async function enumText(entity, code, value){
-  if (!value) return "";
-  if (!fieldDefs) {
-    try { fieldDefs = (await bx("crm." + entity + ".fields")).result || {}; }
-    catch(e){ fieldDefs = {}; }
-  }
-  const def = fieldDefs[code];
-  if (!def || def.type !== "enumeration" || !Array.isArray(def.items)) return String(value);
-  const hit = def.items.filter(i => String(i.ID) === String(value))[0];
-  return hit ? hit.VALUE : "";
+function bxGet(path){
+  return fetch(WEBHOOK + path).then(function(r){ return r.json(); });
+}
+function bxPost(method, payload){
+  return fetch(WEBHOOK + method, {
+    method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload)
+  }).then(function(r){ return r.json(); });
 }
 
-function photoUrl(v){
-  if (!v) return "";
-  let u = "";
-  if (typeof v === "string") u = v;
-  // downloadUrl is the one confirmed to work without a Bitrix session.
-  else u = v.downloadUrl || v.showUrl || v.url || v.URL || "";
-  if (!u) return "";
-  // Bitrix returns paths like /bitrix/components/... — make them absolute.
-  if (u.charAt(0) === "/") u = PORTAL + u;
-  return u;
+/* Values in non-Latin scripts are skipped so the page stays in one language. */
+var NON_LATIN = /[\u0370-\u03FF\u0400-\u04FF\u0530-\u058F\u0590-\u05FF\u0600-\u06FF\u0700-\u074F\u0900-\u097F\u0E00-\u0E7F\u3040-\u30FF\u3400-\u4DBF\u4E00-\u9FFF\uAC00-\uD7AF]/;
+function displayable(t){ return !!t && !NON_LATIN.test(String(t)); }
+
+function hasVal(rec, code){
+  if(!rec || !code) return false;
+  var v = rec[code];
+  if(v === undefined || v === null || v === false) return false;
+  if(Object.prototype.toString.call(v) === "[object Array]") return v.length > 0;
+  var s = String(v).trim();
+  // Bitrix returns "0" / 0 / false for unset boolean and list fields.
+  if(s === "" || s === "0" || s === "false") return false;
+  return true;
 }
 
-/* Second candidate, used if the first image fails to load. */
-function photoUrlAlt(v){
-  if (!v || typeof v === "string") return "";
-  let u = v.showUrl || "";
-  if (!u) return "";
-  if (u.charAt(0) === "/") u = PORTAL + u;
-  return u;
-}
-
-/* Spouse and children, shown only when the contact actually holds them. */
-function renderFamily(c, fmtDate){
-  const block = document.getElementById("familyBlock");
-  const tbl   = document.getElementById("familyRows");
-  if (!c) return;
-  tbl.innerHTML = "";
-
-  const val = k => {
-    const v = c[k];
-    if (v === undefined || v === null) return "";
-    const s = String(v).trim();
-    return isDisplayable(s) ? s : "";
-  };
-
-  const row = (label, value) => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = '<td class="k"></td><td class="v"></td>';
-    tr.children[0].textContent = label;
-    tr.children[1].textContent = value;
-    tbl.appendChild(tr);
-  };
-
-  const nameOf = (f, l) => [val(f), val(l)].filter(Boolean).join(" ").trim();
-
-  // Spouse
-  const spouseName = nameOf(SPOUSE.first, SPOUSE.last);
-  if (spouseName) {
-    let extra = [];
-    const dob = val(SPOUSE.dob);
-    if (dob) extra.push(fmtDate(dob));
-    const cty = val(SPOUSE.country) || val(SPOUSE.country2);
-    if (cty && !/^\d+$/.test(cty)) extra.push(cty);
-    row("Spouse", spouseName + (extra.length ? "  ·  " + extra.join("  ·  ") : ""));
-  }
-
-  // Children — numbered fields
-  let n = 0;
-  CHILDREN_NUMBERED.forEach(ch => {
-    const nm = nameOf(ch.first, ch.last);
-    if (!nm) return;
-    n++;
-    const dob = val(ch.dob);
-    row("Child " + n, nm + (dob ? "  ·  " + fmtDate(dob) : ""));
-  });
-
-  // Children — multi-value fields
-  const mf = c[CHILDREN_MULTI.first];
-  if (Array.isArray(mf)) {
-    const ml = Array.isArray(c[CHILDREN_MULTI.last]) ? c[CHILDREN_MULTI.last] : [];
-    const md = Array.isArray(c[CHILDREN_MULTI.dob])  ? c[CHILDREN_MULTI.dob]  : [];
-    mf.forEach((first, i) => {
-      const a = String(first||"").trim();
-      const b = String(ml[i]||"").trim();
-      if (!isDisplayable(a) || (b && !isDisplayable(b))) return;
-      const nm = [a, b].filter(Boolean).join(" ");
-      if (!nm) return;
-      n++;
-      const dob = md[i] ? fmtDate(md[i]) : "";
-      row("Child " + n, nm + (dob ? "  ·  " + dob : ""));
-    });
-  }
-
-  if (tbl.children.length) block.classList.remove("hidden");
-}
-
-/* Some records hold values in Russian, Hebrew, Arabic and other scripts.
-   Those are skipped so the page stays in one language.
-   Latin letters with diacritics (José, Wojciech, Müller) are kept. */
-const NON_LATIN = /[\u0370-\u03FF\u0400-\u04FF\u0530-\u058F\u0590-\u05FF\u0600-\u06FF\u0700-\u074F\u0900-\u097F\u0E00-\u0E7F\u3040-\u30FF\u3400-\u4DBF\u4E00-\u9FFF\uAC00-\uD7AF]/;
-
-function isDisplayable(text){
-  if (!text) return false;
-  return !NON_LATIN.test(String(text));
-}
-
-/* Country dial codes for the phone field. */
-const DIAL_CODES = "Afghanistan|93,Albania|355,Algeria|213,Andorra|376,Angola|244,Antigua and Barbuda|1268,Argentina|54,Armenia|374,Aruba|297,Australia|61,Austria|43,Azerbaijan|994,Bahamas|1242,Bahrain|973,Bangladesh|880,Barbados|1246,Belarus|375,Belgium|32,Belize|501,Benin|229,Bermuda|1441,Bhutan|975,Bolivia|591,Bosnia and Herzegovina|387,Botswana|267,Brazil|55,Brunei|673,Bulgaria|359,Burkina Faso|226,Burundi|257,Cambodia|855,Cameroon|237,Canada|1,Cape Verde|238,Cayman Islands|1345,Central African Republic|236,Chad|235,Chile|56,China|86,Colombia|57,Comoros|269,Congo|242,Congo (DRC)|243,Costa Rica|506,Croatia|385,Cuba|53,Curacao|599,Cyprus|357,Czech Republic|420,Denmark|45,Djibouti|253,Dominica|1767,Dominican Republic|1809,Ecuador|593,Egypt|20,El Salvador|503,Equatorial Guinea|240,Eritrea|291,Estonia|372,Eswatini|268,Ethiopia|251,Fiji|679,Finland|358,France|33,French Guiana|594,French Polynesia|689,Gabon|241,Gambia|220,Georgia|995,Germany|49,Ghana|233,Gibraltar|350,Greece|30,Greenland|299,Grenada|1473,Guadeloupe|590,Guam|1671,Guatemala|502,Guinea|224,Guinea-Bissau|245,Guyana|592,Haiti|509,Honduras|504,Hong Kong|852,Hungary|36,Iceland|354,India|91,Indonesia|62,Iran|98,Iraq|964,Ireland|353,Israel|972,Italy|39,Ivory Coast|225,Jamaica|1876,Japan|81,Jordan|962,Kazakhstan|7,Kenya|254,Kiribati|686,Kosovo|383,Kuwait|965,Kyrgyzstan|996,Laos|856,Latvia|371,Lebanon|961,Lesotho|266,Liberia|231,Libya|218,Liechtenstein|423,Lithuania|370,Luxembourg|352,Macau|853,Madagascar|261,Malawi|265,Malaysia|60,Maldives|960,Mali|223,Malta|356,Marshall Islands|692,Martinique|596,Mauritania|222,Mauritius|230,Mexico|52,Micronesia|691,Moldova|373,Monaco|377,Mongolia|976,Montenegro|382,Morocco|212,Mozambique|258,Myanmar|95,Namibia|264,Nepal|977,Netherlands|31,New Caledonia|687,New Zealand|64,Nicaragua|505,Niger|227,Nigeria|234,North Macedonia|389,Norway|47,Oman|968,Pakistan|92,Palau|680,Palestine|970,Panama|507,Papua New Guinea|675,Paraguay|595,Peru|51,Philippines|63,Poland|48,Portugal|351,Puerto Rico|1787,Qatar|974,Reunion|262,Romania|40,Russia|7,Rwanda|250,Saint Kitts and Nevis|1869,Saint Lucia|1758,Saint Vincent and the Grenadines|1784,Samoa|685,San Marino|378,Sao Tome and Principe|239,Saudi Arabia|966,Senegal|221,Serbia|381,Seychelles|248,Sierra Leone|232,Singapore|65,Sint Maarten|1721,Slovakia|421,Slovenia|386,Solomon Islands|677,Somalia|252,South Africa|27,South Korea|82,South Sudan|211,Spain|34,Sri Lanka|94,Sudan|249,Suriname|597,Sweden|46,Switzerland|41,Syria|963,Taiwan|886,Tajikistan|992,Tanzania|255,Thailand|66,Timor-Leste|670,Togo|228,Tonga|676,Trinidad and Tobago|1868,Tunisia|216,Turkey|90,Turkmenistan|993,Turks and Caicos Islands|1649,Tuvalu|688,US Virgin Islands|1340,Uganda|256,Ukraine|380,United Arab Emirates|971,United Kingdom|44,United States|1,Uruguay|598,Uzbekistan|998,Vanuatu|678,Vatican City|39,Venezuela|58,Vietnam|84,Wallis and Futuna|681,Western Sahara|212,Yemen|967,Zambia|260,Zimbabwe|263";
-
-function buildDialSelect(){
-  const sel = document.getElementById("upDial");
-  if (!sel) return;
-  sel.innerHTML = '<option value="">Country code…</option>';
-  DIAL_CODES.split(",").forEach(function(pair){
-    const i = pair.lastIndexOf("|");
-    const name = pair.substring(0, i);
-    const code = pair.substring(i + 1);
-    const o = document.createElement("option");
-    o.value = code;
-    o.textContent = name + "  +" + code;
-    sel.appendChild(o);
-  });
-}
-
-/* Fields the client is missing, so the update form can ask for exactly
-   those rather than leaving them to guess where to write. */
-const MISSING = { list: [] };
-
-function buildMissingInputs(){
-  const box = document.getElementById("upMissing");
-  if (!box) return;
-  box.innerHTML = "";
-  MISSING.list.forEach(function(label, i){
-    // "your profession" -> "Your profession"
-    const nice = label.charAt(0).toUpperCase() + label.slice(1);
-    const lab = document.createElement("label");
-    lab.className = "upLabel";
-    lab.textContent = nice + " (optional)";
-    const inp = document.createElement("input");
-    inp.type = "text";
-    inp.className = "upInput missingInput";
-    inp.dataset.label = nice;
-    inp.placeholder = "Only if you'd like to";
-    box.appendChild(lab);
-    box.appendChild(inp);
-  });
-}
-
-/* Holds the record currently on screen, for the update form. */
-const CURRENT = { entity:null, id:null, name:"", cid:"", phones:[], emails:[] };
-
-async function bxPost(method, payload){
-  const r = await fetch(WEBHOOK + method, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
-  return await r.json();
-}
-
-/* Client-submitted updates.
-   Phones and emails are APPENDED to what is already on the record —
-   nothing existing is replaced or removed. Free-text notes go to the
-   timeline so the office can action them without anything being lost. */
-async function submitUpdate(){
-  const dial  = document.getElementById("upDial").value;
-  const rawNo = document.getElementById("upPhone").value.trim();
-  const digits = rawNo.replace(/\D/g, "");
-  const email = document.getElementById("upEmail").value.trim();
-  const note  = document.getElementById("upNote").value.trim();
-  const err   = document.getElementById("upError");
-  const btn   = document.getElementById("upSubmit");
-  err.innerHTML = "";
-
-  // Phone must be a country code plus digits — letters are rejected.
-  let phone = "";
-  if (dial || rawNo) {
-    if (!dial) {
-      err.innerHTML = '<div class="err">Please choose your country code.</div>';
-      return;
-    }
-    if (!rawNo) {
-      err.innerHTML = '<div class="err">Please enter your phone number.</div>';
-      return;
-    }
-    if (/[A-Za-z]/.test(rawNo)) {
-      err.innerHTML = '<div class="err">A phone number can only contain digits.</div>';
-      return;
-    }
-    if (digits.length < 6 || digits.length > 14) {
-      err.innerHTML = '<div class="err">That phone number does not look complete.</div>';
-      return;
-    }
-    phone = "+" + dial + digits.replace(/^0+/, "");
-  }
-
-  // Anything the client filled into the missing-detail inputs
-  const filled = [];
-  document.querySelectorAll(".missingInput").forEach(function(inp){
-    const v = inp.value.trim();
-    if (v) filled.push(inp.dataset.label + ": " + v);
-  });
-
-  if (!phone && !email && !note && !filled.length) {
-    err.innerHTML = '<div class="err">Please fill in at least one field.</div>';
-    return;
-  }
-  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    err.innerHTML = '<div class="err">That email address does not look right.</div>';
-    return;
-  }
-  if (!CURRENT.id) {
-    err.innerHTML = '<div class="err">We could not identify your file. Please reload the page.</div>';
-    return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = "Sending…";
-
-  try {
-    const fields = {};
-    const added  = [];
-
-    // Append — existing entries are kept exactly as they are
-    if (phone) {
-      const exists = CURRENT.phones.some(p =>
-        String(p.VALUE||"").replace(/\D/g,"") === phone.replace(/\D/g,""));
-      if (!exists) {
-        fields.PHONE = CURRENT.phones.concat([{ VALUE: phone, VALUE_TYPE: "MOBILE" }]);
-        added.push("Phone added: " + phone);
-      }
-    }
-    if (email) {
-      const exists = CURRENT.emails.some(e =>
-        String(e.VALUE||"").toLowerCase().trim() === email.toLowerCase());
-      if (!exists) {
-        fields.EMAIL = CURRENT.emails.concat([{ VALUE: email, VALUE_TYPE: "WORK" }]);
-        added.push("Email added: " + email);
-      }
-    }
-
-    if (Object.keys(fields).length) {
-      await bxPost("crm." + CURRENT.entity + ".update",
-        { ID: CURRENT.id, FIELDS: fields });
-    }
-
-    // Timeline note — always written, so the office sees the request
-    let comment = "Client updated their own details via My Immigration File.";
-    if (added.length)  comment += "\n" + added.join("\n");
-    if (filled.length) comment += "\n" + filled.join("\n");
-    if (note)          comment += "\nClient note: " + note;
-
-    await bxPost("crm.timeline.comment.add", {
-      fields: {
-        ENTITY_TYPE: CURRENT.entity,
-        ENTITY_ID: CURRENT.id,
-        COMMENT: comment
-      }
-    });
-
-    document.getElementById("updatePanel").classList.add("hidden");
-    const done = document.getElementById("updateDone");
-    const cta  = document.getElementById("ctaBtn");
-    const dcta = document.getElementById("doneCta");
-    if (dcta && cta) { dcta.href = cta.href; dcta.textContent = cta.textContent; }
-    done.classList.remove("hidden");
-    done.scrollIntoView({ behavior: "smooth", block: "center" });
-
-  } catch(e) {
-    console.error(e);
-    err.innerHTML = '<div class="err">We could not save that just now. Please try again shortly.</div>';
-    btn.disabled = false;
-    btn.textContent = "Send Update";
-  }
-}
-
-/* File completeness — the percentage of the details we ask for that
-   are actually recorded. Nothing here is estimated or scored; it is a
-   straight count of what is on the file. */
-function renderCompleteness(rec, c, phone){
-  const has = (o, k) => {
-    if (!o || !k) return false;
-    const v = o[k];
-    if (v === undefined || v === null) return false;
-    if (Array.isArray(v)) return v.length > 0;
-    return String(v).trim() !== "";
-  };
-  const either = (leadKey, contactKey) => has(rec, leadKey) || has(c, contactKey);
-
-  const checks = [
-    { label: "your date of birth",   ok: either("UF_CRM_LEAD_1691057358096","UF_CRM_64CF8809BDEAC") || has(rec,"BIRTHDATE") || has(c,"BIRTHDATE") },
-    { label: "your country of birth",ok: either("UF_CRM_1449131599","UF_CRM_566016C18B2CC") },
-    { label: "your country of residence", ok: has(rec,"UF_CRM_1449131669") || either("UF_CRM_LEAD_1691057729888","UF_CRM_64CF88148972E") },
-    { label: "your education level", ok: either("UF_CRM_1484914608","UF_CRM_1465285867") || either("UF_CRM_LEAD_1691057977682","UF_CRM_64CF881B8596B") },
-    { label: "your English level",   ok: either("UF_CRM_1484914403","UF_CRM_1484918172") || either("UF_CRM_LEAD_1691057942374","UF_CRM_64CF88181B4AE") },
-    { label: "your marital status",  ok: either("UF_CRM_1500181612","UF_CRM_5F6380072B880") || either("UF_CRM_LEAD_1691057391286","UF_CRM_64CF880D8027E") },
-    { label: "your profession",      ok: either("UF_CRM_1484912429","UF_CRM_1484918121") },
-    { label: "a contact phone number", ok: !!phone }
-  ];
-
-  const done = checks.filter(x => x.ok).length;
-  const pct  = Math.round((done / checks.length) * 100);
-
-  // Count the figure up so the eye follows it to the bar.
-  const el = document.getElementById("scorePct");
-  const reduce = window.matchMedia &&
-                 window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  if (reduce) {
-    el.textContent = pct + "%";
-    document.getElementById("barFill").style.width = pct + "%";
-  } else {
-    el.textContent = "0%";
-    const start = performance.now();
-    const dur = 1100, delay = 480;
-    function tick(now){
-      const t = Math.min(Math.max(now - start - delay, 0) / dur, 1);
-      const eased = 1 - Math.pow(1 - t, 3);      // ease-out
-      el.textContent = Math.round(pct * eased) + "%";
-      if (t < 1) requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-    setTimeout(() => {
-      document.getElementById("barFill").style.width = pct + "%";
-    }, delay);
-  }
-
-  const missing = checks.filter(x => !x.ok).map(x => x.label);
-  // Only profession gets its own input — it is free text, so a client
-  // can answer it without needing to match one of our list values.
-  MISSING.list = missing.filter(l => l === "your profession");
-  const hint = document.getElementById("scoreHint");
-
-  if (!missing.length) {
-    hint.textContent = "Your file is complete. Nothing further is needed from you at this stage.";
-  } else {
-    const list = missing.length === 1
-      ? missing[0]
-      : missing.slice(0, -1).join(", ") + " and " + missing[missing.length - 1];
-    hint.textContent = "Not yet on file: " + list + ". You are welcome to add these below.";
-  }
+function fmtDate(v){
+  var s = String(v).trim();
+  var p = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  var d = p ? new Date(+p[1], +p[2]-1, +p[3]) : new Date(s);
+  if(isNaN(d.getTime())) return s;
+  return d.toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});
 }
 
 function initials(name){
-  const p = String(name||"").trim().split(/\s+/).filter(Boolean);
-  if (!p.length) return "?";
-  return (p[0][0] + (p.length>1 ? p[p.length-1][0] : "")).toUpperCase();
+  var p = String(name||"").trim().split(/\s+/);
+  var out = [];
+  for(var i=0;i<p.length;i++) if(p[i]) out.push(p[i]);
+  if(!out.length) return "?";
+  return (out[0].charAt(0) + (out.length>1 ? out[out.length-1].charAt(0) : "")).toUpperCase();
 }
 
-async function lookup(){
-  const email = document.getElementById("emailField").value.trim();
-  const errBox = document.getElementById("errBox");
-  errBox.innerHTML = "";
+/* Enumeration ids resolved to their label. */
+var fieldDefs = null;
+function enumText(code, value){
+  if(!value) return Promise.resolve("");
+  var p = fieldDefs
+        ? Promise.resolve(fieldDefs)
+        : bxGet("crm."+ENTITY+".fields")
+            .then(function(r){ fieldDefs = (r && r.result) || {}; return fieldDefs; })
+            .catch(function(){ fieldDefs = {}; return fieldDefs; });
 
-  if (!validEmail(email)) {
-    errBox.innerHTML = '<div class="err">Please enter a valid email address.</div>';
+  return p.then(function(defs){
+    var def = defs[code];
+    if(!def || def.type !== "enumeration" || !def.items) return String(value);
+    for(var i=0;i<def.items.length;i++){
+      if(String(def.items[i].ID) === String(value)) return def.items[i].VALUE;
+    }
+    return "";
+  });
+}
+
+/* ------------------------------------------------------------ */
+
+function lookup(){
+  var email = ($("emailField").value || "").trim();
+  var box = $("gateErr");
+  if(box) box.innerHTML = "";
+
+  if(!validEmail(email)){
+    if(box) box.innerHTML = '<div class="err">Please enter a valid email address.</div>';
     return;
   }
 
   show("state-loading");
 
-  try {
-    const sel = "&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=EMAIL&select[]=DATE_CREATE";
-
-    // Look up both — details usually live on the lead, the photo on the contact.
-    const leadRes = await bx("crm.lead.list?filter[EMAIL]=" + encodeURIComponent(email) +
-      sel + "&order[DATE_CREATE]=DESC");
-    const leads = (leadRes.result || []).filter(r => matches(r, email));
-
-    const cRes = await bx("crm.contact.list?filter[EMAIL]=" + encodeURIComponent(email) +
-      sel + "&order[DATE_CREATE]=DESC");
-    const contacts = (cRes.result || []).filter(r => matches(r, email));
-
-    if (!leads.length && !contacts.length) { show("state-notfound"); return; }
-
-    // Fetch full records — crm.*.list omits file fields such as PHOTO.
-    let leadFull = null, contactFull = null;
-    if (leads.length) {
-      try { leadFull = (await bx("crm.lead.get?id=" + encodeURIComponent(leads[0].ID))).result || null; }
-      catch(e){ leadFull = leads[0]; }
-    }
-    if (contacts.length) {
-      try { contactFull = (await bx("crm.contact.get?id=" + encodeURIComponent(contacts[0].ID))).result || null; }
-      catch(e){ contactFull = contacts[0]; }
-    }
-
-    const record = leadFull || contactFull;
-    const entity = leadFull ? "lead" : "contact";
-
-    console.log("[IAS] lead:", leadFull && leadFull.ID, "contact:", contactFull && contactFull.ID);
-
-    await render(record, entity, email, contactFull);
-    show("state-file");
-
-  } catch(e) {
-    console.error(e);
-    show("state-error");
-  }
+  // Lead first, then contact. Whichever exists decides the whole page.
+  tryProfile("lead", email)
+    .then(function (found) {
+      if (found) return true;
+      return tryProfile("contact", email);
+    })
+    .then(function (found) {
+      if (!found) show("state-notfound");
+    })
+    .catch(fail);
 }
 
-/* Confirm the record really belongs to the email that was entered.
-   crm.*.list does not always return multifields, and the server-side
-   filter has already matched on email — so a record with no EMAIL
-   array is accepted rather than discarded. */
-function matches(rec, email){
-  if (!rec) return false;
-  if (!Array.isArray(rec.EMAIL) || !rec.EMAIL.length) return true;
-  const t = email.trim().toLowerCase();
-  return rec.EMAIL.some(e => String(e.VALUE||"").trim().toLowerCase() === t);
-}
+/* Looks the email up under one profile. Resolves true if a record was
+   found and rendered, false if there is simply nothing under it. */
+function tryProfile(which, email) {
+  useProfile(which);
+  var ent = PROFILES[which].entity;
 
-async function render(rec, entity, email, contactRec){
-  const name = [rec.NAME, rec.LAST_NAME].filter(Boolean).join(" ") || "Client";
-  document.getElementById("fullName").textContent = name;
-
-  const cid = rec[entity === "lead" ? CLIENT_ID_LEAD : CLIENT_ID_CONTACT] || ("#" + rec.ID);
-  document.getElementById("clientId").textContent = cid;
-
-  // Photo: this record first, then the linked contact, then initials.
-  const pf = entity === "lead" ? LEAD_PHOTO_FIELD : CONTACT_PHOTO_FIELD;
-  const src = rec.PHOTO || rec[pf]
-           || (contactRec ? contactRec.PHOTO : null)
-           || (contactRec ? contactRec[CONTACT_PHOTO_FIELD] : null);
-
-  const url    = photoUrl(src);
-  const urlAlt = photoUrlAlt(src);
-
-  // On-screen diagnostics: add &debug=1 to the page URL.
-  if (params.get("debug") === "1") {
-    const d = document.createElement("pre");
-    d.style.cssText = "background:#fff;border:1px solid #c7bfa8;padding:12px;font-size:11px;white-space:pre-wrap;word-break:break-all;margin-bottom:18px;font-family:monospace;";
-    d.textContent =
-      "entity: " + entity + "  id: " + rec.ID + "\n" +
-      "contact record: " + (contactRec ? contactRec.ID : "NOT FOUND") + "\n" +
-      "raw photo source: " + JSON.stringify(src) + "\n" +
-      "url (tried 1st): " + (url || "(none)") + "\n" +
-      "url (tried 2nd): " + (urlAlt || "(none)");
-    document.getElementById("state-file").prepend(d);
-  }
-
-  const av = document.getElementById("avatar");
-  if (url) {
-    const img = document.createElement("img");
-    img.className = "photo";
-    // Bitrix blocks image requests carrying a Referer from another domain.
-    // Sending none makes the request behave like opening the URL directly.
-    img.referrerPolicy = "no-referrer";
-    img.setAttribute("referrerpolicy", "no-referrer");
-    img.src = url;
-    img.alt = name;
-    let triedAlt = false;
-    img.onerror = function(){
-      if (!triedAlt && urlAlt && urlAlt !== url) {
-        triedAlt = true;
-        img.src = urlAlt;          // try the other Bitrix URL form
-        return;
-      }
-      av.innerHTML = '<div class="initials">' + initials(name) + '</div>';
-    };
-    av.innerHTML = "";
-    av.appendChild(img);
-  } else {
-    av.innerHTML = '<div class="initials">' + initials(name) + '</div>';
-  }
-
-  // Detail rows — only fields that actually hold a value
-  const tbl = document.getElementById("detailRows");
-  tbl.innerHTML = "";
-  const seen = {};
-
-  function fmtDate(v){
-    let s = String(v).trim();
-    // Plain YYYY-MM-DD is parsed as UTC, which can shift the day.
-    // Read it as a local date instead.
-    const plain = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    const d = plain
-      ? new Date(+plain[1], +plain[2] - 1, +plain[3])
-      : new Date(s);
-    if (isNaN(d)) return s;
-    return d.toLocaleDateString("en-US", { year:"numeric", month:"long", day:"numeric" });
-  }
-
-  let rowIndex = 0;
-  function addRow(label, value){
-    const tr = document.createElement("tr");
-    tr.className = "reveal";
-    tr.style.animationDelay = (0.40 + rowIndex * 0.055) + "s";
-    rowIndex++;
-    tr.innerHTML = '<td class="k"></td><td class="v"></td>';
-    tr.children[0].textContent = label;
-    tr.children[1].textContent = value;
-    tbl.appendChild(tr);
-  }
-
-  for (const f of FIELDS) {
-    if (seen[f.label]) continue;
-
-    // Standard field, lead custom field, then contact custom field
-    let raw = null, src = null;
-    if (f.std && rec[f.std] !== undefined && String(rec[f.std]).trim() !== "") {
-      raw = rec[f.std]; src = "std";
-    } else if (f.lead && rec[f.lead] !== undefined && String(rec[f.lead]).trim() !== "") {
-      raw = rec[f.lead]; src = "lead";
-    } else if (f.contact && contactRec && contactRec[f.contact] !== undefined
-               && String(contactRec[f.contact]).trim() !== "") {
-      raw = contactRec[f.contact]; src = "contact";
-    }
-    if (raw === null || raw === undefined || String(raw).trim() === "") continue;
-
-    let text = String(raw);
-
-    // Dates — full ISO timestamps and plain YYYY-MM-DD
-    if (/^\d{4}-\d{2}-\d{2}(T|$)/.test(text)) {
-      text = fmtDate(text);
-    }
-    // Numeric values may be enumeration IDs — resolve to their label
-    else if (/^\d+$/.test(text) && src !== "std") {
-      const entityForEnum = src === "contact" ? "contact" : "lead";
-      const code = src === "contact" ? f.contact : f.lead;
-      const t = await enumText(entityForEnum, code, text);
-      // A plain number that isn't an enum (e.g. number of children) stays as-is
-      if (t) text = t;
-      else if (!/^\d{1,3}$/.test(text)) continue;
-    }
-
-    seen[f.label] = true;
-    if (!isDisplayable(text)) continue;
-    addRow(f.label, text);
-  }
-
-  // Phone, so the client can spot an outdated number
-  const ph = (rec.PHONE && rec.PHONE[0] && rec.PHONE[0].VALUE)
-          || (contactRec && contactRec.PHONE && contactRec.PHONE[0] && contactRec.PHONE[0].VALUE)
-          || "";
-  if (ph && isDisplayable(ph)) addRow("Phone on file", ph);
-
-  // Profession — offered inline, right where it would sit, so it can be
-  // added in context or simply left alone.
-  const hasProf = ["UF_CRM_1484912429"].some(k => rec[k] && String(rec[k]).trim())
-               || (contactRec && contactRec["UF_CRM_1484918121"]
-                   && String(contactRec["UF_CRM_1484918121"]).trim());
-  if (!hasProf) addProfessionRow();
-
-  if (rec.DATE_CREATE) {
-    const d = new Date(rec.DATE_CREATE);
-    if (!isNaN(d)) addRow("File opened", fmtDate(rec.DATE_CREATE));
-  }
-
-  function addProfessionRow(){
-    const tr = document.createElement("tr");
-    tr.className = "reveal";
-    tr.style.animationDelay = (0.40 + rowIndex * 0.055) + "s";
-    rowIndex++;
-    tr.innerHTML =
-      '<td class="k">Profession</td>' +
-      '<td class="v">' +
-        '<span class="inlineAdd">' +
-          '<input type="text" id="profInline" class="inlineInput" placeholder="Add if you wish">' +
-          '<a href="#" id="profSave" class="inlineSave">Save</a>' +
-        '</span>' +
-        '<span id="profDone" class="inlineDone hidden"></span>' +
-      '</td>';
-    tbl.appendChild(tr);
-
-    tr.querySelector("#profSave").onclick = async function(ev){
-      ev.preventDefault();
-      const input = document.getElementById("profInline");
-      const v = input.value.trim();
-      if (!v) { input.focus(); return; }
-      this.textContent = "Saving…";
-      try {
-        await bxPost("crm.timeline.comment.add", {
-          fields: {
-            ENTITY_TYPE: CURRENT.entity,
-            ENTITY_ID: CURRENT.id,
-            COMMENT: "Client added via My Immigration File —\nProfession: " + v
-          }
+  return bxGet("crm."+ent+".list?filter[EMAIL]=" + encodeURIComponent(email) +
+               "&select[]=ID&order[DATE_CREATE]=DESC")
+    .then(function (list) {
+      var rows = (list && list.result) || [];
+      if (!rows.length) return false;
+      return bxGet("crm."+ent+".get?id=" + encodeURIComponent(rows[0].ID))
+        .then(function (full) {
+          var rec = (full && full.result) || null;
+          if (!rec) return false;
+          return render(rec, email).then(function () {
+            show("state-file");
+            return true;
+          });
         });
-        tr.querySelector(".inlineAdd").classList.add("hidden");
-        const done = document.getElementById("profDone");
-        done.textContent = v + "  ·  saved";
-        done.classList.remove("hidden");
-      } catch(e) {
-        this.textContent = "Try again";
+    });
+}
+
+function render(rec, email){
+  REC.id     = rec.ID;
+  REC.phones = (Object.prototype.toString.call(rec.PHONE) === "[object Array]") ? rec.PHONE.slice() : [];
+  REC.emails = (Object.prototype.toString.call(rec.EMAIL) === "[object Array]") ? rec.EMAIL.slice() : [];
+
+  var nameParts = [];
+  if(rec.NAME) nameParts.push(rec.NAME);
+  if(rec.LAST_NAME) nameParts.push(rec.LAST_NAME);
+  var name = nameParts.join(" ") || "Client";
+
+  $("fullName").textContent = name;
+  $("clientId").textContent = rec[CLIENT_ID_FIELD] || ("#" + rec.ID);
+
+  /* Photo, falling back to initials */
+  var av = $("avatar");
+  var raw = rec.PHOTO || rec[PHOTO_FIELD];
+  var url = "";
+  if(raw){
+    if(typeof raw === "string") url = raw;
+    else url = raw.downloadUrl || raw.showUrl || "";
+    if(url && url.charAt(0) === "/") url = "https://immiworld.org" + url;
+  }
+  av.textContent = initials(name);
+  if(url){
+    var img = document.createElement("img");
+    img.referrerPolicy = "no-referrer";
+    img.alt = name;
+    img.onload = function(){ av.textContent = ""; av.appendChild(img); };
+    img.src = url;
+  }
+
+  /* Detail rows */
+  var tbl = $("detailRows");
+  tbl.innerHTML = "";
+  var seen = {}, rowN = 0;
+
+  function addRow(label, value){
+    var tr = document.createElement("tr");
+    tr.className = "reveal";
+    tr.style.animationDelay = (0.40 + rowN * 0.055) + "s";
+    rowN++;
+    var k = document.createElement("td"); k.className = "k"; k.textContent = label;
+    var v = document.createElement("td"); v.className = "v"; v.textContent = value;
+    tr.appendChild(k); tr.appendChild(v);
+    tbl.appendChild(tr);
+  }
+
+  /* Resolve any enumeration values first, then draw in order. */
+  var jobs = [];
+  for(var i=0;i<FIELDS.length;i++){
+    (function(f){
+      if(!hasVal(rec, f.code)){ jobs.push(Promise.resolve(null)); return; }
+      var text = String(rec[f.code]).trim();
+      if(/^\d{4}-\d{2}-\d{2}(T|$)/.test(text)){
+        jobs.push(Promise.resolve({ label:f.label, text:fmtDate(text) }));
+      } else if(/^\d+$/.test(text) && f.code !== "BIRTHDATE"){
+        jobs.push(enumText(f.code, text).then(function(t){
+          return t ? { label:f.label, text:t } : null;
+        }));
+      } else {
+        jobs.push(Promise.resolve({ label:f.label, text:text }));
       }
+    })(FIELDS[i]);
+  }
+
+  return Promise.all(jobs).then(function(results){
+    for(var i=0;i<results.length;i++){
+      var r = results[i];
+      if(!r) continue;
+      if(seen[r.label]) continue;
+      if(!displayable(r.text)) continue;
+      seen[r.label] = true;
+      addRow(r.label, r.text);
+    }
+
+    var phone = (REC.phones[0] && REC.phones[0].VALUE) || "";
+    if(phone && displayable(phone)) addRow("Phone on file", phone);
+    if(rec.DATE_CREATE) addRow("File opened", fmtDate(rec.DATE_CREATE));
+
+    renderCompleteness(rec, phone);
+
+    var cta = NEXT_URL + (NEXT_URL.indexOf("?") === -1 ? "?" : "&") +
+              "email=" + encodeURIComponent(email) +
+              "&" + ENTITY + "_id=" + encodeURIComponent(rec.ID) +
+              "&_t=" + Date.now() + "-" + Math.random().toString(36).slice(2,8);
+    if(utmCampaign) cta += "&utm_campaign=" + encodeURIComponent(utmCampaign);
+
+    $("ctaBtn").href = cta;
+    $("ctaBtn").textContent = NEXT_LABEL;
+    $("doneCta").href = cta;
+    $("doneCta").textContent = NEXT_LABEL;
+
+    $("updateLink").onclick = function(ev){
+      if(ev && ev.preventDefault) ev.preventDefault();
+      buildDial();
+      $("updatePanel").classList.remove("hidden");
+      $("updatePrompt").style.display = "none";
+      return false;
     };
+  });
+}
+
+function renderCompleteness(rec, phone){
+  var checks = [];
+  for(var i=0;i<COMPLETENESS.length;i++){
+    var c = COMPLETENESS[i], ok = false;
+    for(var j=0;j<c.codes.length;j++){ if(hasVal(rec, c.codes[j])) { ok = true; break; } }
+    checks.push({ label:c.label, ok:ok });
   }
+  checks.push({ label:"a contact phone number", ok: !!phone });
 
-  // ---- Family on file (spouse and children, from the contact) ----
-  renderFamily(contactRec, fmtDate);
+  var done = 0;
+  for(var k=0;k<checks.length;k++) if(checks[k].ok) done++;
+  var pct = Math.round(done / checks.length * 100);
 
-  // ---- File completeness ----
-  // Counted from what is genuinely present on the record, so the
-  // figure reflects the file rather than an invented rating.
-  renderCompleteness(rec, contactRec, ph);
+  var el = $("scorePct");
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  if (!tbl.children.length) {
-    document.getElementById("detailRows").previousElementSibling.style.display = "none";
-  }
-
-  // Who is this?
-  //   A contact record means they are already a client, even if a lead
-  //   also exists — so they are never asked to pay again.
-  //   ?mode=client or ?mode=lead overrides the detection when a campaign
-  //   is sent to one segment only.
-  const mode = (params.get("mode") || "").toLowerCase();
-  const isClient = mode === "client" ? true
-                 : mode === "lead"   ? false
-                 : !!contactRec;
-
-  const btn = document.getElementById("ctaBtn");
-  console.log("[IAS] mode:", mode || "auto", "| treated as:", isClient ? "client" : "lead");
-
-  if (isClient) {
-    let url = CLIENT_BASE + "&email=" + encodeURIComponent(email);
-    if (utmCampaign) url += "&utm_campaign=" + encodeURIComponent(utmCampaign);
-    btn.href = url;
-    btn.textContent = "Confirm My Details";
-    document.querySelector(".cta .sub").textContent = "Takes less than two minutes";
-    document.getElementById("statusNote").textContent =
-      "Your file is open with our office. Please check the details below, then confirm them.";
+  if(reduce || typeof requestAnimationFrame !== "function"){
+    el.textContent = pct + "%";
+    $("barFill").style.width = pct + "%";
   } else {
-    let cta = CTA_BASE + "&email=" + encodeURIComponent(email);
-    if (utmCampaign) cta += "&utm_campaign=" + encodeURIComponent(utmCampaign);
-    btn.href = cta;
+    el.textContent = "0%";
+    var start = Date.now(), dur = 1100, delay = 480;
+    (function tick(){
+      var t = Math.min(Math.max(Date.now()-start-delay, 0) / dur, 1);
+      el.textContent = Math.round(pct * (1 - Math.pow(1-t, 3))) + "%";
+      if(t < 1) requestAnimationFrame(tick);
+    })();
+    setTimeout(function(){ $("barFill").style.width = pct + "%"; }, delay);
   }
 
-  // Remember what we're updating
-  CURRENT.entity  = entity;
-  CURRENT.id      = rec.ID;
-  CURRENT.name    = name;
-  CURRENT.cid     = cid;
-  CURRENT.phones  = (rec.PHONE || []).slice();
-  CURRENT.emails  = (rec.EMAIL || []).slice();
+  var missing = [];
+  for(var m=0;m<checks.length;m++) if(!checks[m].ok) missing.push(checks[m].label);
 
-  document.getElementById("updateLink").onclick = function(ev){
-    ev.preventDefault();
-    buildDialSelect();
-    buildMissingInputs();
-    document.getElementById("updatePanel").classList.remove("hidden");
-    document.getElementById("updatePrompt").style.display = "none";
-  };
+  var hint = $("scoreHint");
+  if(!missing.length){
+    hint.textContent = "Your file is complete. Nothing further is needed from you at this stage.";
+  } else {
+    var list = missing.length === 1
+             ? missing[0]
+             : missing.slice(0,-1).join(", ") + " and " + missing[missing.length-1];
+    hint.textContent = "Not yet on file: " + list + ". You are welcome to add these below.";
+  }
+}
+
+/* ------------------------------------------------------------ */
+
+var DIAL = "Afghanistan|93,Albania|355,Algeria|213,Andorra|376,Angola|244,Argentina|54,Armenia|374,Australia|61,Austria|43,Azerbaijan|994,Bahamas|1242,Bahrain|973,Bangladesh|880,Barbados|1246,Belarus|375,Belgium|32,Belize|501,Benin|229,Bolivia|591,Bosnia and Herzegovina|387,Botswana|267,Brazil|55,Brunei|673,Bulgaria|359,Burkina Faso|226,Burundi|257,Cambodia|855,Cameroon|237,Canada|1,Cape Verde|238,Chad|235,Chile|56,China|86,Colombia|57,Congo|242,Congo (DRC)|243,Costa Rica|506,Croatia|385,Cuba|53,Cyprus|357,Czech Republic|420,Denmark|45,Dominican Republic|1809,Ecuador|593,Egypt|20,El Salvador|503,Estonia|372,Eswatini|268,Ethiopia|251,Fiji|679,Finland|358,France|33,Gabon|241,Gambia|220,Georgia|995,Germany|49,Ghana|233,Greece|30,Guatemala|502,Guinea|224,Guyana|592,Haiti|509,Honduras|504,Hong Kong|852,Hungary|36,Iceland|354,India|91,Indonesia|62,Iran|98,Iraq|964,Ireland|353,Israel|972,Italy|39,Ivory Coast|225,Jamaica|1876,Japan|81,Jordan|962,Kazakhstan|7,Kenya|254,Kosovo|383,Kuwait|965,Kyrgyzstan|996,Laos|856,Latvia|371,Lebanon|961,Lesotho|266,Liberia|231,Libya|218,Lithuania|370,Luxembourg|352,Madagascar|261,Malawi|265,Malaysia|60,Maldives|960,Mali|223,Malta|356,Mauritania|222,Mauritius|230,Mexico|52,Moldova|373,Mongolia|976,Montenegro|382,Morocco|212,Mozambique|258,Myanmar|95,Namibia|264,Nepal|977,Netherlands|31,New Zealand|64,Nicaragua|505,Niger|227,Nigeria|234,North Macedonia|389,Norway|47,Oman|968,Pakistan|92,Palestine|970,Panama|507,Papua New Guinea|675,Paraguay|595,Peru|51,Philippines|63,Poland|48,Portugal|351,Puerto Rico|1787,Qatar|974,Romania|40,Russia|7,Rwanda|250,Saudi Arabia|966,Senegal|221,Serbia|381,Seychelles|248,Sierra Leone|232,Singapore|65,Slovakia|421,Slovenia|386,Somalia|252,South Africa|27,South Korea|82,South Sudan|211,Spain|34,Sri Lanka|94,Sudan|249,Suriname|597,Sweden|46,Switzerland|41,Syria|963,Taiwan|886,Tajikistan|992,Tanzania|255,Thailand|66,Togo|228,Trinidad and Tobago|1868,Tunisia|216,Turkey|90,Turkmenistan|993,Uganda|256,Ukraine|380,United Arab Emirates|971,United Kingdom|44,United States|1,Uruguay|598,Uzbekistan|998,Venezuela|58,Vietnam|84,Yemen|967,Zambia|260,Zimbabwe|263";
+
+function buildDial(){
+  var sel = $("upDial");
+  if(!sel || sel.options.length > 1) return;
+  sel.innerHTML = '<option value="">Country code…</option>';
+  var list = DIAL.split(",");
+  for(var i=0;i<list.length;i++){
+    var pair = list[i];
+    var at = pair.lastIndexOf("|");
+    var o = document.createElement("option");
+    o.value = pair.substring(at+1);
+    o.textContent = pair.substring(0, at) + "  +" + pair.substring(at+1);
+    sel.appendChild(o);
+  }
+}
+
+/* Updates are added to the record — nothing existing is replaced. */
+function submitUpdate(){
+  var dial   = $("upDial").value;
+  var rawNo  = ($("upPhone").value || "").trim();
+  var digits = rawNo.replace(/\D/g,"");
+  var email  = ($("upEmail").value || "").trim();
+  var prof   = ($("upProfession").value || "").trim();
+  var note   = ($("upNote").value || "").trim();
+  var err    = $("upError");
+  var btn    = $("upSubmit");
+  err.innerHTML = "";
+
+  var phone = "";
+  if(dial || rawNo){
+    if(!dial){ err.innerHTML = '<div class="err">Please choose your country code.</div>'; return; }
+    if(!rawNo){ err.innerHTML = '<div class="err">Please enter your phone number.</div>'; return; }
+    if(/[A-Za-z]/.test(rawNo)){ err.innerHTML = '<div class="err">A phone number can only contain digits.</div>'; return; }
+    if(digits.length < 6 || digits.length > 14){ err.innerHTML = '<div class="err">That phone number does not look complete.</div>'; return; }
+    phone = "+" + dial + digits.replace(/^0+/,"");
+  }
+
+  if(!phone && !email && !prof && !note){
+    err.innerHTML = '<div class="err">Please fill in at least one field.</div>'; return;
+  }
+  if(email && !validEmail(email)){
+    err.innerHTML = '<div class="err">That email address does not look right.</div>'; return;
+  }
+  if(!REC.id){
+    err.innerHTML = '<div class="err">We could not identify your file. Please reload the page.</div>'; return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "Sending…";
+
+  var fields = {}, added = [], i;
+
+  if(phone){
+    var dup = false;
+    for(i=0;i<REC.phones.length;i++){
+      if(String(REC.phones[i].VALUE||"").replace(/\D/g,"") === phone.replace(/\D/g,"")) dup = true;
+    }
+    if(!dup){
+      fields.PHONE = REC.phones.concat([{ VALUE:phone, VALUE_TYPE:"MOBILE" }]);
+      added.push("Phone added: " + phone);
+    }
+  }
+  if(email){
+    var dupE = false;
+    for(i=0;i<REC.emails.length;i++){
+      if(String(REC.emails[i].VALUE||"").toLowerCase().trim() === email.toLowerCase()) dupE = true;
+    }
+    if(!dupE){
+      fields.EMAIL = REC.emails.concat([{ VALUE:email, VALUE_TYPE:"WORK" }]);
+      added.push("Email added: " + email);
+    }
+  }
+
+  var comment = "Client updated their own details via My Immigration File.";
+  if(added.length) comment += "\n" + added.join("\n");
+  if(prof) comment += "\nProfession: " + prof;
+  if(note) comment += "\nClient note: " + note;
+
+  var step = Object.keys(fields).length
+           ? bxPost("crm."+ENTITY+".update", { ID:REC.id, FIELDS:fields })
+           : Promise.resolve(null);
+
+  step.then(function(){
+      return bxPost("crm.timeline.comment.add", {
+        fields: { ENTITY_TYPE: ENTITY, ENTITY_ID: REC.id, COMMENT: comment }
+      });
+    })
+    .then(function(){
+      $("updatePanel").classList.add("hidden");
+      var done = $("updateDone");
+      done.classList.remove("hidden");
+      if(done.scrollIntoView) done.scrollIntoView({ behavior:"smooth", block:"center" });
+    })
+    .catch(function(e){
+      if(window.console && console.error) console.error(e);
+      err.innerHTML = '<div class="err">We could not save that just now. Please try again shortly.</div>';
+      btn.disabled = false;
+      btn.textContent = "Send Update";
+    });
 }
 
 /* If the email arrives in the URL from a mail merge, skip the gate. */
 (function init(){
-  const e = params.get("email");
-  if (e && e.indexOf("@") !== -1 && e !== "#EMAIL_TO#") {
-    document.getElementById("emailField").value = decodeURIComponent(e);
+  var e = params.get("email");
+  if(e && e.indexOf("@") !== -1 && e !== "#EMAIL_TO#"){
+    $("emailField").value = decodeURIComponent(e);
     setTimeout(lookup, 80);
   }
 })();
