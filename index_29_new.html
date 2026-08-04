@@ -1106,6 +1106,7 @@ let currentScreen = 'intro';
 let leadId = null;
 let utmParams = '';
 let emailLookupTimer = null;
+let emailPrefilled = false;
 
 // UTM params — always include utm_campaign=INDEX1 as default source identifier
 // Passes through any existing UTM params from the page URL, then adds lead_id
@@ -1359,6 +1360,21 @@ function showScreen(id) {
   const el = document.getElementById('screen-'+id);
   if(el) el.classList.add('active');
   currentScreen = id;
+
+  // An email arriving in the link (?email=...) is filled in and looked up
+  // straight away, so someone coming from a mailing does not have to type
+  // an address we already hold. Done once only, so it never overwrites
+  // something the person has typed themselves.
+  if (id === 'contact' && answers.email && !emailPrefilled) {
+    emailPrefilled = true;
+    setTimeout(function () {
+      const inp = document.getElementById('emailInput');
+      if (inp && !inp.value) {
+        inp.value = answers.email;
+        onEmailInput(answers.email);
+      }
+    }, 60);
+  }
 
   const pw = document.getElementById('progressWrap');
   if(['intro','processing','results','done'].includes(id)) {
