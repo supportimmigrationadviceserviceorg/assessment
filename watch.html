@@ -48,6 +48,14 @@
     background: #000;
   }
   .cta-zone { text-align: center; margin-top: 30px; }
+  .booking-head {
+    font-size: 17px;
+    color: #1a3a6b;
+    font-weight: bold;
+    margin-bottom: 6px;
+    padding-top: 22px;
+    border-top: 1px solid #d8d2c0;
+  }
   .cta {
     display: inline-block;
     background: #1a3a6b;
@@ -102,13 +110,24 @@
     <video controls playsinline preload="metadata"
            poster="https://supportimmigrationadviceserviceorg.github.io/assessment/ias-video-thumbnail.jpg">
       <source src="https://stream.mux.com/hhj25m4cQCqVLhz2BOq2JcZABCIINXL7IbbAk01purGo/high.mp4" type="video/mp4">
+      <track kind="captions" srclang="en" label="English" default
+             src="https://supportimmigrationadviceserviceorg.github.io/assessment/captions.vtt">
       Your browser does not support video playback.
       <a href="https://tavus.video/49c05b3142">Watch the message here</a>.
     </video>
 
     <div class="cta-zone">
-      <a class="cta" href="https://calendly.com/support-ias/immigration-process-guidance">Schedule My Call</a>
-      <div class="note">Takes less than a minute to book</div>
+      <div class="booking-head">Choose a time that works for you</div>
+
+      <!-- Calendly inline embed -->
+      <div class="calendly-inline-widget"
+           data-url="https://calendly.com/support-ias/immigration-process-guidance?hide_gdpr_banner=1&background_color=f4f1ea&text_color=2a2a28&primary_color=1a3a6b"
+           style="min-width:320px;height:700px;"></div>
+      <script src="https://assets.calendly.com/assets/external/widget.js" async></script>
+
+      <noscript>
+        <a class="cta" href="https://calendly.com/support-ias/immigration-process-guidance">Schedule My Call</a>
+      </noscript>
     </div>
 
     <div class="alt">
