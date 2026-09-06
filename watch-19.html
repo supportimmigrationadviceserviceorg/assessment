@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>What the case review actually involves</title>
+<style>
+  body {
+    margin: 0; padding: 0; background: #f3f4f6;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    color: #1f2937;
+  }
+  .wrap {
+    max-width: 640px; margin: 32px auto; background: #ffffff;
+    border: 1px solid #e5e7eb; border-radius: 6px; overflow: hidden;
+  }
+  .body { padding: 28px 32px 34px; }
+  .kicker { font-size: 13px; color: #9ca3af; margin: 0 0 6px; }
+  h1 { font-size: 20px; color: #1f2937; margin: 0 0 20px; line-height: 1.4; }
+  video {
+    width: 100%; display: block; background: #000;
+    border: 1px solid #e5e7eb; border-radius: 4px;
+  }
+  .actions { margin-top: 26px; text-align: center; }
+  .primary {
+    display: inline-block; background: #1f4e79; color: #ffffff;
+    font-size: 16px; padding: 15px 34px; border-radius: 4px;
+    text-decoration: none; font-weight: 600;
+  }
+  .secondary {
+    display: block; margin-top: 16px; color: #6b7280;
+    font-size: 14px; text-decoration: underline;
+  }
+  .disclaim {
+    margin-top: 28px; padding-top: 18px; border-top: 1px solid #e5e7eb;
+    font-size: 12px; color: #9ca3af; line-height: 1.6;
+  }
+  .disclaim a { color: #9ca3af; }
+  @media (max-width: 600px) {
+    .wrap { margin: 0; border-radius: 0; border-left: 0; border-right: 0; }
+    .body { padding: 20px 18px 26px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="body">
+
+    <p class="kicker">Immigration Advice Service</p>
+    <h1>What the case review actually involves</h1>
+
+    <video controls playsinline preload="metadata" poster="https://supportimmigrationadviceserviceorg.github.io/assessment/ias-video-thumbnail.jpg">
+      <source src="https://stream.mux.com/Eyrec1ffyTOUH01mN9WchoRvNzrjPq2Tuios02YLfs7Gw/high.mp4" type="video/mp4">
+      Your browser does not support video playback.
+    </video>
+
+    <div class="actions">
+      <a class="primary" data-forward
+         href="https://supportimmigrationadviceserviceorg.github.io/assessment/interested_19.html?answer=yes">
+        Secure my $19 rate &mdash; open my case
+      </a>
+      <a class="secondary" data-forward
+         href="https://supportimmigrationadviceserviceorg.github.io/assessment/interested_19.html?answer=no">
+        I've changed my mind, close my file
+      </a>
+    </div>
+
+    <div class="disclaim">
+      Immigration Advice Service &middot;
+      <a href="https://immigrationadviceservice.org">immigrationadviceservice.org</a><br>
+      2 N Central Ave, Phoenix, AZ 85004, United States<br><br>
+      Immigration Advice Service is a private company and is not affiliated with USCIS,
+      the Department of State, or any government agency.
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Carry every query parameter from this page's URL (email, utm_campaign, and
+// anything added later) through to the action links, without overwriting the
+// answer=yes / answer=no already set on each link.
+(function () {
+  var incoming = new URLSearchParams(window.location.search);
+  if (!incoming.toString()) return;
+
+  document.querySelectorAll('a[data-forward]').forEach(function (a) {
+    var target = new URL(a.href, window.location.href);
+    incoming.forEach(function (value, key) {
+      if (!target.searchParams.has(key)) {
+        target.searchParams.set(key, value);
+      }
+    });
+    a.href = target.toString();
+  });
+})();
+</script>
+
+</body>
+</html>
