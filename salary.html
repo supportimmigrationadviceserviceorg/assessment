@@ -56,16 +56,21 @@
   .verdict-sub { font-size:14px; color:#c9d3dc; margin-top:12px; line-height:1.6; }
 
   .scale { margin-top:30px; }
-  .scale-title { font-family:'Courier New',Courier,monospace; font-size:10px; letter-spacing:2px;
-                 color:#544d3e; text-transform:uppercase; margin-bottom:16px; }
+  .scale-title { margin-bottom:4px !important; font-family:'Courier New',Courier,monospace; font-size:10px; letter-spacing:2px;
+                 color:#544d3e; text-transform:uppercase; }
   .track { position:relative; height:10px; background:#e3ddce; border:1px solid #b9b0a0; }
   .fill  { position:absolute; top:0; bottom:0; left:0; background:#a8763a; width:0;
            transition:width 1s cubic-bezier(.22,1,.36,1); }
   .you   { position:absolute; top:-9px; bottom:-9px; width:3px; background:#10263c; left:0;
            transition:left 1s cubic-bezier(.22,1,.36,1); }
-  .you-tag { position:absolute; top:-34px; transform:translateX(-50%); white-space:nowrap;
-             font-family:'Courier New',Courier,monospace; font-size:9px; letter-spacing:1.5px;
-             color:#10263c; text-transform:uppercase; transition:left 1s cubic-bezier(.22,1,.36,1); }
+  .marker-row { position:relative; height:24px; }
+  .you-tag { position:absolute; bottom:2px; left:0; transform:translateX(-50%); white-space:nowrap;
+             font-family:'Courier New',Courier,monospace; font-size:10px; letter-spacing:1px;
+             color:#10263c; text-transform:uppercase; font-weight:bold;
+             transition:left 1s cubic-bezier(.22,1,.36,1); }
+  .reach { margin-top:26px; padding:18px 20px; background:#f1ece0; border-left:4px solid #a8763a;
+           font-size:14px; line-height:1.7; color:#141210; }
+  .reach strong { color:#10263c; }
   .ticks { display:flex; justify-content:space-between; margin-top:9px;
            font-family:'Courier New',Courier,monospace; font-size:9px; letter-spacing:1px; color:#5f5849; }
   .ticks span { text-align:center; }
@@ -366,10 +371,12 @@
 
       <div class="scale">
         <div class="scale-title" id="scale-title">Pay in your field, United States</div>
+        <div class="marker-row">
+          <div class="you-tag" id="you-tag">You &middot; <span id="you-amt"></span></div>
+        </div>
         <div class="track">
           <div class="fill" id="fill"></div>
           <div class="you" id="you"></div>
-          <div class="you-tag" id="you-tag">You</div>
         </div>
         <div class="ticks">
           <span>Lower quarter<b id="t25">&mdash;</b></span>
@@ -379,10 +386,13 @@
         </div>
       </div>
 
+      <div class="reach" id="reach"></div>
+
       <div class="note" id="reality">&mdash;</div>
 
       <a class="cta" id="cta" href="interested_19.html?answer=yes">
-        Do I have a legal route? &nbsp;&mdash;&nbsp; $19
+        <span id="cta-text">Do I have a legal route to work in the U.S.?</span>
+        <span style="white-space:nowrap;">&nbsp;&mdash;&nbsp; $19</span>
       </a>
       <div class="cta-note">Reviewed by a licensed U.S. immigration attorney.</div>
 
@@ -411,7 +421,7 @@
 </div>
 
 <script>
-var FIELDS = {"11-0000":{"n":"Management","p25":82970,"med":126520,"p75":176280,"p90":257310,"mean":145260},"15-0000":{"n":"IT, software & mathematics","p25":78820,"med":109280,"p75":155830,"p90":191450,"mean":120080},"23-0000":{"n":"Legal","p25":64800,"med":102500,"p75":174620,"p90":287070,"mean":139510},"17-0000":{"n":"Architecture & engineering","p25":76560,"med":99520,"p75":130240,"p90":166490,"mean":106830},"29-0000":{"n":"Healthcare practitioners (doctors, nurses, therapists)","p25":63860,"med":86530,"p75":123540,"p90":171790,"mean":108700},"13-0000":{"n":"Business & finance","p25":62940,"med":82660,"p75":114820,"p90":153990,"mean":95230},"19-0000":{"n":"Science & research","p25":62380,"med":82530,"p75":114460,"p90":155830,"mean":94600},"27-0000":{"n":"Arts, design, media & sport","p25":44720,"med":62750,"p75":94530,"p90":134900,"mean":79790},"25-0000":{"n":"Education & teaching","p25":43900,"med":60570,"p75":79470,"p90":105240,"mean":67540},"49-0000":{"n":"Installation, maintenance & repair","p25":46110,"med":59620,"p75":76670,"p90":96540,"mean":63320},"47-0000":{"n":"Construction & extraction","p25":46880,"med":59540,"p75":77970,"p90":101650,"mean":65360},"21-0000":{"n":"Community & social service","p25":46370,"med":58300,"p75":75910,"p90":97630,"mean":63410},"33-0000":{"n":"Protective service (police, fire, security)","p25":37350,"med":50080,"p75":75990,"p90":102470,"mean":60720},"43-0000":{"n":"Office & administration","p25":38540,"med":47450,"p75":60060,"p90":76170,"mean":51560},"51-0000":{"n":"Production & manufacturing","p25":38130,"med":46990,"p75":59920,"p90":76990,"mean":51600},"53-0000":{"n":"Transport & logistics","p25":36290,"med":44350,"p75":55990,"p90":72440,"mean":49850},"41-0000":{"n":"Sales","p25":32440,"med":38530,"p75":61100,"p90":99850,"mean":54960},"31-0000":{"n":"Healthcare support","p25":34320,"med":38340,"p75":45930,"p90":54230,"mean":40800},"37-0000":{"n":"Building & grounds maintenance","p25":33930,"med":37680,"p75":46170,"p90":57420,"mean":40880},"45-0000":{"n":"Farming, fishing & forestry","p25":34540,"med":36630,"p75":44990,"p90":58220,"mean":41510},"39-0000":{"n":"Personal care & service","p25":30820,"med":36410,"p75":46060,"p90":61020,"mean":41070},"35-0000":{"n":"Food preparation & service","p25":28760,"med":35050,"p75":41860,"p90":51340,"mean":37150},"00-0000":{"n":"Other / not listed","p25":37590,"med":50980,"p75":80520,"p90":128560,"mean":69770}};
+var FIELDS = {"11-0000":{"n":"Management","p25":82970,"med":126520,"p75":176280,"p90":257310,"mean":145260,"st":"District of Columbia","stm":169990},"15-0000":{"n":"IT, software & mathematics","p25":78820,"med":109280,"p75":155830,"p90":191450,"mean":120080,"st":"California","stm":138670},"23-0000":{"n":"Legal","p25":64800,"med":102500,"p75":174620,"p90":287070,"mean":139510,"st":"District of Columbia","stm":195190},"17-0000":{"n":"Architecture & engineering","p25":76560,"med":99520,"p75":130240,"p90":166490,"mean":106830,"st":"New Mexico","stm":128000},"29-0000":{"n":"Healthcare practitioners (doctors, nurses, therapists)","p25":63860,"med":86530,"p75":123540,"p90":171790,"mean":108700,"st":"California","stm":123330},"13-0000":{"n":"Business & finance","p25":62940,"med":82660,"p75":114820,"p90":153990,"mean":95230,"st":"District of Columbia","stm":109990},"19-0000":{"n":"Science & research","p25":62380,"med":82530,"p75":114460,"p90":155830,"mean":94600,"st":"District of Columbia","stm":128610},"27-0000":{"n":"Arts, design, media & sport","p25":44720,"med":62750,"p75":94530,"p90":134900,"mean":79790,"st":"District of Columbia","stm":101750},"25-0000":{"n":"Education & teaching","p25":43900,"med":60570,"p75":79470,"p90":105240,"mean":67540,"st":"District of Columbia","stm":79890},"49-0000":{"n":"Installation, maintenance & repair","p25":46110,"med":59620,"p75":76670,"p90":96540,"mean":63320,"st":"Alaska","stm":74780},"47-0000":{"n":"Construction & extraction","p25":46880,"med":59540,"p75":77970,"p90":101650,"mean":65360,"st":"Hawaii","stm":82440},"21-0000":{"n":"Community & social service","p25":46370,"med":58300,"p75":75910,"p90":97630,"mean":63410,"st":"District of Columbia","stm":69130},"33-0000":{"n":"Protective service (police, fire, security)","p25":37350,"med":50080,"p75":75990,"p90":102470,"mean":60720,"st":"District of Columbia","stm":73950},"43-0000":{"n":"Office & administration","p25":38540,"med":47450,"p75":60060,"p90":76170,"mean":51560,"st":"District of Columbia","stm":60660},"51-0000":{"n":"Production & manufacturing","p25":38130,"med":46990,"p75":59920,"p90":76990,"mean":51600,"st":"Wyoming","stm":59290},"53-0000":{"n":"Transport & logistics","p25":36290,"med":44350,"p75":55990,"p90":72440,"mean":49850,"st":"Washington","stm":50500},"41-0000":{"n":"Sales","p25":32440,"med":38530,"p75":61100,"p90":99850,"mean":54960,"st":"Washington","stm":47510},"31-0000":{"n":"Healthcare support","p25":34320,"med":38340,"p75":45930,"p90":54230,"mean":40800,"st":"Washington","stm":48400},"37-0000":{"n":"Building & grounds maintenance","p25":33930,"med":37680,"p75":46170,"p90":57420,"mean":40880,"st":"Hawaii","stm":46840},"45-0000":{"n":"Farming, fishing & forestry","p25":34540,"med":36630,"p75":44990,"p90":58220,"mean":41510,"st":"Iowa","stm":44480},"39-0000":{"n":"Personal care & service","p25":30820,"med":36410,"p75":46060,"p90":61020,"mean":41070,"st":"Washington","stm":47150},"35-0000":{"n":"Food preparation & service","p25":28760,"med":35050,"p75":41860,"p90":51340,"mean":37150,"st":"Washington","stm":44590},"00-0000":{"n":"Other / not listed","p25":37590,"med":50980,"p75":80520,"p90":128560,"mean":69770}};
 
 var $ = function (id) { return document.getElementById(id); };
 var params = new URLSearchParams(window.location.search);
@@ -539,6 +549,20 @@ $('go').addEventListener('click', function () {
            'the market, where their industry is going, or what they want for their family. ' +
            'Whether the route exists is still worth knowing.';
   }
+
+  /* where you are, and what is above you */
+  $('you-amt').textContent = usd(mine);
+  var stLine = '';
+  if (F.st) {
+    stLine = ' The highest-paying state for this field is <strong>' + F.st +
+             '</strong>, where the median is ' + usd(F.stm) + '.';
+  }
+  $('reach').innerHTML =
+    'You are <strong>here</strong> on the U.S. scale, at ' + usd(mine) + ' a year. ' +
+    'The next step above you is <strong>' + usd(target) + '</strong>.' + stLine;
+
+  $('cta-text').textContent = 'Could I work in ' + F.n.toLowerCase().split(' (')[0] +
+                              ' in the U.S.?';
 
   $('v-label').textContent = label;
   $('v-sub').textContent = sub;
