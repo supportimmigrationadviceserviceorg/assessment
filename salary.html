@@ -58,7 +58,17 @@
   .scale { margin-top:30px; }
   .scale-title { margin-bottom:4px !important; font-family:'Courier New',Courier,monospace; font-size:10px; letter-spacing:2px;
                  color:#544d3e; text-transform:uppercase; }
-  .track { position:relative; height:10px; background:#e3ddce; border:1px solid #b9b0a0; }
+  .track { position:relative; height:10px; background:#e3ddce; border:1px solid #b9b0a0;
+           cursor:grab; touch-action:none; }
+  .track.dragging { cursor:grabbing; }
+  .track::after { content:''; position:absolute; top:-14px; bottom:-14px; left:0; right:0; }
+  .grip { position:absolute; top:-6px; width:15px; height:22px; margin-left:-7px; left:0;
+          background:#10263c; border:2px solid #faf7f0; box-shadow:0 1px 3px rgba(0,0,0,.35);
+          transition:left 1s cubic-bezier(.22,1,.36,1); }
+  .track.dragging .grip, .track.dragging .fill, .track.dragging ~ .drag-note { transition:none; }
+  .drag-hint { font-family:'Courier New',Courier,monospace; font-size:9px; letter-spacing:1.5px;
+               color:#8a8270; text-transform:uppercase; text-align:center; margin-top:16px; }
+  .reset { color:#a8763a; cursor:pointer; text-decoration:underline; }
   .fill  { position:absolute; top:0; bottom:0; left:0; background:#a8763a; width:0;
            transition:width 1s cubic-bezier(.22,1,.36,1); }
   .you   { position:absolute; top:-9px; bottom:-9px; width:3px; background:#10263c; left:0;
@@ -380,9 +390,10 @@
             <span class="you-arrow" id="you-arrow"></span>
           </div>
         </div>
-        <div class="track">
+        <div class="track" id="track">
           <div class="fill" id="fill"></div>
           <div class="you" id="you"></div>
+          <div class="grip" id="grip"></div>
         </div>
         <div class="ticks">
           <span>Lower quarter<b id="t25">&mdash;</b></span>
@@ -393,6 +404,7 @@
       </div>
 
       <div class="reach" id="reach"></div>
+      <div class="drag-hint" id="drag-hint">Drag the marker along the scale &nbsp;&middot;&nbsp; <span class="reset" id="reset">back to my salary</span></div>
 
       <div class="note" id="reality">&mdash;</div>
 
@@ -428,6 +440,8 @@
 
 <script>
 var FIELDS = {"11-0000":{"n":"Management","p25":82970,"med":126520,"p75":176280,"p90":257310,"mean":145260,"st":"District of Columbia","stm":169990},"15-0000":{"n":"IT, software & mathematics","p25":78820,"med":109280,"p75":155830,"p90":191450,"mean":120080,"st":"California","stm":138670},"23-0000":{"n":"Legal","p25":64800,"med":102500,"p75":174620,"p90":287070,"mean":139510,"st":"District of Columbia","stm":195190},"17-0000":{"n":"Architecture & engineering","p25":76560,"med":99520,"p75":130240,"p90":166490,"mean":106830,"st":"New Mexico","stm":128000},"29-0000":{"n":"Healthcare practitioners (doctors, nurses, therapists)","p25":63860,"med":86530,"p75":123540,"p90":171790,"mean":108700,"st":"California","stm":123330},"13-0000":{"n":"Business & finance","p25":62940,"med":82660,"p75":114820,"p90":153990,"mean":95230,"st":"District of Columbia","stm":109990},"19-0000":{"n":"Science & research","p25":62380,"med":82530,"p75":114460,"p90":155830,"mean":94600,"st":"District of Columbia","stm":128610},"27-0000":{"n":"Arts, design, media & sport","p25":44720,"med":62750,"p75":94530,"p90":134900,"mean":79790,"st":"District of Columbia","stm":101750},"25-0000":{"n":"Education & teaching","p25":43900,"med":60570,"p75":79470,"p90":105240,"mean":67540,"st":"District of Columbia","stm":79890},"49-0000":{"n":"Installation, maintenance & repair","p25":46110,"med":59620,"p75":76670,"p90":96540,"mean":63320,"st":"Alaska","stm":74780},"47-0000":{"n":"Construction & extraction","p25":46880,"med":59540,"p75":77970,"p90":101650,"mean":65360,"st":"Hawaii","stm":82440},"21-0000":{"n":"Community & social service","p25":46370,"med":58300,"p75":75910,"p90":97630,"mean":63410,"st":"District of Columbia","stm":69130},"33-0000":{"n":"Protective service (police, fire, security)","p25":37350,"med":50080,"p75":75990,"p90":102470,"mean":60720,"st":"District of Columbia","stm":73950},"43-0000":{"n":"Office & administration","p25":38540,"med":47450,"p75":60060,"p90":76170,"mean":51560,"st":"District of Columbia","stm":60660},"51-0000":{"n":"Production & manufacturing","p25":38130,"med":46990,"p75":59920,"p90":76990,"mean":51600,"st":"Wyoming","stm":59290},"53-0000":{"n":"Transport & logistics","p25":36290,"med":44350,"p75":55990,"p90":72440,"mean":49850,"st":"Washington","stm":50500},"41-0000":{"n":"Sales","p25":32440,"med":38530,"p75":61100,"p90":99850,"mean":54960,"st":"Washington","stm":47510},"31-0000":{"n":"Healthcare support","p25":34320,"med":38340,"p75":45930,"p90":54230,"mean":40800,"st":"Washington","stm":48400},"37-0000":{"n":"Building & grounds maintenance","p25":33930,"med":37680,"p75":46170,"p90":57420,"mean":40880,"st":"Hawaii","stm":46840},"45-0000":{"n":"Farming, fishing & forestry","p25":34540,"med":36630,"p75":44990,"p90":58220,"mean":41510,"st":"Iowa","stm":44480},"39-0000":{"n":"Personal care & service","p25":30820,"med":36410,"p75":46060,"p90":61020,"mean":41070,"st":"Washington","stm":47150},"35-0000":{"n":"Food preparation & service","p25":28760,"med":35050,"p75":41860,"p90":51340,"mean":37150,"st":"Washington","stm":44590},"00-0000":{"n":"Other / not listed","p25":37590,"med":50980,"p75":80520,"p90":128560,"mean":69770}};
+
+var STATES = {"11-0000":[[84800,"Arkansas"],[93590,"West Virginia"],[96610,"Mississippi"],[99250,"Kentucky"],[99620,"Missouri"],[99990,"Oklahoma"],[100820,"Idaho"],[100840,"Wyoming"],[101400,"Montana"],[102170,"Louisiana"],[102900,"Iowa"],[103440,"North Dakota"],[103550,"Nevada"],[103980,"Alabama"],[104510,"Nebraska"],[105770,"Ohio"],[106420,"Maine"],[107520,"Vermont"],[107740,"Arizona"],[108300,"Florida"],[108350,"New Mexico"],[108710,"Indiana"],[110270,"South Dakota"],[110640,"South Carolina"],[114040,"Michigan"],[115010,"Tennessee"],[115640,"Kansas"],[116040,"Hawaii"],[116330,"Pennsylvania"],[118450,"Utah"],[119430,"Texas"],[120240,"Alaska"],[122980,"Georgia"],[123350,"Wisconsin"],[124390,"North Carolina"],[124810,"Oregon"],[126620,"Minnesota"],[127940,"Rhode Island"],[128080,"Illinois"],[131490,"Maryland"],[131870,"New Hampshire"],[141720,"Virginia"],[143220,"California"],[145610,"Connecticut"],[148150,"Delaware"],[149760,"Colorado"],[159360,"Massachusetts"],[159990,"Washington"],[165280,"New York"],[166690,"New Jersey"],[169990,"District of Columbia"]],"13-0000":[[65100,"Arkansas"],[66540,"Mississippi"],[69240,"Louisiana"],[69910,"West Virginia"],[71410,"Kentucky"],[71850,"Nebraska"],[74110,"Montana"],[74440,"Idaho"],[75280,"Indiana"],[75360,"Oklahoma"],[75700,"Tennessee"],[76320,"Wyoming"],[76390,"Alabama"],[76410,"Utah"],[76670,"Missouri"],[76810,"Iowa"],[76870,"North Dakota"],[77380,"Kansas"],[77510,"Nevada"],[77510,"New Mexico"],[77730,"South Dakota"],[77740,"South Carolina"],[77920,"Arizona"],[78050,"Vermont"],[78090,"Wisconsin"],[78430,"Hawaii"],[78500,"Florida"],[78500,"Ohio"],[78610,"Michigan"],[78700,"Maine"],[79020,"Pennsylvania"],[79270,"Georgia"],[79580,"Texas"],[80230,"North Carolina"],[81490,"New Hampshire"],[82700,"Illinois"],[83210,"Alaska"],[83280,"Minnesota"],[84720,"Oregon"],[86240,"Rhode Island"],[93400,"Delaware"],[93410,"Colorado"],[94500,"Connecticut"],[95010,"Virginia"],[95870,"Maryland"],[96110,"California"],[98030,"Washington"],[98100,"New Jersey"],[100570,"New York"],[101200,"Massachusetts"],[109990,"District of Columbia"]],"15-0000":[[75000,"Mississippi"],[78890,"Louisiana"],[80240,"Montana"],[80720,"West Virginia"],[81420,"South Dakota"],[81970,"North Dakota"],[82090,"Oklahoma"],[84010,"Indiana"],[84450,"Arkansas"],[84590,"Kentucky"],[87030,"Nebraska"],[87400,"Tennessee"],[89360,"Iowa"],[90000,"Idaho"],[91340,"Maine"],[91700,"Alaska"],[92800,"Nevada"],[93690,"Missouri"],[94050,"Kansas"],[95680,"Vermont"],[96100,"Wisconsin"],[96300,"South Carolina"],[98990,"Hawaii"],[99280,"Michigan"],[99290,"New Mexico"],[99930,"Pennsylvania"],[100030,"Alabama"],[100200,"Ohio"],[101120,"Florida"],[103200,"Illinois"],[103440,"Arizona"],[103810,"Utah"],[104140,"Minnesota"],[104720,"Georgia"],[105700,"Rhode Island"],[106100,"Texas"],[107240,"New Hampshire"],[107600,"North Carolina"],[108610,"Connecticut"],[109710,"Oregon"],[113600,"Delaware"],[123900,"New Jersey"],[128090,"Colorado"],[128350,"New York"],[128440,"Maryland"],[128700,"Virginia"],[130620,"Massachusetts"],[133010,"District of Columbia"],[136830,"Washington"],[138670,"California"]],"17-0000":[[77700,"Arkansas"],[81040,"Nebraska"],[81330,"Montana"],[81750,"Mississippi"],[82040,"South Dakota"],[83690,"Iowa"],[84170,"Wisconsin"],[84440,"West Virginia"],[84700,"Kentucky"],[85170,"North Dakota"],[85390,"Kansas"],[85630,"Tennessee"],[86450,"Missouri"],[88050,"Indiana"],[88730,"Georgia"],[88900,"Florida"],[89300,"Vermont"],[91360,"North Carolina"],[92330,"Pennsylvania"],[92460,"Oklahoma"],[94260,"Nevada"],[94260,"South Carolina"],[94370,"Maine"],[94970,"Louisiana"],[95090,"Ohio"],[95100,"Utah"],[96770,"Idaho"],[96850,"New Hampshire"],[96960,"Minnesota"],[96970,"Arizona"],[98110,"Hawaii"],[98420,"New York"],[98520,"Texas"],[98740,"Illinois"],[99640,"Michigan"],[99930,"Delaware"],[99990,"Alabama"],[100380,"Virginia"],[102120,"Connecticut"],[103230,"New Jersey"],[103280,"Colorado"],[103880,"Oregon"],[105160,"Rhode Island"],[106340,"Alaska"],[106360,"Massachusetts"],[111220,"Maryland"],[112400,"Washington"],[124010,"California"],[125650,"District of Columbia"],[128000,"New Mexico"]],"19-0000":[[62820,"Arkansas"],[64770,"Mississippi"],[66950,"Nebraska"],[67560,"Idaho"],[68400,"West Virginia"],[70810,"Montana"],[72140,"Kentucky"],[72690,"Iowa"],[72690,"Kansas"],[73160,"Indiana"],[73920,"Oklahoma"],[74070,"Alabama"],[74070,"Hawaii"],[75330,"Florida"],[75340,"Maine"],[75360,"Louisiana"],[75520,"Wisconsin"],[75870,"Missouri"],[75900,"South Carolina"],[76400,"Tennessee"],[76620,"Michigan"],[76700,"Utah"],[77010,"Texas"],[78730,"Georgia"],[78850,"North Carolina"],[79160,"Ohio"],[79590,"New Hampshire"],[80120,"Arizona"],[80310,"Nevada"],[80330,"Oregon"],[80720,"New Mexico"],[80980,"Pennsylvania"],[82870,"Illinois"],[83150,"Minnesota"],[83800,"New York"],[84180,"Delaware"],[84960,"Colorado"],[85670,"Virginia"],[86380,"Alaska"],[90180,"New Jersey"],[94160,"Washington"],[98140,"Connecticut"],[101700,"California"],[103560,"Maryland"],[104050,"Massachusetts"],[128610,"District of Columbia"]],"21-0000":[[46530,"Mississippi"],[46720,"Arkansas"],[46810,"Oklahoma"],[48690,"West Virginia"],[49020,"Alabama"],[49220,"Louisiana"],[49540,"Missouri"],[50220,"Montana"],[50510,"Iowa"],[50540,"Indiana"],[50550,"Kansas"],[50710,"South Carolina"],[50940,"Nebraska"],[51220,"South Dakota"],[51260,"Florida"],[51900,"Tennessee"],[52350,"Pennsylvania"],[52680,"Arizona"],[53540,"Ohio"],[54500,"Kentucky"],[54530,"North Carolina"],[55230,"Michigan"],[55590,"Utah"],[56160,"Maine"],[56200,"Idaho"],[56350,"Texas"],[56680,"Georgia"],[57330,"Vermont"],[57880,"Illinois"],[58210,"New Hampshire"],[58480,"Hawaii"],[58610,"Delaware"],[59470,"Virginia"],[59970,"Wisconsin"],[60010,"New Mexico"],[60250,"Nevada"],[60590,"Maryland"],[60640,"North Dakota"],[60680,"Connecticut"],[60960,"Rhode Island"],[61160,"Colorado"],[61580,"New York"],[61860,"Oregon"],[61980,"Minnesota"],[62590,"California"],[62960,"Alaska"],[63230,"New Jersey"],[63260,"Massachusetts"],[67650,"Washington"],[69130,"District of Columbia"]],"23-0000":[[62130,"Mississippi"],[68710,"South Carolina"],[71170,"Iowa"],[71410,"Arkansas"],[73480,"Alabama"],[74310,"Idaho"],[77250,"Louisiana"],[77950,"North Carolina"],[78470,"Kentucky"],[78620,"Oklahoma"],[80060,"West Virginia"],[81850,"Florida"],[81870,"Missouri"],[82400,"Kansas"],[83430,"Indiana"],[83890,"Tennessee"],[84620,"Nebraska"],[88510,"New Mexico"],[88760,"Wisconsin"],[90160,"Georgia"],[91190,"Utah"],[91790,"Oregon"],[92830,"Ohio"],[95850,"Michigan"],[96000,"Arizona"],[96230,"Pennsylvania"],[98710,"Nevada"],[98900,"Delaware"],[100070,"Texas"],[100960,"Connecticut"],[105090,"Illinois"],[105100,"Minnesota"],[107090,"Washington"],[108640,"Maryland"],[110300,"Virginia"],[114270,"New Jersey"],[119510,"Colorado"],[129550,"California"],[132990,"Massachusetts"],[137460,"New York"],[195190,"District of Columbia"]],"25-0000":[[47870,"Oklahoma"],[48490,"Montana"],[48610,"Iowa"],[48850,"South Dakota"],[49250,"Kansas"],[49270,"Missouri"],[49290,"Mississippi"],[49410,"North Carolina"],[50960,"Arizona"],[51680,"Arkansas"],[52130,"Indiana"],[52400,"Wyoming"],[52700,"Kentucky"],[52820,"West Virginia"],[53290,"Florida"],[53500,"Idaho"],[55080,"Nevada"],[55140,"North Dakota"],[56690,"Alabama"],[56970,"Louisiana"],[57910,"Maine"],[57930,"Utah"],[58370,"Wisconsin"],[58870,"Tennessee"],[59230,"Michigan"],[59420,"South Carolina"],[59500,"Minnesota"],[59510,"Hawaii"],[60190,"Nebraska"],[60400,"Illinois"],[60490,"New Hampshire"],[61090,"Georgia"],[61090,"Oregon"],[61100,"Virginia"],[61110,"Ohio"],[61620,"Vermont"],[61670,"Delaware"],[61750,"Texas"],[61820,"Pennsylvania"],[62170,"Colorado"],[63130,"New Mexico"],[65270,"New Jersey"],[65500,"Rhode Island"],[66230,"Maryland"],[66420,"Washington"],[66480,"Connecticut"],[68310,"New York"],[69190,"California"],[75080,"Alaska"],[77550,"Massachusetts"],[79890,"District of Columbia"]],"27-0000":[[43580,"Mississippi"],[44220,"Arkansas"],[45830,"West Virginia"],[48110,"Kentucky"],[49140,"Alabama"],[49220,"Idaho"],[49260,"Kansas"],[49910,"Louisiana"],[50340,"Tennessee"],[50720,"Oklahoma"],[50720,"South Carolina"],[50790,"Missouri"],[50820,"Iowa"],[51020,"Nebraska"],[51100,"Indiana"],[51260,"Montana"],[51720,"Ohio"],[52950,"New Mexico"],[53150,"Maine"],[53280,"Texas"],[54960,"Utah"],[55140,"Florida"],[55650,"North Carolina"],[55700,"Michigan"],[56710,"Arizona"],[56990,"Nevada"],[57110,"Wisconsin"],[57550,"Pennsylvania"],[57830,"Hawaii"],[59350,"New Hampshire"],[60670,"Georgia"],[62480,"Minnesota"],[62540,"Virginia"],[63720,"Illinois"],[64310,"Oregon"],[64850,"Washington"],[65090,"Rhode Island"],[65810,"Colorado"],[68680,"Connecticut"],[71100,"Maryland"],[74390,"New Jersey"],[76420,"Massachusetts"],[79520,"California"],[82250,"New York"],[101750,"District of Columbia"]],"29-0000":[[66630,"Mississippi"],[67360,"Alabama"],[74150,"Louisiana"],[75070,"Arkansas"],[76530,"West Virginia"],[77590,"Iowa"],[77740,"South Dakota"],[78140,"Kansas"],[78530,"Kentucky"],[78560,"Oklahoma"],[78590,"Tennessee"],[79250,"Missouri"],[79750,"South Carolina"],[79920,"North Dakota"],[80740,"Indiana"],[80820,"Ohio"],[81270,"North Carolina"],[81390,"Florida"],[81590,"Pennsylvania"],[82080,"Nebraska"],[82160,"Montana"],[82260,"Utah"],[82970,"Texas"],[83140,"Wyoming"],[83520,"Michigan"],[83590,"Georgia"],[84360,"Idaho"],[84940,"Illinois"],[85940,"Wisconsin"],[86360,"New Mexico"],[86990,"Maine"],[87270,"Virginia"],[87370,"Vermont"],[92500,"Arizona"],[95740,"Nevada"],[96400,"New Hampshire"],[96900,"Rhode Island"],[97270,"Delaware"],[98030,"Colorado"],[98600,"Maryland"],[98840,"Minnesota"],[99850,"Connecticut"],[100240,"Massachusetts"],[100400,"District of Columbia"],[102650,"New Jersey"],[103970,"New York"],[105600,"Alaska"],[106080,"Hawaii"],[108780,"Washington"],[118020,"Oregon"],[123330,"California"]],"31-0000":[[29070,"Louisiana"],[29360,"Mississippi"],[29700,"Texas"],[30270,"New Mexico"],[31220,"Arkansas"],[32210,"West Virginia"],[33790,"Alabama"],[34270,"Pennsylvania"],[35400,"Oklahoma"],[35470,"South Carolina"],[35950,"California"],[36100,"Missouri"],[36640,"Kansas"],[37080,"Georgia"],[37200,"Idaho"],[37240,"Tennessee"],[37440,"Indiana"],[37530,"Ohio"],[37610,"Virginia"],[37690,"Michigan"],[37750,"Nevada"],[37790,"Florida"],[37800,"North Carolina"],[37860,"Delaware"],[38020,"Wyoming"],[38420,"Iowa"],[38450,"Wisconsin"],[38620,"Arizona"],[38680,"Kentucky"],[38750,"Utah"],[38760,"Nebraska"],[38970,"Illinois"],[39190,"South Dakota"],[39260,"Montana"],[39880,"New York"],[40420,"Minnesota"],[41070,"Maryland"],[43060,"District of Columbia"],[43090,"Massachusetts"],[43220,"New Jersey"],[43320,"Connecticut"],[44070,"Maine"],[44240,"North Dakota"],[44560,"Colorado"],[44990,"Hawaii"],[45310,"Alaska"],[45800,"Vermont"],[45960,"New Hampshire"],[46180,"Rhode Island"],[47470,"Oregon"],[48400,"Washington"]],"33-0000":[[37390,"Mississippi"],[41740,"Louisiana"],[42310,"Kentucky"],[43350,"Arkansas"],[44450,"Alabama"],[44740,"Nevada"],[45330,"South Carolina"],[45390,"West Virginia"],[46290,"Georgia"],[46300,"North Carolina"],[46430,"Oklahoma"],[46610,"Tennessee"],[46840,"Missouri"],[47130,"Florida"],[47690,"Pennsylvania"],[48960,"Indiana"],[49200,"Kansas"],[49980,"New Mexico"],[50210,"Utah"],[50810,"Arizona"],[51120,"Virginia"],[51310,"Texas"],[51540,"Delaware"],[51700,"California"],[51730,"Maine"],[51920,"Idaho"],[52000,"Michigan"],[52030,"Ohio"],[52140,"South Dakota"],[53410,"Iowa"],[54480,"New Jersey"],[55390,"Wyoming"],[55760,"Hawaii"],[56390,"New York"],[56670,"Illinois"],[56930,"Colorado"],[57520,"Maryland"],[57570,"Montana"],[58350,"North Dakota"],[58980,"Minnesota"],[59260,"Oregon"],[59520,"Rhode Island"],[60110,"Wisconsin"],[60420,"New Hampshire"],[60590,"Nebraska"],[61050,"Connecticut"],[62090,"Washington"],[65550,"Massachusetts"],[69100,"Alaska"],[73950,"District of Columbia"]],"35-0000":[[23400,"Louisiana"],[24280,"Mississippi"],[27110,"Oklahoma"],[27600,"Arkansas"],[27680,"West Virginia"],[27780,"Alabama"],[28600,"Texas"],[28620,"Kentucky"],[28640,"South Carolina"],[28810,"Georgia"],[29270,"Kansas"],[29310,"Tennessee"],[29460,"Indiana"],[29490,"Wyoming"],[29620,"Iowa"],[29820,"North Carolina"],[30060,"South Dakota"],[30160,"Wisconsin"],[30180,"Idaho"],[30300,"Ohio"],[30580,"Montana"],[30630,"New Mexico"],[30770,"Pennsylvania"],[30890,"Utah"],[31080,"Missouri"],[31860,"Nebraska"],[33570,"Michigan"],[33860,"Minnesota"],[34020,"Nevada"],[34040,"North Dakota"],[34260,"Illinois"],[34610,"Florida"],[34960,"Rhode Island"],[35110,"Virginia"],[35600,"Alaska"],[35720,"Delaware"],[36050,"Maryland"],[36190,"Arizona"],[36480,"New Jersey"],[36490,"New Hampshire"],[36610,"Connecticut"],[37040,"Maine"],[37300,"Massachusetts"],[37670,"Oregon"],[37810,"Colorado"],[37850,"New York"],[38210,"Vermont"],[39480,"Hawaii"],[40250,"California"],[44390,"District of Columbia"],[44590,"Washington"]],"37-0000":[[28910,"Mississippi"],[29510,"Louisiana"],[30570,"Arkansas"],[31150,"West Virginia"],[32240,"Alabama"],[32400,"Oklahoma"],[34580,"South Carolina"],[34640,"Texas"],[34940,"Kentucky"],[34990,"Tennessee"],[35170,"South Dakota"],[35720,"New Mexico"],[35760,"Georgia"],[35820,"Kansas"],[36000,"Florida"],[36010,"Virginia"],[36070,"North Carolina"],[36220,"Iowa"],[36420,"Delaware"],[36520,"Ohio"],[36580,"Missouri"],[36680,"Michigan"],[36710,"Wyoming"],[36950,"Indiana"],[36950,"Utah"],[37100,"Nebraska"],[37190,"Pennsylvania"],[37430,"Idaho"],[37570,"Arizona"],[37700,"Wisconsin"],[37950,"North Dakota"],[38030,"Maryland"],[38220,"Montana"],[38540,"Illinois"],[38870,"New Jersey"],[39430,"District of Columbia"],[39620,"Connecticut"],[40510,"Alaska"],[40840,"Minnesota"],[41140,"Maine"],[41620,"Nevada"],[42180,"Colorado"],[42310,"Oregon"],[43040,"New Hampshire"],[43410,"Rhode Island"],[43540,"Vermont"],[43850,"New York"],[44250,"California"],[45760,"Washington"],[46610,"Massachusetts"],[46840,"Hawaii"]],"39-0000":[[26970,"Mississippi"],[27990,"Louisiana"],[28560,"Alabama"],[29240,"Arkansas"],[29420,"Oklahoma"],[29430,"West Virginia"],[30440,"Iowa"],[30530,"Kansas"],[30540,"Georgia"],[30770,"Indiana"],[31060,"South Carolina"],[31200,"Kentucky"],[31200,"Texas"],[31840,"Nebraska"],[32200,"Tennessee"],[32250,"Ohio"],[32620,"Missouri"],[32720,"Nevada"],[33430,"North Dakota"],[33440,"Wyoming"],[33540,"Florida"],[33670,"North Carolina"],[34260,"Michigan"],[34380,"Idaho"],[34460,"Montana"],[34530,"Delaware"],[34620,"Utah"],[34830,"South Dakota"],[34880,"Pennsylvania"],[35340,"New Mexico"],[35710,"Virginia"],[36010,"Wisconsin"],[36160,"Illinois"],[36200,"Rhode Island"],[36650,"Minnesota"],[36790,"Arizona"],[36820,"New Jersey"],[37120,"Connecticut"],[37420,"New Hampshire"],[37590,"Maine"],[37960,"Maryland"],[38260,"New York"],[39030,"Vermont"],[39500,"California"],[40350,"District of Columbia"],[40440,"Colorado"],[41000,"Hawaii"],[41390,"Alaska"],[41600,"Oregon"],[42670,"Massachusetts"],[47150,"Washington"]],"41-0000":[[30340,"Mississippi"],[30360,"West Virginia"],[32020,"Arkansas"],[32570,"Louisiana"],[33300,"Oklahoma"],[34590,"Kentucky"],[35000,"Alabama"],[35270,"New Mexico"],[35610,"Iowa"],[35710,"South Carolina"],[35730,"Tennessee"],[35800,"Kansas"],[35910,"Missouri"],[36260,"Georgia"],[36450,"Ohio"],[36480,"Indiana"],[36640,"Wyoming"],[36650,"Pennsylvania"],[36780,"Texas"],[36810,"Nebraska"],[36920,"Michigan"],[37030,"Nevada"],[37050,"South Dakota"],[37310,"Florida"],[37380,"North Carolina"],[37420,"Virginia"],[37440,"Maryland"],[37520,"Delaware"],[37720,"Idaho"],[37840,"North Dakota"],[38320,"Arizona"],[38370,"Maine"],[38370,"Wisconsin"],[38380,"Montana"],[38410,"New Hampshire"],[38420,"Utah"],[38480,"Illinois"],[39060,"Alaska"],[39360,"Minnesota"],[39570,"Connecticut"],[39830,"Vermont"],[41850,"Oregon"],[41990,"Hawaii"],[42290,"Rhode Island"],[45260,"Massachusetts"],[45380,"New York"],[45400,"California"],[45520,"New Jersey"],[46870,"District of Columbia"],[47440,"Colorado"],[47510,"Washington"]],"43-0000":[[38210,"Mississippi"],[39090,"West Virginia"],[39500,"Arkansas"],[39530,"Louisiana"],[40460,"Alabama"],[41980,"Oklahoma"],[43520,"South Carolina"],[43580,"Kentucky"],[44010,"South Dakota"],[44620,"New Mexico"],[44670,"Kansas"],[44990,"Georgia"],[45070,"Missouri"],[45240,"Texas"],[45340,"Idaho"],[45370,"Tennessee"],[45400,"Florida"],[45450,"North Carolina"],[45600,"Utah"],[45670,"Wyoming"],[45850,"Nebraska"],[45870,"Montana"],[46030,"Indiana"],[46050,"Nevada"],[46310,"Michigan"],[46520,"Iowa"],[46650,"Ohio"],[46720,"Pennsylvania"],[47180,"Virginia"],[47190,"Arizona"],[47560,"Wisconsin"],[47740,"Illinois"],[48050,"North Dakota"],[48080,"Maine"],[48330,"Delaware"],[48820,"Hawaii"],[49210,"Maryland"],[49330,"New Hampshire"],[49560,"Vermont"],[49790,"Rhode Island"],[50390,"Oregon"],[50800,"New Jersey"],[50900,"Minnesota"],[51050,"Colorado"],[51760,"New York"],[52530,"Alaska"],[53600,"Connecticut"],[54900,"California"],[54990,"Massachusetts"],[56660,"Washington"],[60660,"District of Columbia"]],"45-0000":[[33760,"Florida"],[35250,"Arizona"],[35360,"Texas"],[35890,"California"],[36780,"Arkansas"],[37060,"Oregon"],[37220,"Georgia"],[37750,"Alabama"],[37770,"North Carolina"],[37820,"Idaho"],[38040,"Missouri"],[38930,"Pennsylvania"],[39840,"Ohio"],[40190,"Colorado"],[40330,"Washington"],[40640,"Michigan"],[44120,"Illinois"],[44480,"Iowa"]],"47-0000":[[45870,"Arkansas"],[46800,"Mississippi"],[47810,"Alabama"],[48620,"Oklahoma"],[49170,"Texas"],[49370,"Florida"],[49390,"North Carolina"],[49560,"South Carolina"],[49790,"Georgia"],[49900,"New Mexico"],[49950,"Louisiana"],[50120,"South Dakota"],[50510,"Tennessee"],[53150,"Kentucky"],[53800,"Nebraska"],[54960,"Kansas"],[56160,"Idaho"],[56460,"Virginia"],[57170,"Utah"],[57620,"West Virginia"],[58020,"Arizona"],[59360,"Delaware"],[59460,"Iowa"],[59740,"Vermont"],[59750,"Wyoming"],[59880,"Maryland"],[60080,"New Hampshire"],[60320,"Maine"],[60520,"Pennsylvania"],[60960,"Montana"],[61180,"North Dakota"],[61190,"Colorado"],[61190,"Michigan"],[61730,"Missouri"],[61740,"Nevada"],[61860,"Indiana"],[62140,"Ohio"],[63050,"Rhode Island"],[63660,"Wisconsin"],[66130,"Oregon"],[70110,"District of Columbia"],[70410,"New York"],[71640,"Connecticut"],[71670,"California"],[72590,"Minnesota"],[73470,"New Jersey"],[75500,"Washington"],[75620,"Alaska"],[77480,"Massachusetts"],[80570,"Illinois"],[82440,"Hawaii"]],"49-0000":[[49130,"Mississippi"],[49610,"Arkansas"],[49740,"West Virginia"],[51270,"New Mexico"],[51670,"Florida"],[53030,"Louisiana"],[55000,"Oklahoma"],[55040,"South Carolina"],[56400,"Tennessee"],[56530,"Alabama"],[56550,"North Carolina"],[56610,"Idaho"],[56690,"Texas"],[57290,"Arizona"],[57580,"Kentucky"],[57810,"Missouri"],[57840,"Georgia"],[58350,"Kansas"],[58610,"Michigan"],[58860,"Indiana"],[58890,"South Dakota"],[58980,"Nebraska"],[59070,"Montana"],[59110,"Utah"],[59510,"Pennsylvania"],[59810,"Ohio"],[59820,"Virginia"],[59950,"Iowa"],[59990,"Maine"],[60020,"Vermont"],[60660,"Illinois"],[60660,"Nevada"],[60660,"Wisconsin"],[60920,"Rhode Island"],[61250,"Maryland"],[61480,"Delaware"],[61550,"Wyoming"],[61930,"Oregon"],[61990,"North Dakota"],[62190,"New Hampshire"],[62570,"Colorado"],[62600,"New York"],[62920,"Minnesota"],[63290,"New Jersey"],[64660,"California"],[64950,"Connecticut"],[65260,"Massachusetts"],[66130,"Hawaii"],[69090,"Washington"],[72000,"District of Columbia"],[74780,"Alaska"]],"51-0000":[[39860,"Delaware"],[41000,"Mississippi"],[41120,"Arkansas"],[43260,"Georgia"],[43770,"Florida"],[43880,"New Mexico"],[44120,"North Carolina"],[44250,"Alabama"],[44520,"Texas"],[45150,"Tennessee"],[45850,"Oklahoma"],[46220,"South Dakota"],[46400,"Utah"],[46460,"Michigan"],[46490,"West Virginia"],[46500,"New Jersey"],[46680,"South Carolina"],[46750,"Virginia"],[46990,"Idaho"],[47020,"Nevada"],[47030,"Illinois"],[47180,"Ohio"],[47240,"Arizona"],[47360,"Indiana"],[47610,"New York"],[47710,"Pennsylvania"],[47760,"Kentucky"],[47810,"Maryland"],[47810,"Missouri"],[47860,"California"],[48000,"Nebraska"],[48160,"Kansas"],[48210,"Montana"],[48490,"Wisconsin"],[48600,"Iowa"],[48690,"Hawaii"],[48990,"Massachusetts"],[49080,"Vermont"],[49290,"Minnesota"],[49330,"Connecticut"],[49360,"Rhode Island"],[49390,"Maine"],[49610,"New Hampshire"],[49710,"Colorado"],[49720,"Oregon"],[49890,"Louisiana"],[50750,"North Dakota"],[54720,"Alaska"],[55380,"Washington"],[59290,"Wyoming"]],"53-0000":[[37210,"West Virginia"],[37750,"Oklahoma"],[37940,"Mississippi"],[38220,"Alabama"],[38610,"South Carolina"],[38640,"Arkansas"],[39040,"North Carolina"],[39200,"Louisiana"],[40190,"South Dakota"],[40230,"Florida"],[40690,"New Mexico"],[41690,"Georgia"],[41880,"Tennessee"],[41900,"Nevada"],[42100,"Michigan"],[42360,"Texas"],[42880,"Ohio"],[43170,"Missouri"],[43880,"New Hampshire"],[44210,"Indiana"],[44270,"Virginia"],[44340,"Connecticut"],[44390,"Pennsylvania"],[44450,"Kentucky"],[44460,"Kansas"],[44470,"Idaho"],[44550,"Nebraska"],[44740,"New Jersey"],[44930,"Rhode Island"],[44950,"Arizona"],[44950,"Maryland"],[44990,"Maine"],[45340,"Wisconsin"],[45440,"Vermont"],[45480,"Illinois"],[45570,"Utah"],[45780,"Montana"],[45850,"California"],[45930,"Massachusetts"],[46050,"Iowa"],[46190,"Delaware"],[46430,"Oregon"],[46780,"New York"],[47060,"Colorado"],[47420,"Wyoming"],[47560,"Minnesota"],[47940,"Hawaii"],[49190,"North Dakota"],[49460,"District of Columbia"],[50150,"Alaska"],[50500,"Washington"]]};
 
 var $ = function (id) { return document.getElementById(id); };
 var params = new URLSearchParams(window.location.search);
@@ -506,6 +520,58 @@ function countUp(el, target, code, sym) {
   requestAnimationFrame(f);
 }
 
+/* ---- state kept between renders so dragging can recompute ---- */
+var CTX = null;
+
+function nearestState(code, value) {
+  var list = STATES[code];
+  if (!list || !list.length) return null;
+  if (value > list[list.length - 1][0] * 1.02) return { above: true };
+  if (value < list[0][0] * 0.98) return { below: true, name: list[0][1], med: list[0][0] };
+  var best = list[0], bd = Math.abs(list[0][0] - value);
+  for (var i = 1; i < list.length; i++) {
+    var d = Math.abs(list[i][0] - value);
+    if (d < bd) { bd = d; best = list[i]; }
+  }
+  return { name: best[1], med: best[0], close: bd / value < 0.06 };
+}
+
+function placeMarker(pos) {
+  $('fill').style.width = pos + '%';
+  $('you').style.left = pos + '%';
+  $('grip').style.left = pos + '%';
+  var tagEl = $('you-tag'), arrow = $('you-arrow');
+  tagEl.style.left = pos + '%';
+  if (pos < 16)      { tagEl.style.transform = 'translateX(0)';     arrow.style.margin = '2px auto 0 0'; }
+  else if (pos > 84) { tagEl.style.transform = 'translateX(-100%)'; arrow.style.margin = '2px 0 0 auto'; }
+  else               { tagEl.style.transform = 'translateX(-50%)';  arrow.style.margin = '2px auto 0'; }
+}
+
+function renderAt(pos, isDrag) {
+  if (!CTX) return;
+  var C = CTX;
+  var value = C.lo + (pos / 100) * (C.hi - C.lo);      // USD a year
+  placeMarker(pos);
+
+  if (!isDrag) { $('you-amt').textContent = usd(C.mine); return; }
+
+  $('you-amt').textContent = usd(value);
+
+  var diff = value - C.mine;
+  var diffLine = diff >= 0
+    ? '<strong>' + money(C.code, C.sym, diff * C.rate) + '</strong> a year more than you earn today.'
+    : '<strong>' + money(C.code, C.sym, -diff * C.rate) + '</strong> a year less than you earn today.';
+
+  var st = nearestState(C.code2, value), where;
+  if (!st)            where = '';
+  else if (st.above)  where = ' That is above the median in every U.S. state for this field &mdash; the upper end of the profession.';
+  else if (st.below)  where = ' That is below the median in every U.S. state for this field; the lowest is ' + st.name + ', at ' + usd(st.med) + '.';
+  else if (st.close)  where = ' That is roughly the median for this field in <strong>' + st.name + '</strong>.';
+  else                where = ' The nearest state median for this field is <strong>' + st.name + '</strong>, at ' + usd(st.med) + '.';
+
+  $('reach').innerHTML = '<strong>' + usd(value) + '</strong> a year &mdash; ' + diffLine + where;
+}
+
 $('go').addEventListener('click', function () {
   var F = FIELDS[$('field').value];
   var c = cur();
@@ -515,11 +581,13 @@ $('go').addEventListener('click', function () {
   var rate = live ? RATES[c.code] : 1;
   var code = live ? c.code : 'USD';
   var sym  = live ? c.symbol : '$';
-  var mine = annualLocal / rate;                    // their salary in USD
+  var mine = annualLocal / rate;
 
-  /* scale runs from the 25th percentile to the 90th */
   var lo = F.p25, hi = F.p90;
   var pos = Math.max(2, Math.min(98, ((mine - lo) / (hi - lo)) * 100));
+
+  CTX = { lo: lo, hi: hi, mine: mine, rate: rate, code: code, sym: sym,
+          code2: $('field').value, homePos: pos, F: F };
 
   $('t25').textContent = usd(F.p25);
   $('t50').textContent = usd(F.med);
@@ -532,8 +600,7 @@ $('go').addEventListener('click', function () {
   if (mine < F.med) {
     target = F.med;
     label = 'The median in your field, United States';
-    sub = 'Half of everyone in this field earns more than this. Your salary today is ' +
-          usd(mine) + ' a year.';
+    sub = 'Half of everyone in this field earns more than this. Your salary today is ' + usd(mine) + ' a year.';
     note = 'You are currently below the mid-point of this field in the United States, which ' +
            'means the ceiling above you is a real one &mdash; the upper quarter earns ' +
            usd(F.p75) + ' and the top tenth ' + usd(F.p90) + '.';
@@ -548,31 +615,26 @@ $('go').addEventListener('click', function () {
     target = F.p90;
     label = 'The top tenth earns above';
     sub = 'You are already in the upper quarter of this field, at ' + usd(mine) + ' a year.';
-    note = 'You are paid well by U.S. standards for your field. At this level a move is ' +
-           'rarely about the salary alone &mdash; it is about scale, the market you work in, ' +
-           'and what you can build there.';
+    note = 'You are paid well by U.S. standards for your own field, and the top of that ' +
+           'range is still some way above you. The step that matters now is a practical ' +
+           'one: which legal route actually fits someone with your background.';
   } else {
     target = F.p90;
     label = 'The top tenth earns above';
     sub = 'You already earn more than nine in ten people in this field in the United States.';
-    note = 'We are not going to pretend the money is the argument in your case, because it ' +
-           'is not. People in your position move for a different reason &mdash; the size of ' +
-           'the market, where their industry is going, or what they want for their family. ' +
-           'Whether the route exists is still worth knowing.';
+    note = 'You already earn well, and at your level U.S. pay for your field is in much the ' +
+           'same territory &mdash; so a move would be about the market and the opportunity ' +
+           'rather than the pay rise. The step that matters now is a practical one: ' +
+           'which legal route actually fits someone with your background.';
   }
 
-  /* where you are, and what is above you */
-  $('you-amt').textContent = usd(mine);
   var stLine = '';
   if (F.st) {
-    stLine = ' The highest-paying state for this field is <strong>' + F.st +
-             '</strong>, where the median is ' + usd(F.stm) + '.';
+    stLine = ' If pay is what you are optimising for, <strong>' + F.st +
+             '</strong> pays the most in this field, with a median of ' + usd(F.stm) + '.';
   }
-  $('reach').innerHTML =
-    'The next step above you is <strong>' + usd(target) + '</strong> a year.' + stLine;
-
-  $('cta-text').textContent = 'Could I work in ' + F.n.toLowerCase().split(' (')[0] +
-                              ' in the U.S.?';
+  CTX.homeReach = 'The next step above you is <strong>' + usd(target) + '</strong> a year.' + stLine;
+  $('reach').innerHTML = CTX.homeReach;
 
   $('v-label').textContent = label;
   $('v-sub').textContent = sub;
@@ -582,19 +644,40 @@ $('go').addEventListener('click', function () {
 
   $('result').classList.add('show');
   countUp($('v-num'), target * rate, code, sym);
-  setTimeout(function () {
-    $('fill').style.width = pos + '%';
-    $('you').style.left = pos + '%';
-    var tagEl = $('you-tag');
-    tagEl.style.left = pos + '%';
-    /* keep the label inside the track at either end */
-    var arrow = $('you-arrow');
-    if (pos < 16)      { tagEl.style.transform = 'translateX(0)';    arrow.style.margin = '2px auto 0 0'; }
-    else if (pos > 84) { tagEl.style.transform = 'translateX(-100%)'; arrow.style.margin = '2px 0 0 auto'; }
-    else               { tagEl.style.transform = 'translateX(-50%)'; arrow.style.margin = '2px auto 0'; }
-  }, 80);
+  setTimeout(function () { renderAt(pos, false); }, 80);
   $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
+
+/* ---- dragging ---- */
+(function () {
+  var track = $('track'), dragging = false;
+
+  function posFrom(e) {
+    var r = track.getBoundingClientRect();
+    var x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+    return Math.max(0, Math.min(100, (x / r.width) * 100));
+  }
+  function begin(e) {
+    if (!CTX) return;
+    dragging = true; track.classList.add('dragging');
+    renderAt(posFrom(e), true); e.preventDefault();
+  }
+  function move(e) { if (dragging) { renderAt(posFrom(e), true); e.preventDefault(); } }
+  function end() { dragging = false; track.classList.remove('dragging'); }
+
+  track.addEventListener('mousedown', begin);
+  window.addEventListener('mousemove', move);
+  window.addEventListener('mouseup', end);
+  track.addEventListener('touchstart', begin, { passive: false });
+  window.addEventListener('touchmove', move, { passive: false });
+  window.addEventListener('touchend', end);
+
+  $('reset').addEventListener('click', function () {
+    if (!CTX) return;
+    renderAt(CTX.homePos, false);
+    $('reach').innerHTML = CTX.homeReach;
+  });
+})();
 </script>
 
 </body>
