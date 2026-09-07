@@ -81,17 +81,19 @@
   .you-arrow { display:block; width:0; height:0; margin:2px auto 0;
                border-left:7px solid transparent; border-right:7px solid transparent;
                border-top:9px solid #10263c; }
-  .reach { margin-top:26px; padding:18px 20px; background:#f1ece0; border-left:4px solid #a8763a;
-           font-size:14px; line-height:1.7; color:#141210; }
+  .reach { margin-top:26px; padding:20px 22px; background:#f1ece0; border-left:4px solid #a8763a;
+           font-size:15px; line-height:1.7; color:#141210; }
   .reach strong { color:#10263c; }
+  .reach .delta { display:block; font-size:26px; font-weight:bold; color:#a8763a;
+                  line-height:1.2; margin-bottom:8px; }
   .ticks { display:flex; justify-content:space-between; margin-top:9px;
            font-family:'Courier New',Courier,monospace; font-size:9px; letter-spacing:1px; color:#5f5849; }
   .ticks span { text-align:center; }
   .ticks b { display:block; font-family:Georgia,serif; font-size:13px; color:#141210;
              letter-spacing:0; margin-top:3px; }
 
-  .note { font-size:13px; color:#241f19; line-height:1.75; margin-top:26px;
-          padding-top:18px; border-top:1px solid #b9b0a0; }
+  .note { font-size:12px; color:#5f5849; line-height:1.7; margin-top:22px;
+          padding-top:14px; border-top:1px solid #b9b0a0; }
   .cta { display:block; margin-top:24px; padding:18px; background:#10263c; color:#faf7f0;
          text-decoration:none; text-align:center; font-size:17px; }
   .cta:hover { background:#1b3d5e; }
@@ -412,7 +414,12 @@
         <span id="cta-text">Do I have a legal route to work in the U.S.?</span>
         <span style="white-space:nowrap;">&nbsp;&mdash;&nbsp; $19</span>
       </a>
-      <div class="cta-note">Reviewed by a licensed U.S. immigration attorney.</div>
+      <div class="cta-note">
+        Reviewed by a licensed U.S. immigration attorney.<br>
+        <span style="color:#8f6330;">Worth starting now: U.S. government filing fees are adjusted
+        upward for inflation at the start of each fiscal year, and the next one begins
+        <strong>1 October 2026</strong>.</span>
+      </div>
 
       <div class="sources">
         SOURCES<br>
@@ -595,37 +602,24 @@ $('go').addEventListener('click', function () {
   $('t90').textContent = usd(F.p90);
   $('scale-title').textContent = 'Pay in ' + F.n.toLowerCase() + ', United States';
 
-  var target, label, sub, note;
+  var target, label, sub;
 
   if (mine < F.med) {
     target = F.med;
     label = 'The median in your field, United States';
-    sub = 'Half of everyone in this field earns more than this. Your salary today is ' + usd(mine) + ' a year.';
-    note = 'You are currently below the mid-point of this field in the United States, which ' +
-           'means the ceiling above you is a real one &mdash; the upper quarter earns ' +
-           usd(F.p75) + ' and the top tenth ' + usd(F.p90) + '.';
+    sub = 'Half of everyone in this field earns more than this.';
   } else if (mine < F.p75) {
     target = F.p75;
     label = 'The upper quarter earns above';
-    sub = 'You already sit above the U.S. median for this field, at ' + usd(mine) + ' a year.';
-    note = 'You are above the mid-point already, so the honest comparison is not with the ' +
-           'average but with the top of the field: the upper quarter earns above ' +
-           usd(F.p75) + ', and the top tenth above ' + usd(F.p90) + '.';
+    sub = 'You already sit above the U.S. median for this field.';
   } else if (mine < F.p90) {
     target = F.p90;
     label = 'The top tenth earns above';
-    sub = 'You are already in the upper quarter of this field, at ' + usd(mine) + ' a year.';
-    note = 'You are paid well by U.S. standards for your own field, and the top of that ' +
-           'range is still some way above you. The step that matters now is a practical ' +
-           'one: which legal route actually fits someone with your background.';
+    sub = 'You are already in the upper quarter of this field.';
   } else {
     target = F.p90;
     label = 'The top tenth earns above';
     sub = 'You already earn more than nine in ten people in this field in the United States.';
-    note = 'You already earn well, and at your level U.S. pay for your field is in much the ' +
-           'same territory &mdash; so a move would be about the market and the opportunity ' +
-           'rather than the pay rise. The step that matters now is a practical one: ' +
-           'which legal route actually fits someone with your background.';
   }
 
   var stLine = '';
@@ -633,14 +627,25 @@ $('go').addEventListener('click', function () {
     stLine = ' If pay is what you are optimising for, <strong>' + F.st +
              '</strong> pays the most in this field, with a median of ' + usd(F.stm) + '.';
   }
-  CTX.homeReach = 'The next step above you is <strong>' + usd(target) + '</strong> a year.' + stLine;
+  var gap = target - mine;
+  var pctMore = Math.round((gap / mine) * 100);
+  var head;
+  if (gap > 0) {
+    head = '<span class="delta">+' + money(code, sym, gap * rate) + ' a year</span>' +
+           'That is <strong>' + pctMore + '% more</strong> than you earn today, and it is ' +
+           'what people in your field are already paid in the United States.';
+  } else {
+    head = '<span class="delta">You are already there</span>' +
+           'Your pay is in line with the top of this field in the United States.';
+  }
+  CTX.homeReach = head + stLine;
   $('reach').innerHTML = CTX.homeReach;
 
   $('v-label').textContent = label;
   $('v-sub').textContent = sub;
-  $('reality').innerHTML = note +
-    ' <span style="color:#544d3e">These are national figures for a whole occupation group. ' +
-    'U.S. pay varies enormously by state and speciality, and the cost of living varies with it.</span>';
+  $('reality').textContent =
+    'National figures for a whole occupation group. U.S. pay varies by state and speciality, ' +
+    'and so does the cost of living.';
 
   $('result').classList.add('show');
   countUp($('v-num'), target * rate, code, sym);
