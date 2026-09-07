@@ -650,6 +650,24 @@ $('go').addEventListener('click', function () {
     '<span style="color:#a8763a;font-weight:bold;">*</span> National figures for a whole ' +
     'occupation group. U.S. pay varies by state and speciality, and so does the cost of living.';
 
+  /* record the completed check — the Worker holds the CRM key, not this page */
+  try {
+    fetch('https://ias-crm.calm-rain-5660.workers.dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email:        params.get('email') || '',
+        utm_campaign: params.get('utm_campaign') || '',
+        country:      $('country').options[$('country').selectedIndex].text,
+        field:        F.n,
+        salary:       $('salary').value,
+        currency:     code,
+        per:          Number($('per').value) === 12 ? 'per month' : 'per year',
+        usMedian:     F.med
+      })
+    }).catch(function () {});
+  } catch (e) {}
+
   $('result').classList.add('show');
   countUp($('v-num'), target * rate, code, sym);
   setTimeout(function () { renderAt(pos, false); }, 80);
