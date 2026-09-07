@@ -576,7 +576,8 @@ function renderAt(pos, isDrag) {
   else if (st.close)  where = ' That is roughly the median for this field in <strong>' + st.name + '</strong>.';
   else                where = ' The nearest state median for this field is <strong>' + st.name + '</strong>, at ' + usd(st.med) + '.';
 
-  $('reach').innerHTML = '<strong>' + usd(value) + '</strong> a year &mdash; ' + diffLine + where;
+  $('reach').innerHTML = '<span class="delta">' + usd(value) + ' a year</span>' +
+    diffLine + where + '<span style="color:#a8763a;font-weight:bold;">*</span>';
 }
 
 $('go').addEventListener('click', function () {
@@ -624,28 +625,30 @@ $('go').addEventListener('click', function () {
 
   var stLine = '';
   if (F.st) {
-    stLine = ' If pay is what you are optimising for, <strong>' + F.st +
-             '</strong> pays the most in this field, with a median of ' + usd(F.stm) + '.';
+    stLine = ' The same figures show <strong>' + F.st + '</strong> paying the most in this ' +
+             'field of any U.S. state, with a median of ' + usd(F.stm) + '.';
   }
   var gap = target - mine;
   var pctMore = Math.round((gap / mine) * 100);
   var head;
   if (gap > 0) {
     head = '<span class="delta">+' + money(code, sym, gap * rate) + ' a year</span>' +
-           'That is <strong>' + pctMore + '% more</strong> than you earn today, and it is ' +
-           'what people in your field are already paid in the United States.';
+           'That is <strong>' + pctMore + '% more</strong> than you earn today. According to ' +
+           'the <strong>U.S. Bureau of Labor Statistics</strong>, this is what people doing ' +
+           'your job in the United States are paid today.<span style="color:#a8763a;font-weight:bold;">*</span>';
   } else {
     head = '<span class="delta">You are already there</span>' +
-           'Your pay is in line with the top of this field in the United States.';
+           'According to the <strong>U.S. Bureau of Labor Statistics</strong>, your pay is in ' +
+           'line with the top of this field in the United States today.<span style="color:#a8763a;font-weight:bold;">*</span>';
   }
   CTX.homeReach = head + stLine;
   $('reach').innerHTML = CTX.homeReach;
 
   $('v-label').textContent = label;
   $('v-sub').textContent = sub;
-  $('reality').textContent =
-    'National figures for a whole occupation group. U.S. pay varies by state and speciality, ' +
-    'and so does the cost of living.';
+  $('reality').innerHTML =
+    '<span style="color:#a8763a;font-weight:bold;">*</span> National figures for a whole ' +
+    'occupation group. U.S. pay varies by state and speciality, and so does the cost of living.';
 
   $('result').classList.add('show');
   countUp($('v-num'), target * rate, code, sym);
