@@ -95,7 +95,7 @@
   <div class="body">
 
     <h1>What is your work worth in the United States?</h1>
-    <div class="lede">Three questions. The answer uses published U.S. government wage data.</div>
+    <div class="lede">Two questions. The answer comes from published U.S. government wage data.</div>
     <div class="accent"></div>
 
     <label for="country">Where you live now</label>
@@ -327,13 +327,9 @@
       <option value="69770">Other / not listed</option>
     </select>
 
-    <label for="salary">Your gross annual salary today <span id="cur-tag"></span></label>
-    <input id="salary" type="number" inputmode="numeric" min="1" placeholder="e.g. 68000">
-    <div class="hint">Before tax. A rough figure is fine.</div>
-
     <div id="fx-error" class="err" style="display:none">
-      We could not load today&rsquo;s exchange rates. Enter your salary in
-      <strong>U.S. dollars</strong> instead and the comparison will still work.
+      We could not load today&rsquo;s exchange rates, so the figure below is shown
+      in U.S. dollars only.
     </div>
 
     <button id="go" disabled>Show me the numbers</button>
@@ -341,25 +337,23 @@
     <div id="result">
 
       <div class="verdict">
-        <div class="verdict-label" id="v-label">Difference</div>
-        <div class="verdict-num" id="v-num">0%</div>
+        <div class="verdict-label" id="v-label">Average pay in your field, United States</div>
+        <div class="verdict-num" id="v-num">&mdash;</div>
         <div class="verdict-sub" id="v-sub"></div>
       </div>
 
       <table class="cmp">
         <thead>
-          <tr><th></th><th id="th-home">Today</th><th class="us">United States</th></tr>
+          <tr><th>Your field in the United States</th><th class="us">Per year</th></tr>
         </thead>
         <tbody>
           <tr class="big">
-            <td>Gross, per year</td>
-            <td id="g-home">&mdash;</td>
-            <td class="us" id="g-us">&mdash;</td>
+            <td id="f-name">&mdash;</td>
+            <td class="us" id="f-usd">&mdash;</td>
           </tr>
           <tr>
-            <td>In U.S. dollars</td>
-            <td id="g-home-usd">&mdash;</td>
-            <td id="g-us-2">&mdash;</td>
+            <td>Average across all U.S. occupations</td>
+            <td id="f-all">$69,770</td>
           </tr>
         </tbody>
       </table>
@@ -418,14 +412,11 @@ fetch('https://open.er-api.com/v6/latest/USD')
     RATES = d.rates; FX_OK = true;
     RATE_DATE = (d.time_last_update_utc || '').slice(5, 16);
     $('fx-line').innerHTML = 'Exchange rates &mdash; open.er-api.com, ' + RATE_DATE + '.';
-    validate();
   })
   .catch(function () {
     FX_OK = false;
     $('fx-error').style.display = 'block';
-    $('cur-tag').textContent = '(USD)';
-    $('fx-line').textContent = 'Salary entered directly in U.S. dollars.';
-    validate();
+    $('fx-line').textContent = 'Figures shown in U.S. dollars.';
   });
 
 /* ---- prefill from the email link ---- */
@@ -439,7 +430,6 @@ var FIELD_KEYS = {
 if (params.get('field') && FIELD_KEYS[params.get('field').toLowerCase()]) {
   $('field').value = FIELD_KEYS[params.get('field').toLowerCase()];
 }
-if (params.get('salary')) $('salary').value = params.get('salary');
 if (params.get('country')) {
   var want = params.get('country').toLowerCase();
   var opts = $('country').options;
@@ -455,84 +445,58 @@ function currency() {
   return { code: p[0], symbol: p[1] };
 }
 
-function updateCurrencyTag() {
-  var c = currency();
-  $('cur-tag').textContent = (FX_OK && c) ? '(' + c.code + ')' : (FX_OK ? '' : '(USD)');
-}
-
-function money(sym, code, n) {
+function money(sym, n) {
   var s = Math.round(n).toLocaleString('en-US');
-  return /^[A-Za-z]/.test(sym) || sym.length > 2 ? sym + ' ' + s : sym + s;
+  return (/^[A-Za-z]/.test(sym) || sym.length > 2) ? sym + ' ' + s : sym + s;
 }
 
 function validate() {
-  updateCurrencyTag();
-  var c = currency();
-  var ok = $('field').value && Number($('salary').value) > 0 && (c || !FX_OK);
-  if (FX_OK && !c) ok = false;
-  $('go').disabled = !ok;
+  $('go').disabled = !($('country').value && $('field').value);
 }
 $('country').addEventListener('change', validate);
 $('field').addEventListener('change', validate);
-$('salary').addEventListener('input', validate);
 validate();
 
-function countUp(el, target, suffix) {
-  var start = null, dur = 900;
+function countUp(el, target, prefix, suffix) {
+  var start = null, dur = 1100;
   function frame(ts) {
     if (!start) start = ts;
     var p = Math.min((ts - start) / dur, 1);
     var eased = 1 - Math.pow(1 - p, 3);
-    el.textContent = (target < 0 ? '' : '+') + Math.round(target * eased) + suffix;
+    el.textContent = prefix + Math.round(target * eased).toLocaleString('en-US') + suffix;
     if (p < 1) requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
 }
 
 $('go').addEventListener('click', function () {
-  var usGross = Number($('field').value);
-  var homeGross = Number($('salary').value);
+  var usd = Number($('field').value);
+  var fieldName = $('field').options[$('field').selectedIndex].text;
   var c = currency();
+  var localOK = FX_OK && c && RATES[c.code] && c.code !== 'USD';
 
-  var homeUsd, sym, code, homeLabel;
-  if (FX_OK && c && RATES[c.code]) {
-    homeUsd = homeGross / RATES[c.code];
-    sym = c.symbol; code = c.code;
-    homeLabel = $('country').options[$('country').selectedIndex].text;
+  $('f-name').textContent = fieldName;
+  $('f-usd').textContent = '$' + usd.toLocaleString('en-US');
+  $('f-all').textContent = '$69,770';
+
+  if (localOK) {
+    var local = usd * RATES[c.code];
+    $('v-sub').innerHTML = 'That is <strong>$' + usd.toLocaleString('en-US') +
+      '</strong> a year, at today&rsquo;s exchange rate.';
+    countUp($('v-num'), local, (/^[A-Za-z]/.test(c.symbol) || c.symbol.length > 2) ? c.symbol + ' ' : c.symbol, '');
   } else {
-    homeUsd = homeGross; sym = '$'; code = 'USD';
-    homeLabel = c ? $('country').options[$('country').selectedIndex].text : 'Today';
+    $('v-sub').textContent = 'Average gross pay, before tax.';
+    countUp($('v-num'), usd, '$', '');
   }
 
-  var pct = Math.round(((usGross - homeUsd) / homeUsd) * 100);
-
-  $('th-home').textContent = homeLabel;
-  $('g-home').textContent = money(sym, code, homeGross);
-  $('g-us').textContent = '$' + Math.round(usGross).toLocaleString('en-US');
-  $('g-home-usd').textContent = '$' + Math.round(homeUsd).toLocaleString('en-US');
-  $('g-us-2').textContent = '$' + Math.round(usGross).toLocaleString('en-US');
-
-  if (pct >= 0) {
-    $('v-label').textContent = 'Above what you earn today';
-    $('v-sub').textContent = 'Average gross pay in your field, United States.';
-    $('reality').innerHTML =
-      'Read this as a signal, not a forecast. It compares an average across an entire ' +
-      'occupation group with your own salary, and it says nothing about cost of living, ' +
-      'health insurance or paid leave &mdash; all of which differ sharply between countries. ' +
-      'What it does tell you is whether the gap is <strong>large enough to be worth ' +
-      'looking into properly.</strong>';
-  } else {
-    $('v-label').textContent = 'Compared with what you earn today';
-    $('v-sub').textContent = 'Average gross pay in your field, United States.';
-    $('reality').innerHTML =
-      'In your field the U.S. average comes out below what you already earn, and we are ' +
-      'not going to dress that up. Averages hide a great deal &mdash; U.S. pay varies ' +
-      'enormously by state and speciality, and this covers a whole occupation group. ' +
-      '<strong>Whether a move makes sense for you is a different question from the average.</strong>';
-  }
+  $('reality').innerHTML =
+    'This is the average across everyone working in that field in the United States, ' +
+    'published by the U.S. Bureau of Labor Statistics. It is not an offer and not a ' +
+    'prediction &mdash; pay varies enormously by state, speciality and experience, and ' +
+    'the cost of living varies with it. What it does tell you is <strong>the scale of ' +
+    'the market you would be entering.</strong>';
 
   $('result').classList.add('show');
-  countUp($('v-num'), pct, '%');
   $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 </script>
