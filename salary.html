@@ -43,6 +43,12 @@
   .row { display:flex; gap:10px; }
   .row input { flex:2; } .row select { flex:1; }
   .hint { font-size:12px; color:#544d3e; margin-top:6px; }
+  .ask { margin-top:26px; padding:20px 20px 22px; background:#f1ece0;
+         border-left:4px solid #a8763a; }
+  .ask-q { font-family:Georgia,serif; font-size:20px; font-weight:bold; color:#10263c;
+           line-height:1.35; }
+  .ask-sub { font-size:13px; color:#544d3e; margin:6px 0 14px; }
+  .ask .row input, .ask .row select { background:#fff; }
   button { width:100%; margin-top:24px; padding:17px; background:#a8763a; color:#faf7f0;
            border:none; font-family:Georgia,serif; font-size:17px; letter-spacing:0.4px; cursor:pointer; }
   button:hover { background:#8f6330; }
@@ -359,15 +365,17 @@
       <option value="00-0000">Other / not listed</option>
     </select>
 
-    <label for="salary">Your gross salary today <span id="cur-tag"></span></label>
-    <div class="row">
-      <input id="salary" type="number" inputmode="numeric" min="1" placeholder="e.g. 5600">
-      <select id="per">
-        <option value="12">per month</option>
-        <option value="1">per year</option>
-      </select>
+    <div class="ask">
+      <div class="ask-q">How much do you earn today<span id="cur-tag"></span>?</div>
+      <div class="ask-sub">In your own currency, before tax. A rough figure is fine.</div>
+      <div class="row">
+        <input id="salary" type="number" inputmode="numeric" min="1" placeholder="e.g. 5600">
+        <select id="per">
+          <option value="12">per month</option>
+          <option value="1">per year</option>
+        </select>
+      </div>
     </div>
-    <div class="hint">Before tax. A rough figure is fine.</div>
 
     <div id="fx-error" class="err" style="display:none">
       We could not load today&rsquo;s exchange rates. Enter your salary in
@@ -505,7 +513,7 @@ function money(code, sym, n) {
 function usd(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
 function tag() {
   var c = cur();
-  $('cur-tag').textContent = FX_OK ? (c ? '(' + c.code + ')' : '') : '(USD)';
+  $('cur-tag').textContent = FX_OK ? (c ? ', in ' + c.code : '') : ', in USD';
 }
 function validate() {
   tag();
@@ -643,6 +651,8 @@ $('go').addEventListener('click', function () {
   }
   CTX.homeReach = head + stLine;
   $('reach').innerHTML = CTX.homeReach;
+
+  $('cta-text').textContent = 'Could I work in ' + F.n.toLowerCase().split(' (')[0] + ' in the U.S.?';
 
   $('v-label').textContent = label;
   $('v-sub').textContent = sub;
