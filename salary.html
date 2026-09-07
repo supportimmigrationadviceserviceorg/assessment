@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>What is your work worth in the United States?</title>
+<!-- ============================================================
+     IAS - SALARY COMPARISON TOOL  (all countries, gross)
+     Single file. No server, no CRM call, no API key.
+
+     PREFILL FROM EMAIL (optional):
+       salary.html?country=Germany&field=engineering&salary=68000
+                  &email=#EMAIL_TO#&utm_campaign=XXXX
+     Every query parameter is passed straight through to the CTA link.
+
+     SOURCES
+       U.S. wages - BLS Occupational Employment and Wage Statistics,
+                    May 2025 estimates, released 15 May 2026 (USDL-26-0725).
+                    Annual MEAN wage by occupation group.
+       FX         - fetched live from open.er-api.com (free, no key).
+                    If it fails the tool asks for a USD figure instead.
+     ============================================================ -->
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Georgia, 'Times New Roman', serif; background: #dcd7ca;
+         color: #141210; padding: 26px 14px 60px; line-height: 1.6; }
+  .sheet { max-width: 620px; margin: 0 auto; background: #faf7f0; border: 1px solid #b9b0a0; }
+  .mast { background: #10263c; padding: 26px 34px 22px; }
+  .mast-name { font-size: 12px; letter-spacing: 6px; color: #faf7f0;
+               text-transform: uppercase; font-weight: bold; line-height: 1.5; }
+  .rule { height: 1px; background: #a8763a; margin: 14px 0 10px; }
+  .mast-sub { font-family: 'Courier New', Courier, monospace; font-size: 10px;
+              letter-spacing: 2px; color: #d29a4e; text-transform: uppercase; }
+  .body { padding: 30px 34px 34px; }
+  h1 { font-size: 27px; line-height: 1.25; color: #10263c; letter-spacing: -0.3px; margin-bottom: 14px; }
+  .lede { font-size: 15px; color: #241f19; }
+  .accent { height: 3px; width: 58px; background: #a8763a; margin: 18px 0; }
+  label { display: block; font-family: 'Courier New', Courier, monospace; font-size: 10px;
+          letter-spacing: 2px; color: #544d3e; text-transform: uppercase; margin: 20px 0 7px; }
+  select, input { width: 100%; padding: 13px 12px; font-family: Georgia, serif; font-size: 16px;
+                  color: #141210; background: #fff; border: 1px solid #b9b0a0; border-radius: 0; }
+  select:focus, input:focus { outline: 2px solid #a8763a; outline-offset: -2px; }
+  .hint { font-size: 12px; color: #544d3e; margin-top: 6px; }
+  button { width: 100%; margin-top: 24px; padding: 17px; background: #a8763a; color: #faf7f0;
+           border: none; font-family: Georgia, serif; font-size: 17px; letter-spacing: 0.4px; cursor: pointer; }
+  button:hover { background: #8f6330; }
+  button:disabled { background: #c9c0ad; cursor: not-allowed; }
+  #result { display: none; margin-top: 30px; }
+  #result.show { display: block; }
+  .verdict { background: #10263c; padding: 26px 24px; text-align: center; }
+  .verdict-label { font-family: 'Courier New', Courier, monospace; font-size: 10px; letter-spacing: 3px;
+                   color: #d29a4e; text-transform: uppercase; margin-bottom: 12px; }
+  .verdict-num { font-size: 52px; font-weight: bold; color: #faf7f0; line-height: 1.05; }
+  .verdict-sub { font-size: 14px; color: #c9d3dc; margin-top: 10px; }
+  table.cmp { width: 100%; border-collapse: collapse; margin-top: 22px; }
+  table.cmp th { font-family: 'Courier New', Courier, monospace; font-size: 10px; letter-spacing: 1.5px;
+                 color: #544d3e; text-transform: uppercase; text-align: right; padding: 8px 0;
+                 border-bottom: 2px solid #b9b0a0; }
+  table.cmp th:first-child { text-align: left; }
+  table.cmp th.us { border-bottom-color: #a8763a; }
+  table.cmp td { padding: 12px 0; border-bottom: 1px solid #e3ddce; font-size: 15px; text-align: right; }
+  table.cmp td:first-child { text-align: left; font-size: 13px; color: #544d3e; }
+  table.cmp tr.big td { font-weight: bold; font-size: 20px; color: #10263c; border-bottom: none; }
+  table.cmp tr.big td.us { color: #a8763a; }
+  .note { font-size: 12px; color: #544d3e; line-height: 1.7; margin-top: 20px;
+          padding-top: 16px; border-top: 1px solid #b9b0a0; }
+  .cta { display: block; margin-top: 24px; padding: 18px; background: #10263c; color: #faf7f0;
+         text-decoration: none; text-align: center; font-size: 17px; }
+  .cta:hover { background: #1b3d5e; }
+  .cta-note { font-size: 12px; color: #544d3e; text-align: center; margin-top: 10px; }
+  .sources { font-family: 'Courier New', Courier, monospace; font-size: 10px; line-height: 1.9;
+             color: #5f5849; margin-top: 26px; padding-top: 14px; border-top: 1px solid #b9b0a0; }
+  .sources a { color: #a8763a; }
+  .err { background: #fdf3ef; border: 1px solid #9a3b2e; color: #7a2f24; padding: 14px;
+         font-size: 13px; margin-top: 18px; line-height: 1.6; }
+  .foot { background: #10263c; padding: 20px 34px; font-size: 11px; color: #c9d3dc; line-height: 1.75; }
+  .foot a { color: #c9d3dc; }
+  @media (max-width: 520px) {
+    .body { padding: 22px 18px 26px; } .mast { padding: 22px 18px 18px; } .foot { padding: 18px; }
+    h1 { font-size: 23px; } .verdict-num { font-size: 42px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+
+  <div class="mast">
+    <div class="mast-name">Immigration<br>Advice Service</div>
+    <div class="rule"></div>
+    <div class="mast-sub">Earnings comparison</div>
+  </div>
+
+  <div class="body">
+
+    <h1>What is your work worth in the United States?</h1>
+    <div class="lede">Three questions. The answer uses published U.S. government wage data.</div>
+    <div class="accent"></div>
+
+    <label for="country">Where you live now</label>
+    <select id="country">
+      <option value="">Select your country...</option>
+      <option value="AFN|؋">Afghanistan</option>
+      <option value="ALL|L">Albania</option>
+      <option value="DZD|د.ج">Algeria</option>
+      <option value="EUR|€">Andorra</option>
+      <option value="AOA|Kz">Angola</option>
+      <option value="XCD|$">Antigua and Barbuda</option>
+      <option value="ARS|$">Argentina</option>
+      <option value="AMD|֏">Armenia</option>
+      <option value="AUD|$">Australia</option>
+      <option value="EUR|€">Austria</option>
+      <option value="AZN|₼">Azerbaijan</option>
+      <option value="BSD|$">Bahamas</option>
+      <option value="BHD|.د.ب">Bahrain</option>
+      <option value="BDT|৳">Bangladesh</option>
+      <option value="BBD|$">Barbados</option>
+      <option value="BYN|Br">Belarus</option>
+      <option value="EUR|€">Belgium</option>
+      <option value="BZD|$">Belize</option>
+      <option value="XOF|CFA">Benin</option>
+      <option value="BTN|Nu.">Bhutan</option>
+      <option value="BOB|Bs.">Bolivia</option>
+      <option value="BAM|KM">Bosnia and Herzegovina</option>
+      <option value="BWP|P">Botswana</option>
+      <option value="BRL|R$">Brazil</option>
+      <option value="BND|$">Brunei</option>
+      <option value="BGN|лв">Bulgaria</option>
+      <option value="XOF|CFA">Burkina Faso</option>
+      <option value="BIF|FBu">Burundi</option>
+      <option value="KHR|៛">Cambodia</option>
+      <option value="XAF|FCFA">Cameroon</option>
+      <option value="CAD|$">Canada</option>
+      <option value="CVE|$">Cape Verde</option>
+      <option value="XAF|FCFA">Central African Republic</option>
+      <option value="XAF|FCFA">Chad</option>
+      <option value="CLP|$">Chile</option>
+      <option value="CNY|¥">China</option>
+      <option value="COP|$">Colombia</option>
+      <option value="KMF|CF">Comoros</option>
+      <option value="XAF|FCFA">Congo</option>
+      <option value="CRC|₡">Costa Rica</option>
+      <option value="XOF|CFA">Cote d'Ivoire</option>
+      <option value="EUR|€">Croatia</option>
+      <option value="CUP|$">Cuba</option>
+      <option value="EUR|€">Cyprus</option>
+      <option value="CZK|Kč">Czech Republic</option>
+      <option value="CDF|FC">Democratic Republic of the Congo</option>
+      <option value="DKK|kr">Denmark</option>
+      <option value="DJF|Fdj">Djibouti</option>
+      <option value="XCD|$">Dominica</option>
+      <option value="DOP|$">Dominican Republic</option>
+      <option value="USD|$">East Timor</option>
+      <option value="USD|$">Ecuador</option>
+      <option value="EGP|£">Egypt</option>
+      <option value="USD|$">El Salvador</option>
+      <option value="XAF|FCFA">Equatorial Guinea</option>
+      <option value="ERN|Nfk">Eritrea</option>
+      <option value="EUR|€">Estonia</option>
+      <option value="SZL|E">Eswatini</option>
+      <option value="ETB|Br">Ethiopia</option>
+      <option value="FJD|$">Fiji</option>
+      <option value="EUR|€">Finland</option>
+      <option value="EUR|€">France</option>
+      <option value="XAF|FCFA">Gabon</option>
+      <option value="GMD|D">Gambia</option>
+      <option value="GEL|₾">Georgia</option>
+      <option value="EUR|€">Germany</option>
+      <option value="GHS|₵">Ghana</option>
+      <option value="EUR|€">Greece</option>
+      <option value="XCD|$">Grenada</option>
+      <option value="GTQ|Q">Guatemala</option>
+      <option value="GNF|FG">Guinea</option>
+      <option value="XOF|CFA">Guinea-Bissau</option>
+      <option value="GYD|$">Guyana</option>
+      <option value="HTG|G">Haiti</option>
+      <option value="HNL|L">Honduras</option>
+      <option value="HKD|$">Hong Kong</option>
+      <option value="HUF|Ft">Hungary</option>
+      <option value="ISK|kr">Iceland</option>
+      <option value="INR|₹">India</option>
+      <option value="IDR|Rp">Indonesia</option>
+      <option value="IRR|﷼">Iran</option>
+      <option value="IQD|ع.د">Iraq</option>
+      <option value="EUR|€">Ireland</option>
+      <option value="ILS|₪">Israel</option>
+      <option value="EUR|€">Italy</option>
+      <option value="JMD|$">Jamaica</option>
+      <option value="JPY|¥">Japan</option>
+      <option value="JOD|د.ا">Jordan</option>
+      <option value="KZT|₸">Kazakhstan</option>
+      <option value="KES|KSh">Kenya</option>
+      <option value="AUD|$">Kiribati</option>
+      <option value="EUR|€">Kosovo</option>
+      <option value="KWD|د.ك">Kuwait</option>
+      <option value="KGS|с">Kyrgyzstan</option>
+      <option value="LAK|₭">Laos</option>
+      <option value="EUR|€">Latvia</option>
+      <option value="LBP|ل.ل">Lebanon</option>
+      <option value="LSL|L">Lesotho</option>
+      <option value="LRD|$">Liberia</option>
+      <option value="LYD|ل.د">Libya</option>
+      <option value="CHF|Fr">Liechtenstein</option>
+      <option value="EUR|€">Lithuania</option>
+      <option value="EUR|€">Luxembourg</option>
+      <option value="MOP|P">Macau</option>
+      <option value="MGA|Ar">Madagascar</option>
+      <option value="MWK|MK">Malawi</option>
+      <option value="MYR|RM">Malaysia</option>
+      <option value="MVR|.ރ">Maldives</option>
+      <option value="XOF|CFA">Mali</option>
+      <option value="EUR|€">Malta</option>
+      <option value="USD|$">Marshall Islands</option>
+      <option value="MRU|UM">Mauritania</option>
+      <option value="MUR|₨">Mauritius</option>
+      <option value="MXN|$">Mexico</option>
+      <option value="USD|$">Micronesia</option>
+      <option value="MDL|L">Moldova</option>
+      <option value="EUR|€">Monaco</option>
+      <option value="MNT|₮">Mongolia</option>
+      <option value="EUR|€">Montenegro</option>
+      <option value="MAD|د.م.">Morocco</option>
+      <option value="MZN|MT">Mozambique</option>
+      <option value="MMK|K">Myanmar (Burma)</option>
+      <option value="NAD|$">Namibia</option>
+      <option value="AUD|$">Nauru</option>
+      <option value="NPR|₨">Nepal</option>
+      <option value="EUR|€">Netherlands</option>
+      <option value="NZD|$">New Zealand</option>
+      <option value="NIO|C$">Nicaragua</option>
+      <option value="XOF|CFA">Niger</option>
+      <option value="NGN|₦">Nigeria</option>
+      <option value="KPW|₩">North Korea</option>
+      <option value="MKD|ден">North Macedonia</option>
+      <option value="NOK|kr">Norway</option>
+      <option value="OMR|ر.ع.">Oman</option>
+      <option value="PKR|₨">Pakistan</option>
+      <option value="USD|$">Palau</option>
+      <option value="ILS|₪">Palestine</option>
+      <option value="PAB|B/.">Panama</option>
+      <option value="PGK|K">Papua New Guinea</option>
+      <option value="PYG|₲">Paraguay</option>
+      <option value="PEN|S/">Peru</option>
+      <option value="PHP|₱">Philippines</option>
+      <option value="PLN|zł">Poland</option>
+      <option value="EUR|€">Portugal</option>
+      <option value="QAR|ر.ق">Qatar</option>
+      <option value="RON|lei">Romania</option>
+      <option value="RUB|₽">Russia</option>
+      <option value="RWF|FRw">Rwanda</option>
+      <option value="XCD|$">Saint Kitts and Nevis</option>
+      <option value="XCD|$">Saint Lucia</option>
+      <option value="XCD|$">Saint Vincent and the Grenadines</option>
+      <option value="WST|T">Samoa</option>
+      <option value="EUR|€">San Marino</option>
+      <option value="STN|Db">Sao Tome and Principe</option>
+      <option value="SAR|ر.س">Saudi Arabia</option>
+      <option value="XOF|CFA">Senegal</option>
+      <option value="RSD|дин">Serbia</option>
+      <option value="SCR|₨">Seychelles</option>
+      <option value="SLE|Le">Sierra Leone</option>
+      <option value="SGD|$">Singapore</option>
+      <option value="EUR|€">Slovakia</option>
+      <option value="EUR|€">Slovenia</option>
+      <option value="SBD|$">Solomon Islands</option>
+      <option value="SOS|Sh">Somalia</option>
+      <option value="ZAR|R">South Africa</option>
+      <option value="KRW|₩">South Korea</option>
+      <option value="SSP|£">South Sudan</option>
+      <option value="EUR|€">Spain</option>
+      <option value="LKR|₨">Sri Lanka</option>
+      <option value="SDG|ج.س">Sudan</option>
+      <option value="SRD|$">Suriname</option>
+      <option value="SEK|kr">Sweden</option>
+      <option value="CHF|Fr">Switzerland</option>
+      <option value="SYP|£">Syria</option>
+      <option value="TWD|NT$">Taiwan</option>
+      <option value="TJS|ЅМ">Tajikistan</option>
+      <option value="TZS|TSh">Tanzania</option>
+      <option value="THB|฿">Thailand</option>
+      <option value="XOF|CFA">Togo</option>
+      <option value="TOP|T$">Tonga</option>
+      <option value="TTD|$">Trinidad and Tobago</option>
+      <option value="TND|د.ت">Tunisia</option>
+      <option value="TRY|₺">Turkey</option>
+      <option value="TMT|m">Turkmenistan</option>
+      <option value="UGX|USh">Uganda</option>
+      <option value="UAH|₴">Ukraine</option>
+      <option value="AED|د.إ">United Arab Emirates</option>
+      <option value="GBP|£">United Kingdom</option>
+      <option value="USD|$">United States</option>
+      <option value="UYU|$">Uruguay</option>
+      <option value="UZS|so'm">Uzbekistan</option>
+      <option value="VUV|VT">Vanuatu</option>
+      <option value="EUR|€">Vatican City</option>
+      <option value="VES|Bs.">Venezuela</option>
+      <option value="VND|₫">Vietnam</option>
+      <option value="YER|﷼">Yemen</option>
+      <option value="ZMW|ZK">Zambia</option>
+      <option value="ZWG|Z$">Zimbabwe</option>
+    </select>
+
+    <label for="field">Your field of work</label>
+    <select id="field">
+      <option value="">Select your field...</option>
+      <option value="145260">Management</option>
+      <option value="127310">Legal</option>
+      <option value="116940">IT, software &amp; mathematics</option>
+      <option value="108700">Healthcare practitioners (doctors, nurses, therapists)</option>
+      <option value="104680">Architecture &amp; engineering</option>
+      <option value="84780">Business &amp; finance</option>
+      <option value="83720">Science &amp; research</option>
+      <option value="74010">Arts, design &amp; media</option>
+      <option value="67540">Education &amp; teaching</option>
+      <option value="65360">Construction &amp; extraction</option>
+      <option value="60670">Installation, maintenance &amp; repair</option>
+      <option value="58820">Protective service (police, fire, security)</option>
+      <option value="56430">Community &amp; social service</option>
+      <option value="52440">Sales</option>
+      <option value="52160">Transport &amp; logistics</option>
+      <option value="49970">Production &amp; manufacturing</option>
+      <option value="48150">Office &amp; administration</option>
+      <option value="38800">Healthcare support</option>
+      <option value="38640">Personal care &amp; service</option>
+      <option value="36370">Food preparation &amp; service</option>
+      <option value="69770">Other / not listed</option>
+    </select>
+
+    <label for="salary">Your gross annual salary today <span id="cur-tag"></span></label>
+    <input id="salary" type="number" inputmode="numeric" min="1" placeholder="e.g. 68000">
+    <div class="hint">Before tax. A rough figure is fine.</div>
+
+    <div id="fx-error" class="err" style="display:none">
+      We could not load today&rsquo;s exchange rates. Enter your salary in
+      <strong>U.S. dollars</strong> instead and the comparison will still work.
+    </div>
+
+    <button id="go" disabled>Show me the numbers</button>
+
+    <div id="result">
+
+      <div class="verdict">
+        <div class="verdict-label" id="v-label">Difference</div>
+        <div class="verdict-num" id="v-num">0%</div>
+        <div class="verdict-sub" id="v-sub"></div>
+      </div>
+
+      <table class="cmp">
+        <thead>
+          <tr><th></th><th id="th-home">Today</th><th class="us">United States</th></tr>
+        </thead>
+        <tbody>
+          <tr class="big">
+            <td>Gross, per year</td>
+            <td id="g-home">&mdash;</td>
+            <td class="us" id="g-us">&mdash;</td>
+          </tr>
+          <tr>
+            <td>In U.S. dollars</td>
+            <td id="g-home-usd">&mdash;</td>
+            <td id="g-us-2">&mdash;</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="note" id="reality">&mdash;</div>
+
+      <a class="cta" id="cta" href="interested_19.html?answer=yes">
+        Do I have a legal route? &nbsp;&mdash;&nbsp; $19
+      </a>
+      <div class="cta-note">Reviewed by a licensed U.S. immigration attorney.</div>
+
+      <div class="sources">
+        SOURCES<br>
+        U.S. wages &mdash;
+        <a href="https://www.bls.gov/news.release/ocwage.htm">BLS Occupational Employment and Wage Statistics, May 2025</a>
+        (released 15 May 2026). Annual mean wage by occupation group.<br>
+        <span id="fx-line"></span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="foot">
+    Immigration Advice Service &middot;
+    <a href="https://immigrationadviceservice.org">immigrationadviceservice.org</a><br>
+    2 N Central Ave, Phoenix, AZ 85004, United States<br><br>
+    These are averages published by the U.S. government for entire occupation groups.
+    They are not a salary offer, a job offer, or a prediction of what any individual
+    would earn, and they take no account of differences in cost of living, health
+    insurance, paid leave or pensions. Immigration Advice Service is a private company
+    and is not affiliated with USCIS, the U.S. Department of State or any government agency.
+  </div>
+
+</div>
+
+<script>
+var $ = function (id) { return document.getElementById(id); };
+var params = new URLSearchParams(window.location.search);
+var RATES = null, RATE_DATE = '', FX_OK = false;
+
+/* ---- carry incoming parameters through to the CTA ---- */
+(function () {
+  if (!params.toString()) return;
+  var a = $('cta');
+  var url = new URL(a.getAttribute('href'), window.location.href);
+  params.forEach(function (v, k) { if (!url.searchParams.has(k)) url.searchParams.set(k, v); });
+  a.setAttribute('href', url.toString());
+})();
+
+/* ---- live exchange rates: free, no key ---- */
+fetch('https://open.er-api.com/v6/latest/USD')
+  .then(function (r) { return r.json(); })
+  .then(function (d) {
+    if (!d || !d.rates) throw new Error('no rates');
+    RATES = d.rates; FX_OK = true;
+    RATE_DATE = (d.time_last_update_utc || '').slice(5, 16);
+    $('fx-line').innerHTML = 'Exchange rates &mdash; open.er-api.com, ' + RATE_DATE + '.';
+    validate();
+  })
+  .catch(function () {
+    FX_OK = false;
+    $('fx-error').style.display = 'block';
+    $('cur-tag').textContent = '(USD)';
+    $('fx-line').textContent = 'Salary entered directly in U.S. dollars.';
+    validate();
+  });
+
+/* ---- prefill from the email link ---- */
+var FIELD_KEYS = {
+  management: '145260', legal: '127310', it: '116940', tech: '116940',
+  healthcare: '108700', engineering: '104680', finance: '84780', science: '83720',
+  arts: '74010', education: '67540', construction: '65360', maintenance: '60670',
+  protective: '58820', social: '56430', sales: '52440', transport: '52160',
+  production: '49970', office: '48150', other: '69770'
+};
+if (params.get('field') && FIELD_KEYS[params.get('field').toLowerCase()]) {
+  $('field').value = FIELD_KEYS[params.get('field').toLowerCase()];
+}
+if (params.get('salary')) $('salary').value = params.get('salary');
+if (params.get('country')) {
+  var want = params.get('country').toLowerCase();
+  var opts = $('country').options;
+  for (var i = 0; i < opts.length; i++) {
+    if (opts[i].text.toLowerCase() === want) { $('country').selectedIndex = i; break; }
+  }
+}
+
+function currency() {
+  var v = $('country').value;
+  if (!v) return null;
+  var p = v.split('|');
+  return { code: p[0], symbol: p[1] };
+}
+
+function updateCurrencyTag() {
+  var c = currency();
+  $('cur-tag').textContent = (FX_OK && c) ? '(' + c.code + ')' : (FX_OK ? '' : '(USD)');
+}
+
+function money(sym, code, n) {
+  var s = Math.round(n).toLocaleString('en-US');
+  return /^[A-Za-z]/.test(sym) || sym.length > 2 ? sym + ' ' + s : sym + s;
+}
+
+function validate() {
+  updateCurrencyTag();
+  var c = currency();
+  var ok = $('field').value && Number($('salary').value) > 0 && (c || !FX_OK);
+  if (FX_OK && !c) ok = false;
+  $('go').disabled = !ok;
+}
+$('country').addEventListener('change', validate);
+$('field').addEventListener('change', validate);
+$('salary').addEventListener('input', validate);
+validate();
+
+function countUp(el, target, suffix) {
+  var start = null, dur = 900;
+  function frame(ts) {
+    if (!start) start = ts;
+    var p = Math.min((ts - start) / dur, 1);
+    var eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = (target < 0 ? '' : '+') + Math.round(target * eased) + suffix;
+    if (p < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+$('go').addEventListener('click', function () {
+  var usGross = Number($('field').value);
+  var homeGross = Number($('salary').value);
+  var c = currency();
+
+  var homeUsd, sym, code, homeLabel;
+  if (FX_OK && c && RATES[c.code]) {
+    homeUsd = homeGross / RATES[c.code];
+    sym = c.symbol; code = c.code;
+    homeLabel = $('country').options[$('country').selectedIndex].text;
+  } else {
+    homeUsd = homeGross; sym = '$'; code = 'USD';
+    homeLabel = c ? $('country').options[$('country').selectedIndex].text : 'Today';
+  }
+
+  var pct = Math.round(((usGross - homeUsd) / homeUsd) * 100);
+
+  $('th-home').textContent = homeLabel;
+  $('g-home').textContent = money(sym, code, homeGross);
+  $('g-us').textContent = '$' + Math.round(usGross).toLocaleString('en-US');
+  $('g-home-usd').textContent = '$' + Math.round(homeUsd).toLocaleString('en-US');
+  $('g-us-2').textContent = '$' + Math.round(usGross).toLocaleString('en-US');
+
+  if (pct >= 0) {
+    $('v-label').textContent = 'Above what you earn today';
+    $('v-sub').textContent = 'Average gross pay in your field, United States.';
+    $('reality').innerHTML =
+      'Read this as a signal, not a forecast. It compares an average across an entire ' +
+      'occupation group with your own salary, and it says nothing about cost of living, ' +
+      'health insurance or paid leave &mdash; all of which differ sharply between countries. ' +
+      'What it does tell you is whether the gap is <strong>large enough to be worth ' +
+      'looking into properly.</strong>';
+  } else {
+    $('v-label').textContent = 'Compared with what you earn today';
+    $('v-sub').textContent = 'Average gross pay in your field, United States.';
+    $('reality').innerHTML =
+      'In your field the U.S. average comes out below what you already earn, and we are ' +
+      'not going to dress that up. Averages hide a great deal &mdash; U.S. pay varies ' +
+      'enormously by state and speciality, and this covers a whole occupation group. ' +
+      '<strong>Whether a move makes sense for you is a different question from the average.</strong>';
+  }
+
+  $('result').classList.add('show');
+  countUp($('v-num'), pct, '%');
+  $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+</script>
+
+</body>
+</html>
