@@ -6,79 +6,89 @@
 <meta name="robots" content="noindex, nofollow">
 <title>What is your work worth in the United States?</title>
 <!-- ============================================================
-     IAS - SALARY COMPARISON TOOL  (all countries, gross)
+     IAS - EARNINGS RANGE TOOL   (all countries)
      Single file. No server, no CRM call, no API key.
 
-     PREFILL FROM EMAIL (optional):
-       salary.html?country=Germany&field=engineering&salary=68000
-                  &email=#EMAIL_TO#&utm_campaign=XXXX
-     Every query parameter is passed straight through to the CTA link.
+     PREFILL:  salary.html?country=Germany&field=17-0000&salary=5600&per=month
+                          &email=#EMAIL_TO#&utm_campaign=XXXX
+     Every query parameter is passed through to the CTA link.
 
-     SOURCES
-       U.S. wages - BLS Occupational Employment and Wage Statistics,
-                    May 2025 estimates, released 15 May 2026 (USDL-26-0725).
-                    Annual MEAN wage by occupation group.
-       FX         - fetched live from open.er-api.com (free, no key).
-                    If it fails the tool asks for a USD figure instead.
+     DATA - U.S. Bureau of Labor Statistics, Occupational Employment and
+            Wage Statistics, May 2025 (released 15 May 2026). National,
+            cross-industry, major occupation groups. Annual 25th percentile,
+            median, 75th and 90th percentile wages, taken directly from
+            all_data_M_2025.xlsx.
+     FX   - open.er-api.com, fetched live, no key.
      ============================================================ -->
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Georgia, 'Times New Roman', serif; background: #dcd7ca;
-         color: #141210; padding: 26px 14px 60px; line-height: 1.6; }
-  .sheet { max-width: 620px; margin: 0 auto; background: #faf7f0; border: 1px solid #b9b0a0; }
-  .mast { background: #10263c; padding: 26px 34px 22px; }
-  .mast-name { font-size: 12px; letter-spacing: 6px; color: #faf7f0;
-               text-transform: uppercase; font-weight: bold; line-height: 1.5; }
-  .rule { height: 1px; background: #a8763a; margin: 14px 0 10px; }
-  .mast-sub { font-family: 'Courier New', Courier, monospace; font-size: 10px;
-              letter-spacing: 2px; color: #d29a4e; text-transform: uppercase; }
-  .body { padding: 30px 34px 34px; }
-  h1 { font-size: 27px; line-height: 1.25; color: #10263c; letter-spacing: -0.3px; margin-bottom: 14px; }
-  .lede { font-size: 15px; color: #241f19; }
-  .accent { height: 3px; width: 58px; background: #a8763a; margin: 18px 0; }
-  label { display: block; font-family: 'Courier New', Courier, monospace; font-size: 10px;
-          letter-spacing: 2px; color: #544d3e; text-transform: uppercase; margin: 20px 0 7px; }
-  select, input { width: 100%; padding: 13px 12px; font-family: Georgia, serif; font-size: 16px;
-                  color: #141210; background: #fff; border: 1px solid #b9b0a0; border-radius: 0; }
-  select:focus, input:focus { outline: 2px solid #a8763a; outline-offset: -2px; }
-  .hint { font-size: 12px; color: #544d3e; margin-top: 6px; }
-  button { width: 100%; margin-top: 24px; padding: 17px; background: #a8763a; color: #faf7f0;
-           border: none; font-family: Georgia, serif; font-size: 17px; letter-spacing: 0.4px; cursor: pointer; }
-  button:hover { background: #8f6330; }
-  button:disabled { background: #c9c0ad; cursor: not-allowed; }
-  #result { display: none; margin-top: 30px; }
-  #result.show { display: block; }
-  .verdict { background: #10263c; padding: 26px 24px; text-align: center; }
-  .verdict-label { font-family: 'Courier New', Courier, monospace; font-size: 10px; letter-spacing: 3px;
-                   color: #d29a4e; text-transform: uppercase; margin-bottom: 12px; }
-  .verdict-num { font-size: 52px; font-weight: bold; color: #faf7f0; line-height: 1.05; }
-  .verdict-sub { font-size: 14px; color: #c9d3dc; margin-top: 10px; }
-  table.cmp { width: 100%; border-collapse: collapse; margin-top: 22px; }
-  table.cmp th { font-family: 'Courier New', Courier, monospace; font-size: 10px; letter-spacing: 1.5px;
-                 color: #544d3e; text-transform: uppercase; text-align: right; padding: 8px 0;
-                 border-bottom: 2px solid #b9b0a0; }
-  table.cmp th:first-child { text-align: left; }
-  table.cmp th.us { border-bottom-color: #a8763a; }
-  table.cmp td { padding: 12px 0; border-bottom: 1px solid #e3ddce; font-size: 15px; text-align: right; }
-  table.cmp td:first-child { text-align: left; font-size: 13px; color: #544d3e; }
-  table.cmp tr.big td { font-weight: bold; font-size: 20px; color: #10263c; border-bottom: none; }
-  table.cmp tr.big td.us { color: #a8763a; }
-  .note { font-size: 12px; color: #544d3e; line-height: 1.7; margin-top: 20px;
-          padding-top: 16px; border-top: 1px solid #b9b0a0; }
-  .cta { display: block; margin-top: 24px; padding: 18px; background: #10263c; color: #faf7f0;
-         text-decoration: none; text-align: center; font-size: 17px; }
-  .cta:hover { background: #1b3d5e; }
-  .cta-note { font-size: 12px; color: #544d3e; text-align: center; margin-top: 10px; }
-  .sources { font-family: 'Courier New', Courier, monospace; font-size: 10px; line-height: 1.9;
-             color: #5f5849; margin-top: 26px; padding-top: 14px; border-top: 1px solid #b9b0a0; }
-  .sources a { color: #a8763a; }
-  .err { background: #fdf3ef; border: 1px solid #9a3b2e; color: #7a2f24; padding: 14px;
-         font-size: 13px; margin-top: 18px; line-height: 1.6; }
-  .foot { background: #10263c; padding: 20px 34px; font-size: 11px; color: #c9d3dc; line-height: 1.75; }
-  .foot a { color: #c9d3dc; }
-  @media (max-width: 520px) {
-    .body { padding: 22px 18px 26px; } .mast { padding: 22px 18px 18px; } .foot { padding: 18px; }
-    h1 { font-size: 23px; } .verdict-num { font-size: 42px; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:Georgia,'Times New Roman',serif; background:#dcd7ca; color:#141210;
+         padding:26px 14px 60px; line-height:1.6; }
+  .sheet { max-width:620px; margin:0 auto; background:#faf7f0; border:1px solid #b9b0a0; }
+  .mast { background:#10263c; padding:26px 34px 22px; }
+  .mast-name { font-size:12px; letter-spacing:6px; color:#faf7f0; text-transform:uppercase;
+               font-weight:bold; line-height:1.5; }
+  .rule { height:1px; background:#a8763a; margin:14px 0 10px; }
+  .mast-sub { font-family:'Courier New',Courier,monospace; font-size:10px; letter-spacing:2px;
+              color:#d29a4e; text-transform:uppercase; }
+  .body { padding:30px 34px 34px; }
+  h1 { font-size:27px; line-height:1.25; color:#10263c; letter-spacing:-0.3px; margin-bottom:14px; }
+  .lede { font-size:15px; color:#241f19; }
+  .accent { height:3px; width:58px; background:#a8763a; margin:18px 0; }
+  label { display:block; font-family:'Courier New',Courier,monospace; font-size:10px;
+          letter-spacing:2px; color:#544d3e; text-transform:uppercase; margin:20px 0 7px; }
+  select, input { width:100%; padding:13px 12px; font-family:Georgia,serif; font-size:16px;
+                  color:#141210; background:#fff; border:1px solid #b9b0a0; border-radius:0; }
+  select:focus, input:focus { outline:2px solid #a8763a; outline-offset:-2px; }
+  .row { display:flex; gap:10px; }
+  .row input { flex:2; } .row select { flex:1; }
+  .hint { font-size:12px; color:#544d3e; margin-top:6px; }
+  button { width:100%; margin-top:24px; padding:17px; background:#a8763a; color:#faf7f0;
+           border:none; font-family:Georgia,serif; font-size:17px; letter-spacing:0.4px; cursor:pointer; }
+  button:hover { background:#8f6330; }
+  button:disabled { background:#c9c0ad; cursor:not-allowed; }
+  #result { display:none; margin-top:30px; }
+  #result.show { display:block; }
+  .verdict { background:#10263c; padding:26px 24px; text-align:center; }
+  .verdict-label { font-family:'Courier New',Courier,monospace; font-size:10px; letter-spacing:3px;
+                   color:#d29a4e; text-transform:uppercase; margin-bottom:12px; }
+  .verdict-num { font-size:48px; font-weight:bold; color:#faf7f0; line-height:1.05; }
+  .verdict-sub { font-size:14px; color:#c9d3dc; margin-top:12px; line-height:1.6; }
+
+  .scale { margin-top:30px; }
+  .scale-title { font-family:'Courier New',Courier,monospace; font-size:10px; letter-spacing:2px;
+                 color:#544d3e; text-transform:uppercase; margin-bottom:16px; }
+  .track { position:relative; height:10px; background:#e3ddce; border:1px solid #b9b0a0; }
+  .fill  { position:absolute; top:0; bottom:0; left:0; background:#a8763a; width:0;
+           transition:width 1s cubic-bezier(.22,1,.36,1); }
+  .you   { position:absolute; top:-9px; bottom:-9px; width:3px; background:#10263c; left:0;
+           transition:left 1s cubic-bezier(.22,1,.36,1); }
+  .you-tag { position:absolute; top:-34px; transform:translateX(-50%); white-space:nowrap;
+             font-family:'Courier New',Courier,monospace; font-size:9px; letter-spacing:1.5px;
+             color:#10263c; text-transform:uppercase; transition:left 1s cubic-bezier(.22,1,.36,1); }
+  .ticks { display:flex; justify-content:space-between; margin-top:9px;
+           font-family:'Courier New',Courier,monospace; font-size:9px; letter-spacing:1px; color:#5f5849; }
+  .ticks span { text-align:center; }
+  .ticks b { display:block; font-family:Georgia,serif; font-size:13px; color:#141210;
+             letter-spacing:0; margin-top:3px; }
+
+  .note { font-size:13px; color:#241f19; line-height:1.75; margin-top:26px;
+          padding-top:18px; border-top:1px solid #b9b0a0; }
+  .cta { display:block; margin-top:24px; padding:18px; background:#10263c; color:#faf7f0;
+         text-decoration:none; text-align:center; font-size:17px; }
+  .cta:hover { background:#1b3d5e; }
+  .cta-note { font-size:12px; color:#544d3e; text-align:center; margin-top:10px; }
+  .sources { font-family:'Courier New',Courier,monospace; font-size:10px; line-height:1.9;
+             color:#5f5849; margin-top:26px; padding-top:14px; border-top:1px solid #b9b0a0; }
+  .sources a { color:#a8763a; }
+  .err { background:#fdf3ef; border:1px solid #9a3b2e; color:#7a2f24; padding:14px;
+         font-size:13px; margin-top:18px; line-height:1.6; }
+  .foot { background:#10263c; padding:20px 34px; font-size:11px; color:#c9d3dc; line-height:1.75; }
+  .foot a { color:#c9d3dc; }
+  @media (max-width:520px) {
+    .body { padding:22px 18px 26px; } .mast { padding:22px 18px 18px; } .foot { padding:18px; }
+    h1 { font-size:23px; } .verdict-num { font-size:38px; } .ticks { font-size:8px; }
+    .ticks b { font-size:11px; }
   }
 </style>
 </head>
@@ -95,7 +105,7 @@
   <div class="body">
 
     <h1>What is your work worth in the United States?</h1>
-    <div class="lede">Two questions. The answer comes from published U.S. government wage data.</div>
+    <div class="lede">Three questions. The answer comes from official U.S. government wage data.</div>
     <div class="accent"></div>
 
     <label for="country">Where you live now</label>
@@ -304,59 +314,70 @@
     <label for="field">Your field of work</label>
     <select id="field">
       <option value="">Select your field...</option>
-      <option value="145260">Management</option>
-      <option value="127310">Legal</option>
-      <option value="116940">IT, software &amp; mathematics</option>
-      <option value="108700">Healthcare practitioners (doctors, nurses, therapists)</option>
-      <option value="104680">Architecture &amp; engineering</option>
-      <option value="84780">Business &amp; finance</option>
-      <option value="83720">Science &amp; research</option>
-      <option value="74010">Arts, design &amp; media</option>
-      <option value="67540">Education &amp; teaching</option>
-      <option value="65360">Construction &amp; extraction</option>
-      <option value="60670">Installation, maintenance &amp; repair</option>
-      <option value="58820">Protective service (police, fire, security)</option>
-      <option value="56430">Community &amp; social service</option>
-      <option value="52440">Sales</option>
-      <option value="52160">Transport &amp; logistics</option>
-      <option value="49970">Production &amp; manufacturing</option>
-      <option value="48150">Office &amp; administration</option>
-      <option value="38800">Healthcare support</option>
-      <option value="38640">Personal care &amp; service</option>
-      <option value="36370">Food preparation &amp; service</option>
-      <option value="69770">Other / not listed</option>
+      <option value="11-0000">Management</option>
+      <option value="15-0000">IT, software &amp; mathematics</option>
+      <option value="23-0000">Legal</option>
+      <option value="17-0000">Architecture &amp; engineering</option>
+      <option value="29-0000">Healthcare practitioners (doctors, nurses, therapists)</option>
+      <option value="13-0000">Business &amp; finance</option>
+      <option value="19-0000">Science &amp; research</option>
+      <option value="27-0000">Arts, design, media &amp; sport</option>
+      <option value="25-0000">Education &amp; teaching</option>
+      <option value="49-0000">Installation, maintenance &amp; repair</option>
+      <option value="47-0000">Construction &amp; extraction</option>
+      <option value="21-0000">Community &amp; social service</option>
+      <option value="33-0000">Protective service (police, fire, security)</option>
+      <option value="43-0000">Office &amp; administration</option>
+      <option value="51-0000">Production &amp; manufacturing</option>
+      <option value="53-0000">Transport &amp; logistics</option>
+      <option value="41-0000">Sales</option>
+      <option value="31-0000">Healthcare support</option>
+      <option value="37-0000">Building &amp; grounds maintenance</option>
+      <option value="45-0000">Farming, fishing &amp; forestry</option>
+      <option value="39-0000">Personal care &amp; service</option>
+      <option value="35-0000">Food preparation &amp; service</option>
+      <option value="00-0000">Other / not listed</option>
     </select>
 
+    <label for="salary">Your gross salary today <span id="cur-tag"></span></label>
+    <div class="row">
+      <input id="salary" type="number" inputmode="numeric" min="1" placeholder="e.g. 5600">
+      <select id="per">
+        <option value="12">per month</option>
+        <option value="1">per year</option>
+      </select>
+    </div>
+    <div class="hint">Before tax. A rough figure is fine.</div>
+
     <div id="fx-error" class="err" style="display:none">
-      We could not load today&rsquo;s exchange rates, so the figure below is shown
-      in U.S. dollars only.
+      We could not load today&rsquo;s exchange rates. Enter your salary in
+      <strong>U.S. dollars</strong> and the comparison will still work.
     </div>
 
-    <button id="go" disabled>Show me the numbers</button>
+    <button id="go" disabled>Show me where I stand</button>
 
     <div id="result">
 
       <div class="verdict">
-        <div class="verdict-label" id="v-label">Average pay in your field, United States</div>
+        <div class="verdict-label" id="v-label">&mdash;</div>
         <div class="verdict-num" id="v-num">&mdash;</div>
         <div class="verdict-sub" id="v-sub"></div>
       </div>
 
-      <table class="cmp">
-        <thead>
-          <tr><th>Your field in the United States</th><th class="us">Per year</th></tr>
-        </thead>
-        <tbody>
-          <tr class="big">
-            <td id="f-name">&mdash;</td>
-            <td class="us" id="f-usd">&mdash;</td>
-          </tr>
-          <tr>
-            <td>Average across all U.S. occupations</td>
-            <td id="f-all">$69,770</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="scale">
+        <div class="scale-title" id="scale-title">Pay in your field, United States</div>
+        <div class="track">
+          <div class="fill" id="fill"></div>
+          <div class="you" id="you"></div>
+          <div class="you-tag" id="you-tag">You</div>
+        </div>
+        <div class="ticks">
+          <span>Lower quarter<b id="t25">&mdash;</b></span>
+          <span>Median<b id="t50">&mdash;</b></span>
+          <span>Upper quarter<b id="t75">&mdash;</b></span>
+          <span>Top 10%<b id="t90">&mdash;</b></span>
+        </div>
+      </div>
 
       <div class="note" id="reality">&mdash;</div>
 
@@ -367,9 +388,8 @@
 
       <div class="sources">
         SOURCES<br>
-        U.S. wages &mdash;
-        <a href="https://www.bls.gov/news.release/ocwage.htm">BLS Occupational Employment and Wage Statistics, May 2025</a>
-        (released 15 May 2026). Annual mean wage by occupation group.<br>
+        <a href="https://www.bls.gov/oes/current/oes_nat.htm">U.S. Bureau of Labor Statistics, Occupational Employment and Wage Statistics, May 2025</a>
+        &mdash; released 15 May 2026. National annual percentile wages by occupation group.<br>
         <span id="fx-line"></span>
       </div>
 
@@ -381,21 +401,23 @@
     Immigration Advice Service &middot;
     <a href="https://immigrationadviceservice.org">immigrationadviceservice.org</a><br>
     2 N Central Ave, Phoenix, AZ 85004, United States<br><br>
-    These are averages published by the U.S. government for entire occupation groups.
-    They are not a salary offer, a job offer, or a prediction of what any individual
-    would earn, and they take no account of differences in cost of living, health
-    insurance, paid leave or pensions. Immigration Advice Service is a private company
-    and is not affiliated with USCIS, the U.S. Department of State or any government agency.
+    These are published wage distributions for entire occupation groups. They are not a
+    salary offer, a job offer, or a prediction of what any individual would earn, and they
+    take no account of differences in cost of living, health insurance, paid leave or
+    pensions. Immigration Advice Service is a private company and is not affiliated with
+    USCIS, the U.S. Department of State or any government agency.
   </div>
 
 </div>
 
 <script>
+var FIELDS = {"11-0000":{"n":"Management","p25":82970,"med":126520,"p75":176280,"p90":257310,"mean":145260},"15-0000":{"n":"IT, software & mathematics","p25":78820,"med":109280,"p75":155830,"p90":191450,"mean":120080},"23-0000":{"n":"Legal","p25":64800,"med":102500,"p75":174620,"p90":287070,"mean":139510},"17-0000":{"n":"Architecture & engineering","p25":76560,"med":99520,"p75":130240,"p90":166490,"mean":106830},"29-0000":{"n":"Healthcare practitioners (doctors, nurses, therapists)","p25":63860,"med":86530,"p75":123540,"p90":171790,"mean":108700},"13-0000":{"n":"Business & finance","p25":62940,"med":82660,"p75":114820,"p90":153990,"mean":95230},"19-0000":{"n":"Science & research","p25":62380,"med":82530,"p75":114460,"p90":155830,"mean":94600},"27-0000":{"n":"Arts, design, media & sport","p25":44720,"med":62750,"p75":94530,"p90":134900,"mean":79790},"25-0000":{"n":"Education & teaching","p25":43900,"med":60570,"p75":79470,"p90":105240,"mean":67540},"49-0000":{"n":"Installation, maintenance & repair","p25":46110,"med":59620,"p75":76670,"p90":96540,"mean":63320},"47-0000":{"n":"Construction & extraction","p25":46880,"med":59540,"p75":77970,"p90":101650,"mean":65360},"21-0000":{"n":"Community & social service","p25":46370,"med":58300,"p75":75910,"p90":97630,"mean":63410},"33-0000":{"n":"Protective service (police, fire, security)","p25":37350,"med":50080,"p75":75990,"p90":102470,"mean":60720},"43-0000":{"n":"Office & administration","p25":38540,"med":47450,"p75":60060,"p90":76170,"mean":51560},"51-0000":{"n":"Production & manufacturing","p25":38130,"med":46990,"p75":59920,"p90":76990,"mean":51600},"53-0000":{"n":"Transport & logistics","p25":36290,"med":44350,"p75":55990,"p90":72440,"mean":49850},"41-0000":{"n":"Sales","p25":32440,"med":38530,"p75":61100,"p90":99850,"mean":54960},"31-0000":{"n":"Healthcare support","p25":34320,"med":38340,"p75":45930,"p90":54230,"mean":40800},"37-0000":{"n":"Building & grounds maintenance","p25":33930,"med":37680,"p75":46170,"p90":57420,"mean":40880},"45-0000":{"n":"Farming, fishing & forestry","p25":34540,"med":36630,"p75":44990,"p90":58220,"mean":41510},"39-0000":{"n":"Personal care & service","p25":30820,"med":36410,"p75":46060,"p90":61020,"mean":41070},"35-0000":{"n":"Food preparation & service","p25":28760,"med":35050,"p75":41860,"p90":51340,"mean":37150},"00-0000":{"n":"Other / not listed","p25":37590,"med":50980,"p75":80520,"p90":128560,"mean":69770}};
+
 var $ = function (id) { return document.getElementById(id); };
 var params = new URLSearchParams(window.location.search);
-var RATES = null, RATE_DATE = '', FX_OK = false;
+var RATES = null, FX_OK = false;
 
-/* ---- carry incoming parameters through to the CTA ---- */
+/* carry incoming parameters through to the CTA */
 (function () {
   if (!params.toString()) return;
   var a = $('cta');
@@ -404,99 +426,133 @@ var RATES = null, RATE_DATE = '', FX_OK = false;
   a.setAttribute('href', url.toString());
 })();
 
-/* ---- live exchange rates: free, no key ---- */
+/* live exchange rates */
 fetch('https://open.er-api.com/v6/latest/USD')
   .then(function (r) { return r.json(); })
   .then(function (d) {
     if (!d || !d.rates) throw new Error('no rates');
     RATES = d.rates; FX_OK = true;
-    RATE_DATE = (d.time_last_update_utc || '').slice(5, 16);
-    $('fx-line').innerHTML = 'Exchange rates &mdash; open.er-api.com, ' + RATE_DATE + '.';
+    $('fx-line').innerHTML = 'Exchange rates &mdash; open.er-api.com, ' +
+      (d.time_last_update_utc || '').slice(5, 16) + '.';
+    tag();
   })
   .catch(function () {
     FX_OK = false;
     $('fx-error').style.display = 'block';
-    $('fx-line').textContent = 'Figures shown in U.S. dollars.';
+    $('fx-line').textContent = 'Salary entered directly in U.S. dollars.';
+    tag();
   });
 
-/* ---- prefill from the email link ---- */
-var FIELD_KEYS = {
-  management: '145260', legal: '127310', it: '116940', tech: '116940',
-  healthcare: '108700', engineering: '104680', finance: '84780', science: '83720',
-  arts: '74010', education: '67540', construction: '65360', maintenance: '60670',
-  protective: '58820', social: '56430', sales: '52440', transport: '52160',
-  production: '49970', office: '48150', other: '69770'
-};
-if (params.get('field') && FIELD_KEYS[params.get('field').toLowerCase()]) {
-  $('field').value = FIELD_KEYS[params.get('field').toLowerCase()];
-}
+/* prefill */
+if (params.get('field') && FIELDS[params.get('field')]) $('field').value = params.get('field');
+if (params.get('salary')) $('salary').value = params.get('salary');
+if (params.get('per') === 'year') $('per').value = '1';
 if (params.get('country')) {
-  var want = params.get('country').toLowerCase();
-  var opts = $('country').options;
-  for (var i = 0; i < opts.length; i++) {
-    if (opts[i].text.toLowerCase() === want) { $('country').selectedIndex = i; break; }
+  var want = params.get('country').toLowerCase(), o = $('country').options;
+  for (var i = 0; i < o.length; i++) {
+    if (o[i].text.toLowerCase() === want) { $('country').selectedIndex = i; break; }
   }
 }
 
-function currency() {
-  var v = $('country').value;
-  if (!v) return null;
-  var p = v.split('|');
-  return { code: p[0], symbol: p[1] };
+function cur() {
+  var v = $('country').value; if (!v) return null;
+  var p = v.split('|'); return { code: p[0], symbol: p[1] };
 }
-
 function money(sym, n) {
   var s = Math.round(n).toLocaleString('en-US');
   return (/^[A-Za-z]/.test(sym) || sym.length > 2) ? sym + ' ' + s : sym + s;
 }
-
-function validate() {
-  $('go').disabled = !($('country').value && $('field').value);
+function usd(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+function tag() {
+  var c = cur();
+  $('cur-tag').textContent = FX_OK ? (c ? '(' + c.code + ')' : '') : '(USD)';
 }
-$('country').addEventListener('change', validate);
-$('field').addEventListener('change', validate);
+function validate() {
+  tag();
+  $('go').disabled = !($('country').value && $('field').value && Number($('salary').value) > 0);
+}
+['country','field','salary','per'].forEach(function (id) {
+  $(id).addEventListener('change', validate); $(id).addEventListener('input', validate);
+});
 validate();
 
-function countUp(el, target, prefix, suffix) {
-  var start = null, dur = 1100;
-  function frame(ts) {
-    if (!start) start = ts;
-    var p = Math.min((ts - start) / dur, 1);
-    var eased = 1 - Math.pow(1 - p, 3);
-    el.textContent = prefix + Math.round(target * eased).toLocaleString('en-US') + suffix;
-    if (p < 1) requestAnimationFrame(frame);
+function countUp(el, target, sym) {
+  var s = null, dur = 1000;
+  function f(ts) {
+    if (!s) s = ts;
+    var p = Math.min((ts - s) / dur, 1), e = 1 - Math.pow(1 - p, 3);
+    el.textContent = money(sym, target * e);
+    if (p < 1) requestAnimationFrame(f);
   }
-  requestAnimationFrame(frame);
+  requestAnimationFrame(f);
 }
 
 $('go').addEventListener('click', function () {
-  var usd = Number($('field').value);
-  var fieldName = $('field').options[$('field').selectedIndex].text;
-  var c = currency();
-  var localOK = FX_OK && c && RATES[c.code] && c.code !== 'USD';
+  var F = FIELDS[$('field').value];
+  var c = cur();
+  var annualLocal = Number($('salary').value) * Number($('per').value);
 
-  $('f-name').textContent = fieldName;
-  $('f-usd').textContent = '$' + usd.toLocaleString('en-US');
-  $('f-all').textContent = '$69,770';
+  var rate = (FX_OK && c && RATES[c.code]) ? RATES[c.code] : 1;
+  var sym  = (FX_OK && c && RATES[c.code]) ? c.symbol : '$';
+  var mine = annualLocal / rate;                    // their salary in USD
 
-  if (localOK) {
-    var local = usd * RATES[c.code];
-    $('v-sub').innerHTML = 'That is <strong>$' + usd.toLocaleString('en-US') +
-      '</strong> a year, at today&rsquo;s exchange rate.';
-    countUp($('v-num'), local, (/^[A-Za-z]/.test(c.symbol) || c.symbol.length > 2) ? c.symbol + ' ' : c.symbol, '');
+  /* scale runs from the 25th percentile to the 90th */
+  var lo = F.p25, hi = F.p90;
+  var pos = Math.max(2, Math.min(98, ((mine - lo) / (hi - lo)) * 100));
+
+  $('t25').textContent = usd(F.p25);
+  $('t50').textContent = usd(F.med);
+  $('t75').textContent = usd(F.p75);
+  $('t90').textContent = usd(F.p90);
+  $('scale-title').textContent = 'Pay in ' + F.n.toLowerCase() + ', United States';
+
+  var target, label, sub, note;
+
+  if (mine < F.med) {
+    target = F.med;
+    label = 'The median in your field, United States';
+    sub = 'Half of everyone in this field earns more than this. Your salary today is ' +
+          usd(mine) + ' a year.';
+    note = 'You are currently below the mid-point of this field in the United States, which ' +
+           'means the ceiling above you is a real one &mdash; the upper quarter earns ' +
+           usd(F.p75) + ' and the top tenth ' + usd(F.p90) + '.';
+  } else if (mine < F.p75) {
+    target = F.p75;
+    label = 'The upper quarter earns above';
+    sub = 'You already sit above the U.S. median for this field, at ' + usd(mine) + ' a year.';
+    note = 'You are above the mid-point already, so the honest comparison is not with the ' +
+           'average but with the top of the field: the upper quarter earns above ' +
+           usd(F.p75) + ', and the top tenth above ' + usd(F.p90) + '.';
+  } else if (mine < F.p90) {
+    target = F.p90;
+    label = 'The top tenth earns above';
+    sub = 'You are already in the upper quarter of this field, at ' + usd(mine) + ' a year.';
+    note = 'You are paid well by U.S. standards for your field. At this level a move is ' +
+           'rarely about the salary alone &mdash; it is about scale, the market you work in, ' +
+           'and what you can build there.';
   } else {
-    $('v-sub').textContent = 'Average gross pay, before tax.';
-    countUp($('v-num'), usd, '$', '');
+    target = F.p90;
+    label = 'The top tenth earns above';
+    sub = 'You already earn more than nine in ten people in this field in the United States.';
+    note = 'We are not going to pretend the money is the argument in your case, because it ' +
+           'is not. People in your position move for a different reason &mdash; the size of ' +
+           'the market, where their industry is going, or what they want for their family. ' +
+           'Whether the route exists is still worth knowing.';
   }
 
-  $('reality').innerHTML =
-    'This is the average across everyone working in that field in the United States, ' +
-    'published by the U.S. Bureau of Labor Statistics. It is not an offer and not a ' +
-    'prediction &mdash; pay varies enormously by state, speciality and experience, and ' +
-    'the cost of living varies with it. What it does tell you is <strong>the scale of ' +
-    'the market you would be entering.</strong>';
+  $('v-label').textContent = label;
+  $('v-sub').textContent = sub;
+  $('reality').innerHTML = note +
+    ' <span style="color:#544d3e">These are national figures for a whole occupation group. ' +
+    'U.S. pay varies enormously by state and speciality, and the cost of living varies with it.</span>';
 
   $('result').classList.add('show');
+  countUp($('v-num'), target * rate, sym);
+  setTimeout(function () {
+    $('fill').style.width = pos + '%';
+    $('you').style.left = pos + '%';
+    $('you-tag').style.left = pos + '%';
+  }, 80);
   $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 </script>
