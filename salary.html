@@ -468,9 +468,12 @@ function cur() {
   var v = $('country').value; if (!v) return null;
   var p = v.split('|'); return { code: p[0], symbol: p[1] };
 }
-function money(sym, n) {
+/* Only a handful of symbols render reliably in every font. For everything
+   else show the three-letter ISO code, which is unambiguous and legible. */
+var SAFE_SYMBOLS = { USD:'$', EUR:'\u20AC', GBP:'\u00A3', JPY:'\u00A5' };
+function money(code, sym, n) {
   var s = Math.round(n).toLocaleString('en-US');
-  return (/^[A-Za-z]/.test(sym) || sym.length > 2) ? sym + ' ' + s : sym + s;
+  return SAFE_SYMBOLS[code] ? SAFE_SYMBOLS[code] + s : code + ' ' + s;
 }
 function usd(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
 function tag() {
@@ -486,12 +489,12 @@ function validate() {
 });
 validate();
 
-function countUp(el, target, sym) {
+function countUp(el, target, code, sym) {
   var s = null, dur = 1000;
   function f(ts) {
     if (!s) s = ts;
     var p = Math.min((ts - s) / dur, 1), e = 1 - Math.pow(1 - p, 3);
-    el.textContent = money(sym, target * e);
+    el.textContent = money(code, sym, target * e);
     if (p < 1) requestAnimationFrame(f);
   }
   requestAnimationFrame(f);
@@ -502,8 +505,10 @@ $('go').addEventListener('click', function () {
   var c = cur();
   var annualLocal = Number($('salary').value) * Number($('per').value);
 
-  var rate = (FX_OK && c && RATES[c.code]) ? RATES[c.code] : 1;
-  var sym  = (FX_OK && c && RATES[c.code]) ? c.symbol : '$';
+  var live = FX_OK && c && RATES[c.code];
+  var rate = live ? RATES[c.code] : 1;
+  var code = live ? c.code : 'USD';
+  var sym  = live ? c.symbol : '$';
   var mine = annualLocal / rate;                    // their salary in USD
 
   /* scale runs from the 25th percentile to the 90th */
@@ -571,11 +576,16 @@ $('go').addEventListener('click', function () {
     'U.S. pay varies enormously by state and speciality, and the cost of living varies with it.</span>';
 
   $('result').classList.add('show');
-  countUp($('v-num'), target * rate, sym);
+  countUp($('v-num'), target * rate, code, sym);
   setTimeout(function () {
     $('fill').style.width = pos + '%';
     $('you').style.left = pos + '%';
-    $('you-tag').style.left = pos + '%';
+    var tagEl = $('you-tag');
+    tagEl.style.left = pos + '%';
+    /* keep the label inside the track at either end */
+    tagEl.style.transform = pos < 16 ? 'translateX(0)'
+                          : pos > 84 ? 'translateX(-100%)'
+                          : 'translateX(-50%)';
   }, 80);
   $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
