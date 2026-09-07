@@ -63,11 +63,14 @@
            transition:width 1s cubic-bezier(.22,1,.36,1); }
   .you   { position:absolute; top:-9px; bottom:-9px; width:3px; background:#10263c; left:0;
            transition:left 1s cubic-bezier(.22,1,.36,1); }
-  .marker-row { position:relative; height:24px; }
-  .you-tag { position:absolute; bottom:2px; left:0; transform:translateX(-50%); white-space:nowrap;
-             font-family:'Courier New',Courier,monospace; font-size:10px; letter-spacing:1px;
-             color:#10263c; text-transform:uppercase; font-weight:bold;
-             transition:left 1s cubic-bezier(.22,1,.36,1); }
+  .marker-row { position:relative; height:34px; }
+  .you-tag { position:absolute; bottom:0; left:0; transform:translateX(-50%); white-space:nowrap;
+             text-align:center; transition:left 1s cubic-bezier(.22,1,.36,1); }
+  .you-amt { font-family:Georgia,serif; font-size:14px; font-weight:bold; color:#10263c;
+             display:block; line-height:1.2; }
+  .you-arrow { display:block; width:0; height:0; margin:2px auto 0;
+               border-left:7px solid transparent; border-right:7px solid transparent;
+               border-top:9px solid #10263c; }
   .reach { margin-top:26px; padding:18px 20px; background:#f1ece0; border-left:4px solid #a8763a;
            font-size:14px; line-height:1.7; color:#141210; }
   .reach strong { color:#10263c; }
@@ -372,7 +375,10 @@
       <div class="scale">
         <div class="scale-title" id="scale-title">Pay in your field, United States</div>
         <div class="marker-row">
-          <div class="you-tag" id="you-tag">You &middot; <span id="you-amt"></span></div>
+          <div class="you-tag" id="you-tag">
+            <span class="you-amt" id="you-amt"></span>
+            <span class="you-arrow" id="you-arrow"></span>
+          </div>
         </div>
         <div class="track">
           <div class="fill" id="fill"></div>
@@ -563,8 +569,7 @@ $('go').addEventListener('click', function () {
              '</strong>, where the median is ' + usd(F.stm) + '.';
   }
   $('reach').innerHTML =
-    'You are <strong>here</strong> on the U.S. scale, at ' + usd(mine) + ' a year. ' +
-    'The next step above you is <strong>' + usd(target) + '</strong>.' + stLine;
+    'The next step above you is <strong>' + usd(target) + '</strong> a year.' + stLine;
 
   $('cta-text').textContent = 'Could I work in ' + F.n.toLowerCase().split(' (')[0] +
                               ' in the U.S.?';
@@ -583,9 +588,10 @@ $('go').addEventListener('click', function () {
     var tagEl = $('you-tag');
     tagEl.style.left = pos + '%';
     /* keep the label inside the track at either end */
-    tagEl.style.transform = pos < 16 ? 'translateX(0)'
-                          : pos > 84 ? 'translateX(-100%)'
-                          : 'translateX(-50%)';
+    var arrow = $('you-arrow');
+    if (pos < 16)      { tagEl.style.transform = 'translateX(0)';    arrow.style.margin = '2px auto 0 0'; }
+    else if (pos > 84) { tagEl.style.transform = 'translateX(-100%)'; arrow.style.margin = '2px 0 0 auto'; }
+    else               { tagEl.style.transform = 'translateX(-50%)'; arrow.style.margin = '2px auto 0'; }
   }, 80);
   $('result').scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
