@@ -233,6 +233,17 @@
    THIS PAGE SERVES LEADS ONLY.
    It reads and writes crm.lead.* and nothing else. Contacts are
    handled by my_file_client.html.
+
+   FIXED 8 Sep 2026
+   1. The lead search used order[DATE_CREATE] while DATE_CREATE was
+      not in select[]. Bitrix returned an error, the code read
+      list.result as undefined, and every lookup fell through to
+      "we could not locate a file" even when the lead existed.
+      It now orders by ID, which is always present.
+   2. bxGet now throws when Bitrix replies with an error, so a real
+      failure shows the error screen instead of "not found".
+   3. When one email has several leads, the newest OPEN one is used.
+      Converted and junk leads are only used if nothing else exists.
    ============================================================ */
 
 var WEBHOOK = "https://immiworld.org/rest/147/457nb2y39qvng06c/";
@@ -241,6 +252,9 @@ var ENTITY  = "lead";
 /* Where the button goes. */
 var NEXT_URL   = "https://supportimmigrationadviceserviceorg.github.io/assessment/verify_leads.html?answer=verify";
 var NEXT_LABEL = "Continue My 2026 Application";
+
+/* Leads in these stages are skipped unless nothing else is on file. */
+var CLOSED_STATUSES = ["CONVERTED", "JUNK"];
 
 var CLIENT_ID_FIELD = "UF_CRM_1449131692";
 var PHOTO_FIELD     = "UF_CRM_1768833329744";
@@ -304,13 +318,28 @@ function fail(e){
   show("state-error");
 }
 
+/* A Bitrix error now becomes a real exception instead of silently
+   turning into an empty result. */
 function bxGet(path){
-  return fetch(WEBHOOK + path).then(function(r){ return r.json(); });
+  return fetch(WEBHOOK + path)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d && d.error){
+        throw new Error("Bitrix " + d.error + ": " + (d.error_description || "") + "  [" + path + "]");
+      }
+      return d;
+    });
 }
 function bxPost(method, payload){
   return fetch(WEBHOOK + method, {
     method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload)
-  }).then(function(r){ return r.json(); });
+  }).then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d && d.error){
+        throw new Error("Bitrix " + d.error + ": " + (d.error_description || ""));
+      }
+      return d;
+    });
 }
 
 /* Values in non-Latin scripts are skipped so the page stays in one language. */
@@ -366,6 +395,17 @@ function enumText(code, value){
 
 /* ------------------------------------------------------------ */
 
+/* Newest open lead wins. A closed or junk lead is used only when
+   there is nothing else under that email address. */
+function pickLead(rows){
+  if(!rows || !rows.length) return null;
+  for(var i=0;i<rows.length;i++){
+    var st = String(rows[i].STATUS_ID || "");
+    if(CLOSED_STATUSES.indexOf(st) === -1) return rows[i];
+  }
+  return rows[0];
+}
+
 function lookup(){
   var email = ($("emailField").value || "").trim();
   var box = $("gateErr");
@@ -379,11 +419,13 @@ function lookup(){
   show("state-loading");
 
   bxGet("crm."+ENTITY+".list?filter[EMAIL]=" + encodeURIComponent(email) +
-        "&select[]=ID&order[DATE_CREATE]=DESC")
+        "&select[]=ID&select[]=STATUS_ID&order[ID]=DESC")
     .then(function(list){
       var rows = (list && list.result) || [];
       if(!rows.length){ show("state-notfound"); return null; }
-      return bxGet("crm."+ENTITY+".get?id=" + encodeURIComponent(rows[0].ID));
+      var chosen = pickLead(rows);
+      if(!chosen){ show("state-notfound"); return null; }
+      return bxGet("crm."+ENTITY+".get?id=" + encodeURIComponent(chosen.ID));
     })
     .then(function(full){
       if(!full) return;
