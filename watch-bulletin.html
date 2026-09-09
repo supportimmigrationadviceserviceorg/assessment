@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>A short message from the Immigration Advice Service</title>
+<!-- ============================================================
+     IAS — VIDEO LANDING PAGE
+     Video: https://youtu.be/PSlu11-C6xw   (embedded, rel=0)
+     CTA:   /assessment/my_file_leads.html
+
+     Any query parameter arriving on this page (email, utm_campaign)
+     is passed straight through to the button.
+     ============================================================ -->
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:Georgia,'Times New Roman',serif; background:#dcd7ca;
+         color:#141210; padding:28px 14px 60px; line-height:1.6; }
+  .sheet { max-width:640px; margin:0 auto; background:#faf7f0; border:1px solid #b9b0a0; }
+  .mast { background:#10263c; padding:24px 34px 20px; }
+  .mast-name { font-size:13px; letter-spacing:5px; color:#ffffff; text-transform:uppercase;
+               font-weight:bold; line-height:1.5; }
+  .body { padding:30px 34px 34px; }
+  h1 { font-size:26px; line-height:1.28; color:#10263c; margin-bottom:14px; }
+  .accent { height:3px; width:56px; background:#a8763a; margin:16px 0 20px; }
+  .lede { font-size:16px; color:#241f19; margin-bottom:22px; }
+
+  .video { position:relative; width:100%; padding-bottom:56.25%; height:0;
+           background:#000; border:1px solid #b9b0a0; }
+  .video iframe { position:absolute; top:0; left:0; width:100%; height:100%; border:0; }
+
+  .offer { margin-top:26px; padding:20px 22px; background:#eee7d9; border-left:4px solid #a8763a; }
+  .offer h2 { font-size:20px; color:#10263c; line-height:1.4; }
+  .offer .price { font-family:'Courier New',Courier,monospace; font-size:11px; letter-spacing:2px;
+                  color:#7a5322; text-transform:uppercase; font-weight:bold; margin-top:7px; }
+  .offer p { font-size:15px; margin-top:14px; }
+
+  .cta { display:block; margin-top:24px; padding:18px; background:#a8763a; color:#faf7f0;
+         text-decoration:none; text-align:center; font-size:18px; font-weight:bold; }
+  .cta:hover { background:#8f6330; }
+  .cta-note { font-size:12px; color:#544d3e; text-align:center; margin-top:10px; line-height:1.7; }
+
+  .foot { background:#10263c; padding:22px 34px 26px; font-size:11px; color:#c9d3dc; line-height:1.8; }
+  .foot a { color:#c9d3dc; }
+  @media (max-width:560px) {
+    .body { padding:22px 18px 26px; } .mast { padding:20px 18px 16px; } .foot { padding:18px; }
+    h1 { font-size:22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+
+  <div class="mast">
+    <div class="mast-name">Immigration Advice Service</div>
+  </div>
+
+  <div class="body">
+
+    <h1>A short message about your U.S. visa options</h1>
+    <div class="accent"></div>
+    <div class="lede">Under a minute. Then the one question a video cannot answer for you.</div>
+
+    <div class="video">
+      <iframe src="https://www.youtube.com/embed/PSlu11-C6xw?rel=0&amp;modestbranding=1"
+              title="Immigration Advice Service"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen></iframe>
+    </div>
+
+    <div class="offer">
+      <h2>Personal U.S. Visa Assessment</h2>
+      <div class="price">Only $19 until 15 September &nbsp;&middot;&nbsp; then $29</div>
+      <p>
+        A <strong>licensed U.S. immigration attorney</strong> reviews your profile and identifies
+        the U.S. visa and immigration routes that may be relevant to you.
+      </p>
+    </div>
+
+    <a class="cta" id="cta" href="my_file_leads.html">
+      Check my U.S. visa options &nbsp;&mdash;&nbsp; only $19
+    </a>
+    <div class="cta-note">
+      You can review your existing details before deciding whether to continue.<br>
+      No login &nbsp;&middot;&nbsp; No password
+    </div>
+
+  </div>
+
+  <div class="foot">
+    <a href="https://immigrationadviceservice.org">immigrationadviceservice.org</a>
+    &nbsp;&middot;&nbsp; 2 N Central Ave, Phoenix, AZ 85004, United States<br><br>
+    Immigration Advice Service is a private company and is not affiliated with USCIS,
+    the U.S. Department of State or any government agency. An assessment does not
+    guarantee eligibility, a visa, or approval of any application.
+  </div>
+
+</div>
+
+<script>
+/* Carry email and utm_campaign through to the button. */
+(function () {
+  var params = new URLSearchParams(window.location.search);
+  if (!params.toString()) return;
+  var a = document.getElementById('cta');
+  var url = new URL(a.getAttribute('href'), window.location.href);
+  params.forEach(function (v, k) { if (!url.searchParams.has(k)) url.searchParams.set(k, v); });
+  a.setAttribute('href', url.toString());
+})();
+</script>
+
+</body>
+</html>
