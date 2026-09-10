@@ -326,7 +326,10 @@ function chemistryBlock(qid, val) {
 }
 
 function setProgress(num, label) {
-  const pct=num?Math.round((num/totalQ)*100):currentId==='results'||currentId==='hold'?currentId==='hold'?95:100:0;
+  /* Values above totalQ are already percentages: the hold and results
+     screens pass 95 and 100 directly. */
+  const pct = num ? (num > totalQ ? Math.min(num, 100) : Math.round((num / totalQ) * 100))
+                  : (currentId === 'results' ? 100 : currentId === 'hold' ? 95 : 0);
   const bar=document.getElementById('progress');
   bar.style.width=pct+'%';
   document.getElementById('progress-pct').textContent=pct+'%';
@@ -686,6 +689,7 @@ Sound good?`})}
     main.innerHTML=`
       ${block({k:'read',l:'📞 Transition — Read to client',t:`${firstName||name},\n\nThank you for sharing all of that with me.\n\nNow I will place you on a brief hold for about one minute while the system processes your information.\n\nWhen I come back, we will go over the results together.`})}
       ${block({k:'hold',l:'⏸ Place client on hold now',t:`⏸️ Put the client on hold.\n⏱️ Keep hold under 60 seconds.\n\n💬 If you need more time: "Just one more moment — almost there."`})}
+      ${saveBlock()}
       <div class="nav"><button class="btn-back" onclick="goBack()">← Back</button><button class="btn-next" onclick="goNext('results')">Continue →</button></div>`;
 
   } else if(currentId==='results') {
@@ -734,7 +738,8 @@ To proceed with payment or close the form — click the Submit button below (the
       <hr class="divider">
       <div class="lbl" style="margin-bottom:4px">Notes about the call and the client (for the legal team)</div>
       <textarea class="textarea" id="client-goal" placeholder="✍️ Add any notes about the conversation, client's personality, objections, or anything relevant for the legal team...">${answers['client_goal']||''}</textarea>
-      <button class="submit-btn" id="submit-btn" onclick="submitAll()">✓  Submit & Update Lead in Bitrix24</button>`;
+      ${saveBlock()}
+      <button class="submit-btn" id="submit-btn" onclick="submitAll()">✓  Submit &amp; Finish — Update Lead in Bitrix24</button>`;
   }
   window.scrollTo(0,0);
 }
@@ -1026,11 +1031,37 @@ function saveNotes(nid,next){const el=document.getElementById(nid);if(el)answers
 function goNext(next){history.push(currentId);currentId=next;render();}
 function goBack(){if(!history.length)return;currentId=history.pop();render();}
 
-async function submitAll(){
+/* Saves everything to Bitrix24 without ending the call. The agent stays
+   on the same screen and can carry on. Safe to press more than once. */
+function saveDone(btn, ok, err){
+  if(btn){
+    btn.disabled = false;
+    btn.textContent = btn.dataset.label || 'Save all information to the system';
+  }
+  var box = document.getElementById('save-status');
+  if(!box) return;
+  if(ok){
+    box.style.cssText = 'margin-top:10px;padding:10px 12px;border-radius:8px;font-size:13px;background:#ecfdf5;border:1px solid #a7f3d0;color:#15803d';
+    box.textContent = 'Saved to Bitrix24 at ' + new Date().toLocaleTimeString() + '. You can carry on \u2014 saving again will simply update it.';
+  } else {
+    box.style.cssText = 'margin-top:10px;padding:10px 12px;border-radius:8px;font-size:13px;background:#fef2f2;border:1px solid #fecaca;color:#b91c1c';
+    box.textContent = 'Could not save' + (err ? ': ' + err : '') + '. Please try again.';
+  }
+}
+
+function saveBlock(){
+  return '<button class="submit-btn" id="save-btn" style="background:#0f766e" onclick="submitAll({keepGoing:true})">'
+       + '\ud83d\udcbe  Save all information to the system</button>'
+       + '<div id="save-status"></div>';
+}
+
+async function submitAll(opts){
+  const keepGoing = !!(opts && opts.keepGoing);
   const goalEl=document.getElementById('client-goal');if(goalEl)answers['client_goal']=goalEl.value;
   const reasonEl=document.getElementById('client_pref_reason');if(reasonEl)answers['client_pref_reason']=reasonEl.value;
   const pathways=computePathways();
-  const btn=document.getElementById('submit-btn');btn.disabled=true;btn.textContent='Saving to Bitrix24...';
+  const btn=document.getElementById(keepGoing?'save-btn':'submit-btn');
+  if(btn){btn.disabled=true;btn.dataset.label=btn.textContent;btn.textContent='Saving to Bitrix24...';}
   const summary=['=== IMMIGRATION PATHWAY ASSESSMENT ===',`Pathway #1: ${pathways[0]?.name||''}`,`Pathway #2: ${pathways[1]?.name||''}`,`Pathway #3: ${pathways[2]?.name||''}`,`Client preferred: ${answers['pref_pathway']||'Not selected'}`,`Client reason: ${answers['client_pref_reason']||''}`,`Notes: ${answers['client_goal']||''}`,``,`=== ANSWERS ===`,`Age: ${answers['q1']||''}`,`Exact Age: ${answers['exact_age']||''}`,`Country of Residence: ${answers['q2']||''}`,`Country of Birth: ${answers['q2b']||''}`,answers['residence_duration']?`Time in ${answers['q2']||'residence'}: ${answers['residence_duration']}`:'',`Marital Status: ${answers['q3']||''}`,answers['q3']==='Married'?`Spouse: ${answers['spouse_name']||''} | Country: ${answers['spouse_country']||''} | Edu: ${answers['spouse_edu']||''} | Exp: ${answers['spouse_exp']||''} | Immigrating: ${answers['spouse_immigrate']||''}`:'',`Children under 21: ${answers['has_children']||''} ${answers['children_count']?'('+answers['children_count']+')':''}` ,`Primary Goal: ${answers['q4']||''}`,`Education: ${answers['q5']||''}`,`Field: ${answers['q6']||''}`,answers['income_exact_usd']?`Monthly Income: $${answers['income_exact_usd']} USD per month`:'',`Experience: ${answers['q7']||''}`,`Leadership: ${answers['q8']||''}`,`Recognition: ${(answers['q9']||[]).join(', ')}`,`Situation: ${answers['q10']||''}`,`Business Interest: ${answers['q11']||''}`,`Investment Level: ${answers['q12']||''}`,`Study Interest: ${answers['q13']||''}`,`Family in USA: ${answers['q14']||''}`,``,`Agent intro notes: ${answers['intro_notes']||''}`,
     answers['fu_q1']?`Age notes: ${answers['fu_q1']}`:'',
     answers['fu_q2']?`Country notes: ${answers['fu_q2']}`:'',
@@ -1069,7 +1100,7 @@ async function submitAll(){
   if(answers['q12'])fields['UF_CRM_1709560465']=answers['q12'];
   fields['STATUS_ID']='TypeForm';
   fields['UF_CRM_1780826001']='Y';
-  if(!leadId){showResult(true,summary,pathways);return;}
+  if(!leadId){ if(keepGoing){saveDone(btn,false,'No lead ID in the link.');return;} showResult(true,summary,pathways);return; }
   try{
     // Update lead fields
     const updateUrl=`${WEBHOOK}crm.lead.update?ID=${leadId}&`+Object.entries(fields).map(([k,v])=>`fields[${k}]=${encodeURIComponent(v)}`).join('&');
@@ -1078,8 +1109,12 @@ async function submitAll(){
     const commentUrl=WEBHOOK+'crm.timeline.comment.add';
     const commentRes=await fetch(commentUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:{ENTITY_TYPE:'lead',ENTITY_ID:leadId,COMMENT:summary}})});
     const commentData=await commentRes.json();
-    if(commentData.result){showResult(true,summary,pathways);}else{showResult(true,summary,pathways);}
-  }catch(e){showResult(false,summary,pathways,e.message);}
+    if(keepGoing){ saveDone(btn,true); return; }
+    showResult(true,summary,pathways);
+  }catch(e){
+    if(keepGoing){ saveDone(btn,false,e.message); return; }
+    showResult(false,summary,pathways,e.message);
+  }
 }
 
 function showResult(success,summary,pathways,err){
