@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Confirm your report | BusinessMatch</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+  :root{
+    --ground:#F4F2ED;--panel:#FFFFFF;--panel-2:#EAE6DE;
+    --ink:#1D2321;--ink-2:#4E5956;--ink-3:#7C8683;
+    --rule:#D3CEC4;--rule-soft:#E3DFD7;
+    --pine:#1F4D3D;--pine-2:#2E6B55;--pine-soft:#DCE9E3;
+    --clay:#A8542E;--gold:#8A6B1F;--gold-soft:#F2E8CE;
+    --f-d:"Fraunces",Georgia,serif;
+    --f-b:"Public Sans","Segoe UI",system-ui,sans-serif;
+    --f-m:"IBM Plex Mono",ui-monospace,monospace;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --ground:#141917;--panel:#1C2321;--panel-2:#262E2B;
+    --ink:#EDF0EE;--ink-2:#B3BDB9;--ink-3:#828D89;
+    --rule:#333D39;--rule-soft:#28312E;
+    --pine:#79BFA3;--pine-2:#95D0B7;--pine-soft:#17322A;
+    --clay:#DD9877;--gold:#D4B466;--gold-soft:#332C16;
+  }}
+  :root[data-theme="dark"]{
+    --ground:#141917;--panel:#1C2321;--panel-2:#262E2B;
+    --ink:#EDF0EE;--ink-2:#B3BDB9;--ink-3:#828D89;
+    --rule:#333D39;--rule-soft:#28312E;
+    --pine:#79BFA3;--pine-2:#95D0B7;--pine-soft:#17322A;
+    --clay:#DD9877;--gold:#D4B466;--gold-soft:#332C16;
+  }
+  *{box-sizing:border-box;} html,body{margin:0;}
+  body{background:var(--ground);color:var(--ink);font-family:var(--f-b);font-size:15px;
+    line-height:1.6;-webkit-font-smoothing:antialiased;}
+  h1,h2{font-family:var(--f-d);margin:0;line-height:1.2;text-wrap:balance;font-weight:700;}
+  p{margin:0;}
+
+  .topbar{border-bottom:1px solid var(--rule);background:var(--panel);}
+  .topbar .in{max-width:40rem;margin:0 auto;padding:.85rem 20px;display:flex;
+    justify-content:space-between;align-items:center;gap:1rem;}
+  .logo{font-family:var(--f-d);font-weight:700;font-size:1.0625rem;}
+  .logo em{font-style:normal;color:var(--pine);}
+  .secure{font-size:.72rem;color:var(--ink-3);display:flex;align-items:center;gap:.35rem;}
+
+  .wrap{max-width:40rem;margin:0 auto;padding-inline:20px;padding-block:2.25rem 4rem;}
+  h1{font-size:1.85rem;letter-spacing:-.01em;}
+  .lede{color:var(--ink-2);margin-top:.6rem;}
+
+  .box{background:var(--panel);border:1px solid var(--rule);margin-top:1.5rem;}
+  .box .bh{padding:.75rem 1.1rem;background:var(--panel-2);border-bottom:1px solid var(--rule-soft);
+    font-size:.7rem;letter-spacing:.11em;text-transform:uppercase;font-weight:700;color:var(--ink-2);}
+  .box .bb{padding:1.1rem;}
+
+  .line{display:flex;justify-content:space-between;gap:1rem;align-items:baseline;
+    padding:.55rem 0;border-bottom:1px solid var(--rule-soft);font-size:.9375rem;}
+  .line:last-of-type{border-bottom:0;}
+  .line .k{color:var(--ink-2);}
+  .line .v{font-family:var(--f-m);font-variant-numeric:tabular-nums;text-align:right;}
+  .line.total{border-top:2px solid var(--ink);margin-top:.4rem;padding-top:.8rem;}
+  .line.total .k{font-weight:700;color:var(--ink);}
+  .line.total .v{font-size:1.5rem;font-weight:600;color:var(--pine);}
+  .was{color:var(--ink-3);text-decoration:line-through;
+    text-decoration-color:var(--clay);text-decoration-thickness:2px;margin-inline-end:.45rem;font-size:1rem;}
+
+  ul.incl{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:.6rem;}
+  ul.incl li{font-size:.9375rem;color:var(--ink-2);padding-inline-start:1.3rem;position:relative;line-height:1.55;}
+  ul.incl li::before{content:"";position:absolute;inset-inline-start:0;top:.55em;
+    width:7px;height:7px;background:var(--pine);}
+  ul.incl b{color:var(--ink);font-weight:700;}
+
+  .promise{background:var(--pine-soft);border-inline-start:3px solid var(--pine);
+    padding:.9rem 1.05rem;margin-top:1.25rem;font-size:.9375rem;line-height:1.6;color:var(--ink);}
+  .promise b{font-weight:700;}
+
+  .cta{display:block;width:100%;text-align:center;margin-top:1.5rem;
+    background:var(--pine);color:var(--ground);font-family:var(--f-b);font-weight:700;
+    font-size:1.0625rem;padding:1rem 1.25rem;text-decoration:none;border:0;cursor:pointer;}
+  .cta:hover{background:var(--pine-2);}
+  .cta:focus-visible{outline:2px solid var(--ink);outline-offset:2px;}
+  .after{text-align:center;font-size:.8125rem;color:var(--ink-3);margin-top:.7rem;line-height:1.6;}
+
+  .steps{margin-top:2rem;border-top:1px solid var(--rule);padding-top:1.25rem;}
+  .steps h2{font-size:1.05rem;margin-bottom:.7rem;}
+  .steps ol{margin:0;padding-inline-start:1.2rem;display:flex;flex-direction:column;gap:.45rem;
+    font-size:.9rem;color:var(--ink-2);line-height:1.55;}
+  .steps ol li::marker{color:var(--pine);font-weight:700;}
+
+  footer{margin-top:2rem;padding-top:1.1rem;border-top:1px solid var(--rule);
+    font-size:.75rem;line-height:1.65;color:var(--ink-3);}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="in">
+  <span class="logo">Business<em>Match</em></span>
+  <span class="secure">Payment handled by Rapyd</span>
+</div></div>
+
+<div class="wrap">
+
+  <h1 id="head">Your report on this business</h1>
+  <p class="lede" id="lede">Check the details below, then continue to payment. Card details are entered on Rapyd's own secure page, never here.</p>
+
+  <div class="box">
+    <div class="bh">What you are paying for</div>
+    <div class="bb">
+      <div class="line"><span class="k">Business reference</span><span class="v" id="ref">FL-1184</span></div>
+      <div class="line"><span class="k">Report</span><span class="v">Full file and visa check</span></div>
+      <div class="line"><span class="k">Delivered</span><span class="v">Within 2 working days</span></div>
+      <div class="line total"><span class="k">Total today</span>
+        <span class="v"><span class="was" id="was">$495</span><span id="amt">$100</span></span></div>
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="bh">What you receive</div>
+    <div class="bb">
+      <ul class="incl">
+        <li><b>Which business it actually is</b> the name, the exact address and the original listing</li>
+        <li><b>Proof the numbers are real</b> three years of tax returns, checked against what the seller claims</li>
+        <li><b>Whether it would pass for your visa</b> in plain English, with every question an officer is likely to ask you about it</li>
+        <li><b>What to change before you offer</b> the terms that would cost you the visa, and what to ask for instead</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="promise">
+    <b>We have already checked this business is still for sale.</b> If it sells before your report is delivered, you get your money back in full and we show you the closest alternatives at no charge.
+  </p>
+
+  <a class="cta" id="payBtn" href="#" rel="noopener">Continue to secure payment</a>
+  <p class="after">You will be taken to Rapyd to enter your card.<br>We never see or store your card details.</p>
+
+  <div class="steps">
+    <h2>What happens after you pay</h2>
+    <ol>
+      <li>You get a receipt from Rapyd straight away, and a short confirmation from us.</li>
+      <li>We send you an NDA to sign electronically. This is standard in every business sale and protects the seller.</li>
+      <li>We pull the financials and the full listing, and run our own check on how the purchase would need to be structured for your visa.</li>
+      <li>You receive the report within two working days, and a call if you want to walk through it.</li>
+    </ol>
+  </div>
+
+  <footer>
+    This fee is credited in full against our full search service if you go on to use it. The report is business and visa-readiness research, not legal advice, and does not replace representation on your case. Payments are processed by Rapyd. BusinessMatch never holds purchase funds for a business sale; deposits on a business go to a licensed escrow company or a lawyer's client account.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  var RAPYD="https://www.rapyd.ly/pay/rwB5osmT";
+
+  var Q={};
+  try{
+    location.search.replace(/^\?/,"").split("&").forEach(function(p){
+      if(!p) return; var kv=p.split("=");
+      Q[kv[0]]=decodeURIComponent((kv[1]||"").replace(/\+/g," "));
+    });
+  }catch(e){}
+
+  if(Q.ref) document.getElementById("ref").textContent=Q.ref;
+  if(Q.amt) document.getElementById("amt").textContent="$"+Q.amt;
+  if(Q.was===""||Q.was==="0") document.getElementById("was").hidden=true;
+  else if(Q.was) document.getElementById("was").textContent="$"+Q.was;
+
+  if(Q.n){
+    document.getElementById("head").textContent=Q.n+", your report on this business";
+  }
+  if(Q.t){
+    document.getElementById("lede").textContent=
+      "This is the report on "+Q.t+". Check the details below, then continue to payment. "+
+      "Card details are entered on Rapyd's own secure page, never here.";
+  }
+
+  var link=Q.pay||RAPYD;
+  document.getElementById("payBtn").setAttribute("href",link);
+})();
+</script>
+
+</body>
+</html>
