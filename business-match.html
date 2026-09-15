@@ -122,6 +122,12 @@
   .prime b{color:var(--ink);font-weight:700;}
   .prime .pn{font-size:.75rem;color:var(--ink-3);border-top:1px solid var(--rule-soft);padding-top:.6rem;}
 
+  .steps{margin:1.5rem 0 0;padding:0;border:1px solid var(--rule);background:var(--panel);
+    line-height:0;overflow-x:auto;}
+  .steps img{display:block;width:100%;height:auto;max-width:none;min-width:46rem;}
+  @media (max-width:719px){ .steps{display:none;} }
+  @media (min-width:720px){ .how{display:none;} }
+
   .how{list-style:none;margin:1.5rem 0 0;padding:0;display:grid;
     grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:0;border:1px solid var(--rule);background:var(--panel);}
   .how li{display:flex;gap:.7rem;padding:1rem 1.05rem;border-inline-start:1px solid var(--rule-soft);align-items:flex-start;}
@@ -317,6 +323,11 @@
     <h1>Find a U.S. business that actually fits you.</h1>
     <p class="sub">If you want to move to the United States by buying a business, the hardest part is knowing which business. This shows you real ones that fit you, and warns you about the ones that would <b>put your visa at risk</b>.</p>
 
+
+    <figure class="steps">
+      <img src="steps.jpg" width="1200" height="800" loading="lazy" decoding="async"
+           alt="Five steps: a U.S. business for sale, you find the right business, acquire the business, apply for your E-2 visa, live in the USA and grow.">
+    </figure>
 
     <ol class="how">
       <li><span class="n">1</span><span class="w"><b>Tell us about you</b>What you can spend, what you need to earn, where you want to live. Six questions.</span></li>
@@ -1025,7 +1036,8 @@
           'in the meantime.</p>';
       } else {
         var q="?ref="+encodeURIComponent(ref)+"&n="+encodeURIComponent(name)+
-              "&t="+encodeURIComponent(title)+"&e="+encodeURIComponent(mail);
+              "&t="+encodeURIComponent(title)+"&e="+encodeURIComponent(mail)+
+              "&p="+encodeURIComponent(tel);
         box.innerHTML=
           '<p class="tk">Thank you, '+first+'. Taking you to payment now.</p>'+
           '<p class="tb">If nothing happens, <a href="pay.html'+q+'">open it here</a>.</p>';

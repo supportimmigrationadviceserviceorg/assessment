@@ -77,6 +77,23 @@
     padding:.9rem 1.05rem;margin-top:1.25rem;font-size:.9375rem;line-height:1.6;color:var(--ink);}
   .promise b{font-weight:700;}
 
+  .prep{border-color:var(--gold);}
+  .prep .bh{background:var(--gold-soft);color:var(--gold);}
+  .pw{display:flex;gap:.6rem;align-items:flex-start;font-size:.9375rem;line-height:1.6;color:var(--ink-2);}
+  .pw .num{flex:0 0 auto;width:21px;height:21px;border-radius:50%;background:var(--gold);color:var(--panel);
+    font-family:var(--f-m);font-size:.72rem;font-weight:600;display:flex;align-items:center;
+    justify-content:center;margin-top:.15rem;}
+  .pw b{color:var(--ink);font-weight:700;}
+  .copyrow{display:flex;gap:.5rem;align-items:stretch;margin-top:.6rem;margin-inline-start:1.8rem;flex-wrap:wrap;}
+  .copyrow code{flex:1 1 12rem;font-family:var(--f-m);font-size:.9rem;color:var(--ink);
+    background:var(--ground);border:1px solid var(--rule);padding:.55rem .7rem;
+    overflow-x:auto;white-space:nowrap;}
+  .copybtn{flex:0 0 auto;font-family:var(--f-b);font-size:.85rem;font-weight:700;cursor:pointer;
+    background:var(--panel-2);color:var(--ink-2);border:1px solid var(--rule);padding:.55rem 1rem;}
+  .copybtn:hover{border-color:var(--pine);color:var(--pine);}
+  .copybtn:focus-visible{outline:2px solid var(--pine);outline-offset:1px;}
+  .copybtn.done{background:var(--pine);border-color:var(--pine);color:var(--ground);}
+
   .cta{display:block;width:100%;text-align:center;margin-top:1.5rem;
     background:var(--pine);color:var(--ground);font-family:var(--f-b);font-weight:700;
     font-size:1.0625rem;padding:1rem 1.25rem;text-decoration:none;border:0;cursor:pointer;}
@@ -133,6 +150,18 @@
     <b>We have already checked this business is still for sale.</b> If it sells before your report is delivered, you get your money back in full and we show you the closest alternatives at no charge.
   </p>
 
+  <div class="box prep">
+    <div class="bh">Two things on the next page</div>
+    <div class="bb">
+      <p class="pw"><span class="num">1</span><span>Where it asks <b>&ldquo;What&rsquo;s this payment for?&rdquo;</b>, paste this reference so we can match your payment to the right business:</span></p>
+      <div class="copyrow">
+        <code id="payref">BusinessMatch FL-1184</code>
+        <button class="copybtn" id="copyBtn" type="button">Copy</button>
+      </div>
+      <p class="pw" style="margin-top:.9rem;"><span class="num">2</span><span>The payment is taken by <b id="payee">Znavit Services SL</b>, the company that handles our card payments. That is the name you will see on the page and on your statement. It is us.</span></p>
+    </div>
+  </div>
+
   <a class="cta" id="payBtn" href="#" rel="noopener">Continue to secure payment</a>
   <p class="after">You will be taken to Rapyd to enter your card.<br>We never see or store your card details.</p>
 
@@ -154,7 +183,12 @@
 
 <script>
 (function(){
+  // The relay builds a Rapyd checkout with the reference already in the
+  // description, so nothing has to be typed on the payment page. If it is not
+  // configured yet, the plain payment link is used instead.
+  var RELAY="https://script.google.com/macros/s/AKfycbze_lHHIwgSzjLw6ucxyBRAA9sJgYF_qBpBJl8JW4oUdmRzsi6E-VOR1gx8u9n9TCnLTA/exec";
   var RAPYD="https://www.rapyd.ly/pay/rwB5osmT";
+  var USE_RELAY=true;   // set to false to go back to the plain link
 
   var Q={};
   try{
@@ -178,8 +212,57 @@
       "Card details are entered on Rapyd's own secure page, never here.";
   }
 
-  var link=Q.pay||RAPYD;
+  var refEl=document.getElementById("payref");
+  refEl.textContent="BusinessMatch "+(Q.ref||"FL-1184");
+  if(Q.payee) document.getElementById("payee").textContent=Q.payee;
+
+  var cb=document.getElementById("copyBtn");
+  cb.addEventListener("click",function(){
+    var t=refEl.textContent;
+    function ok(){ cb.textContent="Copied"; cb.classList.add("done");
+      setTimeout(function(){ cb.textContent="Copy"; cb.classList.remove("done"); },1800); }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(ok).catch(sel);
+    } else sel();
+    function sel(){
+      try{
+        var r=document.createRange(); r.selectNodeContents(refEl);
+        var s=window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        document.execCommand("copy"); ok();
+      }catch(e){ cb.textContent="Select and copy"; }
+    }
+  });
+
+  var link;
+  if(Q.pay){
+    link=Q.pay;
+  } else if(USE_RELAY && Q.fallback!=="1"){
+    link=RELAY+"?action=checkout"+
+         "&ref="+encodeURIComponent(Q.ref||"")+
+         "&t="+encodeURIComponent(Q.t||"")+
+         "&n="+encodeURIComponent(Q.n||"")+
+         "&e="+encodeURIComponent(Q.e||"")+
+         "&p="+encodeURIComponent(Q.p||"")+
+         "&amt="+encodeURIComponent((Q.amt||"100").replace(/[^0-9.]/g,""));
+  } else {
+    link=RAPYD;
+  }
   document.getElementById("payBtn").setAttribute("href",link);
+
+  // With the relay in play the reference is written in for them, so the
+  // copy-this-in box is only shown when we fall back to the plain link.
+  if(link!==RAPYD && Q.fallback!=="1"){
+    var prep=document.querySelector(".prep");
+    if(prep){
+      prep.querySelector(".bh").textContent="One thing on the next page";
+      var rows=prep.querySelectorAll(".pw");
+      if(rows[0]) rows[0].parentNode.removeChild(rows[0]);
+      var cr=prep.querySelector(".copyrow");
+      if(cr) cr.parentNode.removeChild(cr);
+      var n=prep.querySelector(".pw .num");
+      if(n) n.textContent="1";
+    }
+  }
 })();
 </script>
 
