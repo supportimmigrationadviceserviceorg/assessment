@@ -103,6 +103,27 @@
   .fbar .note{font-size:.8125rem;color:var(--ink-3);}
 
   /* results */
+
+  .assume{margin-top:1.4rem;display:flex;flex-wrap:wrap;gap:.75rem 1rem;align-items:center;
+    background:var(--panel);border:1px solid var(--rule);padding:.8rem 1rem;}
+  .assume .at{display:flex;flex-direction:column;gap:.1rem;min-width:0;}
+  .assume .al{font-size:.65rem;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);font-weight:700;}
+  .assume .av{font-family:var(--f-m);font-size:.9375rem;color:var(--ink);}
+  .assume .adj{margin-inline-start:auto;font-family:var(--f-b);font-size:.8125rem;font-weight:700;
+    background:transparent;border:1px solid var(--rule);color:var(--ink-2);padding:.42rem .85rem;cursor:pointer;}
+  .assume .adj:hover{border-color:var(--pine);color:var(--pine);}
+  .assume .adj:focus-visible{outline:2px solid var(--pine);outline-offset:1px;}
+
+  .refine{margin-top:1.5rem;border:1px dashed var(--rule);background:var(--panel);
+    padding:1.25rem 1.15rem;display:flex;flex-direction:column;gap:.4rem;align-items:flex-start;}
+  .refine.hidden{display:none;}
+  .refine .rq{font-family:var(--f-d);font-weight:700;font-size:1.1875rem;color:var(--ink);}
+  .refine .rd{font-size:.9375rem;color:var(--ink-2);max-width:58ch;}
+  .refine .btn{margin-top:.6rem;}
+
+  .finder{scroll-margin-top:1rem;}
+  @keyframes bump{0%{background:var(--pine-soft);}100%{background:transparent;}}
+  .rhead.updated{animation:bump .9s ease;}
   .results{margin-top:2.25rem;}
   .rhead{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap;
     border-bottom:2px solid var(--ink);padding-bottom:.6rem;}
@@ -191,18 +212,33 @@
 
   <section class="hero">
     <h1>Find a U.S. business that actually fits you.</h1>
-    <p class="sub">Tell us your budget, your background and where you want to live. We show you real businesses for sale that match — and flag the ones that would put your <b>E-2 visa at risk</b>.</p>
+    <p class="sub">Real businesses for sale, scored against your profile, and flagged where they would put your <b>E-2 visa at risk</b>.</p>
 
-    <div class="straight">
-      <p class="sl">Straight answer, before you ask</p>
-      <p>Some of these listings you could eventually find yourself. Here is what you cannot do alone: <b>structure the purchase so the investment actually qualifies for your visa</b>, and <b>get a U.S. broker to take you seriously</b> before you have status, a U.S. bank account and proof of funds.</p>
-      <p>A business can be excellent and still fail your case — wrong deal structure, seller financing secured against the assets, no employees. Brokers are paid by the seller and do not check any of that. We work for you, and we do.</p>
+    <div class="assume">
+      <div class="at">
+        <span class="al">Showing matches for</span>
+        <span class="av" id="assumeLine">a $50–75K budget in Florida</span>
+      </div>
+      <button class="adj" id="adjust" type="button" aria-expanded="false" aria-controls="finder">Not right? Adjust</button>
     </div>
+
   </section>
 
-  <div class="finder">
+  <section class="results">
+    <div class="rhead">
+      <h2>Your matches</h2>
+      <span class="count" id="resCount"></span>
+    </div>
+    <div id="cards"></div>
+
+    <div class="refine" id="refinePrompt">
+      <p class="rq" id="rq">Want sharper matches?</p>
+      <p class="rd" id="rd">Four more answers and we can rule out the ones that would not work for you. Takes under a minute, and the list above updates as you go.</p>
+      <button class="btn ghost" id="openRefine" type="button">Sharpen these matches</button>
+    </div>
+  <div class="finder" id="finder" hidden>
     <div class="fhead">
-      <span class="t">Your profile</span>
+      <span class="t">Sharpen your matches</span>
       <span class="c" id="liveCount">8 businesses available</span>
     </div>
 
@@ -268,17 +304,19 @@
     </div>
 
     <div class="fbar">
-      <button class="btn" id="go" type="button">See my matches</button>
-      <span class="note">No account needed. Results update as you change anything.</span>
+      <button class="btn" id="go" type="button">Update my matches</button>
+      <span class="note">Every change updates the list above straight away. No account needed.</span>
     </div>
   </div>
 
-  <section class="results">
-    <div class="rhead">
-      <h2>Your matches</h2>
-      <span class="count" id="resCount"></span>
+  </section>
+
+  <section class="hero" style="padding-block:0;">
+    <div class="straight">
+      <p class="sl">Straight answer, before you ask</p>
+      <p>Some of these listings you could eventually find yourself. Here is what you cannot do alone: <b>structure the purchase so the investment actually qualifies for your visa</b>, and <b>get a U.S. broker to take you seriously</b> before you have status, a U.S. bank account and proof of funds.</p>
+      <p>A business can be excellent and still fail your case — wrong deal structure, seller financing secured against the assets, no employees. Brokers are paid by the seller and do not check any of that. We work for you, and we do.</p>
     </div>
-    <div id="cards"></div>
   </section>
 
   <section class="lead" id="lead">
@@ -357,6 +395,8 @@
     var ok=Array.prototype.some.call(e.options,function(o){return o.value===v;});
     if(ok) e.value=v;
   }
+  var KNOWN={budget:!!Q.b, state:!!Q.s, income:!!Q.i};
+  if(!Q.b) document.getElementById("budget").value="500000";   // no budget given: hide nothing
   preset("budget",Q.b); preset("income",Q.i); preset("family",Q.f);
   preset("exp",Q.x); preset("style",Q.m); preset("risk",Q.r);
 
@@ -382,10 +422,11 @@
   }
   chips(document.getElementById("states"),STATES,sel.states);
   chips(document.getElementById("avoid"),AVOID,sel.avoid);
-  // opening state: the state from the email link, else Florida
+  // opening state: the one from the email link; with none given, Anywhere,
+  // so a state we were never told about is not quietly filtered out.
   (function(){
     var want=Q.s&&document.getElementById("states-"+Q.s.replace(/\W/g,""));
-    (want||document.getElementById("states-Florida")).click();
+    (want||document.getElementById("states-Anywhere")).click();
   })();
 
   function money(n){return "$"+(n>=1000?Math.round(n/1000)+"K":n);}
@@ -458,6 +499,15 @@
 
     document.getElementById("liveCount").textContent=BIZ.length+" businesses available";
     document.getElementById("resCount").textContent=out.length+" of "+BIZ.length+" match your profile";
+    paintAssume();
+    if(!KNOWN.budget){
+      var rq=document.getElementById("rq"), rd=document.getElementById("rd");
+      if(rq) rq.textContent="Tell us your budget and this list gets much shorter";
+      if(rd) rd.textContent="Right now we are showing you everything we have, at every price. Four answers and we can rule out the ones that would not work for you.";
+    }
+    var rh=document.querySelector(".rhead");
+    if(window.__painted && rh){ rh.classList.remove("updated"); void rh.offsetWidth; rh.classList.add("updated"); }
+    window.__painted=true;
 
     cards.innerHTML="";
     if(!out.length){
@@ -510,8 +560,46 @@
   }
 
   ["budget","income","family","style","exp","risk"].forEach(function(id){
-    document.getElementById(id).addEventListener("change",run);
+    document.getElementById(id).addEventListener("change",function(){
+      if(id==="budget") KNOWN.budget=true;
+      if(id==="income") KNOWN.income=true;
+      run();
+    });
   });
+  // ---- assumption line, written from whatever we already know ------------
+  function assumeText(){
+    var b=document.getElementById("budget");
+    var band=b.options[b.selectedIndex].text;
+    var st=Object.keys(sel.states).filter(function(x){return x!=="Anywhere";});
+    var where = sel.states["Anywhere"] || !st.length ? "across every state"
+              : st.length===1 ? "in "+st[0]
+              : "in "+st.slice(0,-1).join(", ")+" and "+st[st.length-1];
+
+    // Only state a budget as fact if the link actually carried one, or the
+    // visitor set it themselves. Otherwise say plainly that we do not know.
+    var money = KNOWN.budget ? "a "+band+" budget" : "every price we have";
+    return money+" "+where;
+  }
+  function paintAssume(){
+    var el=document.getElementById("assumeLine");
+    if(!el) return;
+    el.textContent=assumeText();
+    var lab=document.querySelector(".assume .al");
+    if(lab) lab.textContent = KNOWN.budget ? "Showing matches for" : "You have not told us a budget yet";
+  }
+
+  // ---- open / close the refinement panel ---------------------------------
+  var finderEl=document.getElementById("finder");
+  var promptEl=document.getElementById("refinePrompt");
+  function openRefine(){
+    finderEl.hidden=false;
+    promptEl.classList.add("hidden");
+    document.getElementById("adjust").setAttribute("aria-expanded","true");
+    finderEl.scrollIntoView({behavior:"smooth",block:"nearest"});
+  }
+  document.getElementById("adjust").addEventListener("click",openRefine);
+  document.getElementById("openRefine").addEventListener("click",openRefine);
+
   document.getElementById("go").addEventListener("click",function(){
     run();
     document.querySelector(".results").scrollIntoView({behavior:"smooth",block:"start"});
