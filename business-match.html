@@ -115,6 +115,13 @@
 
   /* results */
 
+  .prime{margin-top:1.5rem;border:1px solid var(--rule);border-top:3px solid var(--pine);
+    background:var(--panel);padding:1.2rem 1.25rem;display:flex;flex-direction:column;gap:.7rem;max-width:68ch;}
+  .prime .pt{font-family:var(--f-d);font-weight:700;font-size:1.15rem;color:var(--ink);}
+  .prime p{font-size:.95rem;line-height:1.65;color:var(--ink-2);}
+  .prime b{color:var(--ink);font-weight:700;}
+  .prime .pn{font-size:.75rem;color:var(--ink-3);border-top:1px solid var(--rule-soft);padding-top:.6rem;}
+
   .how{list-style:none;margin:1.5rem 0 0;padding:0;display:grid;
     grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:0;border:1px solid var(--rule);background:var(--panel);}
   .how li{display:flex;gap:.7rem;padding:1rem 1.05rem;border-inline-start:1px solid var(--rule-soft);align-items:flex-start;}
@@ -162,6 +169,8 @@
   .rhead{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap;
     border-bottom:2px solid var(--ink);padding-bottom:.6rem;}
   .rhead h2{font-size:1.4rem;}
+  .rhead .expl{flex-basis:100%;font-size:.8rem;line-height:1.5;color:var(--ink-3);
+    font-weight:400;margin-top:.3rem;max-width:64ch;}
   .rhead .count{font-family:var(--f-m);font-size:.8125rem;color:var(--ink-3);}
 
   .demo{margin-top:.9rem;padding:.6rem .8rem;background:var(--gold-soft);
@@ -219,6 +228,44 @@
   .lead .err{display:none;color:var(--clay);font-size:.875rem;font-weight:600;margin-top:.8rem;}
   .lead .fine{font-size:.8125rem;color:var(--ink-3);margin-top:.6rem;}
 
+  .faq{margin-top:2.25rem;}
+  .faq h2{font-size:1.4rem;border-bottom:2px solid var(--ink);padding-bottom:.6rem;}
+  .faq dl{margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(285px,1fr));gap:0;
+    border:1px solid var(--rule);border-top:0;background:var(--panel);}
+  .faq dt{font-family:var(--f-d);font-weight:700;font-size:1.02rem;color:var(--ink);
+    padding:1rem 1.1rem .35rem;border-top:1px solid var(--rule-soft);}
+  .faq dd{margin:0;padding:0 1.1rem 1.1rem;font-size:.9rem;line-height:1.6;color:var(--ink-2);}
+
+  .askbtn{position:fixed;inset-inline-end:18px;bottom:calc(18px + env(safe-area-inset-bottom, 0px));
+    z-index:40;display:flex;align-items:center;gap:.45rem;cursor:pointer;
+    font-family:var(--f-b);font-size:.875rem;font-weight:700;color:var(--ground);
+    background:var(--pine);border:0;padding:.7rem 1.1rem;box-shadow:0 2px 12px rgba(0,0,0,.18);}
+  .askbtn:hover{background:var(--pine-2);}
+  .askbtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px;}
+  .askbtn .q{width:19px;height:19px;border-radius:50%;background:var(--ground);color:var(--pine);
+    font-size:.75rem;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+
+  .askpanel{position:fixed;inset-inline-end:18px;bottom:calc(70px + env(safe-area-inset-bottom, 0px));
+    z-index:41;width:min(370px,calc(100vw - 36px));max-height:min(64vh,520px);
+    background:var(--panel);border:1px solid var(--rule);box-shadow:0 6px 28px rgba(0,0,0,.2);
+    display:flex;flex-direction:column;}
+  .askpanel .ah{display:flex;align-items:center;justify-content:space-between;gap:.5rem;
+    padding:.75rem .9rem;background:var(--pine);color:var(--ground);
+    font-family:var(--f-d);font-weight:700;font-size:.98rem;flex:0 0 auto;}
+  .askpanel .ax{background:none;border:0;color:var(--ground);font-size:1.4rem;line-height:1;
+    cursor:pointer;padding:0 .2rem;}
+  .askpanel .ax:focus-visible{outline:2px solid var(--ground);outline-offset:1px;}
+  .askpanel .ab{overflow-y:auto;padding:.3rem 0;}
+  .askpanel details{border-bottom:1px solid var(--rule-soft);}
+  .askpanel details:last-child{border-bottom:0;}
+  .askpanel summary{cursor:pointer;padding:.7rem .9rem;font-size:.875rem;font-weight:600;
+    color:var(--ink);list-style:none;display:flex;justify-content:space-between;gap:.5rem;align-items:center;}
+  .askpanel summary::-webkit-details-marker{display:none;}
+  .askpanel summary::after{content:"+";color:var(--pine);font-weight:700;flex:0 0 auto;}
+  .askpanel details[open] summary::after{content:"\2212";}
+  .askpanel summary:focus-visible{outline:2px solid var(--pine);outline-offset:-2px;}
+  .askpanel details p{margin:0;padding:0 .9rem .85rem;font-size:.85rem;line-height:1.6;color:var(--ink-2);}
+
   .straight{margin-top:1.5rem;border-inline-start:3px solid var(--clay);background:var(--clay-soft);
     padding:1rem 1.15rem;display:flex;flex-direction:column;gap:.55rem;max-width:64ch;}
   .straight .sl{font-size:.68rem;letter-spacing:.11em;text-transform:uppercase;font-weight:700;color:var(--clay);}
@@ -253,6 +300,15 @@
   <section class="hero">
     <h1>Find a U.S. business that actually fits you.</h1>
     <p class="sub">If you want to move to the United States by buying a business, the hardest part is knowing which business. This shows you real ones that fit you, and warns you about the ones that would <b>put your visa at risk</b>.</p>
+
+    <div class="prime">
+      <p class="pt">Never come across this before? Here is the whole idea.</p>
+      <p>The United States gives a visa to people who buy or start a business there and run it themselves. It is called the <b>E-2</b>. You do not need a job offer, a degree, or a relative in the country. You need a real business that you own and are actually in charge of.</p>
+      <p>You can bring your partner and your children under 21. Your partner can work at any job. It can be renewed again and again for as long as the business is running.</p>
+      <p><b>And not everyone can do this.</b> The route only exists between the United States and countries it has a treaty with. Fewer than half the countries in the world have one. Most of Europe, Japan, South Korea, Taiwan, Canada, Australia and Israel are in. Several of the largest countries in the world are not, and their citizens have no version of this at all.</p>
+      <p>If your country is on the list, you have a door open to you that most people on earth do not have. Tell us where you hold citizenship and we will confirm it in a sentence.</p>
+      <p class="pn">This is general information, not advice about your own case.</p>
+    </div>
 
     <ol class="how">
       <li><span class="n">1</span><span class="w"><b>Tell us about you</b>What you can spend, what you need to earn, where you want to live. Six questions.</span></li>
@@ -290,6 +346,7 @@
   <section class="results">
     <div class="rhead">
       <h2>Businesses that suit you</h2>
+      <span class="expl">The percentage is how well each one fits what you told us. 100% would be a perfect fit on price, earnings, location and the kind of work you have done.</span>
       <span class="count" id="resCount"></span>
     </div>
     <p class="demo">These are example businesses, to show you how this works. Ask for a file on any of them and we will send you real ones that match.</p>
@@ -316,7 +373,7 @@
           <option value="250000">$150,000 to $250,000</option>
           <option value="500000" selected>More than $250,000</option>
         </select>
-        <span class="hint">The money you can actually put into buying and running the business.</span></label>
+        <span class="hint">This has to cover the price of the business, plus roughly $15,000 to $30,000 more for legal fees, the visa itself, and enough cash to run it in the first months. Do not count money you need to live on.</span></label>
 
       <label for="income"><span class="lab">What do you need to earn from it?</span>
         <select id="income">
@@ -438,14 +495,14 @@
   // Listings are shown confidentially: no business name, region rather than city,
   // and no broker identity — the industry standard, and it keeps the seller protected.
   var BIZ=[
-    {id:"FL-1184",t:"Pool Cleaning Round",c:"Tampa Bay area",s:"Florida",ind:"Home & Property Services",price:89000,rev:145000,sde:38000,emp:2,yr:2016,rec:true,fin:false,train:true,dep:false,skill:"hands",risk:"low",src:"Licensed broker"},
-    {id:"FL-1207",t:"Office Cleaning Contracts",c:"Central Florida",s:"Florida",ind:"Home & Property Services",price:128000,rev:210000,sde:52000,emp:3,yr:2014,rec:true,fin:true,train:true,dep:false,skill:"hands",risk:"low",src:"Direct from owner"},
-    {id:"GA-0931",t:"Local Delivery Round",c:"Metro Atlanta",s:"Georgia",ind:"Driving & Delivery",price:95000,rev:190000,sde:44000,emp:0,yr:2019,rec:false,fin:false,train:true,dep:true,skill:"selling",risk:"med",src:"Licensed broker"},
-    {id:"GA-0944",t:"Garden & Grounds Care",c:"Coastal Georgia",s:"Georgia",ind:"Home & Property Services",price:149000,rev:225000,sde:61000,emp:3,yr:2011,rec:true,fin:true,train:true,dep:false,skill:"hands",risk:"low",src:"Licensed broker"},
-    {id:"AZ-0612",t:"Car Valeting Shop",c:"Phoenix area",s:"Arizona",ind:"Cars & Vehicles",price:68000,rev:132000,sde:31000,emp:1,yr:2018,rec:false,fin:false,train:false,dep:true,skill:"trade",risk:"med",src:"Licensed broker"},
-    {id:"NC-0388",t:"Neighbourhood Cafe",c:"Charlotte area",s:"North Carolina",ind:"Food & Drink",price:115000,rev:290000,sde:48000,emp:4,yr:2017,rec:false,fin:false,train:true,dep:false,skill:"hands",risk:"high",src:"Licensed broker"},
-    {id:"TX-1503",t:"Courier & Freight Agency",c:"Dallas area",s:"Texas",ind:"Driving & Delivery",price:215000,rev:410000,sde:88000,emp:2,yr:2013,rec:true,fin:true,train:true,dep:false,skill:"selling",risk:"med",src:"Direct from owner"},
-    {id:"TN-0725",t:"Print & Signs Shop",c:"Nashville area",s:"Tennessee",ind:"Shops & Retail",price:178000,rev:265000,sde:72000,emp:3,yr:2015,rec:true,fin:false,train:true,dep:false,skill:"desk",risk:"med",src:"Franchise resale"}
+    {it:"Pool Cleaning Round",c:"Tampa Bay area",s:"Florida",inprice:89000,rev:145000,sde:38000,emp:2,yr:2016,rec:true,fin:false,train:true,dep:false,skill:"hands",risk:"low",src:"Licensed broker"},
+    {it:"Office Cleaning Contracts",c:"Central Florida",s:"Florida",inprice:128000,rev:210000,sde:52000,emp:3,yr:2014,rec:true,fin:true,train:true,dep:false,skill:"hands",risk:"low",src:"Direct from owner"},
+    {it:"Local Delivery Round",c:"Metro Atlanta",s:"Georgia",inprice:95000,rev:190000,sde:44000,emp:0,yr:2019,rec:false,fin:false,train:true,dep:true,skill:"selling",risk:"med",src:"Licensed broker"},
+    {it:"Garden & Grounds Care",c:"Coastal Georgia",s:"Georgia",inprice:149000,rev:225000,sde:61000,emp:3,yr:2011,rec:true,fin:true,train:true,dep:false,skill:"hands",risk:"low",src:"Licensed broker"},
+    {it:"Car Valeting Shop",c:"Phoenix area",s:"Arizona",inprice:68000,rev:132000,sde:31000,emp:1,yr:2018,rec:false,fin:false,train:false,dep:true,skill:"trade",risk:"med",src:"Licensed broker"},
+    {it:"Neighbourhood Cafe",c:"Charlotte area",s:"North Carolina",inprice:115000,rev:290000,sde:48000,emp:4,yr:2017,rec:false,fin:false,train:true,dep:false,skill:"hands",risk:"high",src:"Licensed broker"},
+    {it:"Courier & Freight Agency",c:"Dallas area",s:"Texas",inprice:215000,rev:410000,sde:88000,emp:2,yr:2013,rec:true,fin:true,train:true,dep:false,skill:"selling",risk:"med",src:"Direct from owner"},
+    {it:"Print & Signs Shop",c:"Nashville area",s:"Tennessee",inprice:178000,rev:265000,sde:72000,emp:3,yr:2015,rec:true,fin:false,train:true,dep:false,skill:"desk",risk:"med",src:"Franchise resale"}
   ];
 
   var sel={states:{},avoid:{}};
@@ -660,7 +717,7 @@
       }).join("");
       d.innerHTML=
         '<div class="ctop"><div><div class="ctitle">'+b.t+'</div>'+
-        '<div class="cloc">'+b.c+', '+b.s+' · '+b.ind+' · established '+b.yr+'</div>'+
+        '<div class="cloc">'+b.c+', '+b.s+' · trading since '+b.yr+'</div>'+
         '<div class="conf"><span class="lock">confidential</span> Ref '+b.id+' · we release the name once you ask for the full file</div></div>'+
         '<div class="score"><div class="pct" style="color:'+col+'">'+s.pct+'%</div><div class="sl">match</div></div></div>'+
         '<div class="stats">'+
@@ -766,7 +823,7 @@
     };
 
     fetch(ENDPOINT,{
-      method:"POST", mode:"no-cors",
+      metho mode:"no-cors",
       headers:{"Content-Type":"text/plain;charset=utf-8"},
       body:JSON.stringify(payload)
     }).then(done).catch(done);
@@ -781,9 +838,48 @@
   if(Q.n) document.getElementById("ln").value=Q.n;
   if(Q.e) document.getElementById("le").value=Q.e;
 
+  var askBtn=document.getElementById("askBtn"), askPanel=document.getElementById("askPanel");
+  function setAsk(open){
+    askPanel.hidden=!open;
+    askBtn.setAttribute("aria-expanded",open?"true":"false");
+  }
+  askBtn.addEventListener("click",function(){ setAsk(askPanel.hidden); });
+  document.getElementById("askClose").addEventListener("click",function(){ setAsk(false); askBtn.focus(); });
+  document.addEventListener("keydown",function(e){ if(e.key==="Escape" && !askPanel.hidden){ setAsk(false); askBtn.focus(); } });
+
   run();
 })();
 </script>
+
+<button class="askbtn" id="askBtn" type="button" aria-expanded="false" aria-controls="askPanel">
+  <span class="q">?</span> Questions
+</button>
+
+<div class="askpanel" id="askPanel" hidden>
+  <div class="ah">
+    <span>Questions people ask first</span>
+    <button class="ax" id="askClose" type="button" aria-label="Close">&times;</button>
+  </div>
+  <div class="ab">
+    <details><summary>Do I have to know how to run this kind of business?</summary>
+      <p>No. Most buyers have never worked in the trade they end up buying. Sellers normally stay on for a few weeks to show you how everything works, and businesses that already have trained staff make it easier still.</p></details>
+
+    <details><summary>How much money do I really need?</summary>
+      <p>The price of the business, plus roughly $15,000 to $30,000 for legal fees, the visa itself and running costs in the first months. There is no official minimum. The cheaper the business, the more of its price you are expected to put in yourself.</p></details>
+
+    <details><summary>Do I have to live where the business is?</summary>
+      <p>Near it, yes. You have to be genuinely running it rather than owning it from abroad. That is why most people look at what is for sale first and choose a city afterwards.</p></details>
+
+    <details><summary>Can my family come with me?</summary>
+      <p>Your husband or wife and any children under 21 come with you. Your partner can apply to work anywhere, not only in your business. Children go to school as normal.</p></details>
+
+    <details><summary>How long does it take?</summary>
+      <p>Usually four to eight months from choosing a business to arriving, depending on how quickly the sale moves and how busy the embassy is.</p></details>
+
+    <details><summary>Can I check my country qualifies?</summary>
+      <p>Yes, and it takes us one sentence. Ask for a file on any business and tell us where you hold citizenship, and we will confirm it before anything else.</p></details>
+  </div>
+</div>
 
 </body>
 </html>
