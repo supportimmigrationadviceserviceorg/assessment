@@ -111,8 +111,32 @@
   .btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px;}
   .btn.ghost{background:transparent;color:var(--ink-2);border:1px solid var(--rule);font-weight:600;}
   .fbar .note{font-size:.8125rem;color:var(--ink-3);}
+  label .hint{font-size:.78rem;line-height:1.45;color:var(--ink-3);font-weight:400;}
 
   /* results */
+
+  .how{list-style:none;margin:1.5rem 0 0;padding:0;display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:0;border:1px solid var(--rule);background:var(--panel);}
+  .how li{display:flex;gap:.7rem;padding:1rem 1.05rem;border-inline-start:1px solid var(--rule-soft);align-items:flex-start;}
+  .how li:first-child{border-inline-start:0;}
+  .how .n{flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:var(--pine);color:var(--ground);
+    font-family:var(--f-m);font-size:.8rem;font-weight:600;display:flex;align-items:center;justify-content:center;}
+  .how .w{display:flex;flex-direction:column;gap:.15rem;font-size:.85rem;line-height:1.5;color:var(--ink-3);}
+  .how .w b{font-family:var(--f-d);font-size:.98rem;color:var(--ink);font-weight:700;}
+  @media (max-width:560px){ .how li{border-inline-start:0;border-top:1px solid var(--rule-soft);} .how li:first-child{border-top:0;} }
+
+  .facts{margin-top:1.1rem;border:1px solid var(--rule);background:var(--panel);
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0;}
+  .facts .f{padding:1rem 1.05rem;border-inline-start:1px solid var(--rule-soft);
+    display:flex;flex-direction:column;gap:.15rem;}
+  .facts .f:first-child{border-inline-start:0;}
+  .facts .fn{font-family:var(--f-m);font-size:1.5rem;font-weight:600;color:var(--pine);
+    font-variant-numeric:tabular-nums;line-height:1.1;}
+  .facts .fl{font-size:.8rem;line-height:1.45;color:var(--ink-3);}
+  .facts .fsrc{grid-column:1/-1;border-top:1px solid var(--rule-soft);
+    padding:.6rem 1.05rem;font-size:.68rem;line-height:1.5;color:var(--ink-3);}
+  @media (max-width:560px){ .facts .f{border-inline-start:0;border-top:1px solid var(--rule-soft);}
+    .facts .f:first-child{border-top:0;} }
 
   .assume{margin-top:1.4rem;display:flex;flex-wrap:wrap;gap:.75rem 1rem;align-items:center;
     background:var(--panel);border:1px solid var(--rule);padding:.8rem 1rem;}
@@ -140,6 +164,8 @@
   .rhead h2{font-size:1.4rem;}
   .rhead .count{font-family:var(--f-m);font-size:.8125rem;color:var(--ink-3);}
 
+  .demo{margin-top:.9rem;padding:.6rem .8rem;background:var(--gold-soft);
+    border-inline-start:3px solid var(--gold);font-size:.85rem;color:var(--ink-2);}
   .card{background:var(--panel);border:1px solid var(--rule);margin-top:1rem;}
   .card.hidden{display:none;}
   .ctop{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;padding:1.1rem 1.15rem .9rem;align-items:start;}
@@ -215,7 +241,7 @@
 
 <div class="topbar"><div class="in">
   <span class="logo">Business<em>Match</em></span>
-  <span class="tag" id="tag">U.S. businesses for treaty investors</span>
+  <span class="tag" id="tag">Buying a business in the United States</span>
   <span class="ident" id="ident" hidden>
     <span class="av" id="identAv">JS</span>
     <span class="idt"><span class="idl" id="identLab">Prepared for</span><span class="idn" id="identName"></span></span>
@@ -226,100 +252,132 @@
 
   <section class="hero">
     <h1>Find a U.S. business that actually fits you.</h1>
-    <p class="sub">Real businesses for sale, scored against your profile, and flagged where they would put your <b>E-2 visa at risk</b>.</p>
+    <p class="sub">If you want to move to the United States by buying a business, the hardest part is knowing which business. This shows you real ones that fit you, and warns you about the ones that would <b>put your visa at risk</b>.</p>
+
+    <ol class="how">
+      <li><span class="n">1</span><span class="w"><b>Tell us about you</b>What you can spend, what you need to earn, where you want to live. Six questions.</span></li>
+      <li><span class="n">2</span><span class="w"><b>See businesses that fit</b>Real businesses for sale, with the numbers, ranked by how well they suit you.</span></li>
+      <li><span class="n">3</span><span class="w"><b>We check the one you like</b>We look at whether it would hold up for your visa, and tell you what to fix first.</span></li>
+    </ol>
+
+    <div class="facts">
+      <div class="f">
+        <span class="fn" id="visaN">51,047</span>
+        <span class="fl" id="visaL">E-2 visas issued in the year to September 2025</span>
+      </div>
+      <div class="f">
+        <span class="fn">$350,000</span>
+        <span class="fl">Median price of a small business sold in the US in 2025</span>
+      </div>
+      <div class="f">
+        <span class="fn">$158,950</span>
+        <span class="fl">Median amount those owners took home in a year</span>
+      </div>
+      <p class="fsrc">US State Department, Report of the Visa Office FY2025, Table XVI. BizBuySell Insight Report, full year 2025.</p>
+    </div>
+
 
     <div class="assume">
       <div class="at">
         <span class="al">Showing matches for</span>
         <span class="av" id="assumeLine">a $50–75K budget in Florida</span>
       </div>
-      <button class="adj" id="adjust" type="button" aria-expanded="false" aria-controls="finder">Not right? Adjust</button>
+      <button class="adj" id="adjust" type="button" aria-expanded="false" aria-controls="finder">Change this</button>
     </div>
 
   </section>
 
   <section class="results">
     <div class="rhead">
-      <h2>Your matches</h2>
+      <h2>Businesses that suit you</h2>
       <span class="count" id="resCount"></span>
     </div>
+    <p class="demo">These are example businesses, to show you how this works. Ask for a file on any of them and we will send you real ones that match.</p>
     <div id="cards"></div>
 
     <div class="refine" id="refinePrompt">
-      <p class="rq" id="rq">Want sharper matches?</p>
-      <p class="rd" id="rd">Four more answers and we can rule out the ones that would not work for you. Takes under a minute, and the list above updates as you go.</p>
-      <button class="btn ghost" id="openRefine" type="button">Sharpen these matches</button>
+      <p class="rq" id="rq">Want a list that actually fits you?</p>
+      <p class="rd" id="rd">Six short questions, about a minute. The list above changes as you answer, so you can see the difference straight away.</p>
+      <button class="btn ghost" id="openRefine" type="button">Answer six questions</button>
     </div>
   <div class="finder" id="finder" hidden>
     <div class="fhead">
-      <span class="t">Sharpen your matches</span>
+      <span class="t">About you</span>
       <span class="c" id="liveCount">8 businesses available</span>
     </div>
 
     <div class="fgrid">
-      <label for="budget"><span class="lab">Total investment budget</span>
+      <label for="budget"><span class="lab">How much money can you put in?</span>
         <select id="budget">
-          <option value="50000">Under $50K</option>
-          <option value="75000" selected>$50K – $75K</option>
-          <option value="100000">$75K – $100K</option>
-          <option value="150000">$100K – $150K</option>
-          <option value="250000">$150K – $250K</option>
-          <option value="500000">$250K+</option>
-        </select></label>
+          <option value="50000">Up to $50,000</option>
+          <option value="75000">$50,000 to $75,000</option>
+          <option value="100000">$75,000 to $100,000</option>
+          <option value="150000">$100,000 to $150,000</option>
+          <option value="250000">$150,000 to $250,000</option>
+          <option value="500000" selected>More than $250,000</option>
+        </select>
+        <span class="hint">The money you can actually put into buying and running the business.</span></label>
 
-      <label for="income"><span class="lab">Income you need</span>
+      <label for="income"><span class="lab">What do you need to earn from it?</span>
         <select id="income">
-          <option value="40000">$40K+</option>
-          <option value="60000" selected>$60K+</option>
-          <option value="80000">$80K+</option>
-          <option value="100000">$100K+</option>
-        </select></label>
+          <option value="40000">About $40,000 a year</option>
+          <option value="60000" selected>About $60,000 a year</option>
+          <option value="80000">About $80,000 a year</option>
+          <option value="100000">$100,000 a year or more</option>
+        </select>
+        <span class="hint">What you need to live on, before tax.</span></label>
 
-      <label for="family"><span class="lab">Family size</span>
+      <label for="family"><span class="lab">Who is coming with you?</span>
         <select id="family">
           <option value="1">Just me</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4" selected>4</option>
-          <option value="5">5+</option>
-        </select></label>
+          <option value="2">Me and my partner</option>
+          <option value="3">Me, my partner and one child</option>
+          <option value="4" selected>Me, my partner and two children</option>
+          <option value="5">Me, my partner and three or more children</option>
+        </select>
+        <span class="hint">The business has to support everyone who comes. This is one of the things visa officers check.</span></label>
 
-      <label for="style"><span class="lab">Your involvement</span>
+      <label for="style"><span class="lab">Do you want to run it yourself?</span>
         <select id="style">
-          <option value="active" selected>Hands-on owner</option>
-          <option value="semi">Semi-absentee</option>
-          <option value="either">Either</option>
-        </select></label>
+          <option value="active" selected>Yes, I want to run it day to day</option>
+          <option value="semi">No, I would hire a manager and oversee it</option>
+          <option value="either">Not sure yet, show me both</option>
+        </select>
+        <span class="hint">For this visa you have to be genuinely in charge, but you do not have to do every job yourself.</span></label>
 
-      <label for="exp"><span class="lab">Your background</span>
+      <label for="exp"><span class="lab">What kind of work have you done?</span>
         <select id="exp">
-          <option value="service">Service &amp; operations</option>
-          <option value="sales" selected>Sales &amp; logistics</option>
-          <option value="trade">Skilled trade</option>
-          <option value="office">Office / professional</option>
-        </select></label>
+          <option value="hands">Hands on work, or running a team</option>
+          <option value="selling" selected>Sales, customers or transport</option>
+          <option value="trade">A skilled trade</option>
+          <option value="desk">Office or professional work</option>
+        </select>
+        <span class="hint">You do not need experience in the same industry. It just helps us rank them.</span></label>
 
-      <label for="risk"><span class="lab">Risk appetite</span>
+      <label for="risk"><span class="lab">How careful do you want to be?</span>
         <select id="risk">
-          <option value="low">Low — proven &amp; steady</option>
-          <option value="med" selected>Medium</option>
-          <option value="high">High — upside first</option>
-        </select></label>
+          <option value="low">Careful. Steady business, fewer surprises</option>
+          <option value="med" selected>In between</option>
+          <option value="high">I will take a risk for a bigger return</option>
+        </select>
+        <span class="hint">Neither answer is wrong. Safer usually means smaller.</span></label>
 
       <div class="wide">
-        <span class="lab" style="display:block;margin-bottom:.4rem;">States you would live in</span>
-        <div class="chips" id="states" role="group" aria-label="Preferred states"></div>
+        <span class="lab" style="display:block;margin-bottom:.25rem;">Do you already have somewhere in mind? <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-3);">(most people do not)</span></span>
+        <span class="hint" style="display:block;margin-bottom:.5rem;">Plenty of people come to us with no idea where to live and pick a place once they see what is for sale there. Leave it on Anywhere and we will show you everything. You will need to live near whichever business you buy, so this is worth deciding later, not now.</span>
+        <div class="chips" id="states" role="group" aria-label="Places you would live"></div>
       </div>
 
       <div class="wide">
-        <span class="lab" style="display:block;margin-bottom:.4rem;">Industries you would rather avoid</span>
-        <div class="chips" id="avoid" role="group" aria-label="Industries to avoid"></div>
+        <span class="lab" style="display:block;margin-bottom:.25rem;">Anything you would not want to run?</span>
+        <span class="hint" style="display:block;margin-bottom:.5rem;">Tick anything you already know is not for you and we will leave it out.</span>
+        <div class="chips" id="avoid" role="group" aria-label="Types of business to leave out"></div>
       </div>
     </div>
 
     <div class="fbar">
-      <button class="btn" id="go" type="button">Update my matches</button>
-      <span class="note">Every change updates the list above straight away. No account needed.</span>
+      <button class="btn" id="go" type="button">Show me better matches</button>
+      <span class="note">The list above changes as soon as you answer. Nothing is saved to an account and nothing is sent yet.</span>
     </div>
   </div>
 
@@ -327,42 +385,42 @@
 
   <section class="hero" style="padding-block:0;">
     <div class="straight">
-      <p class="sl">Straight answer, before you ask</p>
-      <p>Some of these listings you could eventually find yourself. Here is what you cannot do alone: <b>structure the purchase so the investment actually qualifies for your visa</b>, and <b>get a U.S. broker to take you seriously</b> before you have status, a U.S. bank account and proof of funds.</p>
-      <p>A business can be excellent and still fail your case — wrong deal structure, seller financing secured against the assets, no employees. Brokers are paid by the seller and do not check any of that. We work for you, and we do.</p>
+      <p class="sl">An honest word</p>
+      <p>Some of these businesses you could find by yourself online. Here is what you cannot do on your own: <b>set the purchase up so it actually counts for your visa</b>, and <b>get an American broker to take you seriously</b> before you have a visa, a US bank account and proof of your money.</p>
+      <p>A business can be a good business and still cost you the visa. Nobody on the payroll, the wrong kind of loan from the seller, the wrong paperwork. The broker is paid by the seller and does not check any of that. We are paid by you, so we do.</p>
     </div>
   </section>
 
   <section class="lead" id="lead">
-    <p class="price-tag">$100 <s>$495</s> <span>introductory rate while we build our first cases · credited in full against our search service</span></p>
-    <h3>The full file on a specific business</h3>
-    <p>Within two business days, on the business you choose:</p>
+    <p class="price-tag">$100 <s>$495</s> <span>first clients only. If you go on to use our full search service, this comes off the price</span></p>
+    <h3>The full file on one business</h3>
+    <p>Pick a business above and within two working days we send you:</p>
     <ul class="incl">
-      <li><b>Identity released</b> — name, exact location and the listing itself, under NDA</li>
-      <li><b>Verified financials</b> — three years of tax returns checked against the asking figures</li>
-      <li><b>E-2 Viability Report</b> — scored on substantiality, marginality, ownership and deal structure, with every point a consular officer is likely to press on</li>
-      <li><b>What to change before you offer</b> — the terms that would disqualify the investment, and what to ask for instead</li>
+      <li><b>Which business it actually is</b> the name, the exact address and the original listing</li>
+      <li><b>Proof the numbers are real</b> three years of tax returns, checked against what the seller claims</li>
+      <li><b>Whether it would pass for your visa</b> written in plain English, with every question an officer is likely to ask you about it</li>
+      <li><b>What to change before you offer</b> the terms that would cost you the visa, and what to ask for instead</li>
     </ul>
     <div id="leadForm"><div class="lg">
-      <label for="ln"><span class="lab">Full name</span><input type="text" id="ln" placeholder="John Smith"></label>
+      <label for="ln"><span class="lab">Your name</span><input type="text" id="ln" placeholder="John Smith"></label>
       <label for="le"><span class="lab">Email</span><input type="email" id="le" placeholder="john@example.com"></label>
       <label for="lp"><span class="lab">Phone</span><input type="tel" id="lp" placeholder="+44 …"></label>
-      <label for="lt"><span class="lab">When would you buy?</span>
+      <label for="lt"><span class="lab">When are you hoping to buy?</span>
         <select id="lt">
           <option>Within 3 months</option>
           <option selected>3–6 months</option>
           <option>6–12 months</option>
-          <option>Still exploring</option>
+          <option>Just looking for now</option>
         </select></label>
     </div>
     <p class="err" id="err">Please enter your name and a valid email address.</p>
     <button class="btn" id="send" type="button">Request this file</button></div>
-    <p class="fine">We confirm the business is still available before taking any payment. NDA is signed electronically at that point.</p>
-    <p class="thanks" id="thanks">Thank you — we will confirm availability and send the NDA within two business days.</p>
+    <p class="fine">We check the business is still for sale before you pay anything. If it has already sold we will tell you and show you the closest ones instead, free.</p>
+    <p class="thanks" id="thanks">Thank you. We will check the business is still available and come back to you within two working days.</p>
   </section>
 
   <footer>
-    Example listings shown for demonstration. All listings are shown confidentially at the seller's request — business names and exact locations are released under NDA, as is standard in business sales. Match scores are an initial screen, not legal advice, and do not replace a full case review. We are paid by you, never by the seller, and we never hold transaction funds — purchase deposits go to a licensed escrow or attorney trust account.
+    The businesses on this page are examples, shown so you can see how the service works. Real businesses for sale are always listed without their name or exact address, because sellers do not want staff and customers to know before a sale is agreed. You get the name once you ask for the full file. The match score is a first look, not legal advice, and it does not replace a proper review of your case. We are paid by you and never by the seller. We never hold your purchase money. Deposits go to a licensed escrow company or a lawyer\u2019s client account.
   </footer>
 
 </div>
@@ -372,20 +430,22 @@
   // ---- CONFIGURE ME: your Google Apps Script web app URL ----
   var ENDPOINT="https://script.google.com/macros/s/AKfycbze_lHHIwgSzjLw6ucxyBRAA9sJgYF_qBpBJl8JW4oUdmRzsi6E-VOR1gx8u9n9TCnLTA/exec";
 
-  var STATES=["Florida","Georgia","Texas","North Carolina","Arizona","Tennessee","Anywhere"];
-  var AVOID=["Restaurants","Retail","Automotive","Construction","Beauty"];
+  // Places come from the businesses we actually have, so the options can never
+  // offer somewhere with nothing in it. "Anywhere" is first and is the default.
+  var STATES=null;
+  var AVOID=null;
 
   // Listings are shown confidentially: no business name, region rather than city,
   // and no broker identity — the industry standard, and it keeps the seller protected.
   var BIZ=[
-    {id:"FL-1184",t:"Established Pool Service Route",c:"Tampa Bay area",s:"Florida",ind:"Property Services",price:62000,rev:145000,sde:71000,emp:2,yr:2016,rec:true,fin:false,train:true,dep:false,skill:"service",risk:"low",src:"Licensed broker"},
-    {id:"FL-1207",t:"Commercial Cleaning Contract Book",c:"Central Florida",s:"Florida",ind:"Property Services",price:69000,rev:160000,sde:64000,emp:3,yr:2014,rec:true,fin:true,train:true,dep:false,skill:"service",risk:"low",src:"Direct from owner"},
-    {id:"GA-0931",t:"Last-Mile Delivery Operation",c:"Metro Atlanta",s:"Georgia",ind:"Transportation",price:79000,rev:190000,sde:58000,emp:0,yr:2019,rec:false,fin:false,train:true,dep:true,skill:"sales",risk:"med",src:"Licensed broker"},
-    {id:"GA-0944",t:"Landscaping & Grounds Care",c:"Coastal Georgia",s:"Georgia",ind:"Property Services",price:74000,rev:168000,sde:69000,emp:3,yr:2011,rec:true,fin:true,train:true,dep:false,skill:"service",risk:"low",src:"Licensed broker"},
-    {id:"AZ-0612",t:"Auto Detailing Shop",c:"Phoenix metro",s:"Arizona",ind:"Automotive",price:58000,rev:132000,sde:47000,emp:1,yr:2018,rec:false,fin:false,train:false,dep:true,skill:"trade",risk:"med",src:"Licensed broker"},
-    {id:"NC-0388",t:"Neighborhood Café",c:"Charlotte metro",s:"North Carolina",ind:"Restaurants",price:71000,rev:243000,sde:52000,emp:4,yr:2017,rec:false,fin:false,train:true,dep:false,skill:"service",risk:"high",src:"Licensed broker"},
-    {id:"TX-1503",t:"B2B Courier & Freight Brokerage",c:"Dallas–Fort Worth",s:"Texas",ind:"Transportation",price:96000,rev:310000,sde:88000,emp:2,yr:2013,rec:true,fin:true,train:true,dep:false,skill:"sales",risk:"med",src:"Direct from owner"},
-    {id:"TN-0725",t:"Sign & Print Franchise Resale",c:"Nashville metro",s:"Tennessee",ind:"Retail",price:118000,rev:265000,sde:82000,emp:3,yr:2015,rec:true,fin:false,train:true,dep:false,skill:"office",risk:"med",src:"Franchise resale"}
+    {id:"FL-1184",t:"Pool Cleaning Round",c:"Tampa Bay area",s:"Florida",ind:"Home & Property Services",price:89000,rev:145000,sde:38000,emp:2,yr:2016,rec:true,fin:false,train:true,dep:false,skill:"hands",risk:"low",src:"Licensed broker"},
+    {id:"FL-1207",t:"Office Cleaning Contracts",c:"Central Florida",s:"Florida",ind:"Home & Property Services",price:128000,rev:210000,sde:52000,emp:3,yr:2014,rec:true,fin:true,train:true,dep:false,skill:"hands",risk:"low",src:"Direct from owner"},
+    {id:"GA-0931",t:"Local Delivery Round",c:"Metro Atlanta",s:"Georgia",ind:"Driving & Delivery",price:95000,rev:190000,sde:44000,emp:0,yr:2019,rec:false,fin:false,train:true,dep:true,skill:"selling",risk:"med",src:"Licensed broker"},
+    {id:"GA-0944",t:"Garden & Grounds Care",c:"Coastal Georgia",s:"Georgia",ind:"Home & Property Services",price:149000,rev:225000,sde:61000,emp:3,yr:2011,rec:true,fin:true,train:true,dep:false,skill:"hands",risk:"low",src:"Licensed broker"},
+    {id:"AZ-0612",t:"Car Valeting Shop",c:"Phoenix area",s:"Arizona",ind:"Cars & Vehicles",price:68000,rev:132000,sde:31000,emp:1,yr:2018,rec:false,fin:false,train:false,dep:true,skill:"trade",risk:"med",src:"Licensed broker"},
+    {id:"NC-0388",t:"Neighbourhood Cafe",c:"Charlotte area",s:"North Carolina",ind:"Food & Drink",price:115000,rev:290000,sde:48000,emp:4,yr:2017,rec:false,fin:false,train:true,dep:false,skill:"hands",risk:"high",src:"Licensed broker"},
+    {id:"TX-1503",t:"Courier & Freight Agency",c:"Dallas area",s:"Texas",ind:"Driving & Delivery",price:215000,rev:410000,sde:88000,emp:2,yr:2013,rec:true,fin:true,train:true,dep:false,skill:"selling",risk:"med",src:"Direct from owner"},
+    {id:"TN-0725",t:"Print & Signs Shop",c:"Nashville area",s:"Tennessee",ind:"Shops & Retail",price:178000,rev:265000,sde:72000,emp:3,yr:2015,rec:true,fin:false,train:true,dep:false,skill:"desk",risk:"med",src:"Franchise resale"}
   ];
 
   var sel={states:{},avoid:{}};
@@ -415,6 +475,18 @@
   preset("exp",Q.x); preset("style",Q.m); preset("risk",Q.r);
   if(saved && !Q.b) KNOWN.budget=true;
   restore();
+
+  // If the CRM told us their nationality (?c=Germany) show them their own
+  // country's figure. Anything not listed falls back to the worldwide total.
+  var BYCOUNTRY={Japan:"15,367",Canada:"6,779","South Korea":"5,359",
+                 Germany:"3,271",Taiwan:"2,137"};
+  (function(){
+    var c=Q.c && Q.c.trim();
+    if(!c || !BYCOUNTRY[c]) return;
+    var n=document.getElementById("visaN"), l=document.getElementById("visaL");
+    if(n) n.textContent=BYCOUNTRY[c];
+    if(l) l.textContent="E-2 visas went to people from "+c+" in the year to September 2025";
+  })();
 
   var STORE="bm-profile-v1";
   var saved=null;
@@ -469,7 +541,9 @@
       host.appendChild(b);
     });
   }
+  STATES=["Anywhere"].concat(BIZ.map(function(b){return b.s;}).filter(function(v,i,a){return a.indexOf(v)===i;}).sort());
   chips(document.getElementById("states"),STATES,sel.states);
+  AVOID=BIZ.map(function(b){return b.ind;}).filter(function(v,i,a){return a.indexOf(v)===i;}).sort();
   chips(document.getElementById("avoid"),AVOID,sel.avoid);
   // opening state: the one from the email link; with none given, Anywhere,
   // so a state we were never told about is not quietly filtered out.
@@ -506,27 +580,27 @@
     // budget headroom (25)
     var head=1-(b.price/budget);
     pts+=25*Math.min(1,0.45+head*1.3);
-    if(head>0.15) why.push(["plus","Leaves "+money(budget-b.price)+" of your budget for working capital"]);
+    if(head>0.15) why.push(["plus","Leaves you "+money(budget-b.price)+" spare for stock, wages and the first few months"]);
 
     // income (25)
     var r=b.sde/income;
     pts+=25*Math.max(0,Math.min(1,(r-0.7)/0.6));
-    if(r>=1.15) why.push(["plus","Cash flow of "+money(b.sde)+" clears your "+money(income)+" target"]);
-    else if(r<1) why.push(["minus","Cash flow of "+money(b.sde)+" falls short of your "+money(income)+" target"]);
+    if(r>=1.15) why.push(["plus","Pays the owner about "+money(b.sde)+" a year, which covers what you said you need"]);
+    else if(r<1) why.push(["minus","Pays about "+money(b.sde)+" a year, less than the "+money(income)+" you said you need"]);
 
     // location (15)
-    if(sel.states[b.s]){pts+=15;why.push(["plus",b.s+" is on your list"]);}
+    if(sel.states[b.s]){pts+=15;why.push(["plus","In "+b.s+", one of the places you chose"]);}
     else pts+=9;
 
     // experience (12)
-    if(b.skill===exp){pts+=12;why.push(["plus","Matches your background"]);}
+    if(b.skill===exp){pts+=12;why.push(["plus","Close to the kind of work you have done before"]);}
     else if((b.skill==="service"&&exp==="trade")||(b.skill==="sales"&&exp==="office")) pts+=8;
-    else {pts+=4;why.push(["minus","Outside your stated background — expect a learning curve"]);}
+    else {pts+=4;why.push(["minus","Different from the work you have done, so expect a learning period"]);}
 
     // management style (10)
     var semiOk=b.emp>=3;
     if(style==="active"){pts+=10;}
-    else if(style==="semi"){ if(semiOk){pts+=10;why.push(["plus","Enough staff to run semi-absentee"]);} else {pts+=3;why.push(["minus","Too few staff to step back from"]);} }
+    else if(style==="semi"){ if(semiOk){pts+=10;why.push(["plus","Has enough staff that a manager could run the day to day"]);} else {pts+=3;why.push(["minus","Too few staff for you to step back. You would be working in it"]);} }
     else pts+=8;
 
     // risk (8)
@@ -535,16 +609,16 @@
     pts+=8-gap*3.5;
 
     // quality signals (5)
-    if(b.rec){pts+=3;why.push(["plus","Recurring customers, not one-off sales"]);}
+    if(b.rec){pts+=3;why.push(["plus","Customers come back every month, so the income is steady"]);}
     if(b.emp>0) pts+=2;
 
     // --- E-2 specific warnings (not scored, always shown)
     var need=28000+9000*(family-1);
-    if(b.sde<need) why.push(["minus","E-2 risk: cash flow below a living wage for a family of "+family+" — marginality"]);
-    if(b.emp===0) why.push(["minus","E-2 risk: no existing employees — the classic marginality flag"]);
-    if(b.dep) why.push(["minus","E-2 risk: business depends heavily on the current owner"]);
-    if(b.fin) why.push(["minus","E-2 note: seller financing may not count toward your qualifying investment"]);
-    if(b.train) why.push(["plus","Seller provides a training period"]);
+    if(b.sde<need) why.push(["minus","Visa warning: this would not earn enough to support your household. Officers refuse cases where the business only just feeds the family"]);
+    if(b.emp===0) why.push(["minus","Visa warning: nobody works here except the owner. Officers want to see a business that gives other people jobs"]);
+    if(b.dep) why.push(["minus","Warning: the business runs on the current owner personally. Customers may leave when they do"]);
+    if(b.fin) why.push(["minus","Worth knowing: the seller lends you part of the price. That part may not count as your investment for the visa"]);
+    if(b.train) why.push(["plus","The seller stays on for a while to show you how it runs"]);
 
     return {b:b,pct:Math.max(35,Math.min(99,Math.round(pts))),why:why};
   }
@@ -556,12 +630,12 @@
     window.__lastResults=out;
 
     document.getElementById("liveCount").textContent=BIZ.length+" businesses available";
-    document.getElementById("resCount").textContent=out.length+" of "+BIZ.length+" match your profile";
+    document.getElementById("resCount").textContent=out.length+" of "+BIZ.length+" of these could work for you";
     paintAssume();
     if(!KNOWN.budget){
       var rq=document.getElementById("rq"), rd=document.getElementById("rd");
-      if(rq) rq.textContent="Tell us your budget and this list gets much shorter";
-      if(rd) rd.textContent="Right now we are showing you everything we have, at every price. Four answers and we can rule out the ones that would not work for you.";
+      if(rq) rq.textContent="Tell us a bit about yourself and this gets much more useful";
+      if(rd) rd.textContent="Right now you are seeing everything we have, at every price. Six short questions and we can take out the ones that would not work for you.";
     }
     var rh=document.querySelector(".rhead");
     if(window.__painted && rh){ rh.classList.remove("updated"); void rh.offsetWidth; rh.classList.add("updated"); }
@@ -572,7 +646,7 @@
     if(!out.length){
       var e=document.createElement("div");
       e.className="empty";
-      e.textContent="Nothing matches those filters yet. Widen your budget or add a state — new businesses are added weekly.";
+      e.textContent="Nothing here fits those answers yet. Try raising the amount you can spend, or adding another place you would live.";
       cards.appendChild(e);
       return;
     }
@@ -587,15 +661,15 @@
       d.innerHTML=
         '<div class="ctop"><div><div class="ctitle">'+b.t+'</div>'+
         '<div class="cloc">'+b.c+', '+b.s+' · '+b.ind+' · established '+b.yr+'</div>'+
-        '<div class="conf"><span class="lock">confidential</span> Ref '+b.id+' · name and exact location released under NDA</div></div>'+
+        '<div class="conf"><span class="lock">confidential</span> Ref '+b.id+' · we release the name once you ask for the full file</div></div>'+
         '<div class="score"><div class="pct" style="color:'+col+'">'+s.pct+'%</div><div class="sl">match</div></div></div>'+
         '<div class="stats">'+
-          '<div class="stat"><div class="k">Asking</div><div class="v">'+money(b.price)+'</div></div>'+
-          '<div class="stat"><div class="k">Revenue</div><div class="v">'+money(b.rev)+'</div></div>'+
-          '<div class="stat"><div class="k">Cash flow</div><div class="v">'+money(b.sde)+'</div></div>'+
-          '<div class="stat"><div class="k">Employees</div><div class="v">'+b.emp+'</div></div>'+
+          '<div class="stat"><div class="k">Price</div><div class="v">'+money(b.price)+'</div></div>'+
+          '<div class="stat"><div class="k">Sales a year</div><div class="v">'+money(b.rev)+'</div></div>'+
+          '<div class="stat"><div class="k">Owner takes home</div><div class="v">'+money(b.sde)+'</div></div>'+
+          '<div class="stat"><div class="k">Staff</div><div class="v">'+b.emp+'</div></div>'+
         '</div>'+
-        '<div class="why"><div class="wl">Why this matches you</div><ul>'+lis+'</ul></div>'+
+        '<div class="why"><div class="wl">What this means for you</div><ul>'+lis+'</ul></div>'+
         '<div class="cact">'+
           '<button class="mini primary" type="button">Request full file</button>'+
           '<button class="mini" type="button" aria-pressed="false">Save</button>'+
@@ -630,21 +704,21 @@
     var b=document.getElementById("budget");
     var band=b.options[b.selectedIndex].text;
     var st=Object.keys(sel.states).filter(function(x){return x!=="Anywhere";});
-    var where = sel.states["Anywhere"] || !st.length ? "across every state"
+    var where = sel.states["Anywhere"] || !st.length ? "anywhere in the country"
               : st.length===1 ? "in "+st[0]
               : "in "+st.slice(0,-1).join(", ")+" and "+st[st.length-1];
 
     // Only state a budget as fact if the link actually carried one, or the
     // visitor set it themselves. Otherwise say plainly that we do not know.
-    var money = KNOWN.budget ? "a "+band+" budget" : "every price we have";
-    return money+" "+where;
+    var money = KNOWN.budget ? band.toLowerCase().replace("up to","a budget up to").replace("more than","a budget of more than").replace(/^\$/,"a budget of $") : "businesses at every price";
+    return money+", "+where;
   }
   function paintAssume(){
     var el=document.getElementById("assumeLine");
     if(!el) return;
     el.textContent=assumeText();
     var lab=document.querySelector(".assume .al");
-    if(lab) lab.textContent = KNOWN.budget ? "Showing matches for" : "You have not told us a budget yet";
+    if(lab) lab.textContent = KNOWN.budget ? "Showing you" : "You have not told us your budget yet, so we are showing";
   }
 
   // ---- open / close the refinement panel ---------------------------------
