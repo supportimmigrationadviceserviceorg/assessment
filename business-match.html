@@ -69,6 +69,16 @@
   .logo em{font-style:normal;color:var(--pine);}
   .topbar .tag{font-size:.75rem;color:var(--ink-3);letter-spacing:.04em;}
 
+
+  .ident{display:flex;align-items:center;gap:.55rem;}
+  .ident .av{width:31px;height:31px;border-radius:50%;background:var(--pine);color:var(--ground);
+    font-family:var(--f-b);font-size:.75rem;font-weight:700;letter-spacing:.02em;
+    display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .ident .idt{display:flex;flex-direction:column;line-height:1.2;min-width:0;}
+  .ident .idl{font-size:.6rem;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);font-weight:700;}
+  .ident .idn{font-size:.8125rem;font-weight:600;color:var(--ink);white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis;}
+  @media (max-width:520px){ .topbar .tag{display:none;} }
   /* hero */
   .hero{padding-block:2.75rem 1.75rem;}
   .hero h1{font-size:clamp(1.9rem,5vw,2.9rem);letter-spacing:-.015em;max-width:18ch;}
@@ -205,7 +215,11 @@
 
 <div class="topbar"><div class="in">
   <span class="logo">Business<em>Match</em></span>
-  <span class="tag">U.S. businesses for treaty investors</span>
+  <span class="tag" id="tag">U.S. businesses for treaty investors</span>
+  <span class="ident" id="ident" hidden>
+    <span class="av" id="identAv">JS</span>
+    <span class="idt"><span class="idl" id="identLab">Prepared for</span><span class="idn" id="identName"></span></span>
+  </span>
 </div></div>
 
 <div class="wrap">
@@ -399,10 +413,45 @@
   if(!Q.b) document.getElementById("budget").value="500000";   // no budget given: hide nothing
   preset("budget",Q.b); preset("income",Q.i); preset("family",Q.f);
   preset("exp",Q.x); preset("style",Q.m); preset("risk",Q.r);
+  if(saved && !Q.b) KNOWN.budget=true;
+  restore();
 
-  if(Q.n){
+  var STORE="bm-profile-v1";
+  var saved=null;
+  try{ saved=JSON.parse(localStorage.getItem(STORE)||"null"); }catch(e){}
+
+  var who = Q.n || (saved && saved.n) || "";
+  if(who){
     var h=document.querySelector(".hero h1");
-    if(h) h.textContent=Q.n+", here are the U.S. businesses that fit you.";
+    if(h) h.textContent=who+", here are the U.S. businesses that fit you.";
+
+    var id=document.getElementById("ident");
+    var initials=who.trim().split(/\s+/).slice(0,2).map(function(w){return w[0];}).join("").toUpperCase();
+    document.getElementById("identAv").textContent=initials||"?";
+    document.getElementById("identName").textContent=who;
+    document.getElementById("identLab").textContent =
+      (!Q.n && saved) ? "Welcome back" : "Prepared for";
+    id.hidden=false;
+    var tg=document.getElementById("tag"); if(tg) tg.hidden=true;
+  }
+
+  // Anything the visitor changed last time wins over the email link defaults,
+  // so coming back to the page does not throw away their own answers.
+  function restore(){
+    if(!saved) return;
+    ["budget","income","family","style","exp","risk"].forEach(function(k){
+      if(saved[k]){ var e=document.getElementById(k); if(e) e.value=saved[k]; }
+    });
+  }
+  function remember(){
+    try{
+      var o={n:who};
+      ["budget","income","family","style","exp","risk"].forEach(function(k){
+        o[k]=document.getElementById(k).value;
+      });
+      o.states=Object.keys(sel.states); o.avoid=Object.keys(sel.avoid);
+      localStorage.setItem(STORE,JSON.stringify(o));
+    }catch(e){}
   }
 
   function chips(host,list,bag){
@@ -425,6 +474,15 @@
   // opening state: the one from the email link; with none given, Anywhere,
   // so a state we were never told about is not quietly filtered out.
   (function(){
+    if(saved && saved.states && saved.states.length && !Q.s){
+      saved.states.forEach(function(n){
+        var c=document.getElementById("states-"+n.replace(/\W/g,"")); if(c) c.click();
+      });
+      (saved.avoid||[]).forEach(function(n){
+        var c=document.getElementById("avoid-"+n.replace(/\W/g,"")); if(c) c.click();
+      });
+      return;
+    }
     var want=Q.s&&document.getElementById("states-"+Q.s.replace(/\W/g,""));
     (want||document.getElementById("states-Anywhere")).click();
   })();
@@ -508,6 +566,7 @@
     var rh=document.querySelector(".rhead");
     if(window.__painted && rh){ rh.classList.remove("updated"); void rh.offsetWidth; rh.classList.add("updated"); }
     window.__painted=true;
+    remember();
 
     cards.innerHTML="";
     if(!out.length){
