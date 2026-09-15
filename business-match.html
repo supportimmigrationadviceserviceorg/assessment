@@ -210,7 +210,14 @@
   .mini:focus-visible{outline:2px solid var(--pine);outline-offset:1px;}
   .mini[aria-pressed="true"]{background:var(--gold-soft);border-color:var(--gold);color:var(--gold);}
 
-  .empty{background:var(--panel);border:1px dashed var(--rule);padding:1.6rem;text-align:center;color:var(--ink-2);margin-top:1rem;}
+  .empty{background:var(--panel);border:1px solid var(--clay);border-top:3px solid var(--clay);
+    padding:1.4rem 1.3rem;color:var(--ink-2);margin-top:1rem;display:flex;flex-direction:column;gap:.6rem;}
+  .empty .eh{font-family:var(--f-d);font-weight:700;font-size:1.2rem;color:var(--ink);}
+  .empty .eb{font-size:.9375rem;line-height:1.65;max-width:62ch;}
+  .empty .eb b{color:var(--ink);font-weight:700;}
+  .empty .ebtns{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:.5rem;align-items:center;}
+  .lead .free{font-family:var(--f-m);font-weight:600;font-size:1.5rem;color:var(--pine);line-height:1.2;}
+  .lead.alt{border-color:var(--clay);background:var(--clay-soft);}
 
   /* lead form */
   .lead{background:var(--pine-soft);border:1px solid var(--pine);margin-top:1.5rem;padding:1.25rem 1.15rem;}
@@ -451,9 +458,17 @@
   </section>
 
   <section class="lead" id="lead">
-    <p class="price-tag">$100 <s>$495</s> <span>first clients only. If you go on to use our full search service, this comes off the price</span></p>
-    <h3>The full file on one business</h3>
-    <p>Pick a business above and within two working days we send you:</p>
+    <div id="payHead">
+      <p class="price-tag">$100 <s>$495</s> <span>first clients only. If you go on to use our full search service, this comes off the price</span></p>
+      <h3>The full file on one business</h3>
+      <p>Pick a business above and within two working days we send you:</p>
+    </div>
+
+    <div id="altHead" hidden>
+      <p class="free">Free</p>
+      <h3>Which routes are actually open to you</h3>
+      <p>Leave your details and we will come back to you within two working days with the routes that fit your situation, and what each one would take. No charge for this, and no obligation.</p>
+    </div>
     <ul class="incl">
       <li><b>Which business it actually is</b> the name, the exact address and the original listing</li>
       <li><b>Proof the numbers are real</b> three years of tax returns, checked against what the seller claims</li>
@@ -733,11 +748,56 @@
 
     cards.innerHTML="";
     if(!out.length){
+      // Nobody is a dead end. If buying a business does not fit their budget,
+      // there are other routes into the United States, and this is exactly the
+      // moment to say so rather than leave them looking at an empty page.
+      var budget=+val("budget");
+      var cheapest=BIZ.reduce(function(a,b){return b.price<a.price?b:a;});
       var e=document.createElement("div");
       e.className="empty";
-      e.textContent="Nothing here fits those answers yet. Try raising the amount you can spend, or adding another place you would live.";
+      e.innerHTML=
+        '<p class="eh">Nothing here matches yet, and that is worth knowing now.</p>'+
+        (budget<cheapest.price
+          ? '<p class="eb">The smallest business we have is '+money(cheapest.price)+
+            ', and buying one is only one of the ways into the United States.</p>'
+          : '<p class="eb">Buying a business is only one of the ways into the United States, '+
+            'and it is not the right one for everybody.</p>')+
+        '<p class="eb"><b>There are routes that need no investment at all.</b> Some are based on '+
+        'what you have already achieved in your career. Some on an employer sponsoring you. '+
+        'One is a free annual lottery. Which ones are open to you depends on your work, '+
+        'your qualifications, your family and your nationality.</p>'+
+        '<div class="ebtns">'+
+          '<button class="btn" type="button" id="otherRoutes">Show me the other routes</button>'+
+          '<button class="mini" type="button" id="widen">Or widen my search</button>'+
+        '</div>';
       cards.appendChild(e);
+
+      document.getElementById("otherRoutes").addEventListener("click",function(){
+        window.__altRoute=true;
+        var lead=document.getElementById("lead");
+        lead.classList.add("alt");
+        document.getElementById("send").textContent="Show me my options";
+        document.getElementById("altHead").hidden=false;
+        document.getElementById("payHead").hidden=true;
+        lead.scrollIntoView({behavior:"smooth",block:"center"});
+      });
+      document.getElementById("widen").addEventListener("click",function(){
+        var b=document.getElementById("budget");
+        if(b.selectedIndex < b.options.length-1) b.selectedIndex++;
+        KNOWN.budget=true;
+        var any=document.getElementById("states-Anywhere");
+        if(any && any.getAttribute("aria-pressed")!=="true") any.click(); else run();
+      });
       return;
+    }
+
+    // coming back to a list that works again clears the other-routes framing
+    if(window.__altRoute){
+      window.__altRoute=false;
+      document.getElementById("lead").classList.remove("alt");
+      document.getElementById("send").textContent="Request this file";
+      document.getElementById("altHead").hidden=true;
+      document.getElementById("payHead").hidden=false;
     }
 
     out.forEach(function(s){
@@ -837,6 +897,7 @@
     }
     document.getElementById("err").style.display="none";
     btn.disabled=true; btn.textContent="Sending…";
+    var alt=!!window.__altRoute;
 
     var top=(window.__lastResults||[]).slice(0,3).map(function(s){
       return s.b.id+" ("+s.pct+"%)";
@@ -852,6 +913,7 @@
       avoid:Object.keys(sel.avoid).join("|"),
       matches:top,
       source:Q.utm||"email",
+      enquiry: window.__altRoute ? "OTHER ROUTES - budget below business purchase" : "business report",
       page:location.href
     };
 
@@ -867,15 +929,24 @@
       var top=(window.__lastResults||[])[0];
       var ref=(top&&top.b&&top.b.id)||"";
       var title=(top&&top.b&&top.b.t)||"";
-      var q="?ref="+encodeURIComponent(ref)+"&n="+encodeURIComponent(name)+
-            "&t="+encodeURIComponent(title);
-      box.innerHTML=
-        '<p class="tk">Thank you, '+name.split(" ")[0]+'. We have your request.</p>'+
-        '<p class="tb">We check the business is still for sale before you pay anything. '+
-        'If it has already sold we will tell you and show you the closest ones instead, free.</p>'+
-        '<a class="btn" style="margin-top:1rem;display:inline-block;text-decoration:none;" '+
-        'href="pay.html'+q+'">Continue to payment</a>'+
-        '<p class="tb" style="margin-top:.7rem;">Or wait for our email. Either works.</p>';
+      var first=name.split(" ")[0];
+      if(alt){
+        box.innerHTML=
+          '<p class="tk">Thank you, '+first+'. We have your details.</p>'+
+          '<p class="tb">We will look at which routes into the United States are open to you '+
+          'and come back within two working days. There is nothing to pay and nothing to do '+
+          'in the meantime.</p>';
+      } else {
+        var q="?ref="+encodeURIComponent(ref)+"&n="+encodeURIComponent(name)+
+              "&t="+encodeURIComponent(title);
+        box.innerHTML=
+          '<p class="tk">Thank you, '+first+'. We have your request.</p>'+
+          '<p class="tb">We check the business is still for sale before you pay anything. '+
+          'If it has already sold we will tell you and show you the closest ones instead, free.</p>'+
+          '<a class="btn" style="margin-top:1rem;display:inline-block;text-decoration:none;" '+
+          'href="pay.html'+q+'">Continue to payment</a>'+
+          '<p class="tb" style="margin-top:.7rem;">Or wait for our email. Either works.</p>';
+      }
       box.style.display="block";
     }
   });
