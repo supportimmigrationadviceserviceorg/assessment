@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Tell us your budget, background and where you want to live. We match you to real U.S. businesses for sale and score each one on whether it holds up for an E-2 visa.">
+<meta name="robots" content="noindex">
+<style>:root{color-scheme:light}html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Find a U.S. Business That Fits You | BusinessMatch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+</head>
+<body>
+
+<style>
+  :root{
+    --ground:#F4F2ED;
+    --panel:#FFFFFF;
+    --panel-2:#EAE6DE;
+    --ink:#1D2321;
+    --ink-2:#4E5956;
+    --ink-3:#7C8683;
+    --rule:#D3CEC4;
+    --rule-soft:#E3DFD7;
+    --pine:#1F4D3D;
+    --pine-2:#2E6B55;
+    --pine-soft:#DCE9E3;
+    --clay:#A8542E;
+    --clay-soft:#F4E2D8;
+    --gold:#8A6B1F;
+    --gold-soft:#F2E8CE;
+
+    --f-d:"Fraunces",Georgia,serif;
+    --f-b:"Public Sans","Segoe UI",system-ui,sans-serif;
+    --f-m:"IBM Plex Mono",ui-monospace,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#141917;--panel:#1C2321;--panel-2:#262E2B;
+      --ink:#EDF0EE;--ink-2:#B3BDB9;--ink-3:#828D89;
+      --rule:#333D39;--rule-soft:#28312E;
+      --pine:#79BFA3;--pine-2:#95D0B7;--pine-soft:#17322A;
+      --clay:#DD9877;--clay-soft:#33201A;
+      --gold:#D4B466;--gold-soft:#332C16;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#141917;--panel:#1C2321;--panel-2:#262E2B;
+    --ink:#EDF0EE;--ink-2:#B3BDB9;--ink-3:#828D89;
+    --rule:#333D39;--rule-soft:#28312E;
+    --pine:#79BFA3;--pine-2:#95D0B7;--pine-soft:#17322A;
+    --clay:#DD9877;--clay-soft:#33201A;
+    --gold:#D4B466;--gold-soft:#332C16;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{background:var(--ground);color:var(--ink);font-family:var(--f-b);
+    font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+  img{max-width:100%;}
+  h1,h2,h3{font-family:var(--f-d);margin:0;line-height:1.18;text-wrap:balance;font-weight:700;}
+  p{margin:0;}
+  .wrap{max-width:64rem;margin:0 auto;padding-inline:20px;padding-block:0 4rem;}
+
+  .topbar{border-bottom:1px solid var(--rule);background:var(--panel);}
+  .topbar .in{max-width:64rem;margin:0 auto;padding:.85rem 20px;display:flex;justify-content:space-between;align-items:center;gap:1rem;}
+  .logo{font-family:var(--f-d);font-weight:700;font-size:1.0625rem;letter-spacing:-.01em;}
+  .logo em{font-style:normal;color:var(--pine);}
+  .topbar .tag{font-size:.75rem;color:var(--ink-3);letter-spacing:.04em;}
+
+  /* hero */
+  .hero{padding-block:2.75rem 1.75rem;}
+  .hero h1{font-size:clamp(1.9rem,5vw,2.9rem);letter-spacing:-.015em;max-width:18ch;}
+  .hero .sub{color:var(--ink-2);font-size:1.0625rem;max-width:56ch;margin-top:.85rem;}
+  .hero .sub b{color:var(--ink);font-weight:600;}
+
+  /* form */
+  .finder{background:var(--panel);border:1px solid var(--rule);margin-top:1.75rem;}
+  .finder .fhead{padding:.8rem 1.15rem;background:var(--panel-2);border-bottom:1px solid var(--rule-soft);
+    display:flex;justify-content:space-between;align-items:baseline;gap:.75rem;flex-wrap:wrap;}
+  .fhead .t{font-weight:700;font-size:.8125rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-2);}
+  .fhead .c{font-family:var(--f-m);font-size:.75rem;color:var(--ink-3);}
+  .fgrid{padding:1.15rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:1rem;}
+  label{display:flex;flex-direction:column;gap:.3rem;}
+  label .lab{font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-2);}
+  select,input[type="text"],input[type="email"],input[type="tel"]{
+    font-family:var(--f-b);font-size:.9375rem;color:var(--ink);background:var(--ground);
+    border:1px solid var(--rule);padding:.5rem .6rem;width:100%;border-radius:0;}
+  select:focus-visible,input:focus-visible{outline:2px solid var(--pine);outline-offset:1px;}
+  .chips{display:flex;flex-wrap:wrap;gap:.4rem;}
+  .chip{font-size:.8125rem;border:1px solid var(--rule);background:var(--ground);
+    padding:.28rem .6rem;cursor:pointer;user-select:none;color:var(--ink-2);}
+  .chip[aria-pressed="true"]{background:var(--pine-soft);border-color:var(--pine);color:var(--pine);font-weight:600;}
+  .chip:focus-visible{outline:2px solid var(--pine);outline-offset:1px;}
+  .wide{grid-column:1/-1;}
+  .fbar{padding:0 1.15rem 1.15rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap;}
+  .btn{font-family:var(--f-b);font-weight:700;font-size:.9375rem;cursor:pointer;
+    background:var(--pine);color:var(--ground);border:0;padding:.7rem 1.5rem;}
+  .btn:hover{background:var(--pine-2);}
+  .btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px;}
+  .btn.ghost{background:transparent;color:var(--ink-2);border:1px solid var(--rule);font-weight:600;}
+  .fbar .note{font-size:.8125rem;color:var(--ink-3);}
+
+  /* results */
+  .results{margin-top:2.25rem;}
+  .rhead{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap;
+    border-bottom:2px solid var(--ink);padding-bottom:.6rem;}
+  .rhead h2{font-size:1.4rem;}
+  .rhead .count{font-family:var(--f-m);font-size:.8125rem;color:var(--ink-3);}
+
+  .card{background:var(--panel);border:1px solid var(--rule);margin-top:1rem;}
+  .card.hidden{display:none;}
+  .ctop{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;padding:1.1rem 1.15rem .9rem;align-items:start;}
+  .ctitle{font-family:var(--f-d);font-weight:700;font-size:1.25rem;line-height:1.25;}
+  .cloc{color:var(--ink-3);font-size:.875rem;margin-top:.15rem;}
+  .score{text-align:center;flex:0 0 auto;min-width:4.4rem;}
+  .score .pct{font-family:var(--f-m);font-weight:600;font-size:1.5rem;line-height:1;font-variant-numeric:tabular-nums;}
+  .score .sl{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);margin-top:.15rem;}
+
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));
+    border-top:1px solid var(--rule-soft);border-bottom:1px solid var(--rule-soft);}
+  .stat{padding:.65rem .9rem;border-inline-end:1px solid var(--rule-soft);}
+  .stat:last-child{border-inline-end:0;}
+  .stat .k{font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:600;}
+  .stat .v{font-family:var(--f-m);font-size:.95rem;font-variant-numeric:tabular-nums;margin-top:.1rem;}
+
+  .why{padding:.9rem 1.15rem;display:flex;flex-direction:column;gap:.35rem;}
+  .why .wl{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:700;margin-bottom:.15rem;}
+  .why ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:.25rem;}
+  .why li{font-size:.875rem;display:flex;gap:.5rem;align-items:flex-start;color:var(--ink-2);}
+  .why li .m{flex:0 0 auto;font-weight:700;font-family:var(--f-m);font-size:.8rem;line-height:1.5;}
+  .why li.plus .m{color:var(--pine);}
+  .why li.minus .m{color:var(--clay);}
+
+  .cact{padding:.85rem 1.15rem;border-top:1px solid var(--rule-soft);background:var(--panel-2);
+    display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;}
+  .cact .src{margin-inline-start:auto;font-size:.75rem;color:var(--ink-3);font-family:var(--f-m);}
+  .mini{font-size:.8125rem;font-weight:600;font-family:var(--f-b);cursor:pointer;
+    border:1px solid var(--rule);background:var(--panel);color:var(--ink-2);padding:.4rem .8rem;}
+  .mini:hover{border-color:var(--ink-3);}
+  .mini.primary{background:var(--pine);color:var(--ground);border-color:var(--pine);}
+  .mini.primary:hover{background:var(--pine-2);}
+  .mini:focus-visible{outline:2px solid var(--pine);outline-offset:1px;}
+  .mini[aria-pressed="true"]{background:var(--gold-soft);border-color:var(--gold);color:var(--gold);}
+
+  .empty{background:var(--panel);border:1px dashed var(--rule);padding:1.6rem;text-align:center;color:var(--ink-2);margin-top:1rem;}
+
+  /* lead form */
+  .lead{background:var(--pine-soft);border:1px solid var(--pine);margin-top:1.5rem;padding:1.25rem 1.15rem;}
+  .lead h3{font-size:1.2rem;}
+  .lead .price-tag{font-family:var(--f-m);font-weight:600;font-size:1.5rem;color:var(--pine);
+    margin-bottom:.15rem;line-height:1.2;}
+  .lead .price-tag span{font-family:var(--f-b);font-weight:400;font-size:.8125rem;color:var(--ink-2);
+    display:block;margin-top:.1rem;}
+  .lead ul.incl{margin:.9rem 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:.5rem;}
+  .lead ul.incl li{font-size:.9375rem;color:var(--ink-2);padding-inline-start:1.1rem;position:relative;line-height:1.5;}
+  .lead ul.incl li::before{content:"—";position:absolute;inset-inline-start:0;color:var(--pine);font-weight:700;}
+  .lead ul.incl b{color:var(--ink);font-weight:700;}
+  .lead .err{display:none;color:var(--clay);font-size:.875rem;font-weight:600;margin-top:.8rem;}
+  .lead .fine{font-size:.8125rem;color:var(--ink-3);margin-top:.6rem;}
+
+  .straight{margin-top:1.5rem;border-inline-start:3px solid var(--clay);background:var(--clay-soft);
+    padding:1rem 1.15rem;display:flex;flex-direction:column;gap:.55rem;max-width:64ch;}
+  .straight .sl{font-size:.68rem;letter-spacing:.11em;text-transform:uppercase;font-weight:700;color:var(--clay);}
+  .straight p{font-size:.9375rem;color:var(--ink-2);line-height:1.6;}
+  .straight b{color:var(--ink);font-weight:700;}
+
+  .conf{font-size:.72rem;color:var(--ink-3);margin-top:.4rem;font-family:var(--f-m);}
+  .conf .lock{background:var(--panel-2);border:1px solid var(--rule);color:var(--ink-2);
+    padding:.08rem .35rem;letter-spacing:.06em;text-transform:uppercase;font-size:.62rem;font-weight:600;
+    margin-inline-end:.35rem;}
+  .lead p{color:var(--ink-2);font-size:.9375rem;margin-top:.35rem;max-width:58ch;}
+  .lead .lg{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.85rem;margin-top:1rem;}
+  .lead .btn{margin-top:1rem;}
+  .thanks{display:none;font-weight:600;color:var(--pine);margin-top:1rem;}
+
+  footer{margin-top:2.5rem;padding-top:1.1rem;border-top:1px solid var(--rule);
+    font-size:.8125rem;color:var(--ink-3);max-width:70ch;}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+
+<div class="topbar"><div class="in">
+  <span class="logo">Business<em>Match</em></span>
+  <span class="tag">U.S. businesses for treaty investors</span>
+</div></div>
+
+<div class="wrap">
+
+  <section class="hero">
+    <h1>Find a U.S. business that actually fits you.</h1>
+    <p class="sub">Tell us your budget, your background and where you want to live. We show you real businesses for sale that match — and flag the ones that would put your <b>E-2 visa at risk</b>.</p>
+
+    <div class="straight">
+      <p class="sl">Straight answer, before you ask</p>
+      <p>Some of these listings you could eventually find yourself. Here is what you cannot do alone: <b>structure the purchase so the investment actually qualifies for your visa</b>, and <b>get a U.S. broker to take you seriously</b> before you have status, a U.S. bank account and proof of funds.</p>
+      <p>A business can be excellent and still fail your case — wrong deal structure, seller financing secured against the assets, no employees. Brokers are paid by the seller and do not check any of that. We work for you, and we do.</p>
+    </div>
+  </section>
+
+  <div class="finder">
+    <div class="fhead">
+      <span class="t">Your profile</span>
+      <span class="c" id="liveCount">8 businesses available</span>
+    </div>
+
+    <div class="fgrid">
+      <label for="budget"><span class="lab">Total investment budget</span>
+        <select id="budget">
+          <option value="50000">Under $50K</option>
+          <option value="75000" selected>$50K – $75K</option>
+          <option value="100000">$75K – $100K</option>
+          <option value="150000">$100K – $150K</option>
+          <option value="250000">$150K – $250K</option>
+          <option value="500000">$250K+</option>
+        </select></label>
+
+      <label for="income"><span class="lab">Income you need</span>
+        <select id="income">
+          <option value="40000">$40K+</option>
+          <option value="60000" selected>$60K+</option>
+          <option value="80000">$80K+</option>
+          <option value="100000">$100K+</option>
+        </select></label>
+
+      <label for="family"><span class="lab">Family size</span>
+        <select id="family">
+          <option value="1">Just me</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4" selected>4</option>
+          <option value="5">5+</option>
+        </select></label>
+
+      <label for="style"><span class="lab">Your involvement</span>
+        <select id="style">
+          <option value="active" selected>Hands-on owner</option>
+          <option value="semi">Semi-absentee</option>
+          <option value="either">Either</option>
+        </select></label>
+
+      <label for="exp"><span class="lab">Your background</span>
+        <select id="exp">
+          <option value="service">Service &amp; operations</option>
+          <option value="sales" selected>Sales &amp; logistics</option>
+          <option value="trade">Skilled trade</option>
+          <option value="office">Office / professional</option>
+        </select></label>
+
+      <label for="risk"><span class="lab">Risk appetite</span>
+        <select id="risk">
+          <option value="low">Low — proven &amp; steady</option>
+          <option value="med" selected>Medium</option>
+          <option value="high">High — upside first</option>
+        </select></label>
+
+      <div class="wide">
+        <span class="lab" style="display:block;margin-bottom:.4rem;">States you would live in</span>
+        <div class="chips" id="states" role="group" aria-label="Preferred states"></div>
+      </div>
+
+      <div class="wide">
+        <span class="lab" style="display:block;margin-bottom:.4rem;">Industries you would rather avoid</span>
+        <div class="chips" id="avoid" role="group" aria-label="Industries to avoid"></div>
+      </div>
+    </div>
+
+    <div class="fbar">
+      <button class="btn" id="go" type="button">See my matches</button>
+      <span class="note">No account needed. Results update as you change anything.</span>
+    </div>
+  </div>
+
+  <section class="results">
+    <div class="rhead">
+      <h2>Your matches</h2>
+      <span class="count" id="resCount"></span>
+    </div>
+    <div id="cards"></div>
+  </section>
+
+  <section class="lead" id="lead">
+    <p class="price-tag">$495 <span>per business · credited in full against our search service</span></p>
+    <h3>The full file on a specific business</h3>
+    <p>Within two business days, on the business you choose:</p>
+    <ul class="incl">
+      <li><b>Identity released</b> — name, exact location and the listing itself, under NDA</li>
+      <li><b>Verified financials</b> — three years of tax returns checked against the asking figures</li>
+      <li><b>E-2 Viability Report</b> — scored on substantiality, marginality, ownership and deal structure, with every point a consular officer is likely to press on</li>
+      <li><b>What to change before you offer</b> — the terms that would disqualify the investment, and what to ask for instead</li>
+    </ul>
+    <div id="leadForm"><div class="lg">
+      <label for="ln"><span class="lab">Full name</span><input type="text" id="ln" placeholder="John Smith"></label>
+      <label for="le"><span class="lab">Email</span><input type="email" id="le" placeholder="john@example.com"></label>
+      <label for="lp"><span class="lab">Phone</span><input type="tel" id="lp" placeholder="+44 …"></label>
+      <label for="lt"><span class="lab">When would you buy?</span>
+        <select id="lt">
+          <option>Within 3 months</option>
+          <option selected>3–6 months</option>
+          <option>6–12 months</option>
+          <option>Still exploring</option>
+        </select></label>
+    </div>
+    <p class="err" id="err">Please enter your name and a valid email address.</p>
+    <button class="btn" id="send" type="button">Request this file</button></div>
+    <p class="fine">We confirm the business is still available before taking any payment. NDA is signed electronically at that point.</p>
+    <p class="thanks" id="thanks">Thank you — we will confirm availability and send the NDA within two business days.</p>
+  </section>
+
+  <footer>
+    Example listings shown for demonstration. All listings are shown confidentially at the seller's request — business names and exact locations are released under NDA, as is standard in business sales. Match scores are an initial screen, not legal advice, and do not replace a full case review. We are paid by you, never by the seller, and we never hold transaction funds — purchase deposits go to a licensed escrow or attorney trust account.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  // ---- CONFIGURE ME: your Google Apps Script web app URL ----
+  var ENDPOINT="https://script.google.com/macros/s/AKfycbze_lHHIwgSzjLw6ucxyBRAA9sJgYF_qBpBJl8JW4oUdmRzsi6E-VOR1gx8u9n9TCnLTA/exec";
+
+  var STATES=["Florida","Georgia","Texas","North Carolina","Arizona","Tennessee","Anywhere"];
+  var AVOID=["Restaurants","Retail","Automotive","Construction","Beauty"];
+
+  // Listings are shown confidentially: no business name, region rather than city,
+  // and no broker identity — the industry standard, and it keeps the seller protected.
+  var BIZ=[
+    {id:"FL-1184",t:"Established Pool Service Route",c:"Tampa Bay area",s:"Florida",ind:"Property Services",price:62000,rev:145000,sde:71000,emp:2,yr:2016,rec:true,fin:false,train:true,dep:false,skill:"service",risk:"low",src:"Licensed broker"},
+    {id:"FL-1207",t:"Commercial Cleaning Contract Book",c:"Central Florida",s:"Florida",ind:"Property Services",price:69000,rev:160000,sde:64000,emp:3,yr:2014,rec:true,fin:true,train:true,dep:false,skill:"service",risk:"low",src:"Direct from owner"},
+    {id:"GA-0931",t:"Last-Mile Delivery Operation",c:"Metro Atlanta",s:"Georgia",ind:"Transportation",price:79000,rev:190000,sde:58000,emp:0,yr:2019,rec:false,fin:false,train:true,dep:true,skill:"sales",risk:"med",src:"Licensed broker"},
+    {id:"GA-0944",t:"Landscaping & Grounds Care",c:"Coastal Georgia",s:"Georgia",ind:"Property Services",price:74000,rev:168000,sde:69000,emp:3,yr:2011,rec:true,fin:true,train:true,dep:false,skill:"service",risk:"low",src:"Licensed broker"},
+    {id:"AZ-0612",t:"Auto Detailing Shop",c:"Phoenix metro",s:"Arizona",ind:"Automotive",price:58000,rev:132000,sde:47000,emp:1,yr:2018,rec:false,fin:false,train:false,dep:true,skill:"trade",risk:"med",src:"Licensed broker"},
+    {id:"NC-0388",t:"Neighborhood Café",c:"Charlotte metro",s:"North Carolina",ind:"Restaurants",price:71000,rev:243000,sde:52000,emp:4,yr:2017,rec:false,fin:false,train:true,dep:false,skill:"service",risk:"high",src:"Licensed broker"},
+    {id:"TX-1503",t:"B2B Courier & Freight Brokerage",c:"Dallas–Fort Worth",s:"Texas",ind:"Transportation",price:96000,rev:310000,sde:88000,emp:2,yr:2013,rec:true,fin:true,train:true,dep:false,skill:"sales",risk:"med",src:"Direct from owner"},
+    {id:"TN-0725",t:"Sign & Print Franchise Resale",c:"Nashville metro",s:"Tennessee",ind:"Retail",price:118000,rev:265000,sde:82000,emp:3,yr:2015,rec:true,fin:false,train:true,dep:false,skill:"office",risk:"med",src:"Franchise resale"}
+  ];
+
+  var sel={states:{},avoid:{}};
+  var cards=document.getElementById("cards");
+
+  // --- Personalisation from the email link -------------------------------
+  // Bitrix24 merge fields build the URL, e.g.
+  //   ?n=John&b=100000&i=60000&s=Florida&x=sales&f=4
+  // so a lead who clicks through lands on results, not an empty form.
+  var Q={};
+  try{
+    location.search.replace(/^\?/,"").split("&").forEach(function(p){
+      if(!p) return; var kv=p.split("="); Q[kv[0]]=decodeURIComponent((kv[1]||"").replace(/\+/g," "));
+    });
+  }catch(e){}
+
+  function preset(id,v){
+    if(!v) return;
+    var e=document.getElementById(id);
+    if(!e) return;
+    var ok=Array.prototype.some.call(e.options,function(o){return o.value===v;});
+    if(ok) e.value=v;
+  }
+  preset("budget",Q.b); preset("income",Q.i); preset("family",Q.f);
+  preset("exp",Q.x); preset("style",Q.m); preset("risk",Q.r);
+
+  if(Q.n){
+    var h=document.querySelector(".hero h1");
+    if(h) h.textContent=Q.n+", here are the U.S. businesses that fit you.";
+  }
+
+  function chips(host,list,bag){
+    list.forEach(function(name){
+      var b=document.createElement("button");
+      b.type="button";b.className="chip";b.textContent=name;
+      b.setAttribute("aria-pressed","false");
+      b.id=host.id+"-"+name.replace(/\W/g,"");
+      b.addEventListener("click",function(){
+        var on=b.getAttribute("aria-pressed")==="true";
+        b.setAttribute("aria-pressed",on?"false":"true");
+        if(on) delete bag[name]; else bag[name]=1;
+        run();
+      });
+      host.appendChild(b);
+    });
+  }
+  chips(document.getElementById("states"),STATES,sel.states);
+  chips(document.getElementById("avoid"),AVOID,sel.avoid);
+  // opening state: the state from the email link, else Florida
+  (function(){
+    var want=Q.s&&document.getElementById("states-"+Q.s.replace(/\W/g,""));
+    (want||document.getElementById("states-Florida")).click();
+  })();
+
+  function money(n){return "$"+(n>=1000?Math.round(n/1000)+"K":n);}
+  function val(id){return document.getElementById(id).value;}
+
+  function score(b){
+    var budget=+val("budget"), income=+val("income"), family=+val("family"),
+        style=val("style"), exp=val("exp"), risk=val("risk");
+    var why=[], hard=null;
+
+    if(b.price>budget) hard="Above your budget";
+    if(sel.avoid[b.ind]) hard="You asked to avoid "+b.ind.toLowerCase();
+    var anyState=sel.states["Anywhere"]||Object.keys(sel.states).length===0;
+    if(!anyState && !sel.states[b.s]) hard="Not in a state you chose";
+    if(hard) return null;
+
+    var pts=0;
+
+    // budget headroom (25)
+    var head=1-(b.price/budget);
+    pts+=25*Math.min(1,0.45+head*1.3);
+    if(head>0.15) why.push(["plus","Leaves "+money(budget-b.price)+" of your budget for working capital"]);
+
+    // income (25)
+    var r=b.sde/income;
+    pts+=25*Math.max(0,Math.min(1,(r-0.7)/0.6));
+    if(r>=1.15) why.push(["plus","Cash flow of "+money(b.sde)+" clears your "+money(income)+" target"]);
+    else if(r<1) why.push(["minus","Cash flow of "+money(b.sde)+" falls short of your "+money(income)+" target"]);
+
+    // location (15)
+    if(sel.states[b.s]){pts+=15;why.push(["plus",b.s+" is on your list"]);}
+    else pts+=9;
+
+    // experience (12)
+    if(b.skill===exp){pts+=12;why.push(["plus","Matches your background"]);}
+    else if((b.skill==="service"&&exp==="trade")||(b.skill==="sales"&&exp==="office")) pts+=8;
+    else {pts+=4;why.push(["minus","Outside your stated background — expect a learning curve"]);}
+
+    // management style (10)
+    var semiOk=b.emp>=3;
+    if(style==="active"){pts+=10;}
+    else if(style==="semi"){ if(semiOk){pts+=10;why.push(["plus","Enough staff to run semi-absentee"]);} else {pts+=3;why.push(["minus","Too few staff to step back from"]);} }
+    else pts+=8;
+
+    // risk (8)
+    var order={low:0,med:1,high:2};
+    var gap=Math.abs(order[b.risk]-order[risk]);
+    pts+=8-gap*3.5;
+
+    // quality signals (5)
+    if(b.rec){pts+=3;why.push(["plus","Recurring customers, not one-off sales"]);}
+    if(b.emp>0) pts+=2;
+
+    // --- E-2 specific warnings (not scored, always shown)
+    var need=28000+9000*(family-1);
+    if(b.sde<need) why.push(["minus","E-2 risk: cash flow below a living wage for a family of "+family+" — marginality"]);
+    if(b.emp===0) why.push(["minus","E-2 risk: no existing employees — the classic marginality flag"]);
+    if(b.dep) why.push(["minus","E-2 risk: business depends heavily on the current owner"]);
+    if(b.fin) why.push(["minus","E-2 note: seller financing may not count toward your qualifying investment"]);
+    if(b.train) why.push(["plus","Seller provides a training period"]);
+
+    return {b:b,pct:Math.max(35,Math.min(99,Math.round(pts))),why:why};
+  }
+
+  function run(){
+    var out=[];
+    BIZ.forEach(function(b){var s=score(b); if(s) out.push(s);});
+    out.sort(function(a,c){return c.pct-a.pct;});
+    window.__lastResults=out;
+
+    document.getElementById("liveCount").textContent=BIZ.length+" businesses available";
+    document.getElementById("resCount").textContent=out.length+" of "+BIZ.length+" match your profile";
+
+    cards.innerHTML="";
+    if(!out.length){
+      var e=document.createElement("div");
+      e.className="empty";
+      e.textContent="Nothing matches those filters yet. Widen your budget or add a state — new businesses are added weekly.";
+      cards.appendChild(e);
+      return;
+    }
+
+    out.forEach(function(s){
+      var b=s.b, col = s.pct>=80?"var(--pine)":s.pct>=65?"var(--gold)":"var(--clay)";
+      var d=document.createElement("article");
+      d.className="card";
+      var lis=s.why.slice(0,6).map(function(w){
+        return '<li class="'+w[0]+'"><span class="m">'+(w[0]==="plus"?"+":"!")+'</span><span>'+w[1]+'</span></li>';
+      }).join("");
+      d.innerHTML=
+        '<div class="ctop"><div><div class="ctitle">'+b.t+'</div>'+
+        '<div class="cloc">'+b.c+', '+b.s+' · '+b.ind+' · established '+b.yr+'</div>'+
+        '<div class="conf"><span class="lock">confidential</span> Ref '+b.id+' · name and exact location released under NDA</div></div>'+
+        '<div class="score"><div class="pct" style="color:'+col+'">'+s.pct+'%</div><div class="sl">match</div></div></div>'+
+        '<div class="stats">'+
+          '<div class="stat"><div class="k">Asking</div><div class="v">'+money(b.price)+'</div></div>'+
+          '<div class="stat"><div class="k">Revenue</div><div class="v">'+money(b.rev)+'</div></div>'+
+          '<div class="stat"><div class="k">Cash flow</div><div class="v">'+money(b.sde)+'</div></div>'+
+          '<div class="stat"><div class="k">Employees</div><div class="v">'+b.emp+'</div></div>'+
+        '</div>'+
+        '<div class="why"><div class="wl">Why this matches you</div><ul>'+lis+'</ul></div>'+
+        '<div class="cact">'+
+          '<button class="mini primary" type="button">Request full file</button>'+
+          '<button class="mini" type="button" aria-pressed="false">Save</button>'+
+          '<button class="mini" type="button">Not for me</button>'+
+          '<span class="src">'+b.src+' · verified this week</span>'+
+        '</div>';
+
+      var btns=d.querySelectorAll(".cact .mini");
+      btns[0].addEventListener("click",function(){
+        document.getElementById("lead").scrollIntoView({behavior:"smooth",block:"center"});
+      });
+      btns[1].addEventListener("click",function(){
+        var on=btns[1].getAttribute("aria-pressed")==="true";
+        btns[1].setAttribute("aria-pressed",on?"false":"true");
+        btns[1].textContent=on?"Save":"Saved";
+      });
+      btns[2].addEventListener("click",function(){ d.classList.add("hidden"); });
+
+      cards.appendChild(d);
+    });
+  }
+
+  ["budget","income","family","style","exp","risk"].forEach(function(id){
+    document.getElementById(id).addEventListener("change",run);
+  });
+  document.getElementById("go").addEventListener("click",function(){
+    run();
+    document.querySelector(".results").scrollIntoView({behavior:"smooth",block:"start"});
+  });
+  document.getElementById("send").addEventListener("click",function(){
+    var btn=this;
+    var name=document.getElementById("ln").value.trim();
+    var mail=document.getElementById("le").value.trim();
+    if(!name||!mail.match(/^[^@\s]+@[^@\s]+\.[^@\s]+$/)){
+      document.getElementById("err").style.display="block";
+      return;
+    }
+    document.getElementById("err").style.display="none";
+    btn.disabled=true; btn.textContent="Sending…";
+
+    var top=(window.__lastResults||[]).slice(0,3).map(function(s){
+      return s.b.id+" ("+s.pct+"%)";
+    }).join(", ");
+
+    var payload={
+      name:name, email:mail,
+      phone:document.getElementById("lp").value.trim(),
+      timeline:document.getElementById("lt").value,
+      budget:val("budget"), income:val("income"), family:val("family"),
+      style:val("style"), experience:val("exp"), risk:val("risk"),
+      states:Object.keys(sel.states).join("|"),
+      avoid:Object.keys(sel.avoid).join("|"),
+      matches:top,
+      source:Q.utm||"email",
+      page:location.href
+    };
+
+    fetch(ENDPOINT,{
+      method:"POST", mode:"no-cors",
+      headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify(payload)
+    }).then(done).catch(done);
+
+    function done(){
+      document.getElementById("leadForm").style.display="none";
+      document.getElementById("thanks").style.display="block";
+    }
+  });
+
+  // prefill the lead form from the link too, so there is less to retype
+  if(Q.n) document.getElementById("ln").value=Q.n;
+  if(Q.e) document.getElementById("le").value=Q.e;
+
+  run();
+})();
+</script>
+
+</body>
+</html>
