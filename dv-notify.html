@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DV-2027 List | Immigration Advice Service</title>
+<style>
+  :root {
+    --navy:#10263c; --gold:#a8763a; --gold-dark:#8f6330;
+    --cream:#faf7f0; --sand:#dcd7ca; --panel:#eee7d9; --line:#b9b0a0;
+    --ink:#141210; --muted:#544d3e;
+  }
+  * { box-sizing:border-box; }
+  body {
+    margin:0; padding:0; background:var(--sand);
+    font-family:Georgia,'Times New Roman',serif; color:var(--ink);
+  }
+  .wrap { max-width:620px; margin:0 auto; padding:34px 14px 60px; }
+  .card { background:var(--cream); border:1px solid var(--line); }
+  .bar { background:#fff; padding:22px 34px 20px; text-align:center; border-bottom:5px solid var(--navy); }
+  .bar img { display:block; margin:0 auto; width:220px; max-width:100%; height:auto; }
+  .body { padding:30px 34px 34px; }
+  .eyebrow {
+    font-family:'Courier New',Courier,monospace; font-size:11px; letter-spacing:2.5px;
+    color:var(--gold-dark); text-transform:uppercase; font-weight:bold; margin-bottom:11px;
+  }
+  h1 { font-size:26px; line-height:1.3; color:var(--navy); margin:0; font-weight:bold; }
+  .rule { height:3px; background:var(--gold); width:54px; margin:18px 0 22px; }
+  p { font-size:16px; line-height:1.75; margin:0 0 18px; }
+  .record { background:var(--panel); border-left:4px solid var(--gold); padding:20px 22px; margin:0 0 24px; }
+  .record h2 {
+    font-family:'Courier New',Courier,monospace; font-size:11px; letter-spacing:2px;
+    color:#7a5322; text-transform:uppercase; margin:0 0 14px; font-weight:bold;
+  }
+  .row { display:flex; justify-content:space-between; gap:16px; padding:7px 0; border-bottom:1px solid #ddd4c0; font-size:15px; }
+  .row:last-child { border-bottom:0; }
+  .row .k { color:var(--muted); }
+  .row .v { font-weight:bold; color:var(--navy); text-align:right; word-break:break-word; }
+  .btn {
+    display:block; width:100%; border:0; cursor:pointer; text-align:center;
+    font-family:Georgia,serif; font-size:20px; font-weight:bold; letter-spacing:0.5px;
+    color:var(--cream); background:var(--gold); padding:20px; text-decoration:none;
+  }
+  .btn:disabled { opacity:.6; cursor:default; }
+  .btn-2 {
+    display:block; width:100%; text-align:center; margin-top:14px; cursor:pointer;
+    font-family:Georgia,serif; font-size:16px; color:var(--muted);
+    background:#f1ece0; border:1px solid var(--line); padding:15px;
+  }
+  .small { font-size:13px; color:var(--muted); text-align:center; margin:10px 0 0; }
+  .note { font-size:14px; line-height:1.7; background:var(--panel); border-left:4px solid var(--gold); padding:16px 20px; margin:24px 0 0; }
+  .foot { background:var(--navy); color:#c9d3dc; padding:22px 34px 26px; font-size:11px; line-height:1.8; }
+  .foot a { color:#c9d3dc; }
+  .hide { display:none; }
+  @media (max-width:520px) {
+    .bar,.body,.foot { padding-left:22px; padding-right:22px; }
+    .bar img { width:180px; }
+    h1 { font-size:22px; }
+    .row { flex-direction:column; gap:2px; }
+    .row .v { text-align:left; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="card">
+    <div class="bar"><img src="https://supportimmigrationadviceserviceorg.github.io/assessment/logo-hero.png" alt="Immigration Advice Service"></div>
+    <div class="body">
+
+      <!-- ask -->
+      <div id="ask">
+        <div class="eyebrow">Diversity Visa Program &middot; DV-2027</div>
+        <h1 id="askTitle">Confirm your place on the DV-2027 list</h1>
+        <div class="rule"></div>
+
+        <p id="askIntro">
+          These are the details we hold for you. Press the button to confirm and we will
+          contact you, by phone and by email, on the day DV-2027 registration opens.
+        </p>
+
+        <div class="record">
+          <h2>Your details</h2>
+          <div class="row"><span class="k">Name</span><span class="v" id="fName">-</span></div>
+          <div class="row"><span class="k">Email</span><span class="v" id="fEmail">-</span></div>
+          <div class="row"><span class="k">Interest</span><span class="v">Diversity Visa Program (DV-2027)</span></div>
+          <div class="row"><span class="k">Status</span><span class="v" id="fStatus">Not confirmed</span></div>
+        </div>
+
+        <button class="btn" id="btnYes">YES, HOLD MY PLACE</button>
+        <p class="small">One click. No form, no login, no payment.</p>
+        <div class="btn-2" id="btnNo">NO, I AM NOT INTERESTED</div>
+
+        <div class="note">
+          The place we hold is on our own DV-2027 update list, so that we can contact you when
+          registration opens. It is not an entry to the Diversity Visa Program and it does not
+          register you for it. Selection is random and nobody can improve your chances.
+        </div>
+      </div>
+
+      <!-- confirmed yes -->
+      <div id="doneYes" class="hide">
+        <div class="eyebrow">Diversity Visa Program &middot; DV-2027</div>
+        <h1>Your place is held</h1>
+        <div class="rule"></div>
+        <p>
+          Thank you. We have recorded your request. We will contact you, by phone and at
+          <strong id="fEmail2">you</strong>, on the day DV-2027 registration opens.
+        </p>
+        <div class="record">
+          <h2>Your details</h2>
+          <div class="row"><span class="k">Name</span><span class="v" id="fName2">-</span></div>
+          <div class="row"><span class="k">Interest</span><span class="v">Diversity Visa Program (DV-2027)</span></div>
+          <div class="row"><span class="k">Status</span><span class="v" style="color:#2e6b3f;">Confirmed</span></div>
+        </div>
+        <p>Nothing further is needed from you. If you have a question, reply to the email we sent.</p>
+        <div class="note">
+          Registration for the Diversity Visa Program is free and is made only on the official
+          U.S. government website. We do not submit entries and we cannot influence selection.
+        </div>
+      </div>
+
+      <!-- confirmed no -->
+      <div id="doneNo" class="hide">
+        <div class="eyebrow">Diversity Visa Program &middot; DV-2027</div>
+        <h1>Noted, thank you</h1>
+        <div class="rule"></div>
+        <p>
+          We have recorded that you do not want to be notified about DV-2027.
+          If you change your mind, reply to the email we sent and we will add you back.
+        </p>
+      </div>
+
+      <!-- error -->
+      <div id="err" class="hide">
+        <div class="eyebrow">Diversity Visa Program &middot; DV-2027</div>
+        <h1>We could not save that</h1>
+        <div class="rule"></div>
+        <p>
+          Something went wrong on our side. Reply to the email we sent and we will
+          add you to the DV-2027 list by hand.
+        </p>
+      </div>
+
+    </div>
+    <div class="foot">
+      <a href="https://immigrationadviceservice.org">immigrationadviceservice.org</a>
+      &nbsp;&middot;&nbsp; 2 N Central Ave, Phoenix, AZ 85004, United States<br><br>
+      Immigration Advice Service is a private company and is not affiliated with USCIS,
+      the U.S. Department of State or any government agency.
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+
+  /* ---- 1. Paste the /exec URL of the deployed Apps Script web app here ---- */
+  var HANDLER = 'https://script.google.com/macros/s/PASTE_DEPLOYMENT_ID/exec';
+
+  var q = new URLSearchParams(location.search);
+  var name     = (q.get('name')  || '').trim();
+  var email    = (q.get('email') || '').trim();
+  var answer   = (q.get('answer') || 'yes').toLowerCase();
+  var campaign = (q.get('utm_campaign') || '').trim();
+
+  var el = function (id) { return document.getElementById(id); };
+  var show = function (id) {
+    ['ask', 'doneYes', 'doneNo', 'err'].forEach(function (s) {
+      el(s).classList.toggle('hide', s !== id);
+    });
+  };
+
+  // Fill the record card from the link. Nothing is read out of the CRM here,
+  // so an address typed into the URL by a stranger reveals nothing.
+  el('fName').textContent  = name  || 'Not provided';
+  el('fEmail').textContent = email || 'Not provided';
+  el('fName2').textContent = name  || 'Not provided';
+  el('fEmail2').textContent = email || 'you';
+
+  // If the link already said no, lead with that choice but still require a click,
+  // so a mail scanner opening the link cannot answer on the reader's behalf.
+  if (answer === 'no') {
+    el('askTitle').textContent = 'Confirm you are not interested in DV-2027';
+    el('askIntro').textContent = 'Press the lower button to confirm, or the upper one if you would like us to hold your place after all.';
+  }
+
+  function send(choice, onOk) {
+    var url = HANDLER +
+      '?action=dv2027' +
+      '&answer='  + encodeURIComponent(choice) +
+      '&email='   + encodeURIComponent(email) +
+      '&name='    + encodeURIComponent(name) +
+      '&utm_campaign=' + encodeURIComponent(campaign);
+
+    fetch(url, { mode: 'no-cors' })
+      .then(onOk)
+      .catch(function () { show('err'); });
+  }
+
+  el('btnYes').addEventListener('click', function () {
+    this.disabled = true;
+    this.textContent = 'SAVING...';
+    el('fStatus').textContent = 'Saving';
+    send('yes', function () { show('doneYes'); window.scrollTo(0, 0); });
+  });
+
+  el('btnNo').addEventListener('click', function () {
+    el('btnNo').textContent = 'SAVING...';
+    send('no', function () { show('doneNo'); window.scrollTo(0, 0); });
+  });
+
+})();
+</script>
+
+</body>
+</html>
