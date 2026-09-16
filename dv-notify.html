@@ -55,6 +55,19 @@
   .foot { background:var(--navy); color:#d6dfef; padding:22px 34px 26px; font-size:11px; line-height:1.8; }
   .foot a { color:#ffffff; }
   .hide { display:none; }
+  .reasons { margin:0 0 20px; }
+  .reasons label {
+    display:flex; align-items:flex-start; gap:12px; cursor:pointer;
+    background:var(--panel); border:1px solid #cddbf2; padding:14px 16px;
+    margin-bottom:10px; font-size:16px; line-height:1.5; color:var(--ink);
+  }
+  .reasons label:hover { border-color:var(--gold); }
+  .reasons input { margin:3px 0 0; width:18px; height:18px; flex:0 0 auto; accent-color:var(--gold); }
+  #otherText {
+    width:100%; font-family:Georgia,serif; font-size:16px; color:var(--ink);
+    padding:12px 14px; border:1px solid #9fb0cd; background:#fff; margin:0 0 20px;
+  }
+  .skip { display:block; text-align:center; margin-top:14px; font-size:15px; color:var(--muted); text-decoration:underline; cursor:pointer; }
   @media (max-width:520px) {
     .bar,.body,.foot { padding-left:22px; padding-right:22px; }
     .bar img { width:130px; }
@@ -73,7 +86,7 @@
 
       <!-- ask -->
       <div id="ask">
-        <div class="eyebrow"><img src="https://supportimmigrationadviceserviceorg.github.io/assessment/flag-us.png" alt=""><span>Diversity Visa Program &middot; <span style="white-space:nowrap;">September 2026</span></span></div>
+        <div class="eyebrow"><img src="https://supportimmigrationadviceserviceorg.github.io/assessment/flag-us.png" alt=""><span>Diversity Visa Program</span></div>
         <h1 id="askTitle">Confirm your place on the update list</h1>
         <div class="rule"></div>
 
@@ -102,7 +115,7 @@
 
       <!-- confirmed yes -->
       <div id="doneYes" class="hide">
-        <div class="eyebrow"><img src="https://supportimmigrationadviceserviceorg.github.io/assessment/flag-us.png" alt=""><span>Diversity Visa Program &middot; <span style="white-space:nowrap;">September 2026</span></span></div>
+        <div class="eyebrow"><img src="https://supportimmigrationadviceserviceorg.github.io/assessment/flag-us.png" alt=""><span>Diversity Visa Program</span></div>
         <h1>Your place is held</h1>
         <div class="rule"></div>
         <p>
@@ -122,9 +135,30 @@
         </div>
       </div>
 
+      <!-- why not -->
+      <div id="why" class="hide">
+        <div class="eyebrow"><img src="https://supportimmigrationadviceserviceorg.github.io/assessment/flag-us.png" alt=""><span>Diversity Visa Program</span></div>
+        <h1>Before you go, may we ask why?</h1>
+        <div class="rule"></div>
+        <p>One answer helps us send people only what is useful to them.</p>
+
+        <div class="reasons">
+          <label><input type="radio" name="reason" value="No - I'm no longer interested in immigrating to the United States."><span>I&rsquo;m no longer interested in immigrating to the United States.</span></label>
+          <label><input type="radio" name="reason" value="No - Not right now, I may be interested again in the future."><span>Not right now, I may be interested again in the future.</span></label>
+          <label><input type="radio" name="reason" value="No - I'm already working with another immigration provider."><span>I&rsquo;m already working with another immigration provider.</span></label>
+          <label><input type="radio" name="reason" value="No - The timing isn't right for me financially."><span>The timing isn&rsquo;t right for me financially.</span></label>
+          <label><input type="radio" name="reason" value="Other"><span>Other</span></label>
+        </div>
+
+        <input type="text" id="otherText" class="hide" maxlength="200" placeholder="Tell us in a few words">
+
+        <button class="btn" id="btnSendReason">SEND AND FINISH</button>
+        <span class="skip" id="btnSkip">Finish without answering</span>
+      </div>
+
       <!-- confirmed no -->
       <div id="doneNo" class="hide">
-        <div class="eyebrow"><img src="https://supportimmigrationadviceserviceorg.github.io/assessment/flag-us.png" alt=""><span>Diversity Visa Program &middot; <span style="white-space:nowrap;">September 2026</span></span></div>
+        <div class="eyebrow"><img src="https://supportimmigrationadviceserviceorg.github.io/assessment/flag-us.png" alt=""><span>Diversity Visa Program</span></div>
         <h1>Noted, thank you</h1>
         <div class="rule"></div>
         <p>
@@ -135,7 +169,7 @@
 
       <!-- error -->
       <div id="err" class="hide">
-        <div class="eyebrow"><img src="https://supportimmigrationadviceserviceorg.github.io/assessment/flag-us.png" alt=""><span>Diversity Visa Program &middot; <span style="white-space:nowrap;">September 2026</span></span></div>
+        <div class="eyebrow"><img src="https://supportimmigrationadviceserviceorg.github.io/assessment/flag-us.png" alt=""><span>Diversity Visa Program</span></div>
         <h1>We could not save that</h1>
         <div class="rule"></div>
         <p>
@@ -168,7 +202,7 @@
 
   var el = function (id) { return document.getElementById(id); };
   var show = function (id) {
-    ['ask', 'doneYes', 'doneNo', 'err'].forEach(function (s) {
+    ['ask', 'why', 'doneYes', 'doneNo', 'err'].forEach(function (s) {
       el(s).classList.toggle('hide', s !== id);
     });
   };
@@ -187,12 +221,13 @@
     el('askIntro').textContent = 'Press the lower button to confirm, or the upper one if you would like us to hold your place after all.';
   }
 
-  function send(choice, onOk) {
+  function send(choice, onOk, reason) {
     var url = HANDLER +
       '?action=dv2027' +
       '&answer='  + encodeURIComponent(choice) +
       '&email='   + encodeURIComponent(email) +
       '&name='    + encodeURIComponent(name) +
+      '&reason='  + encodeURIComponent(reason || '') +
       '&utm_campaign=' + encodeURIComponent(campaign);
 
     fetch(url, { mode: 'no-cors' })
@@ -207,10 +242,31 @@
     send('yes', function () { show('doneYes'); window.scrollTo(0, 0); });
   });
 
+  // NO opens the reason screen. The CRM is updated when that screen is finished,
+  // either with a reason or by skipping, so nobody is left half-saved.
   el('btnNo').addEventListener('click', function () {
-    el('btnNo').textContent = 'SAVING...';
-    send('no', function () { show('doneNo'); window.scrollTo(0, 0); });
+    show('why');
+    window.scrollTo(0, 0);
   });
+
+  var otherBox = el('otherText');
+  document.querySelectorAll('input[name="reason"]').forEach(function (r) {
+    r.addEventListener('change', function () {
+      otherBox.classList.toggle('hide', this.value !== 'Other');
+      if (this.value === 'Other') otherBox.focus();
+    });
+  });
+
+  function finishNo(btn) {
+    var picked = document.querySelector('input[name="reason"]:checked');
+    var reason = picked ? picked.value : 'No reason given';
+    if (reason === 'Other') reason = 'No - Other: ' + (otherBox.value.trim() || 'not specified');
+    if (btn) { btn.disabled = true; btn.textContent = 'SAVING...'; }
+    send('no', function () { show('doneNo'); window.scrollTo(0, 0); }, reason);
+  }
+
+  el('btnSendReason').addEventListener('click', function () { finishNo(this); });
+  el('btnSkip').addEventListener('click', function () { finishNo(null); });
 
 })();
 </script>
