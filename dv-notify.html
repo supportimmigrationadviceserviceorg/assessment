@@ -78,6 +78,8 @@
     width:100%; font-family:Georgia,serif; font-size:16px; color:var(--ink);
     padding:12px 14px; border:1px solid #9fb0cd; background:#fff; margin:0 0 20px;
   }
+  .rethink { margin:28px 0 0; padding:20px 22px 22px; background:var(--panel); border:1px solid #cddbf2; border-left:4px solid var(--blue); }
+  .rethink-h { font-size:19px; font-weight:bold; color:var(--navy); margin:0 0 8px; }
   .skip { display:block; text-align:center; margin-top:14px; font-size:15px; color:var(--muted); text-decoration:underline; cursor:pointer; }
 
   @media (max-width:520px) {
@@ -398,6 +400,15 @@
 
         <button class="btn" id="btnSendReason">SEND AND FINISH</button>
         <span class="skip" id="btnSkip">Finish without answering</span>
+
+        <div class="rethink">
+          <div class="rethink-h">Changed your mind?</div>
+          <p style="margin:0 0 16px;font-size:16px;">
+            If you would rather not miss it after all, we will keep you on the update list
+            and write to you on the day registration opens.
+          </p>
+          <button class="btn" id="btnYes2">YES, KEEP ME ON THE LIST</button>
+        </div>
       </div>
 
       <!-- confirmed yes -->
@@ -514,11 +525,12 @@
     return (cc ? cc + ' ' : '') + num;
   }
 
-  // Someone who pressed YES in the email is never asked again whether they meant no.
+  // Someone who pressed NO in the email goes straight to the reason screen.
+  // Nobody is shown a large YES button after saying no, and nobody who said
+  // yes is asked again whether they meant no.
   if (answer === 'no') {
-    el('askTitle').textContent = 'Confirm you are not interested';
-    el('askIntro').textContent = 'Press the lower button to confirm, or the blue one if you would like us to keep you on the list after all.';
     el('btnNo').classList.remove('hide');
+    show('why');
   }
 
   // The save also goes out as JSONP, so the page can read the handler's answer.
@@ -590,6 +602,17 @@
 
   el('btnSendReason').addEventListener('click', function () { finishNo(this); });
   el('btnSkip').addEventListener('click', function () { finishNo(null); });
+
+  // Someone who came in on NO and then changed their mind is saved as a yes
+  // straight from this screen, with no reason recorded.
+  el('btnYes2').addEventListener('click', function () {
+    this.disabled = true;
+    this.textContent = 'SAVING...';
+    el('fStatus').classList.remove('pulse');
+    el('fStatus').textContent = 'Saving...';
+    el('fPhone2').textContent = typedPhone() || el('fPhone').textContent;
+    send('yes', function () { show('doneYes'); window.scrollTo(0, 0); });
+  });
 
 })();
 </script>
