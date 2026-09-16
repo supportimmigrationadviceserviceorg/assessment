@@ -34,10 +34,13 @@ function doPost(e) { return handle(e); }
 
 function handle(e) {
   var p = (e && e.parameter) || {};
+  if (String(p.action || '') === 'lookup') return lookup(p);
+
   var email    = String(p.email  || '').trim().toLowerCase();
   var answer   = String(p.answer || '').trim().toLowerCase();
   var campaign = String(p.utm_campaign || '').trim();
   var reason   = String(p.reason || '').trim().slice(0, 250);
+  var phone    = String(p.phone  || '').trim().slice(0, 25);
 
   var out = { ok: false, email: email, answer: answer, lead: null, contact: null, note: '' };
 
@@ -48,14 +51,16 @@ function handle(e) {
              (answer === 'no' && reason ? ' Reason given: ' + reason + '.' : '') +
              ' Campaign ' + (campaign || 'n/a') + ', ' + new Date().toISOString().slice(0, 10) + '.';
 
-  out.lead    = mark('lead', email, answer, note);
-  out.contact = mark('contact', email, answer, note);
+  if (phone) note += ' Phone given by the client: ' + phone + '.';
+
+  out.lead    = mark('lead', email, answer, note, phone);
+  out.contact = mark('contact', email, answer, note, phone);
   out.ok = true;
   return json(out);
 }
 
 
-function mark(kind, email, answer, note) {
+function mark(kind, email, answer, note, phone) {
   var ids = findByEmail(kind === 'lead' ? 'LEAD' : 'CONTACT', email);
   if (!ids.length) return { found: 0, updated: 0 };
 
@@ -76,7 +81,19 @@ function mark(kind, email, answer, note) {
       });
     }
 
-    // 2. the COMMENTS field, in its own call so the request stays short
+    // 2. the phone the client typed, added alongside the numbers already on file.
+    //    Existing entries are sent back with their IDs so none of them is dropped.
+    if (phone && !hasPhone(rec, phone)) {
+      var list = (rec.PHONE || []).map(function (ph) {
+        return { ID: ph.ID, VALUE: ph.VALUE, VALUE_TYPE: ph.VALUE_TYPE };
+      });
+      list.push({ VALUE: phone, VALUE_TYPE: 'MOBILE' });
+      call('crm.' + kind + '.update', {
+        id: id, fields: { PHONE: list }, params: { REGISTER_SONET_EVENT: 'N' }
+      });
+    }
+
+    // 3. the COMMENTS field, in its own call so the request stays short
     var existing = String(rec.COMMENTS || '');
     call('crm.' + kind + '.update', {
       id: id,
@@ -84,7 +101,7 @@ function mark(kind, email, answer, note) {
       params: { REGISTER_SONET_EVENT: 'N' }
     });
 
-    // 3. the timeline
+    // 4. the timeline
     call('crm.timeline.comment.add', {
       fields: { ENTITY_ID: id, ENTITY_TYPE: kind, COMMENT: note }
     });
@@ -93,6 +110,52 @@ function mark(kind, email, answer, note) {
   });
 
   return { found: ids.length, updated: updated };
+}
+
+
+/* ---------------- phone ---------------- */
+
+function digits(v) { return String(v || '').replace(/[^0-9]/g, ''); }
+
+/** True when this number, ignoring spaces and symbols, is already on the record. */
+function hasPhone(rec, phone) {
+  var d = digits(phone);
+  if (d.length < 6) return true;   // too short to be a real number, so do not add it
+  return (rec.PHONE || []).some(function (ph) {
+    var e = digits(ph.VALUE);
+    return e === d || e.slice(-9) === d.slice(-9);
+  });
+}
+
+/** Shows only the last three digits, e.g. 972 50 123 4567 becomes ......567 */
+function mask(phone) {
+  var d = digits(phone);
+  if (d.length < 4) return '';
+  return '\u2022'.repeat(Math.min(d.length - 3, 9)) + d.slice(-3);
+}
+
+/** Answers the page's phone lookup. Returns a masked number and nothing else. */
+function lookup(p) {
+  var email = String(p.email || '').trim().toLowerCase();
+  var cb    = String(p.callback || '').replace(/[^A-Za-z0-9_$]/g, '').slice(0, 40) || '__dvPhone';
+  var out   = { phone: '' };
+
+  if (email && email.indexOf('@') > 0) {
+    ['LEAD', 'CONTACT'].forEach(function (type) {
+      if (out.phone) return;
+      var ids = findByEmail(type, email);
+      ids.forEach(function (id) {
+        if (out.phone) return;
+        var rec = call('crm.' + (type === 'LEAD' ? 'lead' : 'contact') + '.get', { id: id });
+        var first = rec && rec.PHONE && rec.PHONE[0];
+        if (first) out.phone = mask(first.VALUE);
+      });
+    });
+  }
+
+  return ContentService
+    .createTextOutput(cb + '(' + JSON.stringify(out) + ')')
+    .setMimeType(ContentService.MimeType.JAVASCRIPT);
 }
 
 
@@ -153,7 +216,13 @@ function testDvYes() {
     email: 'put-a-test-address@example.com',
     name: 'Test',
     answer: 'yes',
+    phone: '',
     utm_campaign: 'TEST'
   }});
   console.log(out.getContent());
+}
+
+/** Check what the page would show in the Phone row for one address. */
+function testLookup() {
+  console.log(lookup({ email: 'put-a-test-address@example.com', callback: 'cb' }).getContent());
 }

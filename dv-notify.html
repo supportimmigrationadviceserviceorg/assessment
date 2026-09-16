@@ -455,6 +455,11 @@
   /* ---- Paste the /exec URL of the deployed Apps Script web app here ---- */
   var HANDLER = 'https://script.google.com/macros/s/PASTE_DEPLOYMENT_ID/exec';
 
+  if (HANDLER.indexOf('PASTE_DEPLOYMENT_ID') > -1) {
+    console.warn('dv-notify: HANDLER still holds the placeholder URL. ' +
+                 'Nothing will be written to the CRM and the phone will always read "Not on file".');
+  }
+
   var q = new URLSearchParams(location.search);
   var name     = (q.get('name')  || '').trim();
   var email    = (q.get('email') || '').trim();
@@ -513,7 +518,20 @@
     el('btnNo').classList.remove('hide');
   }
 
+  // The save also goes out as JSONP, so the page can read the handler's answer.
+  // A plain no-cors fetch always looks successful, which would let us tell a
+  // client their place is held when nothing was written.
+  var callNo = 0;
   function send(choice, onOk, reason) {
+    var cb = '__dvSave' + (++callNo);
+    var done = false;
+
+    window[cb] = function (res) {
+      if (done) return;
+      done = true;
+      if (res && res.ok) { onOk(); } else { show('err'); window.scrollTo(0, 0); }
+    };
+
     var url = HANDLER +
       '?action=dv' +
       '&answer='  + encodeURIComponent(choice) +
@@ -521,11 +539,16 @@
       '&name='    + encodeURIComponent(name) +
       '&phone='   + encodeURIComponent(typedPhone()) +
       '&reason='  + encodeURIComponent(reason || '') +
-      '&utm_campaign=' + encodeURIComponent(campaign);
+      '&utm_campaign=' + encodeURIComponent(campaign) +
+      '&callback=' + cb;
 
-    fetch(url, { mode: 'no-cors' })
-      .then(onOk)
-      .catch(function () { show('err'); });
+    var sc = document.createElement('script');
+    sc.src = url;
+    sc.onerror = function () { window[cb](null); };
+    document.body.appendChild(sc);
+
+    // If the script never answers, do not leave the client staring at a spinner.
+    setTimeout(function () { window[cb](null); }, 15000);
   }
 
   el('btnYes').addEventListener('click', function () {
