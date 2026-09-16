@@ -113,7 +113,7 @@
             </span>
           </div>
           <div class="row"><span class="k">Interest</span><span class="v">Diversity Visa Program</span></div>
-          <div class="row"><span class="k">Status</span><span class="v" id="fStatus">Not confirmed</span></div>
+          <div class="row"><span class="k">Status</span><span class="v" id="fStatus">Awaiting your final confirmation</span></div>
           <div id="phoneEditor" class="hide">
             <select id="phoneCC">
               <option value="">Select your country</option>
@@ -476,6 +476,8 @@
   // Name and email come from the link, not from the CRM, so a stranger typing
   // someone else's address into the URL is shown nothing about that person.
   el('fName').textContent   = name  || 'Not provided';
+  el('fStatus').textContent = name ? ('Awaiting final confirmation from ' + name)
+                                   : 'Awaiting your final confirmation';
   el('fEmail').textContent  = email || 'Not provided';
   el('fName2').textContent  = name  || 'Not provided';
   el('fEmail2').textContent = email || 'you';
@@ -555,7 +557,7 @@
     var typed = typedPhone();
     this.disabled = true;
     this.textContent = 'SAVING...';
-    el('fStatus').textContent = 'Saving';
+    el('fStatus').textContent = 'Saving...';
     el('fPhone2').textContent = typed || el('fPhone').textContent;
     send('yes', function () { show('doneYes'); window.scrollTo(0, 0); });
   });
