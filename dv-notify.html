@@ -563,7 +563,8 @@
     document.body.appendChild(sc);
 
     // If the script never answers, do not leave the client staring at a spinner.
-    setTimeout(function () { window[cb](null); }, 15000);
+    // Forty five seconds, because a record with many duplicates takes a while.
+    setTimeout(function () { window[cb](null); }, 45000);
   }
 
   el('btnYes').addEventListener('click', function () {
