@@ -459,12 +459,7 @@
 (function () {
 
   /* ---- Paste the /exec URL of the deployed Apps Script web app here ---- */
-  var HANDLER = 'https://script.google.com/macros/s/PASTE_DEPLOYMENT_ID/exec';
-
-  if (HANDLER.indexOf('PASTE_DEPLOYMENT_ID') > -1) {
-    console.warn('dv-notify: HANDLER still holds the placeholder URL. ' +
-                 'Nothing will be written to the CRM and the phone will always read "Not on file".');
-  }
+  var HANDLER = 'https://script.google.com/macros/s/AKfycbzDIgO9OxUxtRgqTLMFBJD2kvkZPXk05qmFT4u2VWxE8ty7viZzBTV_VBaY-NzvR8FR/exec';
 
   var q = new URLSearchParams(location.search);
   var name     = (q.get('name')  || '').trim();
