@@ -662,6 +662,26 @@
     }catch(e){}
   }
 
+  // "Anywhere" and a named state contradict each other, so they cannot both be
+  // on. Choosing one clears the other, and turning the last state off falls
+  // back to Anywhere rather than leaving nothing chosen.
+  function setState_(name,onOff,bag){
+    var c=document.getElementById("states-"+name.replace(/\W/g,""));
+    if(!c) return;
+    c.setAttribute("aria-pressed",onOff?"true":"false");
+    if(onOff) bag[name]=1; else delete bag[name];
+  }
+  function exclusiveStates_(bag,name,wasOn){
+    if(!wasOn){
+      if(name==="Anywhere"){
+        Object.keys(bag).forEach(function(n){ if(n!=="Anywhere") setState_(n,false,bag); });
+      }else{
+        setState_("Anywhere",false,bag);
+      }
+    }
+    if(!Object.keys(bag).length) setState_("Anywhere",true,bag);
+  }
+
   function chips(host,list,bag){
     list.forEach(function(name){
       var b=document.createElement("button");
@@ -672,6 +692,7 @@
         var on=b.getAttribute("aria-pressed")==="true";
         b.setAttribute("aria-pressed",on?"false":"true");
         if(on) delete bag[name]; else bag[name]=1;
+        if(host.id==="states") exclusiveStates_(bag,name,on);
         run();
       });
       host.appendChild(b);
