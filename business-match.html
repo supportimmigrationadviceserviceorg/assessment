@@ -1178,9 +1178,13 @@
       if(window.__bmLive) run(); else offline();
       document.querySelector(".results").scrollIntoView({behavior:"smooth",block:"start"});
     }
+    // The relay is an Apps Script web app and a cold one can take the better
+    // part of ten seconds to answer, so give it twenty before giving up, and
+    // say what is happening rather than leaving the button sitting there.
     (function wait(){
       var ms=Date.now()-t0;
-      if((window.__bmLive && ms>=1500) || ms>=9000){ done(); return; }
+      if((window.__bmLive && ms>=1500) || ms>=20000){ done(); return; }
+      if(ms>=5000) btn.textContent="Still checking our list…";
       setTimeout(wait,150);
     })();
   });
@@ -1339,17 +1343,38 @@
       run();
     }
 
+    // Keep the last list we were given. The relay is an Apps Script web app
+    // and answering can take the better part of ten seconds, so a returning
+    // visitor should not wait for it again. The sheet is refreshed weekly, so
+    // anything older than a week is thrown away rather than shown.
+    var LKEY="bm-listings-v1", WEEK=7*24*60*60*1000;
+    try{
+      var c=JSON.parse(localStorage.getItem(LKEY)||"null");
+      if(c && c.rows && c.rows.length && (Date.now()-c.at) < WEEK) rebuild(c.rows);
+    }catch(e){}
+
     window.__bmListings=function(res){
-      try{ if(res && res.ok) rebuild(res.listings); }catch(e){}
+      try{
+        if(res && res.ok && res.listings && res.listings.length){
+          rebuild(res.listings);
+          try{ localStorage.setItem(LKEY,JSON.stringify({at:Date.now(),rows:res.listings})); }catch(e2){}
+        }
+      }catch(e){}
     };
 
-    try{
-      var s=document.createElement("script");
-      s.src=ENDPOINT+"?action=listings&callback=__bmListings&t="+Date.now();
-      s.async=true;
-      s.onerror=function(){};                 // page keeps the examples, silently
-      document.body.appendChild(s);
-    }catch(e){}
+    // Ask twice if the first attempt is still silent after eight seconds. A
+    // cold Apps Script sometimes never answers the first call at all.
+    function ask(){
+      try{
+        var s=document.createElement("script");
+        s.src=ENDPOINT+"?action=listings&callback=__bmListings&t="+Date.now();
+        s.async=true;
+        s.onerror=function(){};
+        document.body.appendChild(s);
+      }catch(e){}
+    }
+    ask();
+    setTimeout(function(){ if(!window.__bmLive) ask(); },8000);
   })();
 })();
 </script>
