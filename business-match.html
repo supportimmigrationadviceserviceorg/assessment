@@ -226,6 +226,11 @@
   .empty .eh{font-family:var(--f-d);font-weight:700;font-size:1.2rem;color:var(--ink);}
   .empty .eb{font-size:.9375rem;line-height:1.65;max-width:62ch;}
   .empty .eb b{color:var(--ink);font-weight:700;}
+  .empty ul.fixes{margin:.9rem 0 .3rem;padding:0;list-style:none;display:flex;flex-direction:column;gap:.6rem;}
+  .empty ul.fixes li{display:flex;gap:.8rem;align-items:center;flex-wrap:wrap;
+    font-size:.9375rem;line-height:1.55;color:var(--ink-2);}
+  .empty ul.fixes li b{color:var(--ink);font-weight:700;}
+  .empty ul.fixes .mini{flex:none;}
   .empty .ebtns{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:.5rem;align-items:center;}
   .lead .free{font-family:var(--f-m);font-weight:600;font-size:1.5rem;color:var(--pine);line-height:1.2;}
   .lead.alt{border-color:var(--clay);background:var(--clay-soft);}
@@ -489,14 +494,19 @@
       <h3>Which routes are actually open to you</h3>
       <p>Leave your details and we will come back to you within two working days with the routes that fit your situation, and what each one would take. No charge for this, and no obligation.</p>
     </div>
-    <ul class="incl">
+    <div id="notifyHead" hidden>
+      <p class="free">Free</p>
+      <h3>Tell me when a business matches me</h3>
+      <p>Our list changes every week. Leave your details and we will email you when a business that fits the answers you just gave comes onto it. No charge, and you can stop it whenever you like.</p>
+    </div>
+    <ul class="incl" id="inclList">
       <li><b>Which business it actually is</b> the name, the exact address and the original listing</li>
       <li><b>Proof the numbers are real</b> three years of tax returns, checked against what the seller claims</li>
       <li><b>Whether it would pass for your visa</b> written in plain English, with every question an officer is likely to ask you about it</li>
       <li><b>What to change before you offer</b> the terms that would cost you the visa, and what to ask for instead</li>
     </ul>
 
-    <div class="straight">
+    <div class="straight" id="straightBlock">
       <p class="sl">An honest word</p>
       <p>Some of these businesses you could find by yourself online. Here is what you cannot do on your own: <b>set the purchase up so it actually counts for your visa</b>, and <b>get an American broker to take you seriously</b> before you have a visa, a US bank account and proof of your money.</p>
       <p>A business can be a good business and still cost you the visa. Nobody on the payroll, the wrong kind of loan from the seller, the wrong paperwork. The broker is paid by the seller and does not check any of that. We are paid by you, so we do.</p>
@@ -519,7 +529,7 @@
     </div>
     <p class="err" id="err">Please enter your name, a valid email address and a phone number we can reach you on.</p>
     <button class="btn" id="send" type="button">Request this file</button></div>
-    <p class="fine">The $100 covers our work on the file. We check the business is still for sale first, and if it has already sold you get the money back and we show you the closest ones instead.</p>
+    <p class="fine" id="fineNote">The $100 covers our work on the file. We check the business is still for sale first, and if it has already sold you get the money back and we show you the closest ones instead.</p>
     <p class="thanks" id="thanks">Thank you. We will check the business is still available and come back to you within two working days.</p>
   </section>
 
@@ -868,6 +878,118 @@
     return {b:b,pct:Math.max(35,Math.min(99,Math.round(pts))),why:why};
   }
 
+  function nBiz(n){ return n===1 ? "1 business" : n+" businesses"; }
+  function joinWords(a){
+    if(!a.length) return "";
+    if(a.length===1) return a[0];
+    if(a.length===2) return a[0]+" and "+a[1];
+    return a.slice(0,-1).join(", ")+" and "+a[a.length-1];
+  }
+  function uniqSorted(a){
+    return a.filter(function(v,i,x){ return v && x.indexOf(v)===i; }).sort();
+  }
+  function escH(s){
+    return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  // Only three answers can rule a business out: the budget, the states and the
+  // industries ruled out. Relax each on its own and count what it releases, so
+  // an empty list can say what would change it instead of only commiserating.
+  function fixes(){
+    var budget=+val("budget");
+    var anyState=sel.states["Anywhere"]||!Object.keys(sel.states).length;
+    function okBudget(b){ return b.price<=budget; }
+    function okState(b){ return anyState || !!sel.states[b.s]; }
+    function okAvoid(b){ return !sel.avoid[b.ind]; }
+    var f=[];
+
+    var byMoney=BIZ.filter(function(b){ return okState(b)&&okAvoid(b)&&!okBudget(b); });
+    if(byMoney.length){
+      var need=Math.min.apply(null,byMoney.map(function(b){ return b.price; }));
+      var n=byMoney.filter(function(b){ return b.price<=need; }).length;
+      f.push({k:"budget", v:String(need),
+        t:"A budget of <b>"+money(need)+"</b> would open up "+nBiz(n)+".",
+        c:"Use "+money(need)});
+    }
+    var byPlace=BIZ.filter(function(b){ return okBudget(b)&&okAvoid(b)&&!okState(b); });
+    if(byPlace.length){
+      var st=uniqSorted(byPlace.map(function(b){ return b.s; }));
+      f.push({k:"states", v:"",
+        t:"At your budget there "+(byPlace.length===1?"is ":"are ")+nBiz(byPlace.length)+
+          ", in <b>"+escH(joinWords(st))+"</b>.",
+        c:"Show me those"});
+    }
+    var byInd=BIZ.filter(function(b){ return okBudget(b)&&okState(b)&&!okAvoid(b); });
+    if(byInd.length){
+      var inds=uniqSorted(byInd.map(function(b){ return b.ind; }));
+      f.push({k:"avoid", v:"",
+        t:nBiz(byInd.length)+(byInd.length===1?" fits":" fit")+" everything else, but you ruled "+
+          "out <b>"+escH(joinWords(inds).toLowerCase())+"</b>.",
+        c:"Put those back in"});
+    }
+    return f;
+  }
+
+  function fixesHtml(){
+    var f=fixes();
+    if(!f.length){
+      return '<p class="eb">Nothing on the list fits today, at any budget and anywhere in the '+
+             'country. The list changes every week, and buying a business is only one of the '+
+             'ways into the United States.</p>';
+    }
+    return '<p class="eb">There are '+nBiz(BIZ.length)+' on the list today and it changes every '+
+           'week. Here is what would change the answer:</p>'+
+      '<ul class="fixes">'+f.map(function(x){
+        return '<li><span>'+x.t+'</span><button class="mini primary" type="button" '+
+               'data-fix="'+x.k+'" data-v="'+x.v+'">'+x.c+'</button></li>';
+      }).join("")+'</ul>';
+  }
+
+  function applyFix(kind,btn){
+    if(kind==="budget"){
+      var need=+btn.getAttribute("data-v"), b=document.getElementById("budget"), hit=null;
+      for(var i=0;i<b.options.length;i++){
+        var ov=b.options[i].value;
+        if(ov && +ov>=need){ hit=ov; break; }
+      }
+      b.value = hit || b.options[b.options.length-1].value;
+      KNOWN.budget=true;
+      run();
+      return;
+    }
+    if(kind==="states"){
+      var any=document.getElementById("states-Anywhere");
+      if(any && any.getAttribute("aria-pressed")!=="true") any.click(); else run();
+      return;
+    }
+    if(kind==="avoid"){
+      var on=Object.keys(sel.avoid);
+      if(!on.length){ run(); return; }
+      on.forEach(function(n){
+        var c=document.getElementById("avoid-"+n.replace(/\W/g,""));
+        if(c && c.getAttribute("aria-pressed")==="true") c.click();
+      });
+    }
+  }
+
+  // The same form asks for three different things. Nothing else on the panel
+  // should be contradicting the one being asked for.
+  function leadMode(mode){
+    window.__leadMode=mode;
+    window.__altRoute=(mode==="alt");
+    var lead=document.getElementById("lead");
+    if(mode==="pay") lead.classList.remove("alt"); else lead.classList.add("alt");
+    document.getElementById("payHead").hidden    = mode!=="pay";
+    document.getElementById("altHead").hidden    = mode!=="alt";
+    document.getElementById("notifyHead").hidden = mode!=="notify";
+    ["inclList","straightBlock","fineNote"].forEach(function(id){
+      var el=document.getElementById(id); if(el) el.hidden = mode!=="pay";
+    });
+    document.getElementById("send").textContent =
+      mode==="alt" ? "Show me my options" :
+      mode==="notify" ? "Email me when there is one" : "Request this file";
+  }
+
   function run(){
     document.getElementById("liveCount").textContent=BIZ.length+" businesses available";
     if(missing().length) return;
@@ -891,57 +1013,38 @@
 
     cards.innerHTML="";
     if(!out.length){
-      // Nobody is a dead end. If buying a business does not fit their budget,
-      // there are other routes into the United States, and this is exactly the
-      // moment to say so rather than leave them looking at an empty page.
-      var budget=+val("budget");
-      var cheapest=BIZ.reduce(function(a,b){return b.price<a.price?b:a;});
+      // An empty list is not a dead end, and the first thing to say is what
+      // would actually change it. Only three answers can rule a business out:
+      // the budget, the states, and the industries ruled out. So relax each
+      // one on its own and see what it would release. These are real counts
+      // from today's list, not encouragement.
       var e=document.createElement("div");
       e.className="empty";
       e.innerHTML=
-        '<p class="eh">Nothing here matches yet, and that is worth knowing now.</p>'+
-        (budget<cheapest.price
-          ? '<p class="eb">The smallest business we have is '+money(cheapest.price)+
-            ', and buying one is only one of the ways into the United States.</p>'
-          : '<p class="eb">Buying a business is only one of the ways into the United States, '+
-            'and it is not the right one for everybody.</p>')+
-        '<p class="eb"><b>There are routes that need no investment at all.</b> Some are based on '+
-        'what you have already achieved in your career. Some on an employer sponsoring you. '+
-        'One is a free annual lottery. Which ones are open to you depends on your work, '+
-        'your qualifications, your family and your nationality.</p>'+
+        '<p class="eh">We have not found a business that matches your answers right now.</p>'+
+        fixesHtml()+
         '<div class="ebtns">'+
-          '<button class="btn" type="button" id="otherRoutes">Show me the other routes</button>'+
-          '<button class="mini" type="button" id="widen">Or widen my search</button>'+
+          '<button class="btn" type="button" id="notifyMe">Tell me when there is one</button>'+
+          '<button class="mini" type="button" id="otherRoutes">Or show me the other routes into the US</button>'+
         '</div>';
       cards.appendChild(e);
 
-      document.getElementById("otherRoutes").addEventListener("click",function(){
-        window.__altRoute=true;
-        var lead=document.getElementById("lead");
-        lead.classList.add("alt");
-        document.getElementById("send").textContent="Show me my options";
-        document.getElementById("altHead").hidden=false;
-        document.getElementById("payHead").hidden=true;
-        lead.scrollIntoView({behavior:"smooth",block:"center"});
+      Array.prototype.forEach.call(e.querySelectorAll("[data-fix]"),function(btn){
+        btn.addEventListener("click",function(){ applyFix(btn.getAttribute("data-fix"),btn); });
       });
-      document.getElementById("widen").addEventListener("click",function(){
-        var b=document.getElementById("budget");
-        if(b.selectedIndex < b.options.length-1) b.selectedIndex++;
-        KNOWN.budget=true;
-        var any=document.getElementById("states-Anywhere");
-        if(any && any.getAttribute("aria-pressed")!=="true") any.click(); else run();
+      document.getElementById("notifyMe").addEventListener("click",function(){
+        leadMode("notify");
+        document.getElementById("lead").scrollIntoView({behavior:"smooth",block:"center"});
+      });
+      document.getElementById("otherRoutes").addEventListener("click",function(){
+        leadMode("alt");
+        document.getElementById("lead").scrollIntoView({behavior:"smooth",block:"center"});
       });
       return;
     }
 
-    // coming back to a list that works again clears the other-routes framing
-    if(window.__altRoute){
-      window.__altRoute=false;
-      document.getElementById("lead").classList.remove("alt");
-      document.getElementById("send").textContent="Request this file";
-      document.getElementById("altHead").hidden=true;
-      document.getElementById("payHead").hidden=false;
-    }
+    // coming back to a list that works again clears the other framing
+    if(window.__leadMode && window.__leadMode!=="pay") leadMode("pay");
 
     out.forEach(function(s){
       var b=s.b, col = s.pct>=80?"var(--pine)":s.pct>=65?"var(--gold)":"var(--clay)";
@@ -971,6 +1074,7 @@
 
       var btns=d.querySelectorAll(".cact .mini");
       btns[0].addEventListener("click",function(){
+        leadMode("pay");
         document.getElementById("lead").scrollIntoView({behavior:"smooth",block:"center"});
       });
       btns[1].addEventListener("click",function(){
@@ -1094,7 +1198,7 @@
     }
     document.getElementById("err").style.display="none";
     btn.disabled=true; btn.textContent="Sending…";
-    var alt=!!window.__altRoute;
+    var mode=window.__leadMode||"pay", alt=mode!=="pay";
 
     var top=(window.__lastResults||[]).slice(0,3).map(function(s){
       return s.b.id+" ("+s.pct+"%)";
@@ -1110,7 +1214,9 @@
       avoid:Object.keys(sel.avoid).join("|"),
       matches:top,
       source:Q.utm||"email",
-      enquiry: window.__altRoute ? "OTHER ROUTES - budget below business purchase" : "business report",
+      enquiry: mode==="alt" ? "OTHER ROUTES - no business matched their answers"
+             : mode==="notify" ? "NOTIFY ME - no business matched, wants telling when one does"
+             : "business report",
       page:location.href
     };
 
@@ -1127,7 +1233,13 @@
       var ref=(top&&top.b&&top.b.id)||"";
       var title=(top&&top.b&&top.b.t)||"";
       var first=name.split(" ")[0];
-      if(alt){
+      if(mode==="notify"){
+        box.innerHTML=
+          '<p class="tk">Thank you, '+first+'. We have your answers.</p>'+
+          '<p class="tb">We will email you as soon as a business that fits them comes onto our '+
+          'list. The list is refreshed every week. Nothing to pay, and you can tell us to stop '+
+          'at any time.</p>';
+      } else if(alt){
         box.innerHTML=
           '<p class="tk">Thank you, '+first+'. We have your details.</p>'+
           '<p class="tb">We will look at which routes into the United States are open to you '+
