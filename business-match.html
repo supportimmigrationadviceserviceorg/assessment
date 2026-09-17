@@ -920,7 +920,7 @@
           '<button class="mini primary" type="button">Request full file</button>'+
           '<button class="mini" type="button" aria-pressed="false">Save</button>'+
           '<button class="mini" type="button">Not for me</button>'+
-          '<span class="src">'+b.src+' · verified this week</span>'+
+          '<span class="src">'+b.src+(b.chk?' · checked '+b.chk:'')+'</span>'+
         '</div>';
 
       var btns=d.querySelectorAll(".cact .mini");
