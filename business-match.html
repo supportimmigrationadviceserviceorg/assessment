@@ -943,7 +943,19 @@
       }).join("")+'</ul>';
   }
 
+  // Changing one answer and having a business appear in the same instant reads
+  // as a trick rather than a search. Same pause as the main button, and the
+  // buttons lock while it runs so nothing can be pressed twice.
   function applyFix(kind,btn){
+    Array.prototype.forEach.call(document.querySelectorAll("[data-fix]"),function(x){
+      x.disabled=true;
+      if(x!==btn) x.style.opacity=".55";
+    });
+    btn.textContent="Matching businesses…";
+    setTimeout(function(){ doFix(kind,btn); },1500);
+  }
+
+  function doFix(kind,btn){
     if(kind==="budget"){
       var need=+btn.getAttribute("data-v"), b=document.getElementById("budget"), hit=null;
       for(var i=0;i<b.options.length;i++){
