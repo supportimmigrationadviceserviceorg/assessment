@@ -55,6 +55,7 @@
   }
 
   *{box-sizing:border-box;}
+  [hidden]{display:none !important;}
   html,body{margin:0;}
   body{background:var(--ground);color:var(--ink);font-family:var(--f-b);
     font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;}
@@ -352,7 +353,7 @@
     </div>
 
 
-    <div class="assume">
+    <div class="assume" id="assumeBar" hidden>
       <div class="at">
         <span class="al">Showing matches for</span>
         <span class="av" id="assumeLine">a $50–75K budget in Florida</span>
@@ -360,7 +361,7 @@
       <button class="adj" id="adjust" type="button" aria-expanded="false" aria-controls="finder">Change this</button>
     </div>
 
-    <div class="refine" id="refinePrompt">
+    <div class="refine hidden" id="refinePrompt">
       <p class="rq" id="rq">Want a list that actually fits you?</p>
       <p class="rd" id="rd">Six short questions, about a minute. The list above changes as you answer, so you can see the difference straight away.</p>
       <button class="btn ghost" id="openRefine" type="button">Answer six questions</button>
@@ -369,6 +370,7 @@
   </section>
 
   <section class="results">
+   <div id="resultsBox" hidden>
     <div class="rhead">
       <h2>Businesses that suit you</h2>
       <span class="expl">The percentage is how well each one fits what you told us. 100% would be a perfect fit on price, earnings, location and the kind of work you have done.</span>
@@ -376,10 +378,11 @@
     </div>
     <p class="demo" id="demoNote">These are example businesses, to show you how this works. Ask for a file on any of them and we will send you real ones that match.</p>
     <div id="cards"></div>
+   </div>
 
-  <div class="finder" id="finder" hidden>
+  <div class="finder" id="finder">
     <div class="fhead">
-      <span class="t">About you</span>
+      <span class="t">Six questions about you</span>
       <span class="c" id="liveCount">8 businesses available</span>
     </div>
 
@@ -453,8 +456,8 @@
     </div>
 
     <div class="fbar">
-      <button class="btn" id="go" type="button">Show me better matches</button>
-      <span class="note">The list above changes as soon as you answer. Nothing is saved to an account and nothing is sent yet.</span>
+      <button class="btn" id="go" type="button">Show me the businesses</button>
+      <span class="note">Answer what you can and press the button. Nothing is saved to an account and nothing is sent yet.</span>
     </div>
   </div>
 
@@ -463,7 +466,7 @@
   <section class="hero" style="padding-block:0;">
   </section>
 
-  <section class="lead" id="lead">
+  <section class="lead" id="lead" hidden>
     <div id="payHead">
       <p class="price-tag">$100 <s>$495</s> <span>first clients only. If you go on to use our full search service, this comes off the price</span></p>
       <h3>The full file on one business</h3>
@@ -510,7 +513,7 @@
   </section>
 
   <footer>
-    The businesses on this page are examples, shown so you can see how the service works. Real businesses for sale are always listed without their name or exact address, because sellers do not want staff and customers to know before a sale is agreed. You get the name once you ask for the full file. The match score is a first look, not legal advice, and it does not replace a proper review of your case. We are paid by you and never by the seller. We never hold your purchase money. Deposits go to a licensed escrow company or a lawyer\u2019s client account.
+    The businesses shown are real businesses currently advertised for sale, taken from public listings on the date given on each card. We have not confirmed that any of them is still available, and we have not audited the figures, which are the ones published by the seller or their broker. Businesses for sale are normally listed without their name or exact address, because sellers do not want staff and customers to know before a sale is agreed. You get the name once you ask for the full file. The match score is a first look, not legal advice, and it does not replace a proper review of your case. We are paid by you and never by the seller. We never hold your purchase money. Deposits go to a licensed escrow company or a lawyer&rsquo;s client account.
   </footer>
 
 </div>
@@ -979,8 +982,17 @@
   document.getElementById("adjust").addEventListener("click",openRefine);
   document.getElementById("openRefine").addEventListener("click",openRefine);
 
+  // The questionnaire comes first. No businesses are shown until it is answered.
+  function revealResults(){
+    document.getElementById("resultsBox").hidden=false;
+    document.getElementById("assumeBar").hidden=false;
+    document.getElementById("lead").hidden=false;
+  }
   document.getElementById("go").addEventListener("click",function(){
     run();
+    revealResults();
+    finderEl.hidden=true;
+    document.getElementById("adjust").setAttribute("aria-expanded","false");
     document.querySelector(".results").scrollIntoView({behavior:"smooth",block:"start"});
   });
   document.getElementById("send").addEventListener("click",function(){
@@ -1074,6 +1086,7 @@
   Array.prototype.forEach.call(askPanel.querySelectorAll(".asklink"),function(a){
     a.addEventListener("click",function(ev){
       ev.preventDefault(); setAsk(false);
+      revealResults();
       document.getElementById("lead").scrollIntoView({behavior:"smooth",block:"center"});
     });
   });
