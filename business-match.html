@@ -374,7 +374,7 @@
       <span class="expl">The percentage is how well each one fits what you told us. 100% would be a perfect fit on price, earnings, location and the kind of work you have done.</span>
       <span class="count" id="resCount"></span>
     </div>
-    <p class="demo">These are example businesses, to show you how this works. Ask for a file on any of them and we will send you real ones that match.</p>
+    <p class="demo" id="demoNote">These are example businesses, to show you how this works. Ask for a file on any of them and we will send you real ones that match.</p>
     <div id="cards"></div>
 
   <div class="finder" id="finder" hidden>
@@ -1080,6 +1080,66 @@
   document.addEventListener("keydown",function(e){ if(e.key==="Escape" && !askPanel.hidden){ setAsk(false); askBtn.focus(); } });
 
   run();
+
+  // --- Live businesses ---------------------------------------------------
+  // The eight above are examples and ship with the page so it is never empty
+  // and never waits. The real businesses live in a Google Sheet that the relay
+  // serves. When they arrive they replace the examples and the page redraws.
+  // JSONP, because a script tag needs no cross-origin permission from anyone.
+  (function(){
+    function rebuild(rows){
+      if(!rows || !rows.length) return;
+
+      BIZ.length=0;
+      rows.forEach(function(r){ BIZ.push(r); });
+
+      var keptS=Object.keys(sel.states), keptA=Object.keys(sel.avoid);
+      sel.states={}; sel.avoid={};
+
+      var sh=document.getElementById("states"), ah=document.getElementById("avoid");
+      sh.innerHTML=""; ah.innerHTML="";
+
+      STATES=["Anywhere"].concat(BIZ.map(function(b){return b.s;})
+        .filter(function(v,i,a){return v && a.indexOf(v)===i;}).sort());
+      chips(sh,STATES,sel.states);
+
+      AVOID=BIZ.map(function(b){return b.ind;})
+        .filter(function(v,i,a){return v && a.indexOf(v)===i;}).sort();
+      chips(ah,AVOID,sel.avoid);
+
+      // put back whatever was selected; anything no longer offered falls away
+      var any=false;
+      keptS.forEach(function(n){
+        var c=document.getElementById("states-"+n.replace(/\W/g,""));
+        if(c){ c.click(); any=true; }
+      });
+      if(!any){
+        var all=document.getElementById("states-Anywhere");
+        if(all) all.click();
+      }
+      keptA.forEach(function(n){
+        var c=document.getElementById("avoid-"+n.replace(/\W/g,""));
+        if(c) c.click();
+      });
+
+      var note=document.getElementById("demoNote");
+      if(note) note.hidden=true;
+
+      run();
+    }
+
+    window.__bmListings=function(res){
+      try{ if(res && res.ok) rebuild(res.listings); }catch(e){}
+    };
+
+    try{
+      var s=document.createElement("script");
+      s.src=ENDPOINT+"?action=listings&callback=__bmListings&t="+Date.now();
+      s.async=true;
+      s.onerror=function(){};                 // page keeps the examples, silently
+      document.body.appendChild(s);
+    }catch(e){}
+  })();
 })();
 </script>
 
