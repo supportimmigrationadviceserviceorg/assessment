@@ -517,7 +517,7 @@
       <label for="lp"><span class="lab">Phone <span style="color:var(--clay)">*</span></span>
         <span class="telrow">
           <select id="lcc" aria-label="Country code"></select>
-          <input type="tel" id="lp" name="bm-tel" autocomplete="off" inputmode="tel" placeholder="7700 900123" required>
+          <input type="tel" id="lp" name="bm-tel" autocomplete="off" inputmode="tel" placeholder="202 555 0147" required>
         </span></label>
       <label for="lt"><span class="lab">When are you hoping to buy?</span>
         <select id="lt">
@@ -783,27 +783,25 @@
   });
 
   (function(){
-    var sel2=document.getElementById("lcc");
+    var sel2=document.getElementById("lcc"), atIso={}, pos=0;
     DIAL.forEach(function(c){
       var o=document.createElement("option");
       o.value="+"+c.code; o.textContent=c.iso+"  +"+c.code;
       o.title=c.name; o.setAttribute("data-iso",c.iso);
       sel2.appendChild(o);
+      if(!(c.iso in atIso)) atIso[c.iso]=pos;
+      pos++;
     });
 
-    // Guess their country from the browser rather than asking, and from the
-    // link if the CRM told us. They can always change it.
+    // Use the country the CRM gave us in the link if there is one. Otherwise
+    // the United States, because that is what this page is about. Guessing it
+    // from the browser was worse than useless: it showed whichever country the
+    // laptop happened to be set to. They can change it in one click either way.
+    // Chosen by country rather than by dialling code, because the US and Canada
+    // are both +1 and setting the value alone would land on Canada.
     var want=(Q.cc||"").toUpperCase();
-    if(!want){
-      var langs=[].concat(navigator.languages||[],[navigator.language||""]);
-      for(var i=0;i<langs.length;i++){
-        var m=String(langs[i]).match(/[-_]([A-Za-z]{2})$/);
-        if(m){ want=m[1].toUpperCase(); break; }
-      }
-    }
-    var hit=null;
-    for(var j=0;j<DIAL.length;j++){ if(DIAL[j].iso===want){ hit=DIAL[j]; break; } }
-    if(hit) sel2.value="+"+hit.code;
+    if(!(want in atIso)) want="US";
+    if(want in atIso) sel2.selectedIndex=atIso[want];
   })();
 
   function money(n){return "$"+(n>=1000?Math.round(n/1000)+"K":n);}
