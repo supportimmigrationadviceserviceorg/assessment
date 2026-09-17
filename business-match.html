@@ -112,6 +112,10 @@
   .btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px;}
   .btn.ghost{background:transparent;color:var(--ink-2);border:1px solid var(--rule);font-weight:600;}
   .fbar .note{font-size:.8125rem;color:var(--ink-3);}
+  .btn[disabled]{opacity:.65;cursor:default;}
+  .qerr{flex-basis:100%;font-size:.85rem;font-weight:700;color:#a5382c;margin:0;}
+  label.miss select{border-color:#a5382c;box-shadow:0 0 0 1px #a5382c;}
+  label.miss .lab{color:#a5382c;}
   label .hint{font-size:.78rem;line-height:1.45;color:var(--ink-3);font-weight:400;}
 
   /* results */
@@ -388,56 +392,62 @@
 
     <div class="fgrid">
       <label for="budget"><span class="lab">How much money can you put in?</span>
-        <select id="budget">
+        <select id="budget" required>
+          <option value="" selected>Choose one</option>
           <option value="50000">Up to $50,000</option>
           <option value="75000">$50,000 to $75,000</option>
           <option value="100000">$75,000 to $100,000</option>
           <option value="150000">$100,000 to $150,000</option>
           <option value="250000">$150,000 to $250,000</option>
-          <option value="500000" selected>More than $250,000</option>
+          <option value="500000">More than $250,000</option>
         </select>
         <span class="hint">This has to cover the price of the business, plus roughly $15,000 to $30,000 more for legal fees, the visa itself, and enough cash to run it in the first months. Do not count money you need to live on.</span></label>
 
       <label for="income"><span class="lab">What do you need to earn from it?</span>
-        <select id="income">
+        <select id="income" required>
+          <option value="" selected>Choose one</option>
           <option value="40000">About $40,000 a year</option>
-          <option value="60000" selected>About $60,000 a year</option>
+          <option value="60000">About $60,000 a year</option>
           <option value="80000">About $80,000 a year</option>
           <option value="100000">$100,000 a year or more</option>
         </select>
         <span class="hint">What you need to live on, before tax.</span></label>
 
       <label for="family"><span class="lab">Who is coming with you?</span>
-        <select id="family">
+        <select id="family" required>
+          <option value="" selected>Choose one</option>
           <option value="1">Just me</option>
           <option value="2">Me and my partner</option>
           <option value="3">Me, my partner and one child</option>
-          <option value="4" selected>Me, my partner and two children</option>
+          <option value="4">Me, my partner and two children</option>
           <option value="5">Me, my partner and three or more children</option>
         </select>
         <span class="hint">The business has to support everyone who comes. This is one of the things visa officers check.</span></label>
 
       <label for="style"><span class="lab">Do you want to run it yourself?</span>
-        <select id="style">
-          <option value="active" selected>Yes, I want to run it day to day</option>
+        <select id="style" required>
+          <option value="" selected>Choose one</option>
+          <option value="active">Yes, I want to run it day to day</option>
           <option value="semi">No, I would hire a manager and oversee it</option>
           <option value="either">Not sure yet, show me both</option>
         </select>
         <span class="hint">For this visa you have to be genuinely in charge, but you do not have to do every job yourself.</span></label>
 
       <label for="exp"><span class="lab">What kind of work have you done?</span>
-        <select id="exp">
+        <select id="exp" required>
+          <option value="" selected>Choose one</option>
           <option value="hands">Hands on work, or running a team</option>
-          <option value="selling" selected>Sales, customers or transport</option>
+          <option value="selling">Sales, customers or transport</option>
           <option value="trade">A skilled trade</option>
           <option value="desk">Office or professional work</option>
         </select>
         <span class="hint">You do not need experience in the same industry. It just helps us rank them.</span></label>
 
       <label for="risk"><span class="lab">How careful do you want to be?</span>
-        <select id="risk">
+        <select id="risk" required>
+          <option value="" selected>Choose one</option>
           <option value="low">Careful. Steady business, fewer surprises</option>
-          <option value="med" selected>In between</option>
+          <option value="med">In between</option>
           <option value="high">I will take a risk for a bigger return</option>
         </select>
         <span class="hint">Neither answer is wrong. Safer usually means smaller.</span></label>
@@ -457,7 +467,8 @@
 
     <div class="fbar">
       <button class="btn" id="go" type="button">Show me the businesses</button>
-      <span class="note">Answer what you can and press the button. Nothing is saved to an account and nothing is sent yet.</span>
+      <span class="note">All six are needed to match you properly. Nothing is saved to an account and nothing is sent yet.</span>
+      <p class="qerr" id="qerr" hidden></p>
     </div>
   </div>
 
@@ -606,7 +617,6 @@
     if(ok) e.value=v;
   }
   var KNOWN={budget:!!Q.b, state:!!Q.s, income:!!Q.i};
-  if(!Q.b) document.getElementById("budget").value="500000";   // no budget given: hide nothing
   preset("budget",Q.b); preset("income",Q.i); preset("family",Q.f);
   preset("exp",Q.x); preset("style",Q.m); preset("risk",Q.r);
   if(saved && !Q.b) KNOWN.budget=true;
@@ -631,7 +641,7 @@
   var who = Q.n || (saved && saved.n) || "";
   if(who){
     var h=document.querySelector(".hero h1");
-    if(h) h.textContent=who+", here are the U.S. businesses that fit you.";
+    if(h) h.textContent=who+", let us find the U.S. business that fits you.";
 
     var id=document.getElementById("ident");
     var initials=who.trim().split(/\s+/).slice(0,2).map(function(w){return w[0];}).join("").toUpperCase();
@@ -789,6 +799,16 @@
   function money(n){return "$"+(n>=1000?Math.round(n/1000)+"K":n);}
   function val(id){return document.getElementById(id).value;}
 
+  // All six have to be answered. Nothing is scored, and nothing is shown,
+  // until they are.
+  function qids(){ return ["budget","income","family","style","exp","risk"]; }
+  function missing(){
+    return qids().filter(function(id){
+      var e=document.getElementById(id);
+      return !e || !e.value;
+    });
+  }
+
   function score(b){
     var budget=+val("budget"), income=+val("income"), family=+val("family"),
         style=val("style"), exp=val("exp"), risk=val("risk");
@@ -849,6 +869,8 @@
   }
 
   function run(){
+    document.getElementById("liveCount").textContent=BIZ.length+" businesses available";
+    if(missing().length) return;
     var out=[];
     BIZ.forEach(function(b){var s=score(b); if(s) out.push(s);});
     out.sort(function(a,c){return c.pct-a.pct;});
@@ -1009,12 +1031,56 @@
     document.getElementById("assumeBar").hidden=false;
     document.getElementById("lead").hidden=false;
   }
+  // If the live list cannot be reached we say so. We do not show invented
+  // businesses to somebody who has just answered six questions honestly.
+  function offline(){
+    var note=document.getElementById("demoNote");
+    if(note) note.hidden=true;
+    document.getElementById("resCount").textContent="";
+    document.getElementById("cards").innerHTML=
+      '<div class="empty"><p class="eh">We cannot reach our list of businesses right now</p>'+
+      '<p class="eb">This is on our side, not yours. Leave your details below and we will '+
+      'send you the businesses that match your answers, usually the same working day.</p></div>';
+  }
+
   document.getElementById("go").addEventListener("click",function(){
-    run();
-    revealResults();
-    finderEl.hidden=true;
-    document.getElementById("adjust").setAttribute("aria-expanded","false");
-    document.querySelector(".results").scrollIntoView({behavior:"smooth",block:"start"});
+    var btn=this, miss=missing(), err=document.getElementById("qerr");
+
+    qids().forEach(function(id){
+      var lab=document.getElementById(id).closest("label");
+      if(lab){ if(miss.indexOf(id)>-1) lab.classList.add("miss"); else lab.classList.remove("miss"); }
+    });
+
+    if(miss.length){
+      err.textContent = miss.length===1
+        ? "One question is still unanswered."
+        : miss.length+" questions are still unanswered.";
+      err.hidden=false;
+      var first=document.getElementById(miss[0]);
+      first.scrollIntoView({behavior:"smooth",block:"center"});
+      try{ first.focus(); }catch(e){}
+      return;
+    }
+    err.hidden=true;
+
+    // Wait for the real list, and show that something is being worked out
+    // rather than flashing a page at them the instant they click.
+    var label=btn.textContent, t0=Date.now();
+    btn.disabled=true; btn.textContent="Matching businesses…";
+
+    function done(){
+      btn.disabled=false; btn.textContent=label;
+      revealResults();
+      finderEl.hidden=true;
+      document.getElementById("adjust").setAttribute("aria-expanded","false");
+      if(window.__bmLive) run(); else offline();
+      document.querySelector(".results").scrollIntoView({behavior:"smooth",block:"start"});
+    }
+    (function wait(){
+      var ms=Date.now()-t0;
+      if((window.__bmLive && ms>=1500) || ms>=9000){ done(); return; }
+      setTimeout(wait,150);
+    })();
   });
   document.getElementById("send").addEventListener("click",function(){
     var btn=this;
@@ -1159,6 +1225,7 @@
       var note=document.getElementById("demoNote");
       if(note) note.hidden=true;
 
+      window.__bmLive=true;
       run();
     }
 
