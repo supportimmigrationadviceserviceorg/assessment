@@ -304,7 +304,7 @@ const RELAY = "https://script.google.com/macros/s/AKfycbze_lHHIwgSzjLw6ucxyBRAA9
 async function relay(payload, tries) {
   tries = tries || 0;
   const ctl = new AbortController();
-  const timer = setTimeout(function(){ ctl.abort(); }, 20000);
+  const timer = setTimeout(function(){ ctl.abort(); }, 45000);
   try {
     const res = await fetch(RELAY, {
       method: "POST",
@@ -421,17 +421,25 @@ async function confirmDetails() {
 
   const newPhone = document.getElementById("verifyPhone").value.trim();
 
+  // Send the update, but do not make the client sit through it.
+  // findLead has already confirmed the record, so we show the result after a
+  // short wait and let the write finish in the background (relay retries once).
+  const pending = relay({
+    crm: "answer",
+    e: lastEmail,
+    answer: answer,
+    phone: newPhone,
+    campaign: params.get("utm_campaign") || ""
+  }).then(function (r) {
+    if (r && r.ok) {
+      if (r.clientId) lastClientId = r.clientId;
+      if (r.id || r.ref) lastEntityId = r.id || r.ref;
+    }
+    return r;
+  }).catch(function (err) { console.error(err); return null; });
+
   try {
-    const r = await relay({
-      crm: "answer",
-      e: lastEmail,
-      answer: answer,
-      phone: newPhone,
-      campaign: params.get("utm_campaign") || ""
-    });
-    if (!r || !r.ok) { show("state-error"); return; }
-    if (r.clientId) lastClientId = r.clientId;
-    if (r.id || r.ref) lastEntityId = r.id || r.ref;
+    await Promise.race([pending, new Promise(function (r) { setTimeout(r, 2500); })]);
 
     // Show result
     if (answer === "yes") {
@@ -502,15 +510,16 @@ async function submitNoReasonFromVerify() {
 
   show("state-loading");
 
+  const pending = relay({
+    crm: "answer",
+    e: lastEmail,
+    answer: "no",
+    reason: reasonValue,
+    campaign: params.get("utm_campaign") || ""
+  }).catch(function (err) { console.error(err); return null; });
+
   try {
-    const r = await relay({
-      crm: "answer",
-      e: lastEmail,
-      answer: "no",
-      reason: reasonValue,
-      campaign: params.get("utm_campaign") || ""
-    });
-    if (!r || !r.ok) { show("state-error"); return; }
+    await Promise.race([pending, new Promise(function (r) { setTimeout(r, 2500); })]);
     show("state-no");
   } catch(e) { console.error(e); show("state-error"); }
 }
