@@ -301,13 +301,24 @@
 
 <script>
 const RELAY = "https://script.google.com/macros/s/AKfycbze_lHHIwgSzjLw6ucxyBRAA9sJgYF_qBpBJl8JW4oUdmRzsi6E-VOR1gx8u9n9TCnLTA/exec";
-async function relay(payload) {
-  const res = await fetch(RELAY, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify(payload)
-  });
-  return res.json();
+async function relay(payload, tries) {
+  tries = tries || 0;
+  const ctl = new AbortController();
+  const timer = setTimeout(function(){ ctl.abort(); }, 20000);
+  try {
+    const res = await fetch(RELAY, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload),
+      signal: ctl.signal
+    });
+    clearTimeout(timer);
+    return await res.json();
+  } catch (err) {
+    clearTimeout(timer);
+    if (tries < 1) return relay(payload, tries + 1);
+    throw err;
+  }
 }
 let lastEmail = "";
 const FIELD_ID = "UF_CRM_1547484113";
@@ -373,7 +384,7 @@ async function findLead() {
     if (!r || !r.ok || !r.found) { show("state-notfound"); return; }
 
     lastEntityType = r.type;
-    lastEntityId   = r.id;
+    lastEntityId   = r.id || r.ref;
     lastClientId   = r.clientId;
     lastLeadStatus = null;
 
@@ -420,7 +431,7 @@ async function confirmDetails() {
     });
     if (!r || !r.ok) { show("state-error"); return; }
     if (r.clientId) lastClientId = r.clientId;
-    if (r.id) lastEntityId = r.id;
+    if (r.id || r.ref) lastEntityId = r.id || r.ref;
 
     // Show result
     if (answer === "yes") {
