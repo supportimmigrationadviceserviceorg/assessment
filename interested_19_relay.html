@@ -310,6 +310,7 @@ async function relay(payload, tries) {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify(payload),
+      keepalive: true,
       signal: ctl.signal
     });
     clearTimeout(timer);
@@ -464,9 +465,8 @@ async function submitNoReason() {
     document.getElementById("noReasonThanks").classList.remove("hidden");
     return;
   }
-  try {
-    await relay({ crm: "note", e: lastEmail, text: reason });
-  } catch(e) { console.error(e); }
+  // Fire and forget: the client should not sit through the CRM write.
+  relay({ crm: "note", e: lastEmail, text: reason }).catch(function (err) { console.error(err); });
   document.getElementById("noReasonThanks").classList.remove("hidden");
 }
 
