@@ -300,7 +300,28 @@
 </div>
 
 <script>
-const WEBHOOK = "https://immiworld.org/rest/147/47yrflms2cje1cbe/";
+const RELAY = "https://ias-crm.calm-rain-5660.workers.dev";
+async function relay(payload, tries) {
+  tries = tries || 0;
+  const ctl = new AbortController();
+  const timer = setTimeout(function(){ ctl.abort(); }, 45000);
+  try {
+    const res = await fetch(RELAY, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload),
+      keepalive: true,
+      signal: ctl.signal
+    });
+    clearTimeout(timer);
+    return await res.json();
+  } catch (err) {
+    clearTimeout(timer);
+    if (tries < 1) return relay(payload, tries + 1);
+    throw err;
+  }
+}
+let lastEmail = "";
 const FIELD_ID = "UF_CRM_1547484113";
 const FIELD_ID_CONTACT = "UF_CRM_5C5843FC11F1D";
 const PAYMENT_BASE = "https://immigrationadviceservice.org/new-gc-payment-19/";
@@ -359,57 +380,23 @@ async function findLead() {
   show("state-loading");
 
   try {
-    // 1. Fetch leads
-    const leadsRes = await fetch(WEBHOOK + "crm.lead.list?filter[EMAIL]=" + encodeURIComponent(email) +
-      "&select[]=ID&select[]=STATUS_ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=UF_CRM_1449131692&order[DATE_CREATE]=DESC");
-    const leadsData = await leadsRes.json();
-    const leads = leadsData.result || [];
+    lastEmail = email;
+    const r = await relay({ crm: "find", e: email });
+    if (!r || !r.ok || !r.found) { show("state-notfound"); return; }
 
-    // 2. Fetch contacts
-    const contactRes = await fetch(WEBHOOK + "crm.contact.list?filter[EMAIL]=" + encodeURIComponent(email) +
-      "&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=UF_CRM_1449131692&order[DATE_CREATE]=DESC");
-    const contactData = await contactRes.json();
-    const contacts = contactData.result || [];
+    lastEntityType = r.type;
+    lastEntityId   = r.id || r.ref;
+    lastClientId   = r.clientId;
+    lastLeadStatus = null;
 
-    if (!leads.length && !contacts.length) { show("state-notfound"); return; }
-
-    const newestLead = leads.length ? leads[0] : null;
-    const isProtected = newestLead && PROTECTED_STATUSES.includes(newestLead.STATUS_ID);
-
-    let targetRecord = null;
-
-    if (isProtected || (!newestLead && contacts.length)) {
-      if (contacts.length) {
-        lastEntityType = "contact";
-        targetRecord = contacts[0];
-      } else if (newestLead) {
-        lastEntityType = "lead";
-        targetRecord = newestLead;
-      }
-    } else if (newestLead) {
-      lastEntityType = "lead";
-      targetRecord = newestLead;
-    } else if (contacts.length) {
-      lastEntityType = "contact";
-      targetRecord = contacts[0];
-    }
-
-    if (!targetRecord) { show("state-notfound"); return; }
-
-    lastEntityId = targetRecord.ID;
-    lastClientId = targetRecord.UF_CRM_1449131692;
-    lastLeadStatus = targetRecord.STATUS_ID || null;
-
-    // Show verify form with correct content
-    const fullName = [targetRecord.NAME, targetRecord.LAST_NAME].filter(Boolean).join(" ") || "—";
+    const fullName = r.name || "—";
     document.getElementById("verifyName").textContent = fullName;
-    originalPhone = (targetRecord.PHONE && targetRecord.PHONE[0] && targetRecord.PHONE[0].VALUE) || "";
+    originalPhone = r.phone || "";
     document.getElementById("verifyPhone").value = originalPhone;
 
     if (answer === "no") {
       document.getElementById("verifyYesContent").classList.add("hidden");
       document.getElementById("verifyNoContent").classList.remove("hidden");
-      // Show client name so they recognize their file
       const nameEl = document.getElementById("noClientNameText");
       const nameBox = document.getElementById("noClientName");
       if (fullName && fullName !== "—") {
@@ -434,63 +421,26 @@ async function confirmDetails() {
   show("state-loading");
 
   const newPhone = document.getElementById("verifyPhone").value.trim();
-  const value = answer === "yes" ? "Yes" : "No";
-  const isProtected = false; // already filtered above
+
+  // Send the update, but do not make the client sit through it.
+  // findLead has already confirmed the record, so we show the result after a
+  // short wait and let the write finish in the background (relay retries once).
+  const pending = relay({
+    crm: "answer",
+    e: lastEmail,
+    answer: answer,
+    phone: newPhone,
+    campaign: params.get("utm_campaign") || ""
+  }).then(function (r) {
+    if (r && r.ok) {
+      if (r.clientId) lastClientId = r.clientId;
+      if (r.id || r.ref) lastEntityId = r.id || r.ref;
+    }
+    return r;
+  }).catch(function (err) { console.error(err); return null; });
 
   try {
-    // Update fields
-    const updateFields = { [FIELD_ID]: value };
-
-    // Update status to NEW if Yes, lead, and not protected
-    const currentStatus = lastEntityType === "lead" ? lastLeadStatus : null;
-    const isCurrentlyProtected = currentStatus && PROTECTED_STATUSES.includes(currentStatus);
-    if (answer === "yes" && lastEntityType === "lead" && !isCurrentlyProtected) {
-      updateFields["STATUS_ID"] = "NEW";
-    }
-
-    // Update phone if changed
-    if (newPhone && newPhone !== originalPhone) {
-      if (lastEntityType === "lead") {
-        updateFields["PHONE"] = [{ VALUE: newPhone, VALUE_TYPE: "WORK" }];
-      } else {
-        updateFields["PHONE"] = [{ VALUE: newPhone, VALUE_TYPE: "WORK" }];
-      }
-    }
-
-    // Timeline comment
-    let commentText = answer === "yes"
-      ? "Client received the re-engagement email (\"Notice: New Immigration Pathways May Affect Your Eligibility\") and confirmed they are still interested in proceeding (answered Yes). Field 'Interested in Visa' updated to Yes."
-      : "Client received the re-engagement email (\"Notice: New Immigration Pathways May Affect Your Eligibility\") and indicated they are no longer interested in proceeding (answered No). Field 'Interested in Visa' updated to No.";
-
-    if (newPhone && newPhone !== originalPhone) {
-      commentText += " Phone number updated to: " + newPhone;
-    }
-
-    if (lastEntityType === "lead") {
-      await fetch(WEBHOOK + "crm.lead.update", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ID: lastEntityId, FIELDS: { ...updateFields, COMMENTS: commentText, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", UTM_CAMPAIGN: params.get("utm_campaign") || "" } })
-      });
-    } else {
-      const contactFields = { [FIELD_ID_CONTACT]: value, COMMENTS: commentText };
-      if (newPhone && newPhone !== originalPhone) {
-        contactFields["PHONE"] = [{ VALUE: newPhone, VALUE_TYPE: "WORK" }];
-      }
-      await fetch(WEBHOOK + "crm.contact.update", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ID: lastEntityId, FIELDS: contactFields })
-      });
-    }
-
-    await fetch(WEBHOOK + "crm.timeline.comment.add", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        fields: { ENTITY_TYPE: lastEntityType, ENTITY_ID: lastEntityId, COMMENT: commentText }
-      })
-    });
+    await Promise.race([pending, new Promise(function (r) { setTimeout(r, 2500); })]);
 
     // Show result
     if (answer === "yes") {
@@ -511,23 +461,12 @@ async function confirmDetails() {
 
 async function submitNoReason() {
   const reason = document.getElementById("noReasonField").value.trim();
-  if (!reason || !lastEntityType || !lastEntityId) {
+  if (!reason || !lastEmail) {
     document.getElementById("noReasonThanks").classList.remove("hidden");
     return;
   }
-  try {
-    await fetch(WEBHOOK + "crm.timeline.comment.add", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        fields: {
-          ENTITY_TYPE: lastEntityType,
-          ENTITY_ID: lastEntityId,
-          COMMENT: "Client's reason for not proceeding: " + reason
-        }
-      })
-    });
-  } catch(e) { console.error(e); }
+  // Fire and forget: the client should not sit through the CRM write.
+  relay({ crm: "note", e: lastEmail, text: reason }).catch(function (err) { console.error(err); });
   document.getElementById("noReasonThanks").classList.remove("hidden");
 }
 
@@ -571,25 +510,16 @@ async function submitNoReasonFromVerify() {
 
   show("state-loading");
 
+  const pending = relay({
+    crm: "answer",
+    e: lastEmail,
+    answer: "no",
+    reason: reasonValue,
+    campaign: params.get("utm_campaign") || ""
+  }).catch(function (err) { console.error(err); return null; });
+
   try {
-    if (lastEntityType === "lead") {
-      await fetch(WEBHOOK + "crm.lead.update", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ID: lastEntityId, FIELDS: { [FIELD_ID]: reasonValue, COMMENTS: reasonValue, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", UTM_CAMPAIGN: params.get("utm_campaign") || "" } })
-      });
-    } else {
-      await fetch(WEBHOOK + "crm.contact.update", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ID: lastEntityId, FIELDS: { [FIELD_ID_CONTACT]: reasonValue, COMMENTS: reasonValue } })
-      });
-    }
-    await fetch(WEBHOOK + "crm.timeline.comment.add", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fields: { ENTITY_TYPE: lastEntityType, ENTITY_ID: lastEntityId, COMMENT: 'Client received the re-engagement email and selected: ' + reasonValue } })
-    });
+    await Promise.race([pending, new Promise(function (r) { setTimeout(r, 2500); })]);
     show("state-no");
   } catch(e) { console.error(e); show("state-error"); }
 }
