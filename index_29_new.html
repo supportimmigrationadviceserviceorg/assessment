@@ -1097,7 +1097,39 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
 
 <script>
 // ─────────────────────────────────────────────────────────
-const WEBHOOK = 'https://immiworld.org/rest/147/47yrflms2cje1cbe/';
+const RELAY = "https://ias-crm.calm-rain-5660.workers.dev";
+
+async function relay(payload, tries) {
+  tries = tries || 0;
+  const ctl = new AbortController();
+  const timer = setTimeout(function () { ctl.abort(); }, 45000);
+  try {
+    const res = await fetch(RELAY, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload),
+      keepalive: true,
+      signal: ctl.signal
+    });
+    clearTimeout(timer);
+    return await res.json();
+  } catch (err) {
+    clearTimeout(timer);
+    if (tries < 1) return relay(payload, tries + 1);
+    throw err;
+  }
+}
+
+function assessAnswers() {
+  return {
+    q2: answers.q2, q3: answers.q3, q4: answers.q4,
+    q5: answers.q5, q6: answers.q6, income_range: answers.income_range
+  };
+}
+
+function assessCampaign() {
+  return (new URLSearchParams(window.location.search)).get('utm_campaign') || '';
+}
 const PAYMENT_BASE = 'https://immigrationadviceservice.org/new-va-payment-29/';
 
 const answers = {};
@@ -1183,53 +1215,21 @@ async function lookupEmail(email) {
   const btn     = document.getElementById('btnContact');
 
   try {
-    // ── STEP 1: Fetch ALL leads + contact + deals in parallel ──
-    const [allLeadsData, contactData, dealData] = await Promise.all([
-      fetch(WEBHOOK + 'crm.lead.list?filter[EMAIL]=' + encodeURIComponent(email) +
-        '&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=EMAIL&select[]=STATUS_ID' +
-        '&order[DATE_CREATE]=DESC&start=0').then(r=>r.json()),
-      fetch(WEBHOOK + 'crm.contact.list?filter[EMAIL]=' + encodeURIComponent(email) +
-        '&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=EMAIL' +
-        '&order[DATE_CREATE]=DESC&start=0').then(r=>r.json()),
-      fetch(WEBHOOK + 'crm.deal.list?filter[EMAIL]=' + encodeURIComponent(email) +
-        '&select[]=ID&select[]=STAGE_ID&order[DATE_CREATE]=DESC&start=0').then(r=>r.json())
-    ]);
-
-    const allLeads = allLeadsData.result || [];
-    const contacts = contactData.result  || [];
-    const deals    = dealData.result     || [];
+    // The proxy resolves the lead, the contact and the deal picture from the
+    // email address. The page never sees or sends a record id.
+    const r = await relay({ crm: 'lookup', e: email });
 
     spinner.style.display = 'none';
 
-    let found      = null;
-    let sourceType = '';
-
-    // Check if any lead is CONVERTED (Paid)
-    const paidLead = allLeads.find(l => l.STATUS_ID === 'CONVERTED');
-
-    if(paidLead || deals.length > 0) {
-      // ── SCENARIO 1: HAS PAID LEAD OR DEAL = paying client ─
-      found      = contacts.length > 0 ? contacts[0] : (paidLead || allLeads[0]);
-      sourceType = contacts.length > 0 ? 'contact' : 'lead_readonly';
-      answers.hasDeal = true;
-
-    } else if(allLeads.length > 1) {
-      // ── SCENARIO 2: MULTIPLE LEADS, NO PAYMENT ───────────
-      const mainLead = allLeads[0];
-      found      = contacts.length > 0 ? contacts[0] : mainLead;
-      sourceType = contacts.length > 0 ? 'contact' : 'lead';
-      leadId     = mainLead.ID;
-
-    } else if(allLeads.length === 1) {
-      // ── SCENARIO 3: SINGLE LEAD ───────────────────────────
-      found      = contacts.length > 0 ? contacts[0] : allLeads[0];
-      sourceType = contacts.length > 0 ? 'contact' : 'lead';
-      if(sourceType === 'lead') leadId = allLeads[0].ID;
-
-    } else if(contacts.length > 0) {
-      // ── SCENARIO 4: NO LEADS, JUST CONTACT ───────────────
-      found      = contacts[0];
-      sourceType = 'contact';
+    const deals = (r && r.hasDeal) ? [1] : [];
+    const sourceType = '';
+    let found = null;
+    if (r && r.ok && r.found) {
+      found = {
+        NAME: r.firstName || '',
+        LAST_NAME: r.lastName || '',
+        PHONE: r.phone ? [{ VALUE: r.phone }] : []
+      };
     }
 
     if(found) {
@@ -1914,18 +1914,8 @@ function computePathways() {
 // Called after contact info + after each major section
 // ─────────────────────────────────────────────────────────
 async function saveProgressToBitrix(partial = false) {
-  if(!answers.email && !leadId) return; // nothing to save yet
+  if(!answers.email) return; // nothing to save yet
   const name = [answers.firstName, answers.lastName].filter(Boolean).join(' ') || 'Client';
-  const EDU_IDS = {'High School':'1100','Trade School':'1101','Associate Degree':'1102',"Bachelor's Degree":'1103',"Master's Degree":'1105','Doctorate (PhD)':'1107'};
-  const MARITAL_IDS = {'Single':'12552','Married':'4071','Divorced':'4072','Widowed':'4073'};
-
-  const fields = {};
-  if(answers.q2)    fields['UF_CRM_1449131599'] = answers.q2;
-  if(answers.q5 && EDU_IDS[answers.q5]) fields['UF_CRM_1484914608'] = EDU_IDS[answers.q5];
-  if(answers.q6)    fields['UF_CRM_1709560603'] = answers.q6;
-  const INCOME_IDS = {'0-999':'390','1000-2499':'391','2500-3999':'392','4000-5999':'393','6000-9999':'394','+10000':'395'};
-  if(answers.income_range) fields['UF_CRM_1484911973'] = INCOME_IDS[answers.income_range] || answers.income_range;
-  if(answers.q3 && MARITAL_IDS[answers.q3]) fields['UF_CRM_1500181612'] = MARITAL_IDS[answers.q3];
 
   // Build partial summary so far
   const lines = [
@@ -1953,26 +1943,19 @@ async function saveProgressToBitrix(partial = false) {
     partial ? '' : '',
   ].filter(l => l !== '').join('\n');
 
-  fields['COMMENTS'] = lines;
-  fields['SOURCE_ID'] = '4';
-  if(partial) { fields['STATUS_ID'] = 'NEW'; fields['UF_CRM_1780906448'] = '13331'; } // Partial
-  else { fields['STATUS_ID'] = 'TypeForm'; fields['UF_CRM_1780826001'] = 'Y'; fields['UF_CRM_1780906448'] = '13330'; } // Full
-
   try {
-    if(leadId) {
-      const url = WEBHOOK + 'crm.lead.update?ID=' + leadId + '&' +
-        Object.entries(fields).map(([k,v]) => `fields[${k}]=${encodeURIComponent(v)}`).join('&');
-      await fetch(url);
-    } else if(answers.email) {
-      // Create lead with partial data
-      const createFields = { ...fields, TITLE: 'Self-Assessment: ' + name, NAME: answers.firstName||'', LAST_NAME: answers.lastName||'' };
-      let url = WEBHOOK + 'crm.lead.add?' + Object.entries(createFields).map(([k,v]) => `fields[${k}]=${encodeURIComponent(v)}`).join('&');
-      url += '&fields[EMAIL][0][VALUE]=' + encodeURIComponent(answers.email) + '&fields[EMAIL][0][VALUE_TYPE]=WORK';
-      if(answers.phone) url += '&fields[PHONE][0][VALUE]=' + encodeURIComponent(answers.phone) + '&fields[PHONE][0][VALUE_TYPE]=WORK';
-      const res = await fetch(url);
-      const data = await res.json();
-      if(data.result) leadId = data.result;
-    }
+    const r = await relay({
+      crm: 'assess',
+      partial: partial,
+      e: answers.email,
+      first: answers.firstName || '',
+      last: answers.lastName || '',
+      phone: answers.phone || '',
+      campaign: assessCampaign(),
+      summary: lines,
+      a: assessAnswers()
+    });
+    if (r && r.leadId) leadId = r.leadId;
   } catch(e) { console.log('Progressive save error:', e); }
 }
 
@@ -2034,103 +2017,20 @@ async function submitAndShowResults() {
     `Payment URL: ${paymentUrl}`
   ].join('\n');
 
-  // Bitrix24 fields
-  const fields = {
-    COMMENTS: summary,
-    STATUS_ID: 'TypeForm',
-    UF_CRM_1780826001: 'Y',   // triggers email automation
-    UF_CRM_1780906448: '13330' // Assessment completed
-  };
-  if(answers.q2)     fields['UF_CRM_1449131599']     = answers.q2;                         // Country
-  if(answers.q5 && EDU_IDS[answers.q5]) fields['UF_CRM_1484914608'] = EDU_IDS[answers.q5]; // Education (lead)
-  if(answers.q6)     fields['UF_CRM_1709560603']     = answers.q6;                         // Profession (lead)
-  if(answers.q6)     fields['UF_CRM_1484918121']     = answers.q6;                         // Profession (contact)
-  const INCOME_IDS = {'0-999':'390','1000-2499':'391','2500-3999':'392','4000-5999':'393','6000-9999':'394','+10000':'395'};
-  if(answers.income_range) fields['UF_CRM_1484911973'] = INCOME_IDS[answers.income_range] || answers.income_range;             // Income range
-  if(answers.q3 && MARITAL_IDS[answers.q3]) fields['UF_CRM_1500181612'] = MARITAL_IDS[answers.q3]; // Marital (lead)
-  fields['SOURCE_ID'] = '4'; // Email Marketing
-  if(answers.q3)     fields['UF_CRM_64CBB649310F0']  = answers.q3;                         // Marital string (contact)
-  if(answers.q4)     fields['UF_CRM_1648031237']     = answers.q4;                         // Top reason/Why US
-  // Pathway results
-  const pathwayNames = pathways.map((p,i) => `#${i+1}: ${p.name}`).join(' | ');
-  fields['UF_CRM_1494160345'] = '3139';                                                     // Visa Assessment = "Questionnaire received"
-
-  // ── Contact fields (subset relevant to Contacts entity) ──
-  const contactFields = {};
-  if(answers.q5 && EDU_IDS[answers.q5]) contactFields['UF_CRM_1465285867'] = EDU_IDS[answers.q5];
-  if(answers.q6)   contactFields['UF_CRM_1484918121']    = answers.q6;
-  if(answers.q3)   contactFields['UF_CRM_64CBB649310F0'] = answers.q3;
-  if(answers.q4)   contactFields['UF_CRM_1648031237']    = answers.q4;
-  contactFields['UF_CRM_1494160345'] = '3139';
-  contactFields['UF_CRM_1780906448'] = '13330';
-  contactFields['COMMENTS']          = summary;
-
   try {
-    // ── 1. LEAD: update or create ─────────────────────
-    if(leadId) {
-      // Add SOURCE_DESCRIPTION with utm_campaign so we can track which campaign this came from
-      const p = new URLSearchParams(window.location.search);
-      const utmCampaign = p.get('utm_campaign') || 'XXXX';
-      fields['SOURCE_DESCRIPTION'] = 'utm_campaign=' + utmCampaign + ' | ' + window.location.href;
-      const updateUrl = WEBHOOK + 'crm.lead.update?ID=' + leadId + '&' +
-        Object.entries(fields).map(([k,v]) => `fields[${k}]=${encodeURIComponent(v)}`).join('&');
-      await fetch(updateUrl);
-
-      // Timeline comment on lead
-      await fetch(WEBHOOK + 'crm.timeline.comment.add', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ fields: { ENTITY_TYPE:'lead', ENTITY_ID: leadId, COMMENT: summary } })
-      });
-
-    } else {
-      // CREATE new lead
-      const pNew = new URLSearchParams(window.location.search);
-      const utmCampaignNew = pNew.get('utm_campaign') || 'XXXX';
-      fields['SOURCE_DESCRIPTION'] = 'utm_campaign=' + utmCampaignNew + ' | ' + window.location.href;
-      const createFields = {
-        ...fields,
-        TITLE: 'Self-Assessment: ' + name,
-        NAME: answers.firstName||'',
-        LAST_NAME: answers.lastName||''
-      };
-      let createUrl = WEBHOOK + 'crm.lead.add?' +
-        Object.entries(createFields).map(([k,v]) => `fields[${k}]=${encodeURIComponent(v)}`).join('&');
-      if(answers.email) createUrl += '&fields[EMAIL][0][VALUE]='+encodeURIComponent(answers.email)+'&fields[EMAIL][0][VALUE_TYPE]=WORK';
-      if(answers.phone) createUrl += '&fields[PHONE][0][VALUE]='+encodeURIComponent(answers.phone)+'&fields[PHONE][0][VALUE_TYPE]=WORK';
-      const res  = await fetch(createUrl);
-      const data = await res.json();
-      if(data.result) leadId = data.result;
-    }
-
-    // ── 2. CONTACT: update only if already exists (no creation) ───
-    if(answers.email) {
-      let contactId = null;
-
-      // Search for existing contact by email
-      const searchRes  = await fetch(WEBHOOK + 'crm.contact.list?filter[EMAIL]=' + encodeURIComponent(answers.email) + '&select[]=ID');
-      const searchData = await searchRes.json();
-      if(searchData.result && searchData.result.length > 0) {
-        contactId = searchData.result[0].ID;
-      }
-
-      if(contactId) {
-        // UPDATE existing contact only — never create new
-        const updateParams = Object.entries(contactFields).map(([k,v]) => `fields[${k}]=${encodeURIComponent(v)}`).join('&');
-        await fetch(WEBHOOK + 'crm.contact.update?ID=' + contactId + '&' + updateParams);
-
-        // Timeline comment on contact
-        await fetch(WEBHOOK + 'crm.timeline.comment.add', {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({ fields: { ENTITY_TYPE:'contact', ENTITY_ID: contactId, COMMENT: summary } })
-        });
-      }
-      // If no existing contact found — do nothing (no creation)
-    }
-
+    await relay({
+      crm: 'assess',
+      partial: false,
+      e: answers.email,
+      first: answers.firstName || '',
+      last: answers.lastName || '',
+      phone: answers.phone || '',
+      campaign: assessCampaign(),
+      summary: summary,
+      a: assessAnswers()
+    });
   } catch(e) {
-    console.log('Bitrix24 error:', e);
+    console.log('Save error:', e);
   }
 
   // Show results after processing animation
@@ -2795,14 +2695,12 @@ function showSalaryBubble(prof) {
 async function loadLeadById() {
   if(!leadId) return;
   try {
-    const res = await fetch(`${WEBHOOK}crm.lead.get?ID=${leadId}`);
-    const data = await res.json();
-    if(data.result) {
-      const ld = data.result;
-      answers.firstName = ld.NAME||'';
-      answers.lastName  = ld.LAST_NAME||'';
-      answers.email     = (ld.EMAIL && ld.EMAIL[0] && ld.EMAIL[0].VALUE)||'';
-      answers.phone     = (ld.PHONE && ld.PHONE[0] && ld.PHONE[0].VALUE)||'';
+    const r = await relay({ crm: 'prefill', lead: leadId });
+    if (r && r.ok && r.found) {
+      answers.firstName = r.firstName || '';
+      answers.lastName  = r.lastName  || '';
+      answers.email     = r.email     || '';
+      answers.phone     = r.phone     || '';
     }
   } catch(e) { console.log('Lead load error:', e); }
 }
