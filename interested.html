@@ -300,7 +300,30 @@
 </div>
 
 <script>
-const WEBHOOK = "https://immiworld.org/rest/147/47yrflms2cje1cbe/";
+const RELAY = "https://ias-crm.calm-rain-5660.workers.dev";
+
+async function relay(payload, tries) {
+  tries = tries || 0;
+  const ctl = new AbortController();
+  const timer = setTimeout(function () { ctl.abort(); }, 45000);
+  try {
+    const res = await fetch(RELAY, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload),
+      keepalive: true,
+      signal: ctl.signal
+    });
+    clearTimeout(timer);
+    return await res.json();
+  } catch (err) {
+    clearTimeout(timer);
+    if (tries < 1) return relay(payload, tries + 1);
+    throw err;
+  }
+}
+
+let lastEmail = "";
 const FIELD_ID = "UF_CRM_1547484113";
 const FIELD_ID_CONTACT = "UF_CRM_5C5843FC11F1D";
 const PAYMENT_BASE = "https://immigrationadviceservice.org/new-gc-payment-29/";
@@ -430,63 +453,23 @@ async function findLead() {
   show("state-loading");
 
   try {
-    // 1. Fetch leads
-    const leadsRes = await fetch(WEBHOOK + "crm.lead.list?filter[EMAIL]=" + encodeURIComponent(email) +
-      "&select[]=ID&select[]=STATUS_ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=EMAIL&select[]=UF_CRM_1449131692&order[DATE_CREATE]=DESC");
-    const leadsData = await leadsRes.json();
-    const leads = (leadsData.result || []).filter(function (r) { return recordMatchesEmail(r, email); });
+    lastEmail = email;
+    const r = await relay({ crm: "find", e: email });
+    if (!r || !r.ok || !r.found) { show("state-notfound"); return; }
 
-    // 2. Fetch contacts
-    const contactRes = await fetch(WEBHOOK + "crm.contact.list?filter[EMAIL]=" + encodeURIComponent(email) +
-      "&select[]=ID&select[]=NAME&select[]=LAST_NAME&select[]=PHONE&select[]=EMAIL&select[]=UF_CRM_1449131692&order[DATE_CREATE]=DESC");
-    const contactData = await contactRes.json();
-    const contacts = (contactData.result || []).filter(function (r) { return recordMatchesEmail(r, email); });
+    lastEntityType = r.type;
+    lastEntityId   = r.id;
+    lastClientId   = r.clientId;
+    lastLeadStatus = null;
 
-    if (!leads.length && !contacts.length) { show("state-notfound"); return; }
-
-    const newestLead = leads.length ? leads[0] : null;
-    const isProtected = newestLead && PROTECTED_STATUSES.includes(newestLead.STATUS_ID);
-
-    let targetRecord = null;
-
-    if (isProtected || (!newestLead && contacts.length)) {
-      if (contacts.length) {
-        lastEntityType = "contact";
-        targetRecord = contacts[0];
-      } else if (newestLead) {
-        lastEntityType = "lead";
-        targetRecord = newestLead;
-      }
-    } else if (newestLead) {
-      lastEntityType = "lead";
-      targetRecord = newestLead;
-    } else if (contacts.length) {
-      lastEntityType = "contact";
-      targetRecord = contacts[0];
-    }
-
-    if (!targetRecord) { show("state-notfound"); return; }
-
-    // Final guard before we write anything to this record.
-    if (!recordMatchesEmail(targetRecord, email)) { show("state-notfound"); return; }
-
-    lastEntityId = targetRecord.ID;
-    lastClientId = targetRecord.UF_CRM_1449131692;
-    lastLeadStatus = targetRecord.STATUS_ID || null;
-
-    console.log("[IAS] Matched", lastEntityType, "ID", lastEntityId);
-
-    // Show verify form with correct content
-    const fullName = [targetRecord.NAME, targetRecord.LAST_NAME].filter(Boolean).join(" ") || "—";
+    const fullName = r.name || "—";
     document.getElementById("verifyName").textContent = fullName;
-    originalPhone = (targetRecord.PHONE && targetRecord.PHONE[0] && targetRecord.PHONE[0].VALUE) || "";
-    originalPhoneId = (targetRecord.PHONE && targetRecord.PHONE[0] && targetRecord.PHONE[0].ID) || null;
+    originalPhone = r.phone || "";
     document.getElementById("verifyPhone").value = originalPhone;
 
     if (answer === "no") {
       document.getElementById("verifyYesContent").classList.add("hidden");
       document.getElementById("verifyNoContent").classList.remove("hidden");
-      // Show client name so they recognize their file
       const nameEl = document.getElementById("noClientNameText");
       const nameBox = document.getElementById("noClientName");
       if (fullName && fullName !== "—") {
@@ -515,64 +498,29 @@ async function confirmDetails() {
   const isProtected = false; // already filtered above
 
   try {
-    // Update fields
-    const updateFields = { [FIELD_ID]: value };
-
-    // Update status to NEW if Yes, lead, and not protected
-    const currentStatus = lastEntityType === "lead" ? lastLeadStatus : null;
-    const isCurrentlyProtected = currentStatus && PROTECTED_STATUSES.includes(currentStatus);
-    if (answer === "yes" && lastEntityType === "lead" && !isCurrentlyProtected) {
-      updateFields["STATUS_ID"] = "NEW";
-    }
-    // Update status to 31 (Not interested - support email request) if No
-    if (answer === "no" && lastEntityType === "lead" && !isCurrentlyProtected) {
-      updateFields["STATUS_ID"] = "31";
-    }
-
-    // Add phone if changed — kept alongside existing numbers
-    if (newPhone && newPhone !== originalPhone) {
-      updateFields["PHONE"] = buildPhoneField(newPhone);
-    }
-
-    // Timeline comment
-    let commentText = answer === "yes"
-      ? "Client received the re-engagement email (\"Notice: New Immigration Pathways May Affect Your Eligibility\") and confirmed they are still interested in proceeding (answered Yes). Field 'Interested in Visa' updated to Yes."
-      : "Client received the re-engagement email (\"Notice: New Immigration Pathways May Affect Your Eligibility\") and indicated they are no longer interested in proceeding (answered No). Field 'Interested in Visa' updated to No.";
-
-    if (newPhone && newPhone !== originalPhone) {
-      commentText += " Phone number updated to: " + newPhone;
-    }
-
-    if (lastEntityType === "lead") {
-      const leadPayload = { ID: lastEntityId, FIELDS: { ...updateFields, COMMENTS: commentText, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", ...utmFields, ...sourceDescFields } };
-      console.log("[IAS] crm.lead.update payload:", JSON.stringify(leadPayload));
-      const r = await fetch(WEBHOOK + "crm.lead.update", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(leadPayload)
-      });
-      console.log("[IAS] crm.lead.update response:", JSON.stringify(await r.clone().json()));
-    } else {
-      const contactFields = { [FIELD_ID_CONTACT]: value, COMMENTS: commentText, ...sourceDescFields };
-      if (newPhone && newPhone !== originalPhone) {
-        contactFields["PHONE"] = buildPhoneField(newPhone);
+    // The proxy does the writing. The client does not wait for it: the result
+    // shows as soon as it answers or after 2.5 seconds, and the write finishes
+    // in the background.
+    const pending = relay({
+      crm: "answer",
+      flow: "reengage",
+      e: lastEmail,
+      answer: answer,
+      phone: newPhone,
+      campaign: utmCampaign,
+      utm: utmFields,
+      sourceDesc: campaignId
+    }).then(function (rr) {
+      if (rr && rr.ok) {
+        if (rr.clientId) lastClientId = rr.clientId;
+        if (rr.id) lastEntityId = rr.id;
+        if (rr.type) lastEntityType = rr.type;
       }
-      console.log("[IAS] crm.contact.update payload:", JSON.stringify(contactFields));
-      const r = await fetch(WEBHOOK + "crm.contact.update", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ID: lastEntityId, FIELDS: contactFields })
-      });
-      console.log("[IAS] crm.contact.update response:", JSON.stringify(await r.clone().json()));
-    }
+      return rr;
+    }).catch(function (err) { console.error(err); return null; });
 
-    await fetch(WEBHOOK + "crm.timeline.comment.add", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        fields: { ENTITY_TYPE: lastEntityType, ENTITY_ID: lastEntityId, COMMENT: commentText }
-      })
-    });
+    await Promise.race([pending, new Promise(function (res) { setTimeout(res, 2500); })]);
+
 
     // Show result
     if (answer === "yes") {
@@ -597,23 +545,12 @@ async function confirmDetails() {
 
 async function submitNoReason() {
   const reason = document.getElementById("noReasonField").value.trim();
-  if (!reason || !lastEntityType || !lastEntityId) {
+  if (!reason || !lastEmail) {
     document.getElementById("noReasonThanks").classList.remove("hidden");
     return;
   }
-  try {
-    await fetch(WEBHOOK + "crm.timeline.comment.add", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        fields: {
-          ENTITY_TYPE: lastEntityType,
-          ENTITY_ID: lastEntityId,
-          COMMENT: "Client's reason for not proceeding: " + reason
-        }
-      })
-    });
-  } catch(e) { console.error(e); }
+  relay({ crm: "note", flow: "reengage", e: lastEmail, text: reason })
+    .catch(function (err) { console.error(err); });
   document.getElementById("noReasonThanks").classList.remove("hidden");
 }
 
@@ -658,27 +595,17 @@ async function submitNoReasonFromVerify() {
   show("state-loading");
 
   try {
-    if (lastEntityType === "lead") {
-      const p = { ID: lastEntityId, FIELDS: { [FIELD_ID]: reasonValue, STATUS_ID: "31", COMMENTS: reasonValue, ASSIGNED_BY_ID: 902, SOURCE_ID: "4", ...utmFields, ...sourceDescFields } };
-      console.log("[IAS] crm.lead.update (No) payload:", JSON.stringify(p));
-      const r = await fetch(WEBHOOK + "crm.lead.update", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(p)
-      });
-      console.log("[IAS] crm.lead.update (No) response:", JSON.stringify(await r.clone().json()));
-    } else {
-      await fetch(WEBHOOK + "crm.contact.update", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ID: lastEntityId, FIELDS: { [FIELD_ID_CONTACT]: reasonValue, COMMENTS: reasonValue } })
-      });
-    }
-    await fetch(WEBHOOK + "crm.timeline.comment.add", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ fields: { ENTITY_TYPE: lastEntityType, ENTITY_ID: lastEntityId, COMMENT: 'Client received the re-engagement email and selected: ' + reasonValue } })
-    });
+    const pending = relay({
+      crm: "answer",
+      flow: "reengage",
+      e: lastEmail,
+      answer: "no",
+      reason: reasonValue,
+      campaign: utmCampaign,
+      utm: utmFields,
+      sourceDesc: campaignId
+    }).catch(function (err) { console.error(err); return null; });
+    await Promise.race([pending, new Promise(function (res) { setTimeout(res, 2500); })]);
     show("state-no");
   } catch(e) { console.error(e); show("state-error"); }
 }
