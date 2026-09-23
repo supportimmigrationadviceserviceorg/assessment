@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Preferences updated | Immigration Advice Service</title>
+<style>
+  html,body{margin:0;padding:0;background:#dde3ee;font-family:Georgia,'Times New Roman',serif;color:#14213d;}
+  .wrap{max-width:600px;margin:0 auto;padding:34px 14px;}
+  .card{background:#fff;border:1px solid #c3ccdf;}
+  .logo{padding:24px 40px 20px;text-align:center;}
+  .logo img{display:block;margin:0 auto;width:150px;max-width:100%;height:auto;border:0;}
+  .rule{background:#0f2557;height:6px;font-size:1px;line-height:6px;}
+  .eyebrow{background:#eaf0fb;padding:11px 40px;border-bottom:1px solid #c3ccdf;
+    font-family:'Courier New',Courier,monospace;font-size:12px;letter-spacing:1.5px;
+    color:#1b3a8f;text-transform:uppercase;font-weight:bold;}
+  .body{padding:30px 40px 34px;}
+  h1{font-size:26px;line-height:1.35;color:#0f2557;margin:0;font-weight:bold;}
+  .accent{height:4px;font-size:1px;line-height:4px;background:#2c5fd1;width:60px;margin:18px 0 22px;}
+  p{font-size:16px;line-height:1.75;margin:0 0 18px;}
+  .muted{font-size:14px;color:#3a4763;}
+  .box{background:#f4f6fa;border:1px solid #d5dced;padding:18px 22px;margin:4px 0 22px;}
+  .lbl{font-family:'Courier New',Courier,monospace;font-size:11px;letter-spacing:1.2px;
+    color:#1b3a8f;text-transform:uppercase;font-weight:bold;display:block;margin-bottom:12px;}
+  button.reason{display:block;width:100%;text-align:left;background:#fff;border:1px solid #9fb0cd;
+    font-family:Georgia,serif;font-size:15px;color:#2c3e60;padding:13px 16px;margin:0 0 9px;cursor:pointer;}
+  button.reason:hover{background:#eef2f9;}
+  button.reason[disabled]{opacity:.55;cursor:default;}
+  .back{display:inline-block;background:#2c5fd1;color:#fff;text-decoration:none;
+    font-size:16px;font-weight:bold;padding:14px 22px;letter-spacing:.4px;}
+  .foot{background:#0f2557;padding:22px 40px 26px;font-size:11px;color:#d6dfef;line-height:1.8;}
+  .foot a{color:#fff;text-decoration:none;}
+  .hide{display:none;}
+  @media (max-width:520px){
+    .logo,.eyebrow,.body,.foot{padding-left:22px;padding-right:22px;}
+    h1{font-size:23px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+
+    <div class="logo">
+      <img src="logo-hero.png" alt="Immigration Advice Service">
+    </div>
+    <div class="rule"></div>
+    <div class="eyebrow" id="eyebrow">Recording your preference</div>
+
+    <div class="body">
+
+      <div id="stateWorking">
+        <h1>One moment</h1>
+        <div class="accent"></div>
+        <p>We are updating your record.</p>
+      </div>
+
+      <div id="stateDone" class="hide">
+        <h1>Noted, and thank you</h1>
+        <div class="accent"></div>
+        <p>
+          We have recorded that you do not wish to hear from us about this, and we have
+          stopped further emails on it.
+        </p>
+
+        <div class="box" id="reasonBox">
+          <span class="lbl">If you have a moment, may we ask why</span>
+          <button class="reason" data-r="Not the right time">The timing is not right for me</button>
+          <button class="reason" data-r="No longer planning to move">I am no longer planning to move to the United States</button>
+          <button class="reason" data-r="Already working with someone">I am already working with someone else</button>
+          <button class="reason" data-r="Too many emails">I was receiving too many emails</button>
+          <p class="muted" id="thanks" style="margin:14px 0 0;display:none;">
+            Thank you. That is recorded and it genuinely helps us.
+          </p>
+        </div>
+
+        <p class="muted">
+          If this was a mistake, or if your circumstances change, simply reply to any of our
+          emails and we will pick it up from there.
+        </p>
+        <p style="margin:22px 0 0;">
+          <a class="back" href="https://immigrationadviceservice.org">Return to our website</a>
+        </p>
+      </div>
+
+    </div>
+
+    <div class="foot">
+      <a href="https://immigrationadviceservice.org">immigrationadviceservice.org</a>
+      &nbsp;&middot;&nbsp; 2 N Central Ave, Phoenix, AZ 85004, United States<br><br>
+      Immigration Advice Service is a private company and is not affiliated with USCIS, the
+      U.S. Department of State or any government agency.
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  var CRM = "https://ias-crm.calm-rain-5660.workers.dev";
+
+  function param(n) {
+    var m = new RegExp("[?&]" + n + "=([^&]*)").exec(location.search);
+    return m ? decodeURIComponent(m[1].replace(/\+/g, " ")) : "";
+  }
+
+  var email    = param("email").trim();
+  var campaign = param("utm_campaign") || param("campaign") || "";
+
+  function post(payload, ms) {
+    var ctl = new AbortController();
+    var kill = setTimeout(function () { ctl.abort(); }, ms || 45000);
+    return fetch(CRM, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload),
+      keepalive: true,
+      signal: ctl.signal
+    }).then(function (r) { clearTimeout(kill); return r.json(); })
+      .catch(function () { clearTimeout(kill); return null; });
+  }
+
+  function show() {
+    document.getElementById("stateWorking").className = "hide";
+    document.getElementById("stateDone").className = "";
+    document.getElementById("eyebrow").textContent = "Preference recorded";
+  }
+
+  var pending = email
+    ? post({ crm: "answer", e: email, answer: "no", flow: "reengage", campaign: campaign })
+        .then(function (res) {
+          if (!res || res.ok !== true) {
+            return post({ crm: "answer", e: email, answer: "no", flow: "reengage", campaign: campaign });
+          }
+          return res;
+        })
+    : Promise.resolve(null);
+
+  var waited = new Promise(function (ok) { setTimeout(ok, 2500); });
+  Promise.race([pending, waited]).then(show);
+
+  var boxed = document.getElementById("reasonBox");
+  boxed.addEventListener("click", function (ev) {
+    var b = ev.target;
+    if (!b || b.tagName !== "BUTTON" || b.disabled) return;
+    var list = boxed.getElementsByTagName("button");
+    for (var i = 0; i < list.length; i++) { list[i].disabled = true; }
+    b.style.background = "#eaf0fb";
+    b.style.borderColor = "#2c5fd1";
+    document.getElementById("thanks").style.display = "block";
+    if (!email) return;
+    var text = "Reason given on the opt out page: " + b.getAttribute("data-r") +
+               (campaign ? ". Campaign: " + campaign : "");
+    post({ crm: "note", e: email, text: text }, 15000);
+  });
+})();
+</script>
+</body>
+</html>
