@@ -1120,6 +1120,28 @@ async function relay(payload, tries) {
   }
 }
 
+// Email "yes" click: a link carrying answer=yes marks the lead as interested
+// the moment this page opens, through the same proxy action the yes/no pages use.
+// Runs once per browser session, never blocks the page, and skips unfilled merge tags.
+(function markEmailYes() {
+  try {
+    const p = new URLSearchParams(window.location.search);
+    if ((p.get('answer') || '').toLowerCase() !== 'yes') return;
+    const email = (p.get('email') || '').trim();
+    if (!email || email.indexOf('@') < 1 || email.indexOf('#') !== -1) return;
+    const camp = p.get('utm_campaign') || '';
+    const campId = camp.match(/(\d{4,})/) ? camp.match(/(\d{4,})/)[1] : camp;
+    const key = 'ias_yes_' + email.toLowerCase() + '_' + campId;
+    try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, '1'); } catch (e) {}
+    const map = { utm_source: 'UTM_SOURCE', utm_medium: 'UTM_MEDIUM', utm_campaign: 'UTM_CAMPAIGN', utm_content: 'UTM_CONTENT', utm_term: 'UTM_TERM' };
+    const utm = {};
+    Object.keys(map).forEach(function (k) { const v = (p.get(k) || '').trim(); if (v) utm[map[k]] = v; });
+    if (campId) utm.UTM_CAMPAIGN = campId;
+    relay({ crm: 'answer', flow: 'reengage', e: email, answer: 'yes', campaign: camp, utm: utm, sourceDesc: campId })
+      .catch(function (err) { console.error(err); });
+  } catch (e) { console.error(e); }
+})();
+
 function assessAnswers() {
   return {
     q2: answers.q2, q3: answers.q3, q4: answers.q4,
