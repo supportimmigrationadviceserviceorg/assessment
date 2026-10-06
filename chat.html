@@ -75,6 +75,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--body);-
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-left:38px}
 .chip{font:inherit;font-size:13.5px;color:var(--navy);background:transparent;border:1px solid var(--line);border-radius:999px;padding:7px 13px;cursor:pointer;text-align:left}
 .chip:hover{background:var(--surface-2)}
+.chip.other{color:var(--ink-soft);border-style:dashed}
 
 
 .compose{display:flex;gap:8px;align-items:flex-end;padding:12px;border-top:1px solid var(--line);background:var(--surface)}
@@ -236,6 +237,23 @@ function addGo(key) {
   scroll();
 }
 
+// Quick answers the assistant offers after a question; the composer stays open for anything else.
+function addOptions(list) {
+  list = list.map(function (x) { return x.trim(); }).filter(Boolean).slice(0, 4);
+  if (!list.length) return;
+  var w = el("div", "chips"); w.id = "opts";
+  list.forEach(function (s) {
+    var c = el("button", "chip", s); c.type = "button";
+    c.addEventListener("click", function () { submit(s); });
+    w.appendChild(c);
+  });
+  var other = el("button", "chip other", "Something else…"); other.type = "button";
+  other.addEventListener("click", function () { box.focus(); });
+  w.appendChild(other);
+  log.appendChild(w);
+  scroll();
+}
+
 var STARTERS = [
   "What visa can I get to move to the USA?",
   "Am I eligible for a Green Card?",
@@ -293,7 +311,7 @@ function count(role) { return turns.filter(function (t) { return t.role === role
 function submit(text) {
   text = (text || "").trim();
   if (!text || busy || gated) return;
-  var chips = document.getElementById("chips"); if (chips) chips.remove();
+  ["chips", "opts"].forEach(function (id) { var c = document.getElementById(id); if (c) c.remove(); });
   if (count("user") >= MAX_USER_TURNS) {
     addMsg("ai", "We have covered a lot. The best way to go further is the attorney review, where your whole profile is looked at properly.");
     addGo("pay");
@@ -312,6 +330,8 @@ function submit(text) {
       turns.push({ role: "assistant", content: raw });
       var m = raw.match(/\[\[GO:([a-z_]+)\]\]/);
       if (m) addGo(m[1]);
+      var op = raw.match(/\[\[OPTIONS:([^\]]+)\]\]/);
+      if (op) addOptions(op[1].split("|"));
       save(false);
       if (!email && count("assistant") >= GATE_AFTER) askContact();
     })
@@ -380,7 +400,7 @@ function lock(on) {
 
 function askContact() {
   gated = true; lock(false);
-  addMsg("ai", "Happy to keep going. So your answers stay saved and a consultant can follow up with the details that apply to you, where can we reach you?");
+  var ask = addMsg("ai", "Happy to keep going. So your answers stay saved and a consultant can follow up with the details that apply to you, where can we reach you?");
   var f = el("form", "gate"); f.id = "gate"; f.noValidate = true;
   function field(id, label, type, ac, ph) {
     var w = el("label", "fld"); w.htmlFor = id;
@@ -417,7 +437,8 @@ function askContact() {
     go.disabled = true; go.textContent = "Saving…";
     var done = function () {
       email = mail;
-      f.replaceWith(el("p", "gate-done", "Thanks, " + name.split(/\s+/)[0] + ". Ask your next question below."));
+      // Once they have answered, the request and the form disappear and the chat simply carries on.
+      ask.parentNode.remove(); f.remove();
       gated = false; lock(false); box.focus();
       save(true);
     };
@@ -438,7 +459,7 @@ function askContact() {
 var saveTimer = null, clicks = [];
 function transcript() {
   return turns.map(function (t) {
-    return (t.role === "user" ? "Client: " : "IAS assistant: ") + t.content.replace(/\[\[GO:([a-z_]+)\]\]/g, "(offered: $1)").trim();
+    return (t.role === "user" ? "Client: " : "IAS assistant: ") + t.content.replace(/\[\[GO:([a-z_]+)\]\]/g, "(offered: $1)").replace(/\[\[OPTIONS:[^\]]*\]\]/g, "").trim();
   }).join("\n\n") + (clicks.length ? "\n\nButtons clicked: " + clicks.join(", ") : "");
 }
 function save(now) {
