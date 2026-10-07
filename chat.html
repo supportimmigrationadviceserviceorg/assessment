@@ -141,6 +141,7 @@ var PAY    = "https://immigrationadviceservice.org/new-va-payment-29/";
 var MAX_USER_TURNS = 30;
 
 var qs = new URLSearchParams(location.search);
+var recordType = "";        // "lead" or "contact", told by the Worker when the email is known
 var email = clean(qs.get("email"));
 var campaign = (qs.get("utm_campaign") || "").trim();
 if (campaign.indexOf("XXXX") !== -1) campaign = "";
@@ -172,12 +173,14 @@ function destinations() {
     e2_call: { title: "Free investor visa consultation",
       line: "Talk through your budget and business plans with our team.",
       cta: "Book a call", url: link(SITE + "e2_booking_en.html", utm) },
-    dream_map: { title: "Your American life map",
-      line: "Compare U.S. cities on cost of living, jobs and lifestyle.",
-      cta: "Open the map", url: link(SITE + "dream_map_1.html", { utm_source: "ias_chat" }) },
-    dv: { title: "Green Card lottery updates",
-      line: "Get told when the next registration opens and whether you qualify.",
-      cta: "Join the update list", url: link(SITE + "dv-notify.html", { email: email, utm_campaign: campaign }) }
+    dream_map: { title: "Your American Life Map",
+      line: "One minute, six questions: see which U.S. cities fit your work, family and budget.",
+      cta: "Make my map", url: link(SITE + "dream_map.html", { utm_source: "ias_chat" }) },
+    call: { title: "Talk to an immigration advisor",
+      line: "Pick a time that suits you and an advisor will call you.",
+      cta: "Book a call", url: recordType === "contact"
+        ? "https://calendly.com/support-ias/consultation-call-with-an-immigration-expert-clone"
+        : "https://calendly.com/onlineonlineconsultation-immigrationadviceservice/15" }
   };
 }
 
@@ -239,7 +242,7 @@ function addGo(key) {
 
 // Quick answers the assistant offers after a question; the composer stays open for anything else.
 function addOptions(list) {
-  list = list.map(function (x) { return x.trim(); }).filter(Boolean).slice(0, 4);
+  list = list.map(function (x) { return x.trim(); }).filter(Boolean).slice(0, 5);
   if (!list.length) return;
   var w = el("div", "chips"); w.id = "opts";
   list.forEach(function (s) {
@@ -295,7 +298,7 @@ function ask(onText) {
   var conv = recent(turns);
   if (sample) {
     return sample([{ role: "user", content: RULES + "\n\nThe person's messages follow." }].concat(conv), {
-      cache: false, modelTier: "quick",
+      cache: false,
       onText: function (u) { onText(u.text); }
     }).then(function (r) { return r.text; });
   }
@@ -471,7 +474,11 @@ function save(now) {
       .catch(function () {});
   }, now ? 0 : 1500);
 }
-function note(what) { clicks.push(what); save(true); }
+function note(what) {
+  clicks.push(what); save(true);
+  // Count button clicks (payment, Life Map, call…) in the Worker's log, even without an email.
+  if (!sample && !TEST) api({ action: "click", e: email, key: what.replace(/^clicked /, ""), campaign: campaign, source: source }, true).catch(function () {});
+}
 addEventListener("pagehide", function () { save(true); });
 
 // ── Composer ─────────────────────────────────────────────────────
@@ -494,6 +501,7 @@ if (TEST && window.claude && window.claude.use) {
 }
 if (!TEST && email) {
   api({ action: "start", e: email }).then(function (j) {
+    if (j && j.type) recordType = j.type;
     if (j && j.name && !turns.length) hello.textContent = "Hi " + j.name + ". " + HELLO;
   }).catch(function () {});
 }
