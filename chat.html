@@ -245,6 +245,8 @@ function addOptions(list) {
   list = list.map(function (x) { return x.trim(); }).filter(Boolean).slice(0, 5);
   if (!list.length) return;
   var w = el("div", "chips"); w.id = "opts";
+  var OTHER = /^(something else|other|none of these|else)\b/i;
+  list = list.filter(function (x) { return !OTHER.test(x); });   // the page adds its own "Something else…"
   list.forEach(function (s) {
     var c = el("button", "chip", s); c.type = "button";
     c.addEventListener("click", function () { submit(s); });
