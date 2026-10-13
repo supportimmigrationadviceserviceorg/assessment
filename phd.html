@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your PhD and the U.S. — Immigration Advice Service</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{--navy:#1c438a;--ink:#1c2333;--muted:#5a6378;--line:#dfe5f0;--pale:#f4f7fc;--green:#16a34a;--green-d:#12873d;--bg:#eef1f6;}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);font-family:'Public Sans',-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);line-height:1.55}
+.wrap{max-width:560px;margin:0 auto;padding:20px 16px 40px}
+.card{background:#fff;border-radius:16px;box-shadow:0 6px 30px rgba(28,67,138,.08);overflow:hidden}
+.top{padding:18px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.top img{height:34px;width:auto;display:block}
+.step{font-size:12px;color:var(--muted);white-space:nowrap}
+.bar{height:4px;background:var(--line)}
+.bar i{display:block;height:4px;width:0;background:var(--navy);transition:width .35s ease}
+.body{padding:26px 24px 28px}
+h1{font-family:Fraunces,Georgia,serif;font-size:27px;line-height:1.2;margin:0 0 12px;color:var(--navy)}
+h2{font-family:Fraunces,Georgia,serif;font-size:22px;line-height:1.25;margin:0 0 18px;color:var(--ink)}
+p{margin:0 0 14px}
+.muted{color:var(--muted);font-size:14px}
+.opts{display:grid;gap:10px}
+.opt{display:block;width:100%;text-align:left;font:inherit;font-size:16px;padding:14px 16px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);cursor:pointer;transition:border-color .15s,background .15s}
+.opt:hover{border-color:var(--navy)}
+.opt.sel{border-color:var(--navy);background:#eaf0fb}
+.btn{display:block;width:100%;text-align:center;font:inherit;font-weight:700;font-size:17px;padding:16px 20px;border:0;border-radius:40px;background:var(--navy);color:#fff;cursor:pointer;text-decoration:none}
+.btn.pay{background:var(--green)}
+.btn.pay:hover{background:var(--green-d)}
+.btn[disabled]{opacity:.45;cursor:default}
+.ghost{display:block;text-align:center;margin-top:14px;color:var(--navy);font-weight:600;font-size:15px;text-decoration:none}
+.route{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px;background:var(--pale)}
+.route b{display:block;color:var(--navy);font-size:16px;margin-bottom:2px}
+.route span{font-size:14px;color:var(--muted)}
+.box{background:var(--pale);border-radius:12px;padding:16px 18px;margin:18px 0}
+.box li{margin:4px 0}
+.box ul{margin:8px 0 0;padding-left:20px}
+.price{display:flex;align-items:baseline;gap:8px;margin:4px 0 14px}
+.price strong{font-family:Fraunces,Georgia,serif;font-size:34px;color:var(--ink)}
+.hide{display:none}
+.foot{text-align:center;font-size:11px;color:#7a8296;margin-top:18px;line-height:1.6}
+.foot a{color:#7a8296}
+.back{background:none;border:0;color:var(--muted);font:inherit;font-size:14px;margin-top:14px;cursor:pointer;padding:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="top">
+      <img src="logo-hero.png" alt="Immigration Advice Service">
+      <span class="step" id="stepTxt"></span>
+    </div>
+    <div class="bar"><i id="barFill"></i></div>
+    <div class="body">
+
+      <!-- intro -->
+      <section id="s0">
+        <h1>Your PhD could open doors in the United States</h1>
+        <p>Some U.S. routes are built for people with advanced degrees and specialist experience. A few of them do not need a job offer or an employer.</p>
+        <p>Answer 5 quick questions about your doctorate and your work. It takes about a minute, and you will see which routes may be worth looking at for your profile.</p>
+        <button class="btn" id="startBtn">Start &rarr;</button>
+        <p class="muted" style="margin-top:14px">No documents needed at this stage.</p>
+      </section>
+
+      <!-- questions are rendered here -->
+      <section id="sq" class="hide">
+        <h2 id="qText"></h2>
+        <div class="opts" id="qOpts"></div>
+        <button class="back" id="backBtn">&larr; Back</button>
+      </section>
+
+      <!-- result -->
+      <section id="sr" class="hide">
+        <h1 id="rTitle">Routes worth exploring for your profile</h1>
+        <p id="rIntro"></p>
+        <div id="routes"></div>
+        <p class="muted">These are routes worth exploring based on your answers, not a decision on eligibility. Each route has its own requirements, and the details of your case matter.</p>
+
+        <div class="box">
+          <b>Next step: a $29 attorney review</b>
+          <ul>
+            <li>A licensed U.S. immigration attorney reviews your profile.</li>
+            <li>You receive a written report on the routes that fit you, and the ones that don't.</li>
+            <li>A personal consultant is assigned to your file to explain the next steps.</li>
+          </ul>
+        </div>
+        <div class="price"><strong>$29</strong><span class="muted">one-time</span></div>
+        <a class="btn pay" id="payBtn" href="#" rel="noopener">Start my attorney review &rarr;</a>
+        <a class="ghost" href="https://calendly.com/onlineonlineconsultation-immigrationadviceservice/15">Prefer to talk first? Book a short call</a>
+      </section>
+
+    </div>
+  </div>
+  <div class="foot">
+    Immigration Advice Service &middot; 2 N Central Ave, Phoenix, AZ 85004 &middot; <a href="https://immigrationadviceservice.org">immigrationadviceservice.org</a><br>
+    We are a private company, not affiliated with USCIS, the U.S. Department of State or any government agency. Eligibility depends on each person's circumstances; the review does not guarantee eligibility, a visa, or approval of any application.
+  </div>
+</div>
+
+<script>
+(function () {
+  var CRM = "https://ias-crm.calm-rain-5660.workers.dev";
+  var PAY = "https://immigrationadviceservice.org/new-va-payment-29/";
+
+  function param(n) {
+    var m = new RegExp("[?&]" + n + "=([^&]*)").exec(location.search);
+    return m ? decodeURIComponent(m[1].replace(/\+/g, " ")) : "";
+  }
+  var email = param("email").trim();
+  if (email.indexOf("#") > -1 || email.indexOf("@") < 1) email = "";
+  var campaign = param("utm_campaign") || "";
+
+  // Payment link keeps the campaign tags so the payment can be traced back.
+  var keys = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
+  var parts = [];
+  keys.forEach(function (k) { var v = param(k); if (v) parts.push(k + "=" + encodeURIComponent(v)); });
+  if (!param("utm_campaign")) parts.push("utm_campaign=phd_page");
+  var payUrl = PAY + (parts.length ? "?" + parts.join("&") : "");
+
+  var Q = [
+    { id: "field", q: "What is your doctorate in?", a: [
+      "Science, medicine or health", "Engineering or technology", "Business, economics or law",
+      "Social sciences, humanities or education", "Arts, design or media" ] },
+    { id: "now", q: "What do you do today?", a: [
+      "Research or teaching at a university", "Work in industry or the private sector",
+      "Run my own business or consultancy", "Public sector or healthcare",
+      "Between roles right now" ] },
+    { id: "exp", q: "How many years of professional experience do you have after your PhD?", a: [
+      "Less than 2 years", "2 to 5 years", "5 to 10 years", "More than 10 years" ] },
+    { id: "record", q: "Which of these do you have? Choose the one that fits best.", a: [
+      "Many publications or citations", "Patents, awards or press coverage",
+      "Senior or leading roles in my field", "A few publications", "None of these yet" ] },
+    { id: "job", q: "Do you have a job offer from a U.S. employer?", a: [
+      "Yes", "I am in contact with U.S. employers", "No, not yet" ] }
+  ];
+
+  var answers = {}, idx = -1;
+  var $ = function (id) { return document.getElementById(id); };
+
+  function progress() {
+    var total = Q.length;
+    if (idx < 0) { $("stepTxt").textContent = ""; $("barFill").style.width = "0%"; return; }
+    if (idx >= total) { $("stepTxt").textContent = "Your result"; $("barFill").style.width = "100%"; return; }
+    $("stepTxt").textContent = "Question " + (idx + 1) + " of " + total;
+    $("barFill").style.width = Math.round((idx / total) * 100) + "%";
+  }
+
+  function render() {
+    progress();
+    $("s0").className = idx < 0 ? "" : "hide";
+    $("sq").className = idx >= 0 && idx < Q.length ? "" : "hide";
+    $("sr").className = idx >= Q.length ? "" : "hide";
+    if (idx >= 0 && idx < Q.length) {
+      var q = Q[idx];
+      $("qText").textContent = q.q;
+      var box = $("qOpts"); box.innerHTML = "";
+      q.a.forEach(function (txt) {
+        var b = document.createElement("button");
+        b.className = "opt" + (answers[q.id] === txt ? " sel" : "");
+        b.textContent = txt;
+        b.onclick = function () { answers[q.id] = txt; idx++; if (idx >= Q.length) finish(); else render(); };
+        box.appendChild(b);
+      });
+      $("backBtn").style.display = idx > 0 ? "" : "none";
+    }
+    window.scrollTo(0, 0);
+  }
+
+  function routes() {
+    var r = [], a = answers;
+    var strongRecord = /Many publications|Patents|Senior/.test(a.record || "");
+    var academic = /university/.test(a.now || "");
+    var longExp = /5 to 10|More than 10/.test(a.exp || "");
+    r.push({ t: "EB-2 National Interest Waiver (NIW)", d: "For people with an advanced degree whose work benefits the U.S. You can apply for yourself, without a job offer or employer." });
+    if (strongRecord || longExp) r.push({ t: "EB-1A Extraordinary Ability", d: "For people who can show sustained recognition in their field, for example through publications, awards or leading roles. No job offer needed." });
+    if (strongRecord) r.push({ t: "O-1 visa", d: "A work visa for people with extraordinary ability. It needs a U.S. employer or agent." });
+    if (academic && (strongRecord || longExp)) r.push({ t: "EB-1B Outstanding Researcher or Professor", d: "For internationally recognised researchers and academics with a qualifying U.S. offer." });
+    if (/Yes|contact/.test(a.job || "")) r.push({ t: "Employer-sponsored routes (H-1B, EB-2)", d: "With a U.S. employer behind you, these routes may also be open." });
+    if (/business|consultancy/.test(a.now || "")) r.push({ t: "Business and investor routes (E-2, EB-5)", d: "For people who want to invest in or run a business in the U.S. Eligibility depends on nationality and investment." });
+    return r;
+  }
+
+  function finish() {
+    var list = routes();
+    $("rIntro").textContent = "Based on your answers, " + list.length + " U.S. route" + (list.length > 1 ? "s are" : " is") + " worth a closer look:";
+    var box = $("routes"); box.innerHTML = "";
+    list.forEach(function (x) {
+      var d = document.createElement("div"); d.className = "route";
+      var b = document.createElement("b"); b.textContent = x.t;
+      var s = document.createElement("span"); s.textContent = x.d;
+      d.appendChild(b); d.appendChild(s); box.appendChild(d);
+    });
+    $("payBtn").setAttribute("href", payUrl);
+    render();
+    if (email) {
+      var text = "PhD page answers" + (campaign ? " (campaign " + campaign + ")" : "") + ":\n" +
+        Q.map(function (q) { return "- " + q.q + " " + (answers[q.id] || "-"); }).join("\n") +
+        "\nRoutes shown: " + list.map(function (x) { return x.t; }).join("; ");
+      try {
+        fetch(CRM, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ crm: "note", e: email, text: text }), keepalive: true }).catch(function () {});
+      } catch (e) {}
+    }
+  }
+
+  $("startBtn").onclick = function () { idx = 0; render(); };
+  $("backBtn").onclick = function () { if (idx > 0) { idx--; render(); } };
+  render();
+})();
+</script>
+<script src="ias-track.js" defer></script>
+</body>
+</html>
