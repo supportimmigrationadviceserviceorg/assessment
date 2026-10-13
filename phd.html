@@ -41,14 +41,13 @@ p{margin:0 0 14px}
 .route .rh:hover{background:#eaf0fb}
 .route b{display:block;color:var(--navy);font-size:16px;margin-bottom:2px}
 .route span{font-size:14px;color:var(--muted)}
-.route .more{font-size:13px;font-weight:700;color:var(--navy);margin-top:6px;display:block}
-.route.open .more{display:none}
 .route .rd{display:none;padding:0 16px 16px;font-size:14px;line-height:1.6}
 .route.open .rd{display:block}
 .route .rd ul{margin:6px 0 10px;padding-left:20px}
 .route .rd li{margin:3px 0}
 .route .rd .why{background:#fff;border-left:3px solid var(--green);padding:10px 12px;border-radius:6px;margin:10px 0 12px}
 .route .rd .btn{font-size:15px;padding:13px 16px}
+.good{background:#e9f7ef;border:1px solid #b9e3c8;border-radius:12px;padding:14px 16px;margin:16px 0 10px;font-size:15px;line-height:1.55}
 .urgent{background:#fff8e6;border:1px solid #f1d58a;border-radius:12px;padding:14px 16px;margin:18px 0;font-size:15px;line-height:1.55}
 .box{background:var(--pale);border-radius:12px;padding:16px 18px;margin:18px 0}
 .box li{margin:4px 0}
@@ -91,8 +90,8 @@ p{margin:0 0 14px}
       <section id="sr" class="hide">
         <h1 id="rTitle">Routes worth exploring for your profile</h1>
         <p id="rIntro"></p>
-        <p class="muted" style="margin:-6px 0 12px"><b>Tap any route</b> to see what it involves and what it would take in your case.</p>
         <div id="routes"></div>
+        <div class="good" id="goodNews"></div>
         <p class="muted">These are routes worth exploring based on your answers, not a decision on eligibility. Each route has its own requirements, and the details of your case matter.</p>
 
         <div class="urgent"><b>Why now, not later:</b> for U.S. green card routes, your place in the queue is set by the date your petition is filed. Every month you wait is a month later in line, and requirements and processing times can change.</div>
@@ -130,6 +129,10 @@ p{margin:0 0 14px}
   var email = param("email").trim();
   if (email.indexOf("#") > -1 || email.indexOf("@") < 1) email = "";
   var campaign = param("utm_campaign") || "";
+  // First name from the email link (?name=#NAME#); ignored if the merge tag was not filled.
+  var fname = (param("name") || "").trim().split(/\s+/)[0] || "";
+  if (/[#<>{}]/.test(fname) || fname.length > 30) fname = "";
+  if (fname) fname = fname.charAt(0).toUpperCase() + fname.slice(1).toLowerCase();
 
   // Payment link keeps the campaign tags so the payment can be traced back.
   var keys = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
@@ -173,7 +176,10 @@ p{margin:0 0 14px}
     $("sr").className = idx >= Q.length ? "" : "hide";
     if (idx >= 0 && idx < Q.length) {
       var q = Q[idx];
-      $("qText").textContent = q.q;
+      var qt = q.q;
+      if (fname && q.id === "field") qt = fname + ", what is your doctorate in?";
+      if (fname && q.id === "job") qt = "Last one, " + fname + ": do you have a job offer from a U.S. employer?";
+      $("qText").textContent = qt;
       var box = $("qOpts"); box.innerHTML = "";
       q.a.forEach(function (txt) {
         var b = document.createElement("button");
@@ -258,6 +264,14 @@ p{margin:0 0 14px}
 
   function finish() {
     var list = routes();
+    if (fname) $("rTitle").textContent = fname + ", here are the routes worth exploring for your profile";
+    var n = list.length;
+    $("goodNews").innerHTML = "";
+    var gb = document.createElement("b"); gb.textContent = (fname ? "Good news, " + fname + ". " : "Good news. ");
+    $("goodNews").appendChild(gb);
+    $("goodNews").appendChild(document.createTextNode(
+      "With a PhD, you start from a strong position. " + (n > 1 ? n + " U.S. routes" : "A U.S. route") +
+      " may be open for a profile like yours, and the EB-2 NIW does not need an employer or a job offer. That is a very encouraging result."));
     $("rIntro").textContent = "Based on your answers, " + list.length + " U.S. route" + (list.length > 1 ? "s are" : " is") + " worth a closer look:";
     var box = $("routes"); box.innerHTML = "";
     list.forEach(function (x) {
@@ -265,8 +279,7 @@ p{margin:0 0 14px}
       var h = document.createElement("button"); h.className = "rh"; h.type = "button";
       var b = document.createElement("b"); b.textContent = x.t;
       var s = document.createElement("span"); s.textContent = x.d;
-      var m = document.createElement("span"); m.className = "more"; m.textContent = "What does this involve? \u2192";
-      h.appendChild(b); h.appendChild(s); h.appendChild(m);
+      h.appendChild(b); h.appendChild(s);
       var rd = document.createElement("div"); rd.className = "rd";
       var p1 = document.createElement("p"); p1.style.margin = "0"; p1.textContent = x.what;
       var ul = document.createElement("ul");
