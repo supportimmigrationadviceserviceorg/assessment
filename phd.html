@@ -299,6 +299,8 @@ p{margin:0 0 14px}
       d.appendChild(h); d.appendChild(rd); box.appendChild(d);
     });
     $("payBtn").setAttribute("href", payUrl);
+    if (fname) $("payBtn").innerHTML = "";
+    if (fname) $("payBtn").textContent = fname + ", start my attorney review now \u2192";
     render();
     note("PhD page answers" + (campaign ? " (campaign " + campaign + ")" : "") + ":\n" +
       Q.map(function (q) { return "- " + q.q + " " + (answers[q.id] || "-"); }).join("\n") +
