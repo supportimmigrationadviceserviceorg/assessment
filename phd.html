@@ -34,9 +34,22 @@ p{margin:0 0 14px}
 .btn.pay:hover{background:var(--green-d)}
 .btn[disabled]{opacity:.45;cursor:default}
 .ghost{display:block;text-align:center;margin-top:14px;color:var(--navy);font-weight:600;font-size:15px;text-decoration:none}
-.route{border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:10px;background:var(--pale)}
+.route{border:1px solid var(--line);border-radius:12px;margin-bottom:10px;background:var(--pale);overflow:hidden}
+.route .rh{display:block;width:100%;text-align:left;background:none;border:0;font:inherit;padding:14px 44px 14px 16px;cursor:pointer;position:relative;color:inherit}
+.route .rh:after{content:"+";position:absolute;right:16px;top:12px;font-size:22px;font-weight:700;color:var(--navy);line-height:1}
+.route.open .rh:after{content:"\2212"}
+.route .rh:hover{background:#eaf0fb}
 .route b{display:block;color:var(--navy);font-size:16px;margin-bottom:2px}
 .route span{font-size:14px;color:var(--muted)}
+.route .more{font-size:13px;font-weight:700;color:var(--navy);margin-top:6px;display:block}
+.route.open .more{display:none}
+.route .rd{display:none;padding:0 16px 16px;font-size:14px;line-height:1.6}
+.route.open .rd{display:block}
+.route .rd ul{margin:6px 0 10px;padding-left:20px}
+.route .rd li{margin:3px 0}
+.route .rd .why{background:#fff;border-left:3px solid var(--green);padding:10px 12px;border-radius:6px;margin:10px 0 12px}
+.route .rd .btn{font-size:15px;padding:13px 16px}
+.urgent{background:#fff8e6;border:1px solid #f1d58a;border-radius:12px;padding:14px 16px;margin:18px 0;font-size:15px;line-height:1.55}
 .box{background:var(--pale);border-radius:12px;padding:16px 18px;margin:18px 0}
 .box li{margin:4px 0}
 .box ul{margin:8px 0 0;padding-left:20px}
@@ -78,11 +91,14 @@ p{margin:0 0 14px}
       <section id="sr" class="hide">
         <h1 id="rTitle">Routes worth exploring for your profile</h1>
         <p id="rIntro"></p>
+        <p class="muted" style="margin:-6px 0 12px"><b>Tap any route</b> to see what it involves and what it would take in your case.</p>
         <div id="routes"></div>
         <p class="muted">These are routes worth exploring based on your answers, not a decision on eligibility. Each route has its own requirements, and the details of your case matter.</p>
 
+        <div class="urgent"><b>Why now, not later:</b> for U.S. green card routes, your place in the queue is set by the date your petition is filed. Every month you wait is a month later in line, and requirements and processing times can change.</div>
+
         <div class="box">
-          <b>Next step: a $29 attorney review</b>
+          <b>Want a clear answer on which route fits you? Your next step: a $29 attorney review</b>
           <ul>
             <li>A licensed U.S. immigration attorney reviews your profile.</li>
             <li>You receive a written report on the routes that fit you, and the ones that don't.</li>
@@ -90,7 +106,7 @@ p{margin:0 0 14px}
           </ul>
         </div>
         <div class="price"><strong>$29</strong><span class="muted">one-time</span></div>
-        <a class="btn pay" id="payBtn" href="#" rel="noopener">Start my attorney review &rarr;</a>
+        <a class="btn pay" id="payBtn" href="#" rel="noopener">Start my attorney review now &rarr;</a>
         <a class="ghost" href="https://calendly.com/onlineonlineconsultation-immigrationadviceservice/15">Prefer to talk first? Book a short call</a>
       </section>
 
@@ -171,18 +187,73 @@ p{margin:0 0 14px}
     window.scrollTo(0, 0);
   }
 
+  var REVIEW = "The $29 attorney review checks your documents and record against this route and tells you clearly whether it fits your case, and what to do next.";
+  var D = {
+    niw: { t: "EB-2 National Interest Waiver (NIW)", d: "For people with an advanced degree whose work benefits the U.S. You can apply for yourself, without a job offer or employer.",
+      what: "A green card (permanent residence) route. Your PhD meets the advanced degree requirement.",
+      pts: ["You file the petition yourself. No employer and no job offer needed.",
+            "You show that your work has substantial merit and national importance to the U.S.",
+            "You show you are well positioned to move that work forward, for example through your research, results or experience.",
+            "Your spouse and unmarried children under 21 can be included."],
+      key: "Most cases are decided on how well the evidence is presented: letters, publications, citations and a clear plan for your work in the U.S." },
+    eb1a: { t: "EB-1A Extraordinary Ability", d: "For people who can show sustained recognition in their field, for example through publications, awards or leading roles. No job offer needed.",
+      what: "A green card route for people at the top of their field. Usually a shorter wait than EB-2 for most nationalities.",
+      pts: ["You can file for yourself, without an employer.",
+            "You meet at least 3 of 10 criteria, such as published work, citations, awards, judging the work of others, or a leading role.",
+            "You show sustained recognition, not a single achievement.",
+            "Your spouse and unmarried children under 21 can be included."],
+      key: "The bar is high, and which 3 criteria you use, and how they are documented, often decides the case." },
+    o1: { t: "O-1 visa", d: "A work visa for people with extraordinary ability. It needs a U.S. employer or agent.",
+      what: "A temporary work visa, usually granted for up to 3 years and renewable.",
+      pts: ["Needs a U.S. employer or a U.S. agent to file for you.",
+            "You meet at least 3 of the O-1 criteria, similar to EB-1A.",
+            "No annual lottery and no cap.",
+            "Can be a way to start working in the U.S. while a green card case is prepared."],
+      key: "Many PhD holders use the O-1 as a first step, then move to EB-1A or NIW." },
+    eb1b: { t: "EB-1B Outstanding Researcher or Professor", d: "For internationally recognised researchers and academics with a qualifying U.S. offer.",
+      what: "A green card route for researchers and academics.",
+      pts: ["Needs a permanent research or teaching offer from a U.S. university or qualifying employer.",
+            "At least 3 years of research or teaching experience.",
+            "International recognition, shown through at least 2 of 6 criteria such as publications, awards or reviewing others' work."],
+      key: "The employer files the case, so timing with your U.S. offer matters." },
+    emp: { t: "Employer-sponsored routes (H-1B, EB-2)", d: "With a U.S. employer behind you, these routes may also be open.",
+      what: "Work visas and green cards filed by a U.S. employer.",
+      pts: ["H-1B: a work visa for specialist roles, usually through an annual lottery.",
+            "Universities and non-profit research institutes can hire on H-1B without the lottery.",
+            "EB-2 with a job offer: a green card filed by your employer after a labour market test."],
+      key: "If you have, or are close to, a U.S. offer, the order in which you file can save you time." },
+    biz: { t: "Business and investor routes (E-2, EB-5)", d: "For people who want to invest in or run a business in the U.S. Eligibility depends on nationality and investment.",
+      what: "Routes for people who invest in a U.S. business, including a consultancy.",
+      pts: ["E-2: a renewable visa for investors from treaty countries. UK citizens qualify by nationality.",
+            "E-2 has no fixed minimum investment, but the amount must be substantial for the business.",
+            "EB-5: a green card through a larger investment that creates U.S. jobs."],
+      key: "The right structure for the business and the investment is what makes these cases work." }
+  };
+
   function routes() {
     var r = [], a = answers;
     var strongRecord = /Many publications|Patents|Senior/.test(a.record || "");
     var academic = /university/.test(a.now || "");
     var longExp = /5 to 10|More than 10/.test(a.exp || "");
-    r.push({ t: "EB-2 National Interest Waiver (NIW)", d: "For people with an advanced degree whose work benefits the U.S. You can apply for yourself, without a job offer or employer." });
-    if (strongRecord || longExp) r.push({ t: "EB-1A Extraordinary Ability", d: "For people who can show sustained recognition in their field, for example through publications, awards or leading roles. No job offer needed." });
-    if (strongRecord) r.push({ t: "O-1 visa", d: "A work visa for people with extraordinary ability. It needs a U.S. employer or agent." });
-    if (academic && (strongRecord || longExp)) r.push({ t: "EB-1B Outstanding Researcher or Professor", d: "For internationally recognised researchers and academics with a qualifying U.S. offer." });
-    if (/Yes|contact/.test(a.job || "")) r.push({ t: "Employer-sponsored routes (H-1B, EB-2)", d: "With a U.S. employer behind you, these routes may also be open." });
-    if (/business|consultancy/.test(a.now || "")) r.push({ t: "Business and investor routes (E-2, EB-5)", d: "For people who want to invest in or run a business in the U.S. Eligibility depends on nationality and investment." });
-    return r;
+    r.push("niw");
+    if (strongRecord || longExp) r.push("eb1a");
+    if (strongRecord) r.push("o1");
+    if (academic && (strongRecord || longExp)) r.push("eb1b");
+    if (/Yes|contact/.test(a.job || "")) r.push("emp");
+    if (/business|consultancy/.test(a.now || "")) r.push("biz");
+    return r.map(function (k) { var x = D[k]; x.k = k; return x; });
+  }
+
+  function routePay(k) {
+    return payUrl + (payUrl.indexOf("?") > -1 ? "&" : "?") + "utm_term=route_" + k;
+  }
+
+  function note(text) {
+    if (!email) return;
+    try {
+      fetch(CRM, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ crm: "note", e: email, text: text }), keepalive: true }).catch(function () {});
+    } catch (e) {}
   }
 
   function finish() {
@@ -191,21 +262,34 @@ p{margin:0 0 14px}
     var box = $("routes"); box.innerHTML = "";
     list.forEach(function (x) {
       var d = document.createElement("div"); d.className = "route";
+      var h = document.createElement("button"); h.className = "rh"; h.type = "button";
       var b = document.createElement("b"); b.textContent = x.t;
       var s = document.createElement("span"); s.textContent = x.d;
-      d.appendChild(b); d.appendChild(s); box.appendChild(d);
+      var m = document.createElement("span"); m.className = "more"; m.textContent = "What does this involve? \u2192";
+      h.appendChild(b); h.appendChild(s); h.appendChild(m);
+      var rd = document.createElement("div"); rd.className = "rd";
+      var p1 = document.createElement("p"); p1.style.margin = "0"; p1.textContent = x.what;
+      var ul = document.createElement("ul");
+      x.pts.forEach(function (t) { var li = document.createElement("li"); li.textContent = t; ul.appendChild(li); });
+      var why = document.createElement("div"); why.className = "why";
+      why.innerHTML = "<b>What decides it for you:</b> ";
+      why.appendChild(document.createTextNode(x.key + " " + REVIEW));
+      var go = document.createElement("a"); go.className = "btn pay"; go.rel = "noopener";
+      go.href = routePay(x.k); go.textContent = "Check if " + x.t.split(" (")[0] + " fits me \u2014 $29 \u2192";
+      go.onclick = function () { note("PhD page: clicked the $29 review from the route \"" + x.t + "\"" + (campaign ? " (campaign " + campaign + ")" : "")); };
+      rd.appendChild(p1); rd.appendChild(ul); rd.appendChild(why); rd.appendChild(go);
+      h.onclick = function () {
+        var open = d.className.indexOf("open") > -1;
+        d.className = open ? "route" : "route open";
+        if (!open && !x.seen) { x.seen = true; if (window.iasTrack) window.iasTrack("route_" + x.k); }
+      };
+      d.appendChild(h); d.appendChild(rd); box.appendChild(d);
     });
     $("payBtn").setAttribute("href", payUrl);
     render();
-    if (email) {
-      var text = "PhD page answers" + (campaign ? " (campaign " + campaign + ")" : "") + ":\n" +
-        Q.map(function (q) { return "- " + q.q + " " + (answers[q.id] || "-"); }).join("\n") +
-        "\nRoutes shown: " + list.map(function (x) { return x.t; }).join("; ");
-      try {
-        fetch(CRM, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ crm: "note", e: email, text: text }), keepalive: true }).catch(function () {});
-      } catch (e) {}
-    }
+    note("PhD page answers" + (campaign ? " (campaign " + campaign + ")" : "") + ":\n" +
+      Q.map(function (q) { return "- " + q.q + " " + (answers[q.id] || "-"); }).join("\n") +
+      "\nRoutes shown: " + list.map(function (x) { return x.t; }).join("; "));
   }
 
   $("startBtn").onclick = function () { idx = 0; render(); };
