@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Immigration Advice Service</title>
+<meta name="robots" content="noindex">
+<style>body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#eef1f6;color:#1c2333;display:flex;align-items:center;justify-content:center;min-height:100vh}p{font-size:16px}</style>
+<script>
+// Deadline offer gate.
+// Link: offer.html?until=2026-10-19T06:59:00Z&email=...&utm_...
+// Before "until": the reduced price page (interested_19.html).
+// After "until": the regular price page (interested.html). The deadline is enforced here,
+// so a click after the deadline always lands on the regular price.
+(function () {
+  var q = new URLSearchParams(location.search);
+  var until = Date.parse(q.get('until') || '');
+  var open = !isNaN(until) && Date.now() <= until;
+  q.delete('until');
+  q.set('offer', open ? 'deadline_open' : 'deadline_passed');
+  location.replace((open ? 'interested_19.html' : 'interested.html') + '?' + q.toString());
+})();
+</script>
+</head>
+<body>
+<p>One moment&hellip;</p>
+</body>
+</html>
