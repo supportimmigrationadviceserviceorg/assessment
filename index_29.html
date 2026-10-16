@@ -1054,6 +1054,19 @@ body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#f0f4fb 
 </div>
 
 <script>
+// Pick the phone to show a client. Bitrix keeps several numbers in PHONE[];
+// the first one is sometimes a bare dial code ("+297"). Prefer the first
+// full number, fall back to the longest plausible one, never a bare code.
+function bestPhone(list) {
+  if (!Array.isArray(list)) return "";
+  var vals = list.map(function (p) { return String((p && p.VALUE) || "").trim(); }).filter(Boolean);
+  var digits = function (v) { return v.replace(/\D/g, "").length; };
+  var full = vals.find(function (v) { return digits(v) >= 8; });
+  if (full) return full;
+  var rest = vals.filter(function (v) { return digits(v) >= 6; }).sort(function (a, b) { return digits(b) - digits(a); });
+  return rest[0] || "";
+}
+
 // ─────────────────────────────────────────────────────────
 const WEBHOOK = 'https://immiworld.org/rest/147/47yrflms2cje1cbe/';
 const PAYMENT_BASE = 'https://immigrationadviceservice.org/va-payment-29/';
@@ -1209,7 +1222,7 @@ async function lookupEmail(email) {
 
       answers.firstName = found.NAME || '';
       answers.lastName  = found.LAST_NAME || '';
-      answers.phone     = (found.PHONE && found.PHONE[0] && found.PHONE[0].VALUE) || '';
+      answers.phone     = bestPhone(found.PHONE);
 
       // Fill fields
       document.getElementById('contactFirst').value = answers.firstName;
@@ -2587,7 +2600,7 @@ async function loadLeadById() {
       answers.firstName = ld.NAME||'';
       answers.lastName  = ld.LAST_NAME||'';
       answers.email     = (ld.EMAIL && ld.EMAIL[0] && ld.EMAIL[0].VALUE)||'';
-      answers.phone     = (ld.PHONE && ld.PHONE[0] && ld.PHONE[0].VALUE)||'';
+      answers.phone     = bestPhone(ld.PHONE);
     }
   } catch(e) { console.log('Lead load error:', e); }
 }

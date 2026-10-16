@@ -486,6 +486,19 @@
 </div>
 
 <script>
+// Pick the phone to show a client. Bitrix keeps several numbers in PHONE[];
+// the first one is sometimes a bare dial code ("+297"). Prefer the first
+// full number, fall back to the longest plausible one, never a bare code.
+function bestPhone(list) {
+  if (!Array.isArray(list)) return "";
+  var vals = list.map(function (p) { return String((p && p.VALUE) || "").trim(); }).filter(Boolean);
+  var digits = function (v) { return v.replace(/\D/g, "").length; };
+  var full = vals.find(function (v) { return digits(v) >= 8; });
+  if (full) return full;
+  var rest = vals.filter(function (v) { return digits(v) >= 6; }).sort(function (a, b) { return digits(b) - digits(a); });
+  return rest[0] || "";
+}
+
 /* Statuses that must never be overwritten. */
 const PROTECTED_STATUSES = ["CONVERTED", "26", "27", "31", "DETAILS"];
 
@@ -582,7 +595,7 @@ async function findLead() {
     const lead = leads[0];
     lastLeadId = lead.ID;
     lastLeadStatus = lead.STATUS_ID || null;
-    originalPhone = (lead.PHONE && lead.PHONE[0] && lead.PHONE[0].VALUE) || "";
+    originalPhone = bestPhone(lead.PHONE);
 
     if (answer === "no") {
       // Show reason selection screen instead of direct update

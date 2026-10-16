@@ -485,6 +485,19 @@
 </div>
 
 <script>
+// Pick the phone to show a client. Bitrix keeps several numbers in PHONE[];
+// the first one is sometimes a bare dial code ("+297"). Prefer the first
+// full number, fall back to the longest plausible one, never a bare code.
+function bestPhone(list) {
+  if (!Array.isArray(list)) return "";
+  var vals = list.map(function (p) { return String((p && p.VALUE) || "").trim(); }).filter(Boolean);
+  var digits = function (v) { return v.replace(/\D/g, "").length; };
+  var full = vals.find(function (v) { return digits(v) >= 8; });
+  if (full) return full;
+  var rest = vals.filter(function (v) { return digits(v) >= 6; }).sort(function (a, b) { return digits(b) - digits(a); });
+  return rest[0] || "";
+}
+
 const WEBHOOK = "https://immiworld.org/rest/147/47yrflms2cje1cbe/";
 const INTERESTED_FIELD = "UF_CRM_5C5843FC11F1D";
 
@@ -538,7 +551,7 @@ async function findContact() {
 
     const contact = contacts[0];
     lastContactId = contact.ID;
-    originalPhone = (contact.PHONE && contact.PHONE[0] && contact.PHONE[0].VALUE) || "";
+    originalPhone = bestPhone(contact.PHONE);
 
     if (answer === "no") {
       // Show reason selection screen instead of direct update
